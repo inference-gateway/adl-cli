@@ -1,0 +1,94 @@
+version: '3'
+
+vars:
+  APP_NAME: a2a
+  VERSION: 1.0.0
+  BUILD_DIR: bin
+
+tasks:
+  build:
+    desc: Build the a2a CLI
+    cmds:
+      - mkdir -p {{.BUILD_DIR}}
+      - go build -ldflags "-X main.Version={{.VERSION}}" -o {{.BUILD_DIR}}/{{.APP_NAME}} .
+
+  install:
+    desc: Install the a2a CLI to GOPATH/bin
+    cmds:
+      - go install -ldflags "-X main.Version={{.VERSION}}" .
+
+  test:
+    desc: Run tests
+    cmds:
+      - go test -v ./...
+
+  test:coverage:
+    desc: Run tests with coverage
+    cmds:
+      - go test -v -cover ./...
+
+  lint:
+    desc: Run linter
+    cmds:
+      - golangci-lint run
+
+  fmt:
+    desc: Format code
+    cmds:
+      - go fmt ./...
+
+  mod:
+    desc: Download dependencies
+    cmds:
+      - go mod download
+      - go mod tidy
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - rm -rf {{.BUILD_DIR}}
+
+  dev:
+    desc: Run in development mode
+    deps: [build]
+    cmds:
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} {{.CLI_ARGS}}
+
+  examples:test:
+    desc: Test all example ADL files
+    cmds:
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/weather-agent.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/minimal-agent.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/enterprise-agent.yaml
+
+  examples:generate:
+    desc: Generate all example projects
+    deps: [build]
+    cmds:
+      - rm -rf test-output
+      - mkdir -p test-output
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/weather-agent.yaml --output test-output/weather-agent
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/minimal-agent.yaml --output test-output/minimal-agent --template minimal
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/enterprise-agent.yaml --output test-output/enterprise-agent --template enterprise
+
+  release:
+    desc: Build release binaries for multiple platforms
+    cmds:
+      - mkdir -p {{.BUILD_DIR}}/release
+      - GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version={{.VERSION}}" -o {{.BUILD_DIR}}/release/{{.APP_NAME}}-linux-amd64 .
+      - GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version={{.VERSION}}" -o {{.BUILD_DIR}}/release/{{.APP_NAME}}-darwin-amd64 .
+      - GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.Version={{.VERSION}}" -o {{.BUILD_DIR}}/release/{{.APP_NAME}}-darwin-arm64 .
+      - GOOS=windows GOARCH=amd64 go build -ldflags "-X main.Version={{.VERSION}}" -o {{.BUILD_DIR}}/release/{{.APP_NAME}}-windows-amd64.exe .
+
+  docker:build:
+    desc: Build Docker image
+    cmds:
+      - docker build -t {{.APP_NAME}}:{{.VERSION}} .
+
+  ci:
+    desc: Run CI pipeline (fmt, lint, test, build)
+    cmds:
+      - task: fmt
+      - task: lint
+      - task: test
+      - task: build
