@@ -10,6 +10,7 @@ func getAIPoweredTemplate() map[string]string {
 		"Taskfile.yml":        taskfileTemplate,
 		"Dockerfile":          dockerfileTemplate,
 		".gitignore":          gitignoreTemplate,
+		".gitattributes":      gitattributesTemplate,
 		"README.md":           readmeTemplate,
 		"k8s/a2a-server.yaml": aiPoweredOperatorTemplate,
 	}

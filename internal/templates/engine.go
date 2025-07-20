@@ -2,6 +2,8 @@ package templates
 
 import (
 	"bytes"
+	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
@@ -41,6 +43,35 @@ func (e *Engine) Execute(templateContent string, ctx Context) (string, error) {
 	return buf.String(), nil
 }
 
+// ExecuteWithHeader executes a template with the given context and adds a header if needed
+func (e *Engine) ExecuteWithHeader(templateContent string, ctx Context, fileName string) (string, error) {
+	content, err := e.Execute(templateContent, ctx)
+	if err != nil {
+		return "", err
+	}
+
+	ext := strings.ToLower(filepath.Ext(fileName))
+	baseName := strings.ToLower(filepath.Base(fileName))
+
+	var fileType string
+	switch {
+	case ext == ".go":
+		fileType = "go"
+	case ext == ".yaml" || ext == ".yml":
+		fileType = "yaml"
+	case baseName == "dockerfile":
+		fileType = "dockerfile"
+	case baseName == "taskfile.yml":
+		fileType = "taskfile"
+	default:
+		return content, nil
+	}
+
+	header := getGeneratedFileHeader(fileType, ctx.Metadata.CLIVersion, ctx.Metadata.GeneratedAt)
+
+	return header + content, nil
+}
+
 // GetFiles returns the template files for the current template
 func (e *Engine) GetFiles() map[string]string {
 	switch e.templateName {
@@ -51,6 +82,6 @@ func (e *Engine) GetFiles() map[string]string {
 	case "enterprise":
 		return getEnterpriseTemplate()
 	default:
-		return getAIPoweredTemplate() // default to ai-powered
+		return getAIPoweredTemplate()
 	}
 }

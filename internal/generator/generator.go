@@ -196,7 +196,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 	for fileName, templateContent := range files {
 		fileName = g.replacePlaceholders(fileName, adl)
 
-		content, err := templateEngine.Execute(templateContent, ctx)
+		content, err := templateEngine.ExecuteWithHeader(templateContent, ctx, fileName)
 		if err != nil {
 			return fmt.Errorf("failed to execute template for %s: %w", fileName, err)
 		}
@@ -256,6 +256,12 @@ func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string) error {
 		"description":  adl.Metadata.Description,
 		"version":      adl.Metadata.Version,
 		"capabilities": adl.Spec.Capabilities,
+		"_generated": map[string]interface{}{
+			"by":        "A2A CLI",
+			"version":   getVersion(),
+			"timestamp": time.Now().Format(time.RFC3339),
+			"warning":   "This file was automatically generated. DO NOT EDIT.",
+		},
 	}
 
 	// Add tools if available

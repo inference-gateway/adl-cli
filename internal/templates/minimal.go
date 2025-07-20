@@ -10,6 +10,7 @@ func getMinimalTemplate() map[string]string {
 		"Taskfile.yml":        taskfileTemplate,   // Reuse from ai-powered
 		"Dockerfile":          dockerfileTemplate, // Reuse from ai-powered
 		".gitignore":          gitignoreTemplate,  // Reuse from ai-powered
+		".gitattributes":      gitattributesTemplate,
 		"README.md":           minimalReadmeTemplate,
 		"k8s/a2a-server.yaml": minimalOperatorTemplate,
 	}
