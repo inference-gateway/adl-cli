@@ -110,7 +110,7 @@ func main() {
 
 const goModTemplate = `module {{ .ADL.Spec.Language.Go.Module }}
 
-go {{ .ADL.Spec.Language.Go.GoVersion }}
+go {{ .ADL.Spec.Language.Go.Version }}
 
 require (
 	github.com/inference-gateway/a2a/adk v0.1.0
@@ -258,7 +258,7 @@ tasks:
 `
 
 const dockerfileTemplate = `# Build stage
-FROM golang:{{ .ADL.Spec.Language.Go.GoVersion }}-alpine AS builder
+FROM golang:{{ .ADL.Spec.Language.Go.Version }}-alpine AS builder
 
 WORKDIR /app
 
@@ -386,7 +386,7 @@ This A2A agent was generated using the A2A CLI from an Agent Definition Language
 
 ### Prerequisites
 
-- Go {{ .ADL.Spec.Language.Go.GoVersion }}+
+- Go {{ .ADL.Spec.Language.Go.Version }}+
 - [Task](https://taskfile.dev/) (optional, for using Taskfile commands)
 
 ### Environment Variables

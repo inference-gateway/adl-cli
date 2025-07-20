@@ -233,7 +233,7 @@ This minimal A2A server was generated using the A2A CLI from an Agent Definition
 
 ### Prerequisites
 
-- Go {{ .ADL.Spec.Language.Go.GoVersion }}+
+- Go {{ .ADL.Spec.Language.Go.Version }}+
 - [Task](https://taskfile.dev/) (optional, for using Taskfile commands)
 
 ### Environment Variables

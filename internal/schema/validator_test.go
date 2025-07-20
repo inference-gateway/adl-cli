@@ -24,7 +24,7 @@ spec:
   language:
     go:
       module: "github.com/example/test-agent"
-      goVersion: "1.21"
+      version: "1.24"
 `
 
 	tmpFile, err := os.CreateTemp("", "test-adl-*.yaml")

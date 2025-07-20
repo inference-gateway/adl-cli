@@ -189,12 +189,12 @@ const adlSchema = `{
           "properties": {
             "go": {
               "type": "object",
-              "required": ["module", "goVersion"],
+              "required": ["module", "version"],
               "properties": {
                 "module": {
                   "type": "string"
                 },
-                "goVersion": {
+                "version": {
                   "type": "string"
                 }
               }

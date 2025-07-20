@@ -121,8 +121,8 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 		if adl.Spec.Language.Go.Module == "" {
 			return fmt.Errorf("spec.language.go.module is required")
 		}
-		if adl.Spec.Language.Go.GoVersion == "" {
-			return fmt.Errorf("spec.language.go.goVersion is required")
+		if adl.Spec.Language.Go.Version == "" {
+			return fmt.Errorf("spec.language.go.version is required")
 		}
 	}
 	if adl.Spec.Language.TypeScript != nil {

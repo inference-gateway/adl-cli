@@ -29,8 +29,8 @@ func TestGenerator_Generate(t *testing.T) {
 			},
 			Language: &schema.Language{
 				Go: &schema.GoConfig{
-					Module:    "github.com/example/test-agent",
-					GoVersion: "1.21",
+					Module:  "github.com/example/test-agent",
+					Version: "1.24",
 				},
 			},
 		},
@@ -87,8 +87,8 @@ func TestGenerator_validateADL(t *testing.T) {
 					},
 					Language: &schema.Language{
 						Go: &schema.GoConfig{
-							Module:    "github.com/example/test-agent",
-							GoVersion: "1.21",
+							Module:  "github.com/example/test-agent",
+							Version: "1.24",
 						},
 					},
 				},
@@ -111,8 +111,8 @@ func TestGenerator_validateADL(t *testing.T) {
 					},
 					Language: &schema.Language{
 						Go: &schema.GoConfig{
-							Module:    "github.com/example/test-agent",
-							GoVersion: "1.21",
+							Module:  "github.com/example/test-agent",
+							Version: "1.24",
 						},
 					},
 				},
@@ -165,7 +165,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					},
 					Language: &schema.Language{
 						Go: &schema.GoConfig{
-							GoVersion: "1.21",
+							Version: "1.24",
 						},
 					},
 				},
@@ -194,8 +194,8 @@ func TestGenerator_validateADL(t *testing.T) {
 					},
 					Language: &schema.Language{
 						Go: &schema.GoConfig{
-							Module:    "github.com/example/test-agent",
-							GoVersion: "1.21",
+							Module:  "github.com/example/test-agent",
+							Version: "1.24",
 						},
 					},
 				},
@@ -224,8 +224,8 @@ func TestGenerator_validateADL(t *testing.T) {
 					},
 					Language: &schema.Language{
 						Go: &schema.GoConfig{
-							Module:    "github.com/example/test-agent",
-							GoVersion: "1.21",
+							Module:  "github.com/example/test-agent",
+							Version: "1.24",
 						},
 						TypeScript: &schema.TypeScriptConfig{
 							PackageName: "test-agent",

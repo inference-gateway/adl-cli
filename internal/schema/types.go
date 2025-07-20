@@ -64,8 +64,8 @@ type AuthConfig struct {
 
 // GoConfig for Go-specific settings
 type GoConfig struct {
-	Module    string `yaml:"module" json:"module"`
-	GoVersion string `yaml:"goVersion" json:"goVersion"`
+	Module  string `yaml:"module" json:"module"`
+	Version string `yaml:"version" json:"version"`
 }
 
 // TypeScriptConfig for TypeScript-specific settings

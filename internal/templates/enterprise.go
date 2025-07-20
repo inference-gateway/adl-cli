@@ -638,7 +638,7 @@ This enterprise-grade A2A agent was generated using the A2A CLI from an Agent De
 
 ### Prerequisites
 
-- Go {{ .ADL.Spec.Language.Go.GoVersion }}+
+- Go {{ .ADL.Spec.Language.Go.Version }}+
 - [Task](https://taskfile.dev/) (optional, for using Taskfile commands)
 - Docker & Docker Compose (for containerized deployment)
 - Kubernetes (for production deployment)

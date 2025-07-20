@@ -145,9 +145,10 @@ spec:
     port: 8080
     debug: false
 
-  go:
-    module: "github.com/example/weather-agent"
-    goVersion: "1.21"
+  language:
+    go:
+      module: "github.com/example/weather-agent"
+      version: "1.24"
 ```
 
 ### ADL Schema
@@ -159,7 +160,7 @@ The complete ADL schema includes:
 - **agent**: AI provider configuration (OpenAI, Anthropic, etc.)
 - **tools**: Function definitions with JSON schemas
 - **server**: HTTP server configuration
-- **go**: Go-specific settings
+- **language**: Programming language-specific settings (Go, TypeScript, etc.)
 
 ## Generated Project Structure
 

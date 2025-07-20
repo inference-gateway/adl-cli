@@ -4,13 +4,11 @@ metadata:
   name: simple-api
   description: "A minimal HTTP API server without AI capabilities"
   version: "1.0.0"
-
 spec:
   capabilities:
     streaming: false
     pushNotifications: false
     stateTransitionHistory: false
-
   tools:
     - name: health_check
       description: "Perform health check of the system"
@@ -21,7 +19,6 @@ spec:
             type: string
             description: "Component to check (optional)"
         required: []
-
     - name: echo
       description: "Echo back the input message"
       schema:
@@ -31,12 +28,10 @@ spec:
             type: string
             description: "Message to echo back"
         required: [message]
-
   server:
     port: 3000
     debug: true
-
   language:
     go:
       module: "github.com/example/simple-api"
-      goVersion: "1.24"
+      version: "1.24"

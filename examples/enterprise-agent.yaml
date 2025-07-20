@@ -93,4 +93,4 @@ spec:
   language:
     go:
       module: "github.com/company/enterprise-agent"
-      goVersion: "1.24"
+      version: "1.24"
