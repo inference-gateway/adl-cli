@@ -117,34 +117,34 @@ metadata:
   name: weather-agent
   description: "Provides weather information for cities worldwide"
   version: "1.0.0"
-
 spec:
   capabilities:
     streaming: true
     pushNotifications: false
     stateTransitionHistory: false
-
   agent:
     provider: openai
     model: gpt-4o-mini
     systemPrompt: "You are a helpful weather assistant."
     maxTokens: 4096
     temperature: 0.7
-
   tools:
     - name: get_weather
       description: "Get current weather for a city"
       schema:
         type: object
         properties:
-          city: {type: string, description: "City name"}
-          country: {type: string, description: "Country code"}
-        required: [city]
-
+          city:
+            - type: string
+              description: "City name"
+          country:
+            - type: string
+              description: "Country code"
+        required:
+          - city
   server:
     port: 8080
     debug: false
-
   language:
     go:
       module: "github.com/example/weather-agent"
