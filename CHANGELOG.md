@@ -1,0 +1,31 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [0.2.0](https://github.com/inference-gateway/a2a-cli/compare/v0.1.0...v0.2.0) (2025-07-21)
+
+### ✨ Features
+
+* Add support for generated file headers and .gitattributes template ([90bbc46](https://github.com/inference-gateway/a2a-cli/commit/90bbc46890ebe22b27c5a294111c3b2cf48a219f))
+
+### ♻️ Improvements
+
+* Introduce .adl-ignore file support to protect implementations during generation ([377bfb0](https://github.com/inference-gateway/a2a-cli/commit/377bfb085b487e73c75b887188ba0205dfba1122))
+* Remove commented-out code and clean up validation functions ([9ba910f](https://github.com/inference-gateway/a2a-cli/commit/9ba910fc1e71c4b2dd67fbb511f75c064749d210))
+* Rename .adl-ignore to .a2a-ignore and update related functionality ([86ea2b5](https://github.com/inference-gateway/a2a-cli/commit/86ea2b58c58f7f3cc3173cc5aa8d4a47bc73efcb))
+
+### 👷 CI
+
+* Add GoReleaser configuration and GitHub Actions workflow for artifact uploads ([cd7ae6d](https://github.com/inference-gateway/a2a-cli/commit/cd7ae6d1bb781d4a308d1b79caa12417ec108e97))
+
+### 📚 Documentation
+
+* Add contributing guide and roadmap for language support ([c24afd5](https://github.com/inference-gateway/a2a-cli/commit/c24afd5ec8cadce2ab43bedd2778bfee9c74053c))
+* Update README.md to enhance formatting and visibility of project badges ([9b7df5c](https://github.com/inference-gateway/a2a-cli/commit/9b7df5cf6d77664b681b5ea80ba64fb6cdff0bed))
+
+### 🔧 Miscellaneous
+
+* Add .releaserc.yaml for semantic release configuration ([36e2341](https://github.com/inference-gateway/a2a-cli/commit/36e2341abfb3e010b1d085b1ef1f2e8ca50d66b5))
+* Add initial .editorconfig file for consistent coding styles ([4d35977](https://github.com/inference-gateway/a2a-cli/commit/4d359772a6029d89dbc65fe36c8d26f169778c41))
+* Create LICENSE ([2176bf0](https://github.com/inference-gateway/a2a-cli/commit/2176bf07575e198aeb332f0ff1317df1c2de105e))
+* Simplify ldflags in GoReleaser configuration ([39cd5bc](https://github.com/inference-gateway/a2a-cli/commit/39cd5bcb566c040dc11bfb7f119db290d538d702))
