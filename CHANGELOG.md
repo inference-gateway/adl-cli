@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.1](https://github.com/inference-gateway/a2a-cli/compare/v0.2.0...v0.2.1) (2025-07-21)
+
+### 🐛 Bug Fixes
+
+* Correct artifact filename pattern in upload step ([0941b93](https://github.com/inference-gateway/a2a-cli/commit/0941b93c0df767b6cd96e3b72e752202b0e14343))
+
+### 🔧 Miscellaneous
+
+* Remove Docker Buildx setup and GitHub Container Registry login from artifacts workflow ([0ddea6e](https://github.com/inference-gateway/a2a-cli/commit/0ddea6e59fa607f03229a2a3017f38fb9240797e))
+
 ## [0.2.0](https://github.com/inference-gateway/a2a-cli/compare/v0.1.0...v0.2.0) (2025-07-21)
 
 ### ✨ Features
