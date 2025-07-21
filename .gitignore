@@ -39,7 +39,7 @@ ehthumbs.db
 Thumbs.db
 
 # Test output
-test-output/
+test-output*/
 
 # Logs
 *.log

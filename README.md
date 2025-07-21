@@ -14,7 +14,7 @@ The A2A CLI helps you build production-ready A2A agents quickly by generating co
 - 🚀 **Rapid Development** - Generate complete projects in seconds
 - 📋 **Schema-Driven** - Use YAML ADL files to define your agents
 - 🎯 **Multiple Templates** - Choose from minimal, AI-powered, or enterprise templates
-- 🔄 **Smart Sync** - Update generated code while preserving your implementations
+- � **Smart Ignore** - Protect your implementations with .adl-ignore files
 - ✅ **Validation** - Built-in ADL schema validation
 - 🛠️ **Interactive Setup** - Guided project initialization
 - 📦 **Production Ready** - Includes Docker, Kubernetes, and monitoring configs
@@ -81,7 +81,6 @@ task run
 | `a2a init [name]` | Initialize a new project interactively |
 | `a2a generate` | Generate project from ADL file |
 | `a2a validate [file]` | Validate an ADL file |
-| `a2a sync` | Update generated code preserving implementations |
 
 ### Generate Command
 
@@ -92,7 +91,7 @@ a2a generate --file agent.yaml --output ./my-agent
 # Use specific template
 a2a generate --file agent.yaml --output ./my-agent --template minimal
 
-# Overwrite existing files
+# Overwrite existing files (respects .adl-ignore)
 a2a generate --file agent.yaml --output ./my-agent --overwrite
 ```
 
@@ -172,6 +171,7 @@ my-agent/
 ├── go.mod               # Go module definition
 ├── Taskfile.yml         # Development tasks
 ├── Dockerfile           # Container configuration
+├── .adl-ignore          # Files to protect from regeneration
 ├── .well-known/
 │   └── agent.json       # Agent capabilities (auto-generated)
 └── README.md            # Project documentation
@@ -206,6 +206,52 @@ a2a generate --file examples/weather-agent.yaml --output ./weather-agent
 a2a generate --file examples/minimal-agent.yaml --output ./minimal-agent --template minimal
 a2a generate --file examples/enterprise-agent.yaml --output ./enterprise-agent --template enterprise
 ```
+
+## Customizing Generation with .adl-ignore
+
+The A2A CLI automatically creates a `.adl-ignore` file during project generation to protect files containing TODO implementations. This file works similar to `.gitignore` and prevents important implementation files from being overwritten during subsequent generations.
+
+### Automatically Protected Files
+
+When you generate a project, these files are automatically added to `.adl-ignore`:
+
+- **AI-powered template**: `tools.go`
+- **Minimal template**: `handlers.go` 
+- **Enterprise template**: `tools.go`, `auth.go`, `middleware.go`, `metrics.go`, `logging.go`, `tool_metrics.go`
+
+You can control which additional files are generated or updated by editing the `.adl-ignore` file:
+
+```bash
+# .adl-ignore
+# Skip Docker-related files if you have custom containerization
+Dockerfile
+docker-compose.yml
+
+# Skip Kubernetes manifests if you use different deployment tools
+k8s/
+
+# Skip specific generated files you want to customize
+middleware.go
+auth.go
+
+# Skip build configuration if you have custom setup
+Taskfile.yml
+```
+
+### .adl-ignore Patterns
+
+- Use `#` for comments
+- Use `/` at the end to match directories
+- Use `*` for wildcards
+- Exact file paths or glob patterns
+- Protects files during all `generate` operations
+
+### Common Use Cases
+
+- **Custom Deployment**: Skip `Dockerfile`, `k8s/`, `docker-compose.yml`
+- **Custom Build**: Skip `Taskfile.yml`, `Makefile`
+- **Custom Auth**: Skip `auth.go`, `middleware.go`
+- **Custom Documentation**: Skip `README.md`
 
 ## Development
 

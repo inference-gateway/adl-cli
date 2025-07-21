@@ -1,0 +1,38 @@
+# .adl-ignore
+# 
+# This file specifies which files should be ignored during A2A CLI generation operations.
+# Patterns work similar to .gitignore:
+# - Use # for comments
+# - Use / at the end to match directories
+# - Use * for wildcards
+# - Exact file paths or glob patterns
+
+# Skip Docker-related files if you have custom containerization
+Dockerfile
+docker-compose.yml
+
+# Skip Kubernetes manifests if you use different deployment tools
+k8s/
+
+# Skip specific generated files you want to customize
+middleware.go
+auth.go
+
+# Skip build configuration if you have custom setup
+Taskfile.yml
+
+# Skip IDE-specific configurations
+.vscode/
+.idea/
+
+# Skip generated README if you have custom documentation
+README.md
+
+# Skip .gitignore if you have project-specific patterns
+.gitignore
+
+# Examples of pattern matching:
+# *.yaml          - All YAML files
+# test_*          - All files starting with test_
+# **/config.go    - All config.go files in any directory
+# tools/          - Entire tools directory

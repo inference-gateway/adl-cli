@@ -85,3 +85,8 @@ func (e *Engine) GetFiles() map[string]string {
 		return getAIPoweredTemplate()
 	}
 }
+
+// GetTemplate returns the template name
+func (e *Engine) GetTemplate() string {
+	return e.templateName
+}

@@ -383,9 +383,9 @@ This project was generated with:
 - **Template:** {{ .Metadata.Template }}
 - **Generated At:** {{ .Metadata.GeneratedAt.Format "2006-01-02 15:04:05" }}
 
-To regenerate or sync with ADL changes:
+To regenerate with ADL changes:
 ` + "```bash" + `
-a2a sync --file agent.yaml
+a2a generate --file agent.yaml --output . --overwrite
 ` + "```" + `
 
 ---

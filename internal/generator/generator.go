@@ -22,7 +22,6 @@ type Generator struct {
 type Config struct {
 	Template  string
 	Overwrite bool
-	SyncMode  bool
 }
 
 // New creates a new generator
@@ -185,9 +184,19 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		},
 	}
 
+	ignoreChecker, err := NewIgnoreChecker(outputDir)
+	if err != nil {
+		return fmt.Errorf("failed to initialize ignore checker: %w", err)
+	}
+
 	files := templateEngine.GetFiles()
 	for fileName, templateContent := range files {
 		fileName = g.replacePlaceholders(fileName, adl)
+
+		if ignoreChecker.ShouldIgnore(fileName) {
+			fmt.Printf("🚫 Ignoring file (matches .adl-ignore): %s\n", fileName)
+			continue
+		}
 
 		content, err := templateEngine.ExecuteWithHeader(templateContent, ctx, fileName)
 		if err != nil {
@@ -200,8 +209,12 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		}
 	}
 
-	if err := g.generateAgentJSON(adl, outputDir); err != nil {
+	if err := g.generateAgentJSON(adl, outputDir, ignoreChecker); err != nil {
 		return fmt.Errorf("failed to generate agent.json: %w", err)
+	}
+
+	if err := g.generateAdlIgnoreFile(outputDir, templateEngine.GetTemplate()); err != nil {
+		return fmt.Errorf("failed to generate .adl-ignore file: %w", err)
 	}
 
 	return nil
@@ -222,7 +235,7 @@ func (g *Generator) replacePlaceholders(fileName string, adl *schema.ADL) string
 
 // writeFile writes content to a file, creating directories as needed
 func (g *Generator) writeFile(filePath, content string) error {
-	if !g.config.Overwrite && !g.config.SyncMode {
+	if !g.config.Overwrite {
 		if _, err := os.Stat(filePath); err == nil {
 			fmt.Printf("⚠️  Skipping existing file: %s\n", filePath)
 			return nil
@@ -243,7 +256,12 @@ func (g *Generator) writeFile(filePath, content string) error {
 }
 
 // generateAgentJSON generates the .well-known/agent.json file
-func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string) error {
+func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
+	if ignoreChecker.ShouldIgnore(".well-known/agent.json") {
+		fmt.Printf("🚫 Ignoring file (matches .adl-ignore): .well-known/agent.json\n")
+		return nil
+	}
+
 	agentCard := map[string]interface{}{
 		"name":         adl.Metadata.Name,
 		"description":  adl.Metadata.Description,
@@ -286,4 +304,83 @@ func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string) error {
 // getVersion returns the CLI version (this would be injected at build time)
 func getVersion() string {
 	return "1.0.0"
+}
+
+// generateAdlIgnoreFile creates a .adl-ignore file with files that contain TODOs
+func (g *Generator) generateAdlIgnoreFile(outputDir, templateName string) error {
+	ignoreFilePath := filepath.Join(outputDir, ".adl-ignore")
+
+	if _, err := os.Stat(ignoreFilePath); err == nil {
+		fmt.Printf("📄 .adl-ignore file already exists, skipping creation\n")
+		return nil
+	}
+
+	var filesToIgnore []string
+
+	// Files that contain TODOs and should only be generated once
+	switch templateName {
+	case "minimal":
+		filesToIgnore = []string{
+			"handlers.go",
+		}
+	case "ai-powered":
+		filesToIgnore = []string{
+			"tools.go",
+		}
+	case "enterprise":
+		filesToIgnore = []string{
+			"tools.go",
+			"auth.go",
+			"middleware.go",
+			"metrics.go",
+			"logging.go",
+			"tool_metrics.go",
+		}
+	default:
+		filesToIgnore = []string{
+			"tools.go",
+		}
+	}
+
+	if len(filesToIgnore) == 0 {
+		return nil
+	}
+
+	content := generateAdlIgnoreContent(filesToIgnore)
+
+	if err := os.WriteFile(ignoreFilePath, []byte(content), 0644); err != nil {
+		return fmt.Errorf("failed to write .adl-ignore file: %w", err)
+	}
+
+	fmt.Printf("✅ Generated: .adl-ignore\n")
+	fmt.Printf("🔒 Files with TODO implementations will be preserved on future generations\n")
+
+	return nil
+}
+
+// generateAdlIgnoreContent generates the content for .adl-ignore file
+func generateAdlIgnoreContent(filesToIgnore []string) string {
+	content := `# .adl-ignore file
+# This file specifies which files should not be overwritten during generation operations.
+# Files listed here typically contain TODO implementations that users have completed.
+#
+# Patterns supported:
+# - Exact file names: handlers.go
+# - Wildcards: *.go
+# - Directories: build/
+# - Comments: lines starting with #
+
+`
+
+	for _, file := range filesToIgnore {
+		content += file + "\n"
+	}
+
+	content += `
+# Add your own files to ignore here:
+# my-custom-file.go
+# config/secrets.yaml
+`
+
+	return content
 }
