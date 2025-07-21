@@ -28,12 +28,10 @@ func init() {
 }
 
 func runSync(cmd *cobra.Command, args []string) error {
-	// Validate input file exists
 	if _, err := os.Stat(adlFile); os.IsNotExist(err) {
 		return fmt.Errorf("ADL file '%s' does not exist", adlFile)
 	}
 
-	// Convert to absolute paths
 	absADLFile, err := filepath.Abs(adlFile)
 	if err != nil {
 		return fmt.Errorf("failed to resolve ADL file path: %w", err)
@@ -44,16 +42,14 @@ func runSync(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to resolve output directory path: %w", err)
 	}
 
-	// Create generator with sync mode
 	gen := generator.New(generator.Config{
-		Template:  "", // Auto-detect from existing project
+		Template:  "",
 		Overwrite: false,
 		SyncMode:  true,
 	})
 
 	fmt.Printf("Syncing A2A agent from '%s' to '%s'\n", absADLFile, absOutputDir)
 
-	// Sync the project
 	if err := gen.Generate(absADLFile, absOutputDir); err != nil {
 		return fmt.Errorf("sync failed: %w", err)
 	}

@@ -27,10 +27,10 @@ This command reads a YAML or JSON ADL file and generates:
 }
 
 var (
-	adlFile    string
-	outputDir  string
-	template   string
-	overwrite  bool
+	adlFile   string
+	outputDir string
+	template  string
+	overwrite bool
 )
 
 func init() {
@@ -43,12 +43,10 @@ func init() {
 }
 
 func runGenerate(cmd *cobra.Command, args []string) error {
-	// Validate input file exists
 	if _, err := os.Stat(adlFile); os.IsNotExist(err) {
 		return fmt.Errorf("ADL file '%s' does not exist", adlFile)
 	}
 
-	// Convert to absolute paths
 	absADLFile, err := filepath.Abs(adlFile)
 	if err != nil {
 		return fmt.Errorf("failed to resolve ADL file path: %w", err)
@@ -59,7 +57,6 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to resolve output directory path: %w", err)
 	}
 
-	// Create generator
 	gen := generator.New(generator.Config{
 		Template:  template,
 		Overwrite: overwrite,
@@ -68,7 +65,6 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	fmt.Printf("Generating A2A agent from '%s' to '%s'\n", absADLFile, absOutputDir)
 	fmt.Printf("Using template: %s\n", template)
 
-	// Generate the project
 	if err := gen.Generate(absADLFile, absOutputDir); err != nil {
 		return fmt.Errorf("generation failed: %w", err)
 	}

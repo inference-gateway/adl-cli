@@ -78,7 +78,6 @@ func (g *Generator) parseADL(adlFile string) (*schema.ADL, error) {
 
 // validateADL validates the ADL structure for code generation requirements
 func (g *Generator) validateADL(adl *schema.ADL) error {
-	// Basic structure validation
 	if adl.APIVersion != "a2a.dev/v1" {
 		return fmt.Errorf("unsupported API version: %s", adl.APIVersion)
 	}
@@ -86,7 +85,6 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 		return fmt.Errorf("unsupported kind: %s", adl.Kind)
 	}
 
-	// Metadata validation
 	if adl.Metadata.Name == "" {
 		return fmt.Errorf("metadata.name is required")
 	}
@@ -97,7 +95,6 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 		return fmt.Errorf("metadata.version is required")
 	}
 
-	// Server configuration validation
 	if adl.Spec.Server.Port == 0 {
 		return fmt.Errorf("spec.server.port is required and must be greater than 0")
 	}
@@ -105,12 +102,10 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 		return fmt.Errorf("spec.server.port must be between 1 and 65535")
 	}
 
-	// Capabilities validation - must be explicitly defined
 	if adl.Spec.Capabilities == nil {
 		return fmt.Errorf("spec.capabilities is required")
 	}
 
-	// Language validation - exactly one programming language must be defined for code generation
 	if adl.Spec.Language == nil {
 		return fmt.Errorf("spec.language is required for code generation")
 	}
@@ -142,7 +137,6 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 		return fmt.Errorf("exactly one programming language must be defined for code generation, found %d", languageCount)
 	}
 
-	// Agent configuration validation (if AI-powered)
 	if adl.Spec.Agent != nil {
 		if adl.Spec.Agent.Provider == "" {
 			return fmt.Errorf("spec.agent.provider is required when agent configuration is specified")
@@ -157,7 +151,6 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 		}
 	}
 
-	// Tools validation
 	for i, tool := range adl.Spec.Tools {
 		if tool.Name == "" {
 			return fmt.Errorf("spec.tools[%d].name is required", i)
@@ -264,7 +257,6 @@ func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string) error {
 		},
 	}
 
-	// Add tools if available
 	if len(adl.Spec.Tools) > 0 {
 		tools := make([]map[string]interface{}, len(adl.Spec.Tools))
 		for i, tool := range adl.Spec.Tools {

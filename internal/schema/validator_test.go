@@ -6,7 +6,6 @@ import (
 )
 
 func TestValidator_ValidateFile(t *testing.T) {
-	// Create a temporary valid ADL file
 	validADL := `apiVersion: a2a.dev/v1
 kind: Agent
 metadata:
@@ -51,7 +50,6 @@ spec:
 }
 
 func TestValidator_ValidateFile_Invalid(t *testing.T) {
-	// Create a temporary invalid ADL file
 	invalidADL := `apiVersion: invalid
 kind: Agent
 metadata:

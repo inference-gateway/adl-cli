@@ -29,13 +29,11 @@ func NewValidator() *Validator {
 
 // ValidateFile validates an ADL file
 func (v *Validator) ValidateFile(filePath string) error {
-	// Read the file
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %w", err)
 	}
 
-	// Convert YAML to JSON for validation
 	var yamlData interface{}
 	if err := yaml.Unmarshal(data, &yamlData); err != nil {
 		return fmt.Errorf("failed to parse YAML: %w", err)
@@ -46,7 +44,6 @@ func (v *Validator) ValidateFile(filePath string) error {
 		return fmt.Errorf("failed to convert to JSON: %w", err)
 	}
 
-	// Validate against schema
 	documentLoader := gojsonschema.NewBytesLoader(jsonData)
 	result, err := v.schema.Validate(documentLoader)
 	if err != nil {
@@ -64,7 +61,6 @@ func (v *Validator) ValidateFile(filePath string) error {
 	return nil
 }
 
-// adlSchema is the JSON schema for ADL files
 const adlSchema = `{
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Agent Definition Language (ADL)",
