@@ -1,4 +1,4 @@
-# .adl-ignore
+# .a2a-ignore
 # 
 # This file specifies which files should be ignored during A2A CLI generation operations.
 # Patterns work similar to .gitignore:

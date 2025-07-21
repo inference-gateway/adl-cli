@@ -14,7 +14,7 @@ The A2A CLI helps you build production-ready A2A agents quickly by generating co
 - 🚀 **Rapid Development** - Generate complete projects in seconds
 - 📋 **Schema-Driven** - Use YAML ADL files to define your agents
 - 🎯 **Multiple Templates** - Choose from minimal, AI-powered, or enterprise templates
-- � **Smart Ignore** - Protect your implementations with .adl-ignore files
+- � **Smart Ignore** - Protect your implementations with .a2a-ignore files
 - ✅ **Validation** - Built-in ADL schema validation
 - 🛠️ **Interactive Setup** - Guided project initialization
 - 📦 **Production Ready** - Includes Docker, Kubernetes, and monitoring configs
@@ -91,7 +91,7 @@ a2a generate --file agent.yaml --output ./my-agent
 # Use specific template
 a2a generate --file agent.yaml --output ./my-agent --template minimal
 
-# Overwrite existing files (respects .adl-ignore)
+# Overwrite existing files (respects .a2a-ignore)
 a2a generate --file agent.yaml --output ./my-agent --overwrite
 ```
 
@@ -171,7 +171,7 @@ my-agent/
 ├── go.mod               # Go module definition
 ├── Taskfile.yml         # Development tasks
 ├── Dockerfile           # Container configuration
-├── .adl-ignore          # Files to protect from regeneration
+├── .a2a-ignore          # Files to protect from regeneration
 ├── .well-known/
 │   └── agent.json       # Agent capabilities (auto-generated)
 └── README.md            # Project documentation
@@ -207,22 +207,22 @@ a2a generate --file examples/minimal-agent.yaml --output ./minimal-agent --templ
 a2a generate --file examples/enterprise-agent.yaml --output ./enterprise-agent --template enterprise
 ```
 
-## Customizing Generation with .adl-ignore
+## Customizing Generation with .a2a-ignore
 
-The A2A CLI automatically creates a `.adl-ignore` file during project generation to protect files containing TODO implementations. This file works similar to `.gitignore` and prevents important implementation files from being overwritten during subsequent generations.
+The A2A CLI automatically creates a `.a2a-ignore` file during project generation to protect files containing TODO implementations. This file works similar to `.gitignore` and prevents important implementation files from being overwritten during subsequent generations.
 
 ### Automatically Protected Files
 
-When you generate a project, these files are automatically added to `.adl-ignore`:
+When you generate a project, these files are automatically added to `.a2a-ignore`:
 
 - **AI-powered template**: `tools.go`
 - **Minimal template**: `handlers.go` 
 - **Enterprise template**: `tools.go`, `auth.go`, `middleware.go`, `metrics.go`, `logging.go`, `tool_metrics.go`
 
-You can control which additional files are generated or updated by editing the `.adl-ignore` file:
+You can control which additional files are generated or updated by editing the `.a2a-ignore` file:
 
 ```bash
-# .adl-ignore
+# .a2a-ignore
 # Skip Docker-related files if you have custom containerization
 Dockerfile
 docker-compose.yml
@@ -238,7 +238,7 @@ auth.go
 Taskfile.yml
 ```
 
-### .adl-ignore Patterns
+### .a2a-ignore Patterns
 
 - Use `#` for comments
 - Use `/` at the end to match directories
