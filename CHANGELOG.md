@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.3](https://github.com/inference-gateway/a2a-cli/compare/v0.2.2...v0.2.3) (2025-07-21)
+
+### 🐛 Bug Fixes
+
+* Update project name in goreleaser configuration ([15873c1](https://github.com/inference-gateway/a2a-cli/commit/15873c1ec8d0f5a5e80dec779707f1695056fc3e))
+
 ## [0.2.2](https://github.com/inference-gateway/a2a-cli/compare/v0.2.1...v0.2.2) (2025-07-21)
 
 ### 📚 Documentation
