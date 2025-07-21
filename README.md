@@ -312,6 +312,56 @@ task examples:generate
 - [A2A Framework](https://github.com/inference-gateway/a2a) - The core A2A framework
 - [A2A Examples](https://github.com/inference-gateway/a2a-examples) - Example A2A agents
 
+## Roadmap
+
+### Language Support
+
+The A2A CLI currently supports Go, with plans to expand to additional programming languages:
+
+#### ✅ Currently Supported
+- **Go** - Full support with all templates (minimal, ai-powered, enterprise)
+
+#### 🚧 Planned Support
+- **TypeScript/Node.js** - Complete A2A agent generation with Express.js framework
+  - AI-powered agents with OpenAI/Anthropic integration
+  - Enterprise features (auth, metrics, logging)
+  - Docker and Kubernetes deployment configs
+  
+- **Rust** - High-performance A2A agents with async support
+  - Tokio-based async runtime
+  - Enterprise-grade performance and safety
+  - WebAssembly (WASM) compilation support
+
+- **Python** - Rapid prototyping and AI-first development
+  - FastAPI-based server generation
+  - Rich AI ecosystem integration
+  - Jupyter notebook support for development
+
+#### 🔮 Future Considerations
+- **Java/Kotlin** - Enterprise JVM support
+- **C#/.NET** - Microsoft ecosystem integration
+- **Swift** - Apple ecosystem and server-side Swift
+
+### Template Enhancements
+
+- **Multi-language projects** - Generate polyglot agents with language-specific microservices
+- **Custom templates** - User-defined project templates and scaffolding
+- **Plugin system** - Extensible architecture for custom generators
+- **Cloud-native templates** - Serverless (AWS Lambda, Vercel) and edge deployment support
+
+### Developer Experience
+
+- **IDE integrations** - VS Code, IntelliJ, and other editor extensions
+- **Hot reload** - Live reloading during development
+- **Interactive debugging** - Built-in debugging tools and profilers
+- **Testing frameworks** - Automated testing generation and test runners
+
+### Contribute to the Roadmap
+
+We welcome community input on our roadmap! Please:
+- 💡 Suggest new languages or frameworks via [Issues](https://github.com/inference-gateway/a2a-cli/issues)
+- 🤝 Contribute implementations for new languages (see [Contributing Guide](CONTRIBUTING.md))
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
