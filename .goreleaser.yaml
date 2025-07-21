@@ -9,7 +9,7 @@ before:
     - go mod tidy
 
 builds:
-  - id: a2a-cli
+  - id: a2a
     main: .
     env:
       - CGO_ENABLED=0
