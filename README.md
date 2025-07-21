@@ -1,9 +1,16 @@
+<div align="center">
+
 # A2A CLI
 
-A command-line interface for generating production-ready A2A (Agent-to-Agent) servers from Agent Definition Language (ADL) files.
+*A command-line interface for generating production-ready A2A (Agent-to-Agent) servers from Agent Definition Language (ADL) files.*
 
-[![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg?style=flat-square&logo=go)](https://golang.org)
+[![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/inference-gateway/a2a-cli/ci.yml?style=flat-square&logo=github)](https://github.com/inference-gateway/a2a-cli/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/inference-gateway/a2a-cli?style=flat-square)](https://goreportcard.com/report/github.com/inference-gateway/a2a-cli)
+[![Release](https://img.shields.io/github/v/release/inference-gateway/a2a-cli?style=flat-square&logo=github)](https://github.com/inference-gateway/a2a-cli/releases)
+
+</div>
 
 ## Overview
 
