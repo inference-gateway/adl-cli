@@ -2,7 +2,7 @@
 ---
 version: 2
 
-project_name: a2a-cli
+project_name: a2a
 
 before:
   hooks:
