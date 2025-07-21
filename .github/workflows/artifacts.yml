@@ -43,7 +43,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ github.event.release.tag_name }}
         run: |
-          for file in dist/a2a_*; do
+          for file in dist/a2a-cli_*; do
             if [ -d "$file" ]; then
               echo "Skipping directory: $file"
               continue
