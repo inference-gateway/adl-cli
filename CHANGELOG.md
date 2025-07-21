@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.2](https://github.com/inference-gateway/a2a-cli/compare/v0.2.1...v0.2.2) (2025-07-21)
+
+### 📚 Documentation
+
+* Add early development warning to README ([26f9bcd](https://github.com/inference-gateway/a2a-cli/commit/26f9bcdc0d3c13828f70ec867b1ed53158dd13f2))
+* Add installation instructions and script to README ([7cc1125](https://github.com/inference-gateway/a2a-cli/commit/7cc1125b7297a969e223892ccaa33dfe77cdd3b1))
+
+### 🔨 Miscellaneous
+
+* Update artifact upload script and add installation script for A2A CLI ([a0e810b](https://github.com/inference-gateway/a2a-cli/commit/a0e810bcb76212a03a7ba7568026452b4c0f55e3))
+
 ## [0.2.1](https://github.com/inference-gateway/a2a-cli/compare/v0.2.0...v0.2.1) (2025-07-21)
 
 ### 🐛 Bug Fixes
