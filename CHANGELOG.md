@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0](https://github.com/inference-gateway/a2a-cli/compare/v0.3.0...v0.4.0) (2025-07-23)
+
+### ✨ Features
+
+* **ci:** Add --ci flag to generate GitHub Actions workflows ([#10](https://github.com/inference-gateway/a2a-cli/issues/10)) ([b6bc96b](https://github.com/inference-gateway/a2a-cli/commit/b6bc96b0a88b7a432f8ba00d8c9e4d1416283296)), closes [#8](https://github.com/inference-gateway/a2a-cli/issues/8)
+
+### 🐛 Bug Fixes
+
+* Add support for 'deepseek' AI provider in project initialization and validation ([a5204c6](https://github.com/inference-gateway/a2a-cli/commit/a5204c60e49d9d21d99406de886d5b619c7b34d8))
+
+### 🔧 Miscellaneous
+
+* Update model in minimal-agent.yaml to 'deepseek-chat' ([cf2d781](https://github.com/inference-gateway/a2a-cli/commit/cf2d781bb448c845e7df2c0bc4b9c2967b08bce7))
+
 ## [0.3.0](https://github.com/inference-gateway/a2a-cli/compare/v0.2.5...v0.3.0) (2025-07-23)
 
 ### ✨ Features
