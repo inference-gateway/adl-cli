@@ -313,7 +313,7 @@ func (g *Generator) generateA2aIgnoreFile(outputDir, templateName string) error 
 	switch templateName {
 	case "minimal":
 		filesToIgnore = []string{
-			"handlers.go",
+			"tools/*",
 		}
 	}
 
@@ -337,11 +337,12 @@ func (g *Generator) generateA2aIgnoreFile(outputDir, templateName string) error 
 func generateA2aIgnoreContent(filesToIgnore []string) string {
 	content := `# .a2a-ignore file
 # This file specifies which files should not be overwritten during generation operations.
-# Files listed here typically contain TODO implementations that users have completed.
+# Files listed here typically contain implementations that users have completed.
 #
 # Patterns supported:
 # - Exact file names: handlers.go
 # - Wildcards: *.go
+# - Directory patterns: tools/*
 # - Directories: build/
 # - Comments: lines starting with #
 
