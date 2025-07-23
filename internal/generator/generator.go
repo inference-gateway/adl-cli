@@ -473,9 +473,9 @@ jobs:
         go-version: %s
         cache: true
 
-    - name: Install GoReleaser
+    - name: Install golangci-lint
       run: |
-        curl -sSL https://github.com/goreleaser/goreleaser/releases/download/v2.7.0/goreleaser_Linux_x86_64.tar.gz | tar -xzv -C /usr/local/bin goreleaser
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v2.1.6
 
     - name: Install Task
       uses: arduino/setup-task@v2
