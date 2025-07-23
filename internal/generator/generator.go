@@ -276,7 +276,7 @@ func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string, ignoreC
 		agentCard["tools"] = tools
 	}
 
-	jsonData, err := json.MarshalIndent(agentCard, "", "  ")
+	jsonData, err := g.formatJSONWithIndentation(agentCard)
 	if err != nil {
 		return err
 	}
@@ -287,7 +287,7 @@ func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string, ignoreC
 	}
 
 	agentJSONPath := filepath.Join(wellKnownDir, "agent.json")
-	return g.writeFile(agentJSONPath, string(jsonData))
+	return g.writeFile(agentJSONPath, jsonData)
 }
 
 // getVersion returns the CLI version (this would be injected at build time)
@@ -354,4 +354,13 @@ func generateA2aIgnoreContent(filesToIgnore []string) string {
 `
 
 	return content
+}
+
+// formatJSONWithIndentation formats JSON with proper indentation for nested objects
+func (g *Generator) formatJSONWithIndentation(data interface{}) (string, error) {
+	jsonBytes, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return "", err
+	}
+	return string(jsonBytes), nil
 }
