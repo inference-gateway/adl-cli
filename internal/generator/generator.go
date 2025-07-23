@@ -463,7 +463,6 @@ jobs:
       uses: arduino/setup-task@v2
       with:
         version: 3.x
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Download dependencies
       run: go mod download
