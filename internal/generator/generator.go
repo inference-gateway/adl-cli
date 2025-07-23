@@ -471,15 +471,12 @@ jobs:
       uses: actions/setup-go@v5.5.0
       with:
         go-version: %s
-    
-    - name: Cache Go modules
-      uses: actions/cache@v4
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-    
+        cache: true
+
+    - name: Install GoReleaser
+      run: |
+        curl -sSL https://github.com/goreleaser/goreleaser/releases/download/v2.7.0/goreleaser_Linux_x86_64.tar.gz | tar -xzv -C /usr/local/bin goreleaser
+
     - name: Install Task
       uses: arduino/setup-task@v2
       with:

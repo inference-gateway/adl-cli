@@ -27,15 +27,20 @@ tasks:
     cmds:
       - go test -v -cover ./...
 
+  fmt:
+    desc: Format and vet code
+    cmd: |
+      go fmt ./...
+
+  vet:
+    desc: Run go vet
+    cmd: |
+      go vet ./...
+
   lint:
     desc: Run linter
     cmds:
       - golangci-lint run
-
-  fmt:
-    desc: Format code
-    cmds:
-      - go fmt ./...
 
   mod:
     desc: Download dependencies

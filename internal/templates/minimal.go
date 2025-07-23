@@ -192,51 +192,29 @@ tasks:
     desc: Run tests
     cmd: go test -v ./...
 
-  test-cover:
+  test:cover:
     desc: Run tests with coverage
     cmd: go test -v -cover ./...
 
+  fmt:
+    desc: Format and vet code
+    cmd: go fmt ./...
+
+  vet:
+    desc: Run go vet
+    cmd: go vet ./...
+
   lint:
     desc: Run linter
-    cmd: |
-      go fmt ./...
-      go vet ./...
+    cmd: golangci-lint run
 
   clean:
     desc: Clean build artifacts
     cmd: rm -rf bin/
 
-  docker-build:
+  docker:build:
     desc: Build Docker image
     cmd: docker build -t {{` + "`{{.APP_NAME}}`" + `}}:{{` + "`{{.VERSION}}`" + `}} .
-
-  docker-run:
-    desc: Run Docker container
-    cmd: |
-      docker run -d \
-        --name {{` + "`{{.APP_NAME}}`" + `}} \
-        -p {{ .ADL.Spec.Server.Port | default 8080 }}:{{ .ADL.Spec.Server.Port | default 8080 }} \
-        {{` + "`{{.APP_NAME}}`" + `}}:{{` + "`{{.VERSION}}`" + `}}
-
-  k8s-deploy:
-    desc: Deploy to Kubernetes using operator
-    cmd: kubectl apply -f k8s/a2a-server.yaml
-
-  k8s-delete:
-    desc: Delete from Kubernetes
-    cmd: kubectl delete -f k8s/a2a-server.yaml
-
-  dev:
-    desc: Development mode with auto-reload
-    deps: [build]
-    cmd: |
-      while true; do
-        ./bin/{{` + "`{{.APP_NAME}}`" + `}} &
-        PID=$!
-        inotifywait -e modify -r . --exclude='bin/.*'
-        kill $PID 2>/dev/null || true
-        sleep 1
-      done
 `
 
 const dockerfileTemplate = `FROM golang:1.22-alpine AS builder
