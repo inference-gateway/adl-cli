@@ -92,7 +92,7 @@ func main() {
 	agent, err := server.NewAgentBuilder(logger).
 		WithConfig(&cfg.A2A.AgentConfig).
 		WithToolBox(toolBox).
-		WithSystemPrompt(` + "`" + `{{ .ADL.Spec.Agent.SystemPrompt | default "You are a helpful AI assistant." }}` + "`" + `).
+		WithSystemPrompt(` + "`" + `{{- if .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt }}{{- else }}You are a helpful AI assistant.{{- end }}` + "`" + `).
 		Build()
 	if err != nil {
 		log.Fatal("failed to create agent:", err)
@@ -542,6 +542,7 @@ metadata:
   name: {{ .ADL.Metadata.Name }}
   namespace: {{ .ADL.Metadata.Name }}-ns
 spec:
+  replicas: 1
   image: "{{ .ADL.Metadata.Name }}:{{ .ADL.Metadata.Version | default "latest" }}"
   timezone: "UTC"
   port: {{ .ADL.Spec.Server.Port | default 8080 }}
@@ -566,8 +567,8 @@ spec:
     secretRef: ""
   agent:
     enabled: true
-    systemPrompt: "{{ .ADL.Spec.Agent.SystemPrompt | default "You are a helpful AI assistant." }}"
-  replicas: 1
+    systemPrompt: |
+{{- if .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt | nindent 6 }}{{- else }}      You are a helpful AI assistant.{{- end }}
   resources:
     limits:
       memory: "256Mi"
