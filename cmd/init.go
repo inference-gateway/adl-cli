@@ -137,7 +137,6 @@ func collectADLInfo(scanner *bufio.Scanner, projectName string) *adlData {
 		Kind:       "Agent",
 	}
 
-	// Metadata
 	fmt.Println("📋 Agent Metadata")
 	fmt.Println("-----------------")
 	adl.Metadata.Name = promptString(scanner, "Agent name", projectName)
@@ -160,7 +159,7 @@ func collectADLInfo(scanner *bufio.Scanner, projectName string) *adlData {
 			Temperature  float64 `yaml:"temperature,omitempty"`
 		}{}
 
-		provider := promptChoice(scanner, "AI Provider", []string{"openai", "anthropic", "azure", "ollama"}, "openai")
+		provider := promptChoice(scanner, "AI Provider", []string{"openai", "anthropic", "azure", "ollama", "deepseek"}, "openai")
 		adl.Spec.Agent.Provider = provider
 
 		var defaultModel string
@@ -173,6 +172,8 @@ func collectADLInfo(scanner *bufio.Scanner, projectName string) *adlData {
 			defaultModel = "gpt-4o"
 		case "ollama":
 			defaultModel = "llama3.1"
+		case "deepseek":
+			defaultModel = "deepseek-chat"
 		}
 
 		adl.Spec.Agent.Model = promptString(scanner, "Model", defaultModel)

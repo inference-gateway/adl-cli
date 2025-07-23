@@ -57,6 +57,8 @@ tasks:
 
   examples:test:
     desc: Test all example ADL files
+    deps:
+      - build
     cmds:
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/minimal-agent.yaml
 

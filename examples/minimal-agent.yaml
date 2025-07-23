@@ -10,10 +10,10 @@ spec:
     pushNotifications: true
     stateTransitionHistory: true
   agent:
-    provider: openai
+    provider: deepseek
     model: gpt-4o
     systemPrompt: |
-      You are an enterprise-grade AI assistant with access to various business tools.
+      You are are an helpful assistant.
       Always prioritize security, accuracy, and compliance in your responses.
       Log all interactions for audit purposes.
     maxTokens: 8192
