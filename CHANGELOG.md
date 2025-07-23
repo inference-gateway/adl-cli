@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0-rc.1](https://github.com/inference-gateway/a2a-cli/compare/v0.4.3...v0.5.0-rc.1) (2025-07-23)
+
+### ✨ Features
+
+* Add generate task to create code from ADL ([a3d37bb](https://github.com/inference-gateway/a2a-cli/commit/a3d37bbc316dcb5a547284c26b44150621f1ae5b))
+
+### ♻️ Improvements
+
+* Cleanup - update generated file patterns in gitattributes and generator ([456818d](https://github.com/inference-gateway/a2a-cli/commit/456818d681d9d1f1ac943c571c0838101457e733))
+* Enhance configuration management and logging in main application ([8b65915](https://github.com/inference-gateway/a2a-cli/commit/8b65915150fc5773e221b479d57ad817729d1294))
+
 ## [0.4.3](https://github.com/inference-gateway/a2a-cli/compare/v0.4.2...v0.4.3) (2025-07-23)
 
 ### 🐛 Bug Fixes
