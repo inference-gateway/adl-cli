@@ -28,10 +28,10 @@ This command reads a YAML or JSON ADL file and generates:
 }
 
 var (
-	adlFile           string
-	outputDir         string
-	template          string
-	overwrite         bool
+	adlFile              string
+	outputDir            string
+	template             string
+	overwrite            bool
 	generateDevcontainer bool
 )
 
@@ -60,7 +60,6 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to resolve output directory path: %w", err)
 	}
 
-	// Generate devcontainer configuration if flag is set
 	if generateDevcontainer {
 		devcontainerGen := devcontainer.New()
 
@@ -80,7 +79,6 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	// Generate regular A2A agent project
 	gen := generator.New(generator.Config{
 		Template:  template,
 		Overwrite: overwrite,
