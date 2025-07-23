@@ -479,6 +479,5 @@ jobs:
     
     - name: Build
       run: task build
-
 `, goVersion)
 }
