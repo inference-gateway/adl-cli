@@ -350,13 +350,6 @@ The A2A CLI currently supports Go, with plans to expand to additional programmin
 - **Plugin system** - Extensible architecture for custom generators
 - **Cloud-native templates** - Serverless (AWS Lambda, Vercel) and edge deployment support
 
-### Developer Experience
-
-- **IDE integrations** - VS Code, IntelliJ, and other editor extensions
-- **Hot reload** - Live reloading during development
-- **Interactive debugging** - Built-in debugging tools and profilers
-- **Testing frameworks** - Automated testing generation and test runners
-
 ### Contribute to the Roadmap
 
 We welcome community input on our roadmap! Please:
@@ -369,10 +362,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- 📖 [Documentation](https://docs.a2a.dev)
-- 💬 [Discussions](https://github.com/inference-gateway/a2a/discussions)
+- 📖 [Documentation](https://docs.inference-gateway.com)
+- 💬 [Discussions](https://github.com/inference-gateway/a2a-cli/discussions)
 - 🐛 [Issues](https://github.com/inference-gateway/a2a-cli/issues)
 
 ---
 
-> 🤖 Powered by the [A2A (Agent-to-Agent) framework](https://github.com/inference-gateway/a2a)
+> 🤖 Powered by the [Inference Gateway framework](https://github.com/inference-gateway/)
