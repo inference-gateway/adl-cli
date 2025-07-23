@@ -377,15 +377,18 @@ func (g *Generator) formatJSONWithIndentation(data interface{}) (string, error) 
 	return string(jsonBytes), nil
 }
 
-// generateCI generates CI/CD workflow configuration based on the programming language
+// generateCI generates CI/CD workflow configuration based on the programming language and SCM provider
 func (g *Generator) generateCI(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
-	language := g.detectLanguage(adl)
+	scmProvider := g.detectSCMProvider(adl)
 
-	switch language {
-	case "go":
+	switch scmProvider {
+	case "github":
 		return g.generateGitHubActionsWorkflow(adl, outputDir, ignoreChecker)
+	case "gitlab":
+		return g.generateGitLabCIWorkflow(adl, outputDir, ignoreChecker)
 	default:
-		return fmt.Errorf("CI generation not supported for language: %s", language)
+		fmt.Printf("⚠️  No SCM provider specified, defaulting to GitHub Actions\n")
+		return g.generateGitHubActionsWorkflow(adl, outputDir, ignoreChecker)
 	}
 }
 
@@ -400,7 +403,15 @@ func (g *Generator) detectLanguage(adl *schema.ADL) string {
 	return "unknown"
 }
 
-// generateGitHubActionsWorkflow generates a GitHub Actions workflow for Go projects
+// detectSCMProvider detects the SCM provider from ADL
+func (g *Generator) detectSCMProvider(adl *schema.ADL) string {
+	if adl.Spec.SCM != nil && adl.Spec.SCM.Provider != "" {
+		return adl.Spec.SCM.Provider
+	}
+	return "github"
+}
+
+// generateGitHubActionsWorkflow generates a GitHub Actions workflow for projects
 func (g *Generator) generateGitHubActionsWorkflow(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
 	workflowPath := ".github/workflows/ci.yml"
 
@@ -409,7 +420,17 @@ func (g *Generator) generateGitHubActionsWorkflow(adl *schema.ADL, outputDir str
 		return nil
 	}
 
-	workflowContent := g.generateGoWorkflowContent(adl)
+	language := g.detectLanguage(adl)
+	var workflowContent string
+
+	switch language {
+	case "go":
+		workflowContent = g.generateGoWorkflowContent(adl)
+	case "typescript":
+		workflowContent = g.generateTypeScriptWorkflowContent(adl)
+	default:
+		return fmt.Errorf("GitHub Actions generation not supported for language: %s", language)
+	}
 
 	fullWorkflowPath := filepath.Join(outputDir, workflowPath)
 	if err := g.writeFile(fullWorkflowPath, workflowContent); err != nil {
@@ -479,4 +500,63 @@ jobs:
     - name: Build
       run: task build
 `, goVersion)
+}
+
+// generateTypeScriptWorkflowContent generates the GitHub Actions workflow content for TypeScript projects
+func (g *Generator) generateTypeScriptWorkflowContent(adl *schema.ADL) string {
+	nodeVersion := "18"
+	if adl.Spec.Language.TypeScript != nil && adl.Spec.Language.TypeScript.NodeVersion != "" {
+		nodeVersion = adl.Spec.Language.TypeScript.NodeVersion
+	}
+
+	return fmt.Sprintf(`name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    
+    steps:
+    - uses: actions/checkout@v4.2.2
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4.1.0
+      with:
+        node-version: %s
+        cache: 'npm'
+    
+    - name: Install Task
+      uses: arduino/setup-task@v2
+      with:
+        version: 3.x
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Lint
+      run: task lint
+    
+    - name: Run tests
+      run: task test
+    
+    - name: Build
+      run: task build
+`, nodeVersion)
+}
+
+// generateGitLabCIWorkflow generates a GitLab CI workflow
+func (g *Generator) generateGitLabCIWorkflow(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
+	// TODO: Implement GitLab CI workflow generation
+	// This should generate .gitlab-ci.yml based on the programming language
+	// and follow similar patterns to the GitHub Actions implementation
+	fmt.Printf("⚠️  GitLab CI generation is not yet implemented\n")
+	fmt.Printf("� This is a planned feature - contributions welcome!\n")
+	return nil
 }
