@@ -261,3 +261,70 @@ func TestGenerator_validateADL(t *testing.T) {
 		})
 	}
 }
+
+func TestGenerator_generateA2aIgnoreFile(t *testing.T) {
+	tests := []struct {
+		name         string
+		templateName string
+		wantContent  string
+	}{
+		{
+			name:         "minimal template creates tools ignore",
+			templateName: "minimal",
+			wantContent:  "tools/*",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tmpDir, err := os.MkdirTemp("", "a2a-ignore-test-*")
+			if err != nil {
+				t.Fatalf("Failed to create temp dir: %v", err)
+			}
+			defer func() {
+				if err := os.RemoveAll(tmpDir); err != nil {
+					t.Logf("Failed to remove temp dir: %v", err)
+				}
+			}()
+
+			gen := New(Config{
+				Template: tt.templateName,
+			})
+
+			err = gen.generateA2aIgnoreFile(tmpDir, tt.templateName)
+			if err != nil {
+				t.Fatalf("generateA2aIgnoreFile() error = %v", err)
+			}
+
+			ignoreFilePath := filepath.Join(tmpDir, ".a2a-ignore")
+			content, err := os.ReadFile(ignoreFilePath)
+			if err != nil {
+				t.Fatalf("Failed to read .a2a-ignore file: %v", err)
+			}
+
+			contentStr := string(content)
+			if !containsPattern(contentStr, tt.wantContent) {
+				t.Errorf("generateA2aIgnoreFile() content does not contain expected pattern %q", tt.wantContent)
+			}
+		})
+	}
+}
+
+// containsPattern checks if the content contains the expected pattern
+func containsPattern(content, pattern string) bool {
+	return len(content) > 0 && (content == pattern ||
+		(len(content) > len(pattern) &&
+			(content[:len(pattern)] == pattern ||
+				content[len(content)-len(pattern):] == pattern ||
+				containsSubstring(content, pattern))))
+}
+
+// containsSubstring is a simple substring check
+func containsSubstring(content, pattern string) bool {
+	for i := 0; i <= len(content)-len(pattern); i++ {
+		if content[i:i+len(pattern)] == pattern {
+			return true
+		}
+	}
+	return false
+}
