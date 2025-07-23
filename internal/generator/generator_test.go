@@ -51,6 +51,7 @@ func TestGenerator_Generate(t *testing.T) {
 	gen := New(Config{
 		Template:  "minimal",
 		Overwrite: true,
+		Version:   "test-version",
 	})
 
 	outputDir := filepath.Join(tmpDir, "output")
@@ -239,7 +240,9 @@ func TestGenerator_validateADL(t *testing.T) {
 		},
 	}
 
-	gen := New(Config{})
+	gen := New(Config{
+		Version: "test-version",
+	})
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

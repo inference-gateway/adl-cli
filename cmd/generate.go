@@ -14,17 +14,8 @@ import (
 var generateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "Generate A2A agent code from ADL file",
-	Long: `Generate complete A2A agent project structure from an Agent Definition Language (ADL) file.
-
-This command reads a YAML or JSON ADL file and generates:
-- Complete Go project structure
-- Main server setup
-- Tool implementations with TODO placeholders
-- Agent configuration
-- .well-known/agent.json file
-- Taskfile.yml for development tasks
-- Dockerfile for containerization`,
-	RunE: runGenerate,
+	Long:  `Generate complete A2A agent project structure from an Agent Definition Language (ADL) file.`,
+	RunE:  runGenerate,
 }
 
 var (
@@ -63,6 +54,7 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	gen := generator.New(generator.Config{
 		Template:  template,
 		Overwrite: overwrite,
+		Version:   version,
 	})
 
 	fmt.Printf("Generating A2A agent from '%s' to '%s'\n", absADLFile, absOutputDir)

@@ -22,6 +22,7 @@ type Generator struct {
 type Config struct {
 	Template  string
 	Overwrite bool
+	Version   string
 }
 
 // New creates a new generator
@@ -168,7 +169,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		ADL: adl,
 		Metadata: schema.GeneratedMetadata{
 			GeneratedAt: time.Now(),
-			CLIVersion:  getVersion(),
+			CLIVersion:  g.getVersion(),
 			Template:    g.config.Template,
 		},
 	}
@@ -258,7 +259,7 @@ func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string, ignoreC
 		"capabilities": adl.Spec.Capabilities,
 		"_generated": map[string]interface{}{
 			"by":        "A2A CLI",
-			"version":   getVersion(),
+			"version":   g.getVersion(),
 			"timestamp": time.Now().Format(time.RFC3339),
 			"warning":   "This file was automatically generated. DO NOT EDIT.",
 		},
@@ -290,9 +291,12 @@ func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string, ignoreC
 	return g.writeFile(agentJSONPath, jsonData)
 }
 
-// getVersion returns the CLI version (this would be injected at build time)
-func getVersion() string {
-	return "1.0.0"
+// getVersion returns the CLI version from config or default
+func (g *Generator) getVersion() string {
+	if g.config.Version != "" {
+		return g.config.Version
+	}
+	return "dev"
 }
 
 // generateA2aIgnoreFile creates a .a2a-ignore file with files that contain TODOs
