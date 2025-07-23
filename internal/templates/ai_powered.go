@@ -2,6 +2,7 @@ package templates
 
 import (
 	"strings"
+
 	"github.com/inference-gateway/a2a-cli/internal/schema"
 )
 
@@ -237,7 +238,7 @@ const goModTemplate = `module {{ .ADL.Spec.Language.Go.Module }}
 go {{ .ADL.Spec.Language.Go.Version }}
 
 require (
-	github.com/inference-gateway/a2a/adk v0.1.0
+	github.com/inference-gateway/a2a/adk v0.7.3
 	github.com/sethvargo/go-envconfig v1.1.0
 )
 `
@@ -295,7 +296,6 @@ import (
 // Tool function signature for A2A agents
 type ToolFunc func(ctx context.Context, args map[string]interface{}) (string, error)
 `
-
 
 const cardJSONTemplate = `{
   "name": "{{ .ADL.Metadata.Name }}",
@@ -1020,7 +1020,7 @@ func ` + title(tool.Name) + `(ctx context.Context, args map[string]interface{}) 
 	} else {
 		template += `
 	// Parse arguments`
-		
+
 		if tool.Schema != nil {
 			if properties, ok := tool.Schema["properties"].(map[string]interface{}); ok {
 				for key, prop := range properties {
