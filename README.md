@@ -122,7 +122,21 @@ a2a generate --file agent.yaml --output ./my-agent
 
 # Overwrite existing files (respects .a2a-ignore)
 a2a generate --file agent.yaml --output ./my-agent --overwrite
+
+# Generate with CI workflow configuration
+a2a generate --file agent.yaml --output ./my-agent --ci
 ```
+
+#### Generate Flags
+
+| Flag | Description |
+|------|-------------|
+| `--file`, `-f` | ADL file to generate from (default: "agent.yaml") |
+| `--output`, `-o` | Output directory for generated code (default: ".") |
+| `--template`, `-t` | Template to use (default: "minimal") |
+| `--overwrite` | Overwrite existing files (respects .a2a-ignore) |
+| `--devcontainer` | Generate VS Code devcontainer configuration |
+| `--ci` | Generate CI workflow configuration |
 
 
 ## Agent Definition Language (ADL)
@@ -198,6 +212,25 @@ my-agent/
 │   └── agent.json       # Agent capabilities (auto-generated)
 └── README.md            # Project documentation
 ```
+
+### CI Integration
+
+When using the `--ci` flag, the A2A CLI generates GitHub Actions workflows for your project:
+
+```bash
+# Generate project with CI workflow
+a2a generate --file agent.yaml --output ./my-agent --ci
+```
+
+This creates a GitHub Actions workflow (`.github/workflows/ci.yml`) that includes:
+
+- **Automated Testing**: Runs all tests on every push and pull request
+- **Code Quality**: Format checking and linting
+- **Multi-Environment**: Supports main and develop branches
+- **Caching**: Go module caching for faster builds
+- **Task Integration**: Uses the generated Taskfile for consistent build steps
+
+The generated workflow automatically detects your Go version from the ADL file and configures the appropriate environment.
 
 
 ## Examples

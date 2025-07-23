@@ -24,6 +24,7 @@ var (
 	template             string
 	overwrite            bool
 	generateDevcontainer bool
+	generateCI           bool
 )
 
 func init() {
@@ -34,6 +35,7 @@ func init() {
 	generateCmd.Flags().StringVarP(&template, "template", "t", "minimal", "Template to use (minimal)")
 	generateCmd.Flags().BoolVar(&overwrite, "overwrite", false, "Overwrite existing files")
 	generateCmd.Flags().BoolVar(&generateDevcontainer, "devcontainer", false, "Generate VS Code devcontainer configuration")
+	generateCmd.Flags().BoolVar(&generateCI, "ci", false, "Generate CI workflow configuration")
 }
 
 func runGenerate(cmd *cobra.Command, args []string) error {
@@ -52,13 +54,17 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	}
 
 	gen := generator.New(generator.Config{
-		Template:  template,
-		Overwrite: overwrite,
-		Version:   version,
+		Template:   template,
+		Overwrite:  overwrite,
+		Version:    version,
+		GenerateCI: generateCI,
 	})
 
 	fmt.Printf("Generating A2A agent from '%s' to '%s'\n", absADLFile, absOutputDir)
 	fmt.Printf("Using template: %s\n", template)
+	if generateCI {
+		fmt.Printf("CI workflow generation: enabled\n")
+	}
 
 	if err := gen.Generate(absADLFile, absOutputDir); err != nil {
 		return fmt.Errorf("generation failed: %w", err)

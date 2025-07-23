@@ -24,6 +24,7 @@ type Spec struct {
 	Tools        []Tool        `yaml:"tools,omitempty" json:"tools,omitempty"`
 	Server       Server        `yaml:"server" json:"server"`
 	Language     *Language     `yaml:"language,omitempty" json:"language,omitempty"`
+	SCM          *SCM          `yaml:"scm,omitempty" json:"scm,omitempty"`
 }
 
 // Capabilities defines what the agent can do
@@ -78,6 +79,12 @@ type TypeScriptConfig struct {
 type Language struct {
 	Go         *GoConfig         `yaml:"go,omitempty" json:"go,omitempty"`
 	TypeScript *TypeScriptConfig `yaml:"typescript,omitempty" json:"typescript,omitempty"`
+}
+
+// SCM contains source control management configuration
+type SCM struct {
+	Provider string `yaml:"provider" json:"provider"`
+	URL      string `yaml:"url,omitempty" json:"url,omitempty"`
 }
 
 // GeneratedMetadata contains information about the generation
