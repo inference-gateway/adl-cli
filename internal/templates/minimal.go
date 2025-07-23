@@ -1,46 +1,29 @@
 package templates
 
-import "github.com/inference-gateway/a2a-cli/internal/schema"
+import (
+	"fmt"
 
-// getMinimalTemplate returns the minimal agent template files (non-AI)
-func getMinimalTemplate() map[string]string {
-	return map[string]string{
-		"main.go":             minimalMainGoTemplate,
-		"go.mod":              goModTemplate, // Reuse from ai-powered
-		"handlers.go":         handlersGoTemplate,
-		"config.go":           minimalConfigGoTemplate,
-		"Taskfile.yml":        taskfileTemplate,   // Reuse from ai-powered
-		"Dockerfile":          dockerfileTemplate, // Reuse from ai-powered
-		".gitignore":          gitignoreTemplate,  // Reuse from ai-powered
-		".gitattributes":      gitattributesTemplate,
-		"README.md":           minimalReadmeTemplate,
-		"k8s/a2a-server.yaml": minimalOperatorTemplate,
-	}
-}
+	"github.com/inference-gateway/a2a-cli/internal/schema"
+)
 
-// getMinimalTemplateWithContext returns the minimal agent template files with individual handler files
-func getMinimalTemplateWithContext(adl *schema.ADL) map[string]string {
+// GetMinimalTemplate returns the minimal agent template files
+func GetMinimalTemplate(adl *schema.ADL) map[string]string {
 	files := map[string]string{
-		"main.go":             minimalMainGoWithHandlersTemplate,
-		"go.mod":              goModTemplate, // Reuse from ai-powered
-		"handlers/handlers.go": handlersPackageTemplate,
-		"config.go":           minimalConfigGoTemplate,
-		"card.json":           cardJSONTemplate, // Reuse from ai-powered
-		"Taskfile.yml":        taskfileTemplate,   // Reuse from ai-powered
-		"Dockerfile":          dockerfileTemplate, // Reuse from ai-powered
-		".gitignore":          gitignoreTemplate,  // Reuse from ai-powered
-		".gitattributes":      gitattributesTemplate,
-		"README.md":           minimalReadmeWithHandlersTemplate,
-		"k8s/a2a-server.yaml": minimalOperatorTemplate,
+		"main.go":                minimalMainGoTemplate,
+		"go.mod":                 goModTemplate,
+		".well-known/agent.json": cardJSONTemplate,
+		"Taskfile.yml":           taskfileTemplate,
+		"Dockerfile":             dockerfileTemplate,
+		".gitignore":             gitignoreTemplate,
+		".gitattributes":         gitattributesTemplate,
+		"README.md":              minimalReadmeTemplate,
+		"k8s/a2a-server.yaml":    minimalOperatorTemplate,
 	}
 
-	// Add individual handler files
+	// Add individual tool files
 	for _, tool := range adl.Spec.Tools {
-		files["handlers/"+tool.Name+".go"] = generateIndividualHandlerTemplate(tool)
+		files["tools/"+tool.Name+".go"] = generateToolTemplate(tool)
 	}
-
-	// Add chat handler
-	files["handlers/chat.go"] = chatHandlerTemplate
 
 	return files
 }
@@ -49,256 +32,316 @@ const minimalMainGoTemplate = `package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/inference-gateway/a2a/adk/server"
-)
-
-func main() {
-	// Load configuration
-	config, err := LoadConfig()
-	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
-	}
-
-	// Create context that cancels on interrupt
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer cancel()
-
-	// Build A2A server (minimal mode - no AI agent)
-	serverBuilder := server.NewA2AServerBuilder()
-
-	// Configure server
-	serverBuilder.SetPort(config.Port)
-	serverBuilder.SetDebug(config.Debug)
-
-	{{- if .ADL.Spec.Capabilities }}
-	// Configure capabilities
-	{{- if .ADL.Spec.Capabilities.Streaming }}
-	serverBuilder.EnableStreaming()
-	{{- end }}
-	{{- if .ADL.Spec.Capabilities.PushNotifications }}
-	serverBuilder.EnablePushNotifications()
-	{{- end }}
-	{{- if .ADL.Spec.Capabilities.StateTransitionHistory }}
-	serverBuilder.EnableStateTransitionHistory()
-	{{- end }}
-	{{- end }}
-
-	// Add custom handlers
-	serverBuilder.SetCustomHandler("/chat", NewChatHandler())
-	{{- range .ADL.Spec.Tools }}
-	serverBuilder.SetCustomHandler("/{{ .Name }}", New{{ .Name | title }}Handler())
-	{{- end }}
-
-	// Build server
-	srv, err := serverBuilder.Build()
-	if err != nil {
-		log.Fatalf("Failed to build server: %v", err)
-	}
-
-	// Start server
-	fmt.Printf("🚀 Starting {{ .ADL.Metadata.Name }} server on port %d\n", config.Port)
-	if err := srv.Run(ctx); err != nil {
-		log.Fatalf("Server failed: %v", err)
-	}
-
-	fmt.Println("👋 {{ .ADL.Metadata.Name }} server stopped")
-}
-`
-
-const minimalMainGoWithHandlersTemplate = `package main
-
-import (
-	"context"
-	"fmt"
-	"log"
-	"os"
-	"os/signal"
-	"syscall"
-
-	"github.com/inference-gateway/a2a/adk/server"
-	"{{ .ADL.Spec.Language.Go.Module }}/handlers"
-)
-
-func main() {
-	// Load configuration
-	config, err := LoadConfig()
-	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
-	}
-
-	// Create context that cancels on interrupt
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer cancel()
-
-	// Build A2A server (minimal mode - no AI agent)
-	serverBuilder := server.NewA2AServerBuilder()
-
-	// Configure server
-	serverBuilder.SetPort(config.Port)
-	serverBuilder.SetDebug(config.Debug)
-
-	{{- if .ADL.Spec.Capabilities }}
-	// Configure capabilities
-	{{- if .ADL.Spec.Capabilities.Streaming }}
-	serverBuilder.EnableStreaming()
-	{{- end }}
-	{{- if .ADL.Spec.Capabilities.PushNotifications }}
-	serverBuilder.EnablePushNotifications()
-	{{- end }}
-	{{- if .ADL.Spec.Capabilities.StateTransitionHistory }}
-	serverBuilder.EnableStateTransitionHistory()
-	{{- end }}
-	{{- end }}
-
-	// Add custom handlers
-	serverBuilder.SetCustomHandler("/chat", handlers.NewChatHandler())
-	{{- range .ADL.Spec.Tools }}
-	serverBuilder.SetCustomHandler("/{{ .Name }}", handlers.New{{ .Name | title }}Handler())
-	{{- end }}
-
-	// Build server
-	srv, err := serverBuilder.Build()
-	if err != nil {
-		log.Fatalf("Failed to build server: %v", err)
-	}
-
-	// Start server
-	fmt.Printf("🚀 Starting {{ .ADL.Metadata.Name }} server on port %d\n", config.Port)
-	if err := srv.Run(ctx); err != nil {
-		log.Fatalf("Server failed: %v", err)
-	}
-
-	fmt.Println("👋 {{ .ADL.Metadata.Name }} server stopped")
-}
-`
-
-const handlersGoTemplate = `package main
-
-import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-)
-
-// ChatHandler handles chat requests
-type ChatHandler struct{}
-
-// NewChatHandler creates a new chat handler
-func NewChatHandler() *ChatHandler {
-	return &ChatHandler{}
-}
-
-// ServeHTTP handles HTTP requests
-func (h *ChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// TODO: Implement chat logic
-	// Parse request body
-	var request map[string]interface{}
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
-	}
-
-	// TODO: Process the chat request
-	// This is where you implement your business logic
-
-	// Example response
-	response := map[string]interface{}{
-		"message": "Hello! This is a minimal A2A agent. Implement your logic in handlers.go",
-		"agent":   "{{ .ADL.Metadata.Name }}",
-		"version": "{{ .ADL.Metadata.Version }}",
-		"request": request,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
-}
-
-{{- range .ADL.Spec.Tools }}
-
-// {{ .Name | title }}Handler handles {{ .Name }} requests
-type {{ .Name | title }}Handler struct{}
-
-// New{{ .Name | title }}Handler creates a new {{ .Name }} handler
-func New{{ .Name | title }}Handler() *{{ .Name | title }}Handler {
-	return &{{ .Name | title }}Handler{}
-}
-
-// ServeHTTP handles HTTP requests for {{ .Name }}
-func (h *{{ .Name | title }}Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// TODO: Implement {{ .Name }} logic
-	// {{ .Description }}
-
-	// Parse request body
-	var request map[string]interface{}
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
-	}
-
-	{{- if .Implementation }}
-	{{ .Implementation }}
-	{{- else }}
-	// TODO: Implement {{ .Name }} functionality
-	// Expected parameters:
-	{{- range $key, $value := .Schema.properties }}
-	{{- if $value.type }}
-	// - {{ $key }}: {{ $value.type }} - {{ $value.description }}
-	{{- end }}
-	{{- end }}
-
-	// Example response
-	response := map[string]interface{}{
-		"tool":   "{{ .Name }}",
-		"result": "TODO: Implement {{ .Name }} logic",
-		"input":  request,
-	}
-	{{- end }}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
-}
-{{- end }}
-`
-
-const minimalConfigGoTemplate = `package main
-
-import (
-	"context"
-
+	"github.com/inference-gateway/a2a/adk/server/config"
 	"github.com/sethvargo/go-envconfig"
+	"go.uber.org/zap"
+
+	"{{ .ADL.Spec.Language.Go.Module }}/tools"
 )
 
-// Config holds the application configuration
 type Config struct {
-	Port  int  ` + "`" + `env:"PORT,default={{ .ADL.Spec.Server.Port }}"` + "`" + `
-	Debug bool ` + "`" + `env:"DEBUG,default={{ .ADL.Spec.Server.Debug }}"` + "`" + `
+	A2A config.Config ` + "`" + `env:",prefix=A2A_"` + "`" + `
 }
 
-// LoadConfig loads configuration from environment variables
-func LoadConfig() (*Config, error) {
+var (
+	Version          = "{{ .ADL.Metadata.Version }}"
+	AgentName        = "{{ .ADL.Metadata.Name }}"
+	AgentDescription = "{{ .ADL.Metadata.Description }}"
+)
+
+func main() {
 	ctx := context.Background()
-	var config Config
-	if err := envconfig.Process(ctx, &config); err != nil {
-		return nil, err
+
+	// Load configuration from environment first
+	var cfg Config
+	if err := envconfig.Process(ctx, &cfg); err != nil {
+		log.Fatal("failed to load config:", err)
 	}
-	return &config, nil
+
+	// Initialize logger based on DEBUG environment variable
+	var logger *zap.Logger
+	var err error
+	if cfg.A2A.Debug {
+		logger, err = zap.NewDevelopment()
+	} else {
+		logger, err = zap.NewProduction()
+	}
+	if err != nil {
+		log.Fatal("failed to initialize logger:", err)
+	}
+	defer logger.Sync()
+
+	logger.Debug("loaded configuration", zap.Any("config", cfg))
+
+	// Create toolbox
+	toolBox := server.NewDefaultToolBox()
+
+	{{- range .ADL.Spec.Tools }}
+	// Add {{ .Name }} tool
+	{{ .Name }}Tool := tools.New{{ .Name | title }}Tool()
+	toolBox.AddTool({{ .Name }}Tool)
+	{{- end }}
+
+	// Create A2A server with agent
+	agent, err := server.NewAgentBuilder(logger).
+		WithConfig(&cfg.A2A.AgentConfig).
+		WithToolBox(toolBox).
+		WithSystemPrompt(` + "`" + `{{ .ADL.Spec.Agent.SystemPrompt | default "You are a helpful AI assistant." }}` + "`" + `).
+		Build()
+	if err != nil {
+		log.Fatal("failed to create agent:", err)
+	}
+
+	a2aServer, err := server.NewA2AServerBuilder(cfg.A2A, logger).
+		WithAgent(agent).
+		WithAgentCardFromFile("./.well-known/agent.json", map[string]interface{}{
+			"name":        AgentName,
+			"version":     Version,
+			"description": AgentDescription,
+			"url":         cfg.A2A.AgentURL,
+		}).
+		Build()
+	if err != nil {
+		log.Fatal("failed to create A2A server:", err)
+	}
+
+	// Start server
+	go func() {
+		if err := a2aServer.Start(ctx); err != nil {
+			log.Fatal("server failed to start:", err)
+		}
+	}()
+
+	logger.Info("{{ .ADL.Metadata.Name }} agent running", zap.String("port", cfg.A2A.ServerConfig.Port))
+
+	// Wait for shutdown signal
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	logger.Info("shutting down server...")
+	a2aServer.Stop(ctx)
 }
+`
+
+const goModTemplate = `module {{ .ADL.Spec.Language.Go.Module }}
+
+go {{ .ADL.Spec.Language.Go.Version }}
+
+require (
+	github.com/inference-gateway/a2a v0.7.3
+	github.com/sethvargo/go-envconfig v1.2.0
+	go.uber.org/zap v1.27.0
+)
+`
+
+const cardJSONTemplate = `{
+	"schemaVersion": "0.1.0",
+	"name": "{{ .ADL.Metadata.Name }}",
+	"version": "{{ .ADL.Metadata.Version }}",
+	"description": "{{ .ADL.Metadata.Description }}",
+	"capabilities": {
+		{{- if .ADL.Spec.Capabilities }}
+		"streaming": {{ .ADL.Spec.Capabilities.Streaming }},
+		"pushNotifications": {{ .ADL.Spec.Capabilities.PushNotifications }},
+		"stateTransitionHistory": {{ .ADL.Spec.Capabilities.StateTransitionHistory }}
+		{{- else }}
+		"streaming": false,
+		"pushNotifications": false,
+		"stateTransitionHistory": false
+		{{- end }}
+	},
+	"tools": [
+		{{- range $index, $tool := .ADL.Spec.Tools }}
+		{{- if $index }},{{ end }}
+		{
+			"name": "{{ $tool.Name }}",
+			"description": "{{ $tool.Description }}",
+			"schema": {{ $tool.Schema | toJson }}
+		}
+		{{- end }}
+	],
+	"language": {
+		"go": {
+			"version": "{{ .ADL.Spec.Language.Go.Version }}",
+			"module": "{{ .ADL.Spec.Language.Go.Module }}"
+		}
+	}
+}
+`
+
+const taskfileTemplate = `version: '3'
+
+vars:
+  APP_NAME: {{ .ADL.Metadata.Name }}
+  VERSION: {{ .ADL.Metadata.Version }}
+
+tasks:
+  build:
+    desc: Build the application
+    cmd: go build -o bin/{{` + "`{{.APP_NAME}}`" + `}} .
+
+  run:
+    desc: Run the application in development mode
+    cmd: go run .
+    env:
+      A2A_DEBUG: true
+      A2A_SERVER_PORT: {{ .ADL.Spec.Server.Port | default 8080 }}
+
+  test:
+    desc: Run tests
+    cmd: go test -v ./...
+
+  test-cover:
+    desc: Run tests with coverage
+    cmd: go test -v -cover ./...
+
+  lint:
+    desc: Run linter
+    cmd: |
+      go fmt ./...
+      go vet ./...
+
+  clean:
+    desc: Clean build artifacts
+    cmd: rm -rf bin/
+
+  docker-build:
+    desc: Build Docker image
+    cmd: docker build -t {{` + "`{{.APP_NAME}}`" + `}}:{{` + "`{{.VERSION}}`" + `}} .
+
+  docker-run:
+    desc: Run Docker container
+    cmd: |
+      docker run -d \
+        --name {{` + "`{{.APP_NAME}}`" + `}} \
+        -p {{ .ADL.Spec.Server.Port | default 8080 }}:{{ .ADL.Spec.Server.Port | default 8080 }} \
+        {{` + "`{{.APP_NAME}}`" + `}}:{{` + "`{{.VERSION}}`" + `}}
+
+  k8s-deploy:
+    desc: Deploy to Kubernetes using operator
+    cmd: kubectl apply -f k8s/a2a-server.yaml
+
+  k8s-delete:
+    desc: Delete from Kubernetes
+    cmd: kubectl delete -f k8s/a2a-server.yaml
+
+  dev:
+    desc: Development mode with auto-reload
+    deps: [build]
+    cmd: |
+      while true; do
+        ./bin/{{` + "`{{.APP_NAME}}`" + `}} &
+        PID=$!
+        inotifywait -e modify -r . --exclude='bin/.*'
+        kill $PID 2>/dev/null || true
+        sleep 1
+      done
+`
+
+const dockerfileTemplate = `FROM golang:1.22-alpine AS builder
+
+WORKDIR /app
+
+# Install ca-certificates for HTTPS requests
+RUN apk --no-cache add ca-certificates
+
+# Copy go mod files
+COPY go.mod go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Build the application
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+
+# Final stage
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates tzdata
+
+WORKDIR /root/
+
+# Copy the binary from builder stage
+COPY --from=builder /app/main .
+
+# Copy agent card
+COPY --from=builder /app/.well-known ./.well-known
+
+# Expose port
+EXPOSE {{ .ADL.Spec.Server.Port | default 8080 }}
+
+# Set environment variables
+ENV A2A_SERVER_PORT={{ .ADL.Spec.Server.Port | default 8080 }}
+ENV A2A_SERVER_HOST=0.0.0.0
+
+# Run the application
+CMD ["./main"]
+`
+
+const gitignoreTemplate = `# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with ` + "`" + `go test -c` + "`" + `
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Go workspace file
+go.work
+
+# Build output
+bin/
+dist/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Log files
+*.log
+
+# Temporary files
+tmp/
+temp/
+
+# Coverage reports
+coverage.txt
+coverage.html
 `
 
 const minimalReadmeTemplate = `# {{ .ADL.Metadata.Name | title }}
@@ -309,7 +352,7 @@ const minimalReadmeTemplate = `# {{ .ADL.Metadata.Name | title }}
 
 ## Overview
 
-This minimal A2A server was generated using the A2A CLI from an Agent Definition Language (ADL) file. This template provides a basic HTTP server without AI capabilities - perfect for implementing custom business logic.
+This A2A (Agent-to-Agent) server was generated using the A2A CLI from an Agent Definition Language (ADL) file. This agent uses the inference gateway A2A framework with AI-powered capabilities.
 
 ### Capabilities
 
@@ -319,11 +362,10 @@ This minimal A2A server was generated using the A2A CLI from an Agent Definition
 - **State Transition History:** {{ .ADL.Spec.Capabilities.StateTransitionHistory }}
 {{- end }}
 
-### Available Endpoints
+### Available Tools
 
-- ` + "`POST /chat`" + ` - Main chat endpoint
 {{- range .ADL.Spec.Tools }}
-- ` + "`POST /{{ .Name }}`" + ` - {{ .Description }}
+- **{{ .Name }}** - {{ .Description }}
 {{- end }}
 
 ## Getting Started
@@ -335,8 +377,11 @@ This minimal A2A server was generated using the A2A CLI from an Agent Definition
 
 ### Environment Variables
 
-- ` + "`PORT`" + `: Server port (default: {{ .ADL.Spec.Server.Port }})
-- ` + "`DEBUG`" + `: Enable debug mode (default: {{ .ADL.Spec.Server.Debug }})
+Common A2A configuration:
+- ` + "`A2A_SERVER_PORT`" + `: Server port (default: {{ .ADL.Spec.Server.Port | default 8080 }})
+- ` + "`A2A_DEBUG`" + `: Enable debug mode (default: false)
+- ` + "`A2A_AGENT_SYSTEM_PROMPT`" + `: Override the system prompt
+- ` + "`A2A_AGENT_MODEL`" + `: AI model to use
 
 ### Running the Server
 
@@ -395,297 +440,55 @@ kubectl get a2a {{ .ADL.Metadata.Name }} -n {{ .ADL.Metadata.Name }}-ns
 kubectl get pods -n {{ .ADL.Metadata.Name }}-ns
 
 # Port forward for testing
-kubectl port-forward svc/{{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Port }}:80 -n {{ .ADL.Metadata.Name }}-ns
+kubectl port-forward svc/{{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Port | default 8080 }}:80 -n {{ .ADL.Metadata.Name }}-ns
 ` + "```" + `
 
 The operator automatically manages deployment, scaling, health checks, and configuration.
 
 ## Development
 
-### TODO: Implement Handlers
-
-{{- if .ADL.Spec.Tools }}
-The following handlers need implementation in ` + "`handlers.go`" + `:
-
-{{- range .ADL.Spec.Tools }}
-- **{{ .Name | title }}Handler**: {{ .Description }}
-{{- end }}
-
-Each handler receives HTTP requests and should implement your business logic.
-{{- else }}
-The main chat handler needs implementation in ` + "`handlers.go`" + `.
-{{- end }}
-
 ### Project Structure
 
 ` + "```" + `
 .
 ├── main.go              # Main server setup
-├── handlers.go          # HTTP handlers (⚠️ TODO)
-├── config.go            # Configuration management
-├── go.mod               # Go module definition
-├── Taskfile.yml         # Task definitions
-├── Dockerfile           # Container configuration
-├── .well-known/
-│   └── agent.json       # Agent capabilities (auto-generated)
-└── README.md            # This file
-` + "```" + `
-
-### Testing
-
-Add tests for your handler implementations:
-
-` + "```bash" + `
-# Run tests
-go test -v ./...
-
-# Run tests with coverage
-go test -v -cover ./...
-` + "```" + `
-
-### Example Usage
-
-` + "```bash" + `
-# Test the chat endpoint
-curl -X POST http://localhost:{{ .ADL.Spec.Server.Port }}/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Hello, world!"}'
-
-{{- range .ADL.Spec.Tools }}
-# Test the {{ .Name }} endpoint
-curl -X POST http://localhost:{{ $.ADL.Spec.Server.Port }}/{{ .Name }} \
-  -H "Content-Type: application/json" \
-  -d '{}'
-{{- end }}
-` + "```" + `
-
-## API Endpoints
-
-Once running, the server exposes:
-
-- ` + "`GET /.well-known/agent.json`" + ` - Agent capabilities and metadata
-- ` + "`POST /chat`" + ` - Main chat endpoint
-{{- range .ADL.Spec.Tools }}
-- ` + "`POST /{{ .Name }}`" + ` - {{ .Description }}
-{{- end }}
-{{- if .ADL.Spec.Capabilities.Streaming }}
-- ` + "`POST /stream`" + ` - Streaming endpoint (if implemented)
-{{- end }}
-
-## Generated Files
-
-This project was generated with:
-- **CLI Version:** {{ .Metadata.CLIVersion }}
-- **Template:** {{ .Metadata.Template }}
-- **Generated At:** {{ .Metadata.GeneratedAt.Format "2006-01-02 15:04:05" }}
-
-To regenerate with ADL changes:
-` + "```bash" + `
-a2a generate --file agent.yaml --output . --overwrite
-` + "```" + `
-
----
-
-> 🤖 This server is powered by the [A2A (Agent-to-Agent) framework](https://github.com/inference-gateway/a2a)
-`
-
-const handlersPackageTemplate = `package handlers
-
-import (
-	"net/http"
-)
-
-// Handler interface for HTTP handlers
-type Handler interface {
-	ServeHTTP(w http.ResponseWriter, r *http.Request)
-}
-`
-
-
-const chatHandlerTemplate = `package handlers
-
-import (
-	"encoding/json"
-	"net/http"
-)
-
-// ChatHandler handles chat requests
-type ChatHandler struct{}
-
-// NewChatHandler creates a new chat handler
-func NewChatHandler() *ChatHandler {
-	return &ChatHandler{}
-}
-
-// ServeHTTP handles HTTP requests
-func (h *ChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// TODO: Implement chat logic
-	// Parse request body
-	var request map[string]interface{}
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
-	}
-
-	// TODO: Process the chat request
-	// This is where you implement your business logic
-
-	// Example response
-	response := map[string]interface{}{
-		"message": "Hello! This is a minimal A2A agent. Implement your logic in handlers/chat.go",
-		"agent":   "{{ .ADL.Metadata.Name }}",
-		"version": "{{ .ADL.Metadata.Version }}",
-		"request": request,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
-}`
-
-const minimalReadmeWithHandlersTemplate = `# {{ .ADL.Metadata.Name | title }}
-
-{{ .ADL.Metadata.Description }}
-
-**Version:** {{ .ADL.Metadata.Version }}
-
-## Overview
-
-This minimal A2A server was generated using the A2A CLI from an Agent Definition Language (ADL) file. This template provides a basic HTTP server without AI capabilities - perfect for implementing custom business logic.
-
-### Capabilities
-
-{{- if .ADL.Spec.Capabilities }}
-- **Streaming:** {{ .ADL.Spec.Capabilities.Streaming }}
-- **Push Notifications:** {{ .ADL.Spec.Capabilities.PushNotifications }}
-- **State Transition History:** {{ .ADL.Spec.Capabilities.StateTransitionHistory }}
-{{- end }}
-
-### Available Endpoints
-
-- ` + "`POST /chat`" + ` - Main chat endpoint
-{{- range .ADL.Spec.Tools }}
-- ` + "`POST /{{ .Name }}`" + ` - {{ .Description }}
-{{- end }}
-
-## Getting Started
-
-### Prerequisites
-
-- Go {{ .ADL.Spec.Language.Go.Version }}+
-- [Task](https://taskfile.dev/) (optional, for using Taskfile commands)
-
-### Environment Variables
-
-- ` + "`PORT`" + `: Server port (default: {{ .ADL.Spec.Server.Port }})
-- ` + "`DEBUG`" + `: Enable debug mode (default: {{ .ADL.Spec.Server.Debug }})
-
-### Running the Server
-
-#### Using Task (recommended)
-
-` + "```bash" + `
-# Install dependencies
-go mod tidy
-
-# Run in development mode
-task run
-
-# Build the binary
-task build
-
-# Run tests
-task test
-` + "```" + `
-
-#### Using Go directly
-
-` + "```bash" + `
-# Run directly
-go run .
-
-# Build and run
-go build -o bin/{{ .ADL.Metadata.Name }} .
-./bin/{{ .ADL.Metadata.Name }}
-` + "```" + `
-
-#### Using Docker
-
-` + "```bash" + `
-# Build Docker image
-task docker-build
-
-# Run container
-task docker-run
-` + "```" + `
-
-#### Kubernetes Deployment
-
-For production deployment using the [Inference Gateway Operator](https://github.com/inference-gateway/operator):
-
-` + "```bash" + `
-# Install the Inference Gateway Operator (if not already installed)
-kubectl apply -f https://github.com/inference-gateway/operator/releases/latest/download/install.yaml
-
-# Apply A2A Custom Resource
-kubectl apply -f k8s/a2a-server.yaml
-
-# Check A2A status
-kubectl get a2a {{ .ADL.Metadata.Name }} -n {{ .ADL.Metadata.Name }}-ns
-
-# View operator-managed deployment
-kubectl get pods -n {{ .ADL.Metadata.Name }}-ns
-
-# Port forward for testing
-kubectl port-forward svc/{{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Port }}:80 -n {{ .ADL.Metadata.Name }}-ns
-` + "```" + `
-
-The operator automatically manages deployment, scaling, health checks, and configuration.
-
-## Development
-
-### TODO: Implement Handlers
-
-{{- if .ADL.Spec.Tools }}
-The following handlers need implementation in their respective files:
-
-{{- range .ADL.Spec.Tools }}
-- **{{ .Name | title }}Handler** (` + "`handlers/{{ .Name }}.go`" + `): {{ .Description }}
-{{- end }}
-
-Each handler receives HTTP requests and should implement your business logic.
-{{- else }}
-The main chat handler needs implementation in ` + "`handlers/chat.go`" + `.
-{{- end }}
-
-### Project Structure
-
-` + "```" + `
-.
-├── main.go              # Main server setup
-├── handlers/            # HTTP handlers (⚠️ TODO)
-│   ├── chat.go          # Main chat handler
+├── tools/               # Tool implementations
 {{- range .ADL.Spec.Tools }}
 │   ├── {{ .Name }}.go   # {{ .Description }}
 {{- end }}
-│   └── handlers.go      # Handlers package definition
-├── config.go            # Configuration management
 ├── go.mod               # Go module definition
-├── card.json            # Agent metadata (auto-generated)
+├── .well-known/
+│   └── agent.json       # Agent capabilities
 ├── Taskfile.yml         # Task definitions
 ├── Dockerfile           # Container configuration
-├── .well-known/
-│   └── agent.json       # Agent capabilities (auto-generated)
+├── k8s/
+│   └── a2a-server.yaml  # Kubernetes deployment
 └── README.md            # This file
+` + "```" + `
+
+### Implementing Tools
+
+Each tool is implemented in its own file under the ` + "`tools/`" + ` directory. Tools follow this pattern:
+
+` + "```go" + `
+func NewToolNameTool() server.Tool {
+    return server.NewBasicTool(
+        "tool_name",
+        "Tool description",
+        schema,
+        toolNameHandler,
+    )
+}
+
+func toolNameHandler(ctx context.Context, args map[string]interface{}) (string, error) {
+    // Your implementation here
+    return result, nil
+}
 ` + "```" + `
 
 ### Testing
 
-Add tests for your handler implementations:
+Add tests for your tool implementations:
 
 ` + "```bash" + `
 # Run tests
@@ -698,17 +501,8 @@ go test -v -cover ./...
 ### Example Usage
 
 ` + "```bash" + `
-# Test the chat endpoint
-curl -X POST http://localhost:{{ .ADL.Spec.Server.Port }}/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Hello, world!"}'
-
-{{- range .ADL.Spec.Tools }}
-# Test the {{ .Name }} endpoint
-curl -X POST http://localhost:{{ $.ADL.Spec.Server.Port }}/{{ .Name }} \
-  -H "Content-Type: application/json" \
-  -d '{}'
-{{- end }}
+# Test the agent capabilities
+curl http://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}/.well-known/agent.json
 ` + "```" + `
 
 ## API Endpoints
@@ -716,13 +510,6 @@ curl -X POST http://localhost:{{ $.ADL.Spec.Server.Port }}/{{ .Name }} \
 Once running, the server exposes:
 
 - ` + "`GET /.well-known/agent.json`" + ` - Agent capabilities and metadata
-- ` + "`POST /chat`" + ` - Main chat endpoint
-{{- range .ADL.Spec.Tools }}
-- ` + "`POST /{{ .Name }}`" + ` - {{ .Description }}
-{{- end }}
-{{- if .ADL.Spec.Capabilities.Streaming }}
-- ` + "`POST /stream`" + ` - Streaming endpoint (if implemented)
-{{- end }}
 
 ## Generated Files
 
@@ -777,123 +564,98 @@ spec:
   tls:
     enabled: false
     secretRef: ""
-  # Minimal template - no AI agent
   agent:
-    enabled: false
-{{- if .ADL.Spec.Env }}
-  env:
-    {{- range .ADL.Spec.Env }}
-    - name: "{{ .Name }}"
-      {{- if .Value }}
-      value: "{{ .Value }}"
-      {{- else if .ValueFrom }}
-      valueFrom:
-        {{- if .ValueFrom.ConfigMapKeyRef }}
-        configMapKeyRef:
-          name: "{{ .ValueFrom.ConfigMapKeyRef.Name }}"
-          key: "{{ .ValueFrom.ConfigMapKeyRef.Key }}"
-        {{- else if .ValueFrom.SecretKeyRef }}
-        secretKeyRef:
-          name: "{{ .ValueFrom.SecretKeyRef.Name }}"
-          key: "{{ .ValueFrom.SecretKeyRef.Key }}"
-        {{- end }}
-      {{- end }}
-    {{- end }}
-{{- end }}
-{{- if .ADL.Spec.Env }}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .ADL.Metadata.Name }}-config
-  namespace: {{ .ADL.Metadata.Name }}-ns
-data:
-  {{- range .ADL.Spec.Env }}
-  {{- if .Value }}
-  {{ .Name }}: "{{ .Value }}"
-  {{- end }}
-  {{- end }}
-{{- end }}
+    enabled: true
+    systemPrompt: "{{ .ADL.Spec.Agent.SystemPrompt | default "You are a helpful AI assistant." }}"
+  replicas: 1
+  resources:
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
 `
 
-// generateIndividualHandlerTemplate creates a template for an individual handler
-func generateIndividualHandlerTemplate(tool schema.Tool) string {
-	template := `package handlers
+// generateToolTemplate creates a template for an individual tool
+func generateToolTemplate(tool schema.Tool) string {
+	return `package tools
 
 import (
-	"encoding/json"
-	"net/http"
+	"context"
+	"fmt"
+
+	"github.com/inference-gateway/a2a/adk/server"
 )
 
-// ` + titleCase(tool.Name) + `Handler handles ` + tool.Name + ` requests
-type ` + titleCase(tool.Name) + `Handler struct{}
-
-// New` + titleCase(tool.Name) + `Handler creates a new ` + tool.Name + ` handler
-func New` + titleCase(tool.Name) + `Handler() *` + titleCase(tool.Name) + `Handler {
-	return &` + titleCase(tool.Name) + `Handler{}
+// New` + titleCase(tool.Name) + `Tool creates a new ` + tool.Name + ` tool
+func New` + titleCase(tool.Name) + `Tool() server.Tool {
+	return server.NewBasicTool(
+		"` + tool.Name + `",
+		"` + tool.Description + `",
+		` + generateSchemaString(tool.Schema) + `,
+		` + tool.Name + `Handler,
+	)
 }
 
-// ServeHTTP handles HTTP requests for ` + tool.Name + `
-func (h *` + titleCase(tool.Name) + `Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
+// ` + tool.Name + `Handler handles the ` + tool.Name + ` tool execution
+func ` + tool.Name + `Handler(ctx context.Context, args map[string]interface{}) (string, error) {
 	// TODO: Implement ` + tool.Name + ` logic
 	// ` + tool.Description + `
+	
+	` + generateToolLogic(tool) + `
+	
+	return fmt.Sprintf(` + "`" + `{"result": "TODO: Implement ` + tool.Name + ` logic", "input": %+v}` + "`" + `, args), nil
+}
+`
+}
 
-	// Parse request body
-	var request map[string]interface{}
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
+// generateSchemaString converts a schema map to a Go string representation
+func generateSchemaString(schema map[string]interface{}) string {
+	if schema == nil {
+		return `map[string]interface{}{
+			"type": "object",
+			"properties": map[string]interface{}{},
+		}`
+	}
+
+	// For now, return a basic schema structure
+	// TODO: Implement proper schema serialization
+	return `map[string]interface{}{
+		"type": "object",
+		"properties": map[string]interface{}{
+			// TODO: Add proper schema properties
+		},
 	}`
+}
 
-	if tool.Implementation != "" {
-		template += `
+// generateToolLogic generates basic parameter extraction logic
+func generateToolLogic(tool schema.Tool) string {
+	if tool.Schema == nil {
+		return "// No parameters defined"
+	}
 
-	` + tool.Implementation
-	} else {
-		template += `
-
-	// TODO: Implement ` + tool.Name + ` functionality
-	// Expected parameters:`
-		
-		if tool.Schema != nil {
-			if properties, ok := tool.Schema["properties"].(map[string]interface{}); ok {
-				for key, prop := range properties {
-					if propMap, ok := prop.(map[string]interface{}); ok {
-						if propType, ok := propMap["type"].(string); ok {
-							description := ""
-							if desc, ok := propMap["description"].(string); ok {
-								description = desc
-							}
-							template += `
-	// - ` + key + `: ` + propType + ` - ` + description
-						}
+	logic := "// Extract parameters from args\n"
+	if properties, ok := tool.Schema["properties"].(map[string]interface{}); ok {
+		for paramName, prop := range properties {
+			if propMap, ok := prop.(map[string]interface{}); ok {
+				if propType, ok := propMap["type"].(string); ok {
+					switch propType {
+					case "string":
+						logic += fmt.Sprintf("\t// %s := args[\"%s\"].(string)\n", paramName, paramName)
+					case "number":
+						logic += fmt.Sprintf("\t// %s := args[\"%s\"].(float64)\n", paramName, paramName)
+					case "boolean":
+						logic += fmt.Sprintf("\t// %s := args[\"%s\"].(bool)\n", paramName, paramName)
+					default:
+						logic += fmt.Sprintf("\t// %s := args[\"%s\"]\n", paramName, paramName)
 					}
 				}
 			}
 		}
-
-		template += `
-
-	// Example response
-	response := map[string]interface{}{
-		"tool":   "` + tool.Name + `",
-		"result": "TODO: Implement ` + tool.Name + ` logic",
-		"input":  request,
-	}`
 	}
 
-	template += `
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
-}`
-
-	return template
+	return logic
 }
 
 // titleCase capitalizes the first letter of a string
@@ -901,9 +663,8 @@ func titleCase(s string) string {
 	if len(s) == 0 {
 		return s
 	}
-	firstChar := s[:1]
-	if firstChar >= "a" && firstChar <= "z" {
-		return string(firstChar[0]-32) + s[1:]
+	if s[0] >= 'a' && s[0] <= 'z' {
+		return string(s[0]-32) + s[1:]
 	}
 	return s
 }

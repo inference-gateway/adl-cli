@@ -38,7 +38,7 @@ func init() {
 
 	generateCmd.Flags().StringVarP(&adlFile, "file", "f", "agent.yaml", "ADL file to generate from")
 	generateCmd.Flags().StringVarP(&outputDir, "output", "o", ".", "Output directory for generated code")
-	generateCmd.Flags().StringVarP(&template, "template", "t", "ai-powered", "Template to use (minimal, ai-powered, enterprise)")
+	generateCmd.Flags().StringVarP(&template, "template", "t", "minimal", "Template to use (minimal)")
 	generateCmd.Flags().BoolVar(&overwrite, "overwrite", false, "Overwrite existing files")
 }
 

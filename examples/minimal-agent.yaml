@@ -1,37 +1,89 @@
 apiVersion: a2a.dev/v1
 kind: Agent
 metadata:
-  name: simple-api
-  description: "A minimal HTTP API server without AI capabilities"
-  version: "1.0.0"
+  name: minimal-agent
+  description: "Minimal agent with basic functionality"
+  version: "0.1.0"
 spec:
   capabilities:
-    streaming: false
-    pushNotifications: false
-    stateTransitionHistory: false
+    streaming: true
+    pushNotifications: true
+    stateTransitionHistory: true
+  agent:
+    provider: openai
+    model: gpt-4o
+    systemPrompt: |
+      You are an enterprise-grade AI assistant with access to various business tools.
+      Always prioritize security, accuracy, and compliance in your responses.
+      Log all interactions for audit purposes.
+    maxTokens: 8192
+    temperature: 0.3
   tools:
-    - name: health_check
-      description: "Perform health check of the system"
+    - name: query_database
+      description: "Query the company database with proper authentication"
       schema:
         type: object
         properties:
-          component:
+          query:
             type: string
-            description: "Component to check (optional)"
-        required: []
-    - name: echo
-      description: "Echo back the input message"
+            description: "SQL query to execute"
+          table:
+            type: string
+            description: "Table name to query"
+          limit:
+            type: integer
+            description: "Maximum number of results"
+            maximum: 1000
+        required: [query, table]
+    - name: send_notification
+      description: "Send notifications to users or teams"
       schema:
         type: object
         properties:
+          recipient:
+            type: string
+            description: "Recipient email or team name"
           message:
             type: string
-            description: "Message to echo back"
-        required: [message]
+            description: "Notification message"
+          priority:
+            type: string
+            description: "Priority level"
+            enum: ["low", "medium", "high", "critical"]
+          channel:
+            type: string
+            description: "Notification channel"
+            enum: ["email", "slack", "teams", "webhook"]
+        required: [recipient, message, priority, channel]
+    - name: generate_report
+      description: "Generate business reports based on data analysis"
+      schema:
+        type: object
+        properties:
+          report_type:
+            type: string
+            description: "Type of report to generate"
+            enum: ["sales", "performance", "compliance", "security"]
+          date_range:
+            type: object
+            properties:
+              start:
+                type: string
+                format: date
+              end:
+                type: string
+                format: date
+          format:
+            type: string
+            description: "Output format"
+            enum: ["pdf", "excel", "json", "html"]
+        required: [report_type, date_range, format]
   server:
-    port: 3000
-    debug: true
+    port: 8443
+    debug: false
+    auth:
+      enabled: true
   language:
     go:
-      module: "github.com/example/simple-api"
+      module: "github.com/company/minimal-agent"
       version: "1.24"
