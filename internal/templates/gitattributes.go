@@ -57,18 +57,6 @@ Dockerfile linguist-generated=true
 Taskfile.yml linguist-generated=true
 .gitignore linguist-generated=true
 
-# Template-specific generated files
-tools.go linguist-generated=true
-handlers.go linguist-generated=true
-
-# Enterprise template files
-middleware.go linguist-generated=true
-metrics.go linguist-generated=true
-logging.go linguist-generated=true
-auth.go linguist-generated=true
-tool_metrics.go linguist-generated=true
-docker-compose.yml linguist-generated=true
-
 # Kubernetes manifests
 k8s/*.yaml linguist-generated=true
 k8s/*.yml linguist-generated=true

@@ -347,7 +347,7 @@ func generateA2aIgnoreContent(filesToIgnore []string) string {
 # Files listed here typically contain implementations that users have completed.
 #
 # Patterns supported:
-# - Exact file names: handlers.go
+# - Exact file names: tools/my_tool.go
 # - Wildcards: *.go
 # - Directory patterns: tools/*
 # - Directories: build/
