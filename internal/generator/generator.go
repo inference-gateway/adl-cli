@@ -377,7 +377,7 @@ func (g *Generator) formatJSONWithIndentation(data interface{}) (string, error) 
 	return string(jsonBytes), nil
 }
 
-// generateCI generates CI/CD workflow configuration based on the programming language and SCM provider
+// generateCI generates CI workflow configuration based on the programming language and SCM provider
 func (g *Generator) generateCI(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
 	scmProvider := g.detectSCMProvider(adl)
 

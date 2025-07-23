@@ -87,3 +87,6 @@ spec:
     go:
       module: "github.com/company/minimal-agent"
       version: "1.24"
+  scm:
+    provider: github
+    url: "https://github.com/company/minimal-agent"

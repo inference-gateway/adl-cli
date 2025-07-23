@@ -123,7 +123,7 @@ a2a generate --file agent.yaml --output ./my-agent
 # Overwrite existing files (respects .a2a-ignore)
 a2a generate --file agent.yaml --output ./my-agent --overwrite
 
-# Generate with CI/CD workflow configuration
+# Generate with CI workflow configuration
 a2a generate --file agent.yaml --output ./my-agent --ci
 ```
 
@@ -213,12 +213,12 @@ my-agent/
 └── README.md            # Project documentation
 ```
 
-### CI/CD Integration
+### CI Integration
 
 When using the `--ci` flag, the A2A CLI generates GitHub Actions workflows for your project:
 
 ```bash
-# Generate project with CI/CD workflow
+# Generate project with CI workflow
 a2a generate --file agent.yaml --output ./my-agent --ci
 ```
 
