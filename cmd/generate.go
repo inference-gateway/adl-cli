@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/inference-gateway/a2a-cli/internal/devcontainer"
 	"github.com/inference-gateway/a2a-cli/internal/generator"
 	"github.com/spf13/cobra"
 )
@@ -27,10 +28,11 @@ This command reads a YAML or JSON ADL file and generates:
 }
 
 var (
-	adlFile   string
-	outputDir string
-	template  string
-	overwrite bool
+	adlFile      string
+	outputDir    string
+	template     string
+	overwrite    bool
+	devcontainer bool
 )
 
 func init() {
@@ -40,6 +42,7 @@ func init() {
 	generateCmd.Flags().StringVarP(&outputDir, "output", "o", ".", "Output directory for generated code")
 	generateCmd.Flags().StringVarP(&template, "template", "t", "minimal", "Template to use (minimal)")
 	generateCmd.Flags().BoolVar(&overwrite, "overwrite", false, "Overwrite existing files")
+	generateCmd.Flags().BoolVar(&devcontainer, "devcontainer", false, "Generate VS Code devcontainer configuration")
 }
 
 func runGenerate(cmd *cobra.Command, args []string) error {
@@ -57,6 +60,27 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to resolve output directory path: %w", err)
 	}
 
+	// Generate devcontainer configuration if flag is set
+	if devcontainer {
+		devcontainerGen := devcontainer.New()
+
+		fmt.Printf("Generating devcontainer configuration from '%s' to '%s'\n", absADLFile, absOutputDir)
+
+		if err := devcontainerGen.Generate(absADLFile, absOutputDir); err != nil {
+			return fmt.Errorf("devcontainer generation failed: %w", err)
+		}
+
+		fmt.Println("✅ Devcontainer configuration generated successfully!")
+		fmt.Printf("📁 Files created in: %s/.devcontainer/\n", absOutputDir)
+		fmt.Println("📝 Next steps:")
+		fmt.Println("   1. Open project in VS Code")
+		fmt.Println("   2. Install the 'Dev Containers' extension")
+		fmt.Println("   3. Run 'Dev Containers: Reopen in Container' command")
+
+		return nil
+	}
+
+	// Generate regular A2A agent project
 	gen := generator.New(generator.Config{
 		Template:  template,
 		Overwrite: overwrite,
