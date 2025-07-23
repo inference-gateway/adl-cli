@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   APP_NAME: a2a
-  VERSION: 0.2.3
+  VERSION: 0.2.4
   BUILD_DIR: bin
 
 tasks:

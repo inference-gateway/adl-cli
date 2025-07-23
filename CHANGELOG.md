@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.4](https://github.com/inference-gateway/a2a-cli/compare/v0.2.3...v0.2.4) (2025-07-23)
+
+### ♻️ Improvements
+
+* Refactor templates to match inference-gateway structure ([#4](https://github.com/inference-gateway/a2a-cli/issues/4)) ([a836935](https://github.com/inference-gateway/a2a-cli/commit/a836935e6ca9529a4388f3c90e410c46e056d98f))
+
+### 🐛 Bug Fixes
+
+* Update dependencies in go.mod and go.sum ([a44c568](https://github.com/inference-gateway/a2a-cli/commit/a44c568efdc2fcfb90a2dcb5117f8e31ef0f2f19))
+
+### 👷 CI
+
+* Update Claude PR Assistant workflow ([#3](https://github.com/inference-gateway/a2a-cli/issues/3)) ([3df9330](https://github.com/inference-gateway/a2a-cli/commit/3df93302f46e382fe3115e0287965e5aaa14f9bf))
+
+### 📚 Documentation
+
+* Add CLAUDE.md for project guidance and development instructions ([0aacc20](https://github.com/inference-gateway/a2a-cli/commit/0aacc20657fa22ea08d0301231716e78667135fa))
+
 ## [0.2.3](https://github.com/inference-gateway/a2a-cli/compare/v0.2.2...v0.2.3) (2025-07-21)
 
 ### 🐛 Bug Fixes
