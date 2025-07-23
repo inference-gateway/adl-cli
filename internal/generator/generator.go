@@ -20,9 +20,10 @@ type Generator struct {
 
 // Config holds generator configuration
 type Config struct {
-	Template  string
-	Overwrite bool
-	Version   string
+	Template   string
+	Overwrite  bool
+	Version    string
+	GenerateCI bool
 }
 
 // New creates a new generator
@@ -207,6 +208,12 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		return fmt.Errorf("failed to generate .a2a-ignore file: %w", err)
 	}
 
+	if g.config.GenerateCI {
+		if err := g.generateCI(adl, outputDir, ignoreChecker); err != nil {
+			return fmt.Errorf("failed to generate CI configuration: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -368,4 +375,134 @@ func (g *Generator) formatJSONWithIndentation(data interface{}) (string, error) 
 		return "", err
 	}
 	return string(jsonBytes), nil
+}
+
+// generateCI generates CI/CD workflow configuration based on the programming language
+func (g *Generator) generateCI(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
+	language := g.detectLanguage(adl)
+	
+	switch language {
+	case "go":
+		return g.generateGitHubActionsWorkflow(adl, outputDir, ignoreChecker)
+	default:
+		return fmt.Errorf("CI generation not supported for language: %s", language)
+	}
+}
+
+// detectLanguage detects the programming language from ADL
+func (g *Generator) detectLanguage(adl *schema.ADL) string {
+	if adl.Spec.Language.Go != nil {
+		return "go"
+	}
+	if adl.Spec.Language.TypeScript != nil {
+		return "typescript"
+	}
+	return "unknown"
+}
+
+// generateGitHubActionsWorkflow generates a GitHub Actions workflow for Go projects
+func (g *Generator) generateGitHubActionsWorkflow(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
+	workflowPath := ".github/workflows/ci.yml"
+	
+	if ignoreChecker.ShouldIgnore(workflowPath) {
+		fmt.Printf("🚫 Ignoring file (matches .a2a-ignore): %s\n", workflowPath)
+		return nil
+	}
+
+	workflowContent := g.generateGoWorkflowContent(adl)
+	
+	fullWorkflowPath := filepath.Join(outputDir, workflowPath)
+	if err := g.writeFile(fullWorkflowPath, workflowContent); err != nil {
+		return fmt.Errorf("failed to write GitHub Actions workflow: %w", err)
+	}
+
+	fmt.Println("✅ CI/CD workflow generated successfully!")
+	fmt.Printf("📁 GitHub Actions workflow: %s\n", workflowPath)
+	
+	return nil
+}
+
+// generateGoWorkflowContent generates the GitHub Actions workflow content for Go projects
+func (g *Generator) generateGoWorkflowContent(adl *schema.ADL) string {
+	goVersion := "1.24"
+	if adl.Spec.Language.Go != nil && adl.Spec.Language.Go.Version != "" {
+		goVersion = adl.Spec.Language.Go.Version
+	}
+
+	return fmt.Sprintf(`name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: %s
+    
+    - name: Cache Go modules
+      uses: actions/cache@v4
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+    
+    - name: Install Task
+      uses: arduino/setup-task@v2
+      with:
+        version: 3.x
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Download dependencies
+      run: go mod download
+    
+    - name: Format check
+      run: task fmt
+    
+    - name: Lint
+      run: task lint
+    
+    - name: Run tests
+      run: task test
+    
+    - name: Build
+      run: task build
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: %s
+    
+    - name: Install Task
+      uses: arduino/setup-task@v2
+      with:
+        version: 3.x
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Build application
+      run: task build
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: %s-binary
+        path: bin/
+`, goVersion, goVersion, adl.Metadata.Name)
 }
