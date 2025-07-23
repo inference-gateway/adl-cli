@@ -189,7 +189,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		return fmt.Errorf("failed to initialize ignore checker: %w", err)
 	}
 
-	files := templateEngine.GetFiles()
+	files := templateEngine.GetFilesWithContext(adl)
 	for fileName, templateContent := range files {
 		fileName = g.replacePlaceholders(fileName, adl)
 

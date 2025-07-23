@@ -1,8 +1,32 @@
 package templates
 
+import "github.com/inference-gateway/a2a-cli/internal/schema"
+
 // getEnterpriseTemplate returns the enterprise template files
 func getEnterpriseTemplate() map[string]string {
 	files := getAIPoweredTemplate() // Start with ai-powered template
+
+	// Add enterprise-specific files
+	files["middleware.go"] = middlewareGoTemplate
+	files["metrics.go"] = metricsGoTemplate
+	files["logging.go"] = loggingGoTemplate
+	files["auth.go"] = authGoTemplate
+	files["tool_metrics.go"] = toolMetricsGoTemplate
+	files["docker-compose.yml"] = dockerComposeTemplate
+	files["k8s/a2a-server.yaml"] = a2aOperatorTemplate
+	files["k8s/namespace.yaml"] = namespaceTemplate
+
+	// Override main.go for enterprise features
+	files["main.go"] = enterpriseMainGoTemplate
+	files["config.go"] = enterpriseConfigGoTemplate
+	files["README.md"] = enterpriseReadmeTemplate
+
+	return files
+}
+
+// getEnterpriseTemplateWithContext returns the enterprise template files with individual tool files
+func getEnterpriseTemplateWithContext(adl *schema.ADL) map[string]string {
+	files := getAIPoweredTemplateWithContext(adl) // Start with ai-powered template with context
 
 	// Add enterprise-specific files
 	files["middleware.go"] = middlewareGoTemplate

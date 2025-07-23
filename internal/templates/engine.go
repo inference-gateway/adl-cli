@@ -86,6 +86,20 @@ func (e *Engine) GetFiles() map[string]string {
 	}
 }
 
+// GetFilesWithContext returns the template files for the current template with ADL context
+func (e *Engine) GetFilesWithContext(adl *schema.ADL) map[string]string {
+	switch e.templateName {
+	case "minimal":
+		return getMinimalTemplateWithContext(adl)
+	case "ai-powered":
+		return getAIPoweredTemplateWithContext(adl)
+	case "enterprise":
+		return getEnterpriseTemplateWithContext(adl)
+	default:
+		return getAIPoweredTemplateWithContext(adl)
+	}
+}
+
 // GetTemplate returns the template name
 func (e *Engine) GetTemplate() string {
 	return e.templateName

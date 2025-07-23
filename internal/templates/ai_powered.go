@@ -1,5 +1,10 @@
 package templates
 
+import (
+	"strings"
+	"github.com/inference-gateway/a2a-cli/internal/schema"
+)
+
 // getAIPoweredTemplate returns the AI-powered agent template files
 func getAIPoweredTemplate() map[string]string {
 	return map[string]string{
@@ -14,6 +19,30 @@ func getAIPoweredTemplate() map[string]string {
 		"README.md":           readmeTemplate,
 		"k8s/a2a-server.yaml": aiPoweredOperatorTemplate,
 	}
+}
+
+// getAIPoweredTemplateWithContext returns the AI-powered agent template files with individual tool files
+func getAIPoweredTemplateWithContext(adl *schema.ADL) map[string]string {
+	files := map[string]string{
+		"main.go":             aiPoweredMainGoTemplate,
+		"go.mod":              goModTemplate,
+		"tools/tools.go":      toolsPackageTemplate,
+		"config.go":           configGoTemplate,
+		"card.json":           cardJSONTemplate,
+		"Taskfile.yml":        taskfileTemplate,
+		"Dockerfile":          dockerfileTemplate,
+		".gitignore":          gitignoreTemplate,
+		".gitattributes":      gitattributesTemplate,
+		"README.md":           aiPoweredReadmeTemplate,
+		"k8s/a2a-server.yaml": aiPoweredOperatorTemplate,
+	}
+
+	// Add individual tool files
+	for _, tool := range adl.Spec.Tools {
+		files["tools/"+tool.Name+".go"] = generateIndividualToolTemplate(tool)
+	}
+
+	return files
 }
 
 const mainGoTemplate = `package main
@@ -64,6 +93,100 @@ func main() {
 	toolbox := adk.NewToolbox()
 	{{- range .ADL.Spec.Tools }}
 	toolbox.AddTool("{{ .Name }}", {{ .Name | title }}Tool)
+	{{- end }}
+	agentBuilder.SetToolbox(toolbox)
+	{{- end }}
+
+	agent, err := agentBuilder.Build()
+	if err != nil {
+		log.Fatalf("Failed to build agent: %v", err)
+	}
+
+	serverBuilder.SetAgent(agent)
+	{{- end }}
+
+	// Configure server
+	serverBuilder.SetPort(config.Port)
+	serverBuilder.SetDebug(config.Debug)
+
+	{{- if .ADL.Spec.Capabilities }}
+	// Configure capabilities
+	{{- if .ADL.Spec.Capabilities.Streaming }}
+	serverBuilder.EnableStreaming()
+	{{- end }}
+	{{- if .ADL.Spec.Capabilities.PushNotifications }}
+	serverBuilder.EnablePushNotifications()
+	{{- end }}
+	{{- if .ADL.Spec.Capabilities.StateTransitionHistory }}
+	serverBuilder.EnableStateTransitionHistory()
+	{{- end }}
+	{{- end }}
+
+	// Build server
+	srv, err := serverBuilder.Build()
+	if err != nil {
+		log.Fatalf("Failed to build server: %v", err)
+	}
+
+	// Start server
+	fmt.Printf("🚀 Starting {{ .ADL.Metadata.Name }} agent on port %d\n", config.Port)
+	if err := srv.Run(ctx); err != nil {
+		log.Fatalf("Server failed: %v", err)
+	}
+
+	fmt.Println("👋 {{ .ADL.Metadata.Name }} agent stopped")
+}
+`
+
+const aiPoweredMainGoTemplate = `package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/inference-gateway/a2a/adk"
+	"github.com/inference-gateway/a2a/adk/server"
+	"{{ .ADL.Spec.Language.Go.Module }}/tools"
+)
+
+func main() {
+	// Load configuration
+	config, err := LoadConfig()
+	if err != nil {
+		log.Fatalf("Failed to load configuration: %v", err)
+	}
+
+	// Create context that cancels on interrupt
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
+
+	// Build A2A server
+	serverBuilder := server.NewA2AServerBuilder()
+
+	{{- if .ADL.Spec.Agent }}
+	// Configure AI agent
+	agentBuilder := adk.NewAgentBuilder()
+	agentBuilder.SetProvider("{{ .ADL.Spec.Agent.Provider }}")
+	agentBuilder.SetModel("{{ .ADL.Spec.Agent.Model }}")
+	{{- if .ADL.Spec.Agent.SystemPrompt }}
+	agentBuilder.SetSystemPrompt(` + "`" + `{{ .ADL.Spec.Agent.SystemPrompt }}` + "`" + `)
+	{{- end }}
+	{{- if .ADL.Spec.Agent.MaxTokens }}
+	agentBuilder.SetMaxTokens({{ .ADL.Spec.Agent.MaxTokens }})
+	{{- end }}
+	{{- if .ADL.Spec.Agent.Temperature }}
+	agentBuilder.SetTemperature({{ .ADL.Spec.Agent.Temperature }})
+	{{- end }}
+
+	{{- if .ADL.Spec.Tools }}
+	// Add tools
+	toolbox := adk.NewToolbox()
+	{{- range .ADL.Spec.Tools }}
+	toolbox.AddTool("{{ .Name }}", tools.{{ .Name | title }})
 	{{- end }}
 	agentBuilder.SetToolbox(toolbox)
 	{{- end }}
@@ -162,6 +285,64 @@ func {{ .Name | title }}Tool(ctx context.Context, args map[string]interface{}) (
 }
 {{- end }}
 `
+
+const toolsPackageTemplate = `package tools
+
+import (
+	"context"
+)
+
+// Tool function signature for A2A agents
+type ToolFunc func(ctx context.Context, args map[string]interface{}) (string, error)
+`
+
+
+const cardJSONTemplate = `{
+  "name": "{{ .ADL.Metadata.Name }}",
+  "description": "{{ .ADL.Metadata.Description }}",
+  "version": "{{ .ADL.Metadata.Version }}",
+  {{- if .ADL.Spec.Agent }}
+  "agent": {
+    "provider": "{{ .ADL.Spec.Agent.Provider }}",
+    "model": "{{ .ADL.Spec.Agent.Model }}"
+    {{- if .ADL.Spec.Agent.SystemPrompt }},
+    "systemPrompt": {{ .ADL.Spec.Agent.SystemPrompt | toJson }}
+    {{- end }}
+    {{- if .ADL.Spec.Agent.MaxTokens }},
+    "maxTokens": {{ .ADL.Spec.Agent.MaxTokens }}
+    {{- end }}
+    {{- if .ADL.Spec.Agent.Temperature }},
+    "temperature": {{ .ADL.Spec.Agent.Temperature }}
+    {{- end }}
+  },
+  {{- end }}
+  {{- if .ADL.Spec.Capabilities }}
+  "capabilities": {
+    "streaming": {{ .ADL.Spec.Capabilities.Streaming }},
+    "pushNotifications": {{ .ADL.Spec.Capabilities.PushNotifications }},
+    "stateTransitionHistory": {{ .ADL.Spec.Capabilities.StateTransitionHistory }}
+  },
+  {{- end }}
+  {{- if .ADL.Spec.Tools }}
+  "tools": [
+    {{- range $i, $tool := .ADL.Spec.Tools }}
+    {{- if $i }},{{ end }}
+    {
+      "name": "{{ $tool.Name }}",
+      "description": "{{ $tool.Description }}",
+      "schema": {{ $tool.Schema | toJson }}
+    }
+    {{- end }}
+  ],
+  {{- end }}
+  "_generated": {
+    "by": "A2A CLI",
+    "version": "{{ .Metadata.CLIVersion }}",
+    "timestamp": "{{ .Metadata.GeneratedAt.Format "2006-01-02T15:04:05Z07:00" }}",
+    "template": "{{ .Metadata.Template }}",
+    "warning": "This file was automatically generated. DO NOT EDIT."
+  }
+}`
 
 const configGoTemplate = `package main
 
@@ -539,6 +720,211 @@ a2a generate --file agent.yaml --output . --overwrite
 > 🤖 This agent is powered by the [A2A (Agent-to-Agent) framework](https://github.com/inference-gateway/a2a)
 `
 
+const aiPoweredReadmeTemplate = `# {{ .ADL.Metadata.Name | title }}
+
+{{ .ADL.Metadata.Description }}
+
+**Version:** {{ .ADL.Metadata.Version }}
+
+## Overview
+
+This A2A agent was generated using the A2A CLI from an Agent Definition Language (ADL) file.
+
+### Capabilities
+
+{{- if .ADL.Spec.Capabilities }}
+- **Streaming:** {{ .ADL.Spec.Capabilities.Streaming }}
+- **Push Notifications:** {{ .ADL.Spec.Capabilities.PushNotifications }}
+- **State Transition History:** {{ .ADL.Spec.Capabilities.StateTransitionHistory }}
+{{- end }}
+
+{{- if .ADL.Spec.Agent }}
+
+### AI Configuration
+
+- **Provider:** {{ .ADL.Spec.Agent.Provider }}
+- **Model:** {{ .ADL.Spec.Agent.Model }}
+{{- if .ADL.Spec.Agent.MaxTokens }}
+- **Max Tokens:** {{ .ADL.Spec.Agent.MaxTokens }}
+{{- end }}
+{{- if .ADL.Spec.Agent.Temperature }}
+- **Temperature:** {{ .ADL.Spec.Agent.Temperature }}
+{{- end }}
+{{- end }}
+
+{{- if .ADL.Spec.Tools }}
+
+### Available Tools
+
+{{- range .ADL.Spec.Tools }}
+#### {{ .Name | title }}
+{{ .Description }}
+
+**Implementation Status:** ⚠️ TODO - Implement in ` + "`tools/{{ .Name }}.go`" + `
+{{- end }}
+{{- end }}
+
+## Getting Started
+
+### Prerequisites
+
+- Go {{ .ADL.Spec.Language.Go.Version }}+
+- [Task](https://taskfile.dev/) (optional, for using Taskfile commands)
+
+### Environment Variables
+
+{{- if .ADL.Spec.Agent }}
+{{- if eq .ADL.Spec.Agent.Provider "openai" }}
+- ` + "`OPENAI_API_KEY`" + `: Your OpenAI API key
+{{- else if eq .ADL.Spec.Agent.Provider "anthropic" }}
+- ` + "`ANTHROPIC_API_KEY`" + `: Your Anthropic API key
+{{- else if eq .ADL.Spec.Agent.Provider "azure" }}
+- ` + "`AZURE_OPENAI_ENDPOINT`" + `: Your Azure OpenAI endpoint
+- ` + "`AZURE_OPENAI_API_KEY`" + `: Your Azure OpenAI API key
+{{- else if eq .ADL.Spec.Agent.Provider "ollama" }}
+- ` + "`OLLAMA_BASE_URL`" + `: Ollama server URL (default: http://localhost:11434)
+{{- end }}
+{{- end }}
+- ` + "`PORT`" + `: Server port (default: {{ .ADL.Spec.Server.Port }})
+- ` + "`DEBUG`" + `: Enable debug mode (default: {{ .ADL.Spec.Server.Debug }})
+
+### Running the Agent
+
+#### Using Task (recommended)
+
+` + "```bash" + `
+# Install dependencies
+go mod tidy
+
+# Run in development mode
+task run
+
+# Build the binary
+task build
+
+# Run tests
+task test
+` + "```" + `
+
+#### Using Go directly
+
+` + "```bash" + `
+# Run directly
+go run .
+
+# Build and run
+go build -o bin/{{ .ADL.Metadata.Name }} .
+./bin/{{ .ADL.Metadata.Name }}
+` + "```" + `
+
+#### Using Docker
+
+` + "```bash" + `
+# Build Docker image
+task docker-build
+
+# Run container
+task docker-run
+` + "```" + `
+
+#### Kubernetes Deployment
+
+For production deployment using the [Inference Gateway Operator](https://github.com/inference-gateway/operator):
+
+` + "```bash" + `
+# Install the Inference Gateway Operator (if not already installed)
+kubectl apply -f https://github.com/inference-gateway/operator/releases/latest/download/install.yaml
+
+# Apply A2A Custom Resource
+kubectl apply -f k8s/a2a-server.yaml
+
+# Check A2A status
+kubectl get a2a {{ .ADL.Metadata.Name }} -n {{ .ADL.Metadata.Name }}-ns
+
+# View operator-managed deployment
+kubectl get pods -n {{ .ADL.Metadata.Name }}-ns
+
+# Port forward for testing
+kubectl port-forward svc/{{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Port }}:80 -n {{ .ADL.Metadata.Name }}-ns
+` + "```" + `
+
+The operator automatically manages deployment, scaling, health checks, and configuration.
+
+## Development
+
+### TODO: Implement Tools
+
+{{- if .ADL.Spec.Tools }}
+The following tools need implementation in their respective files:
+
+{{- range .ADL.Spec.Tools }}
+- **{{ .Name | title }}** (` + "`tools/{{ .Name }}.go`" + `): {{ .Description }}
+{{- end }}
+
+Each tool function receives a ` + "`context.Context`" + ` and ` + "`map[string]interface{}`" + ` with the tool arguments, and should return a JSON string result.
+{{- else }}
+No tools defined in the ADL file.
+{{- end }}
+
+### Project Structure
+
+` + "```" + `
+.
+├── main.go              # Main server setup
+├── tools/               # Tool implementations (⚠️ TODO)
+{{- range .ADL.Spec.Tools }}
+│   ├── {{ .Name }}.go   # {{ .Description }}
+{{- end }}
+│   └── tools.go         # Tools package definition
+├── config.go            # Configuration management
+├── go.mod               # Go module definition
+├── card.json            # Agent metadata (auto-generated)
+├── Taskfile.yml         # Task definitions
+├── Dockerfile           # Container configuration
+├── .well-known/
+│   └── agent.json       # Agent capabilities (auto-generated)
+└── README.md            # This file
+` + "```" + `
+
+### Testing
+
+Add tests for your tool implementations:
+
+` + "```bash" + `
+# Run tests
+go test -v ./...
+
+# Run tests with coverage
+go test -v -cover ./...
+` + "```" + `
+
+## API Endpoints
+
+Once running, the agent exposes:
+
+- ` + "`GET /.well-known/agent.json`" + ` - Agent capabilities and metadata
+- ` + "`POST /chat`" + ` - Chat with the agent
+{{- if .ADL.Spec.Capabilities.Streaming }}
+- ` + "`POST /stream`" + ` - Streaming chat endpoint
+{{- end }}
+
+## Generated Files
+
+This project was generated with:
+- **CLI Version:** {{ .Metadata.CLIVersion }}
+- **Template:** {{ .Metadata.Template }}
+- **Generated At:** {{ .Metadata.GeneratedAt.Format "2006-01-02 15:04:05" }}
+
+To regenerate with ADL changes:
+` + "```bash" + `
+a2a generate --file agent.yaml --output . --overwrite
+` + "```" + `
+
+---
+
+> 🤖 This agent is powered by the [A2A (Agent-to-Agent) framework](https://github.com/inference-gateway/a2a)
+`
+
 const aiPoweredOperatorTemplate = `---
 apiVersion: v1
 kind: Namespace
@@ -612,3 +998,73 @@ data:
   api-key: "YOUR_BASE64_ENCODED_API_KEY_HERE"
 {{- end }}
 `
+
+// generateIndividualToolTemplate creates a template for an individual tool
+func generateIndividualToolTemplate(tool schema.Tool) string {
+	template := `package tools
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+)
+
+// ` + title(tool.Name) + ` implements the ` + tool.Name + ` tool
+// ` + tool.Description + `
+func ` + title(tool.Name) + `(ctx context.Context, args map[string]interface{}) (string, error) {
+	// TODO: Implement ` + tool.Name + ` tool logic`
+
+	if tool.Implementation != "" {
+		template += `
+	` + tool.Implementation
+	} else {
+		template += `
+	// Parse arguments`
+		
+		if tool.Schema != nil {
+			if properties, ok := tool.Schema["properties"].(map[string]interface{}); ok {
+				for key, prop := range properties {
+					if propMap, ok := prop.(map[string]interface{}); ok {
+						if propType, ok := propMap["type"].(string); ok {
+							description := ""
+							if desc, ok := propMap["description"].(string); ok {
+								description = desc
+							}
+							template += `
+	// ` + key + `: ` + propType + ` - ` + description
+						}
+					}
+				}
+			}
+		}
+
+		template += `
+
+	// Example implementation - replace with your business logic
+	result := map[string]interface{}{
+		"tool": "` + tool.Name + `",
+		"args": args,
+		"result": "TODO: Implement this tool",
+	}
+
+	jsonResult, err := json.Marshal(result)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal result: %w", err)
+	}
+
+	return string(jsonResult), nil`
+	}
+
+	template += `
+}`
+
+	return template
+}
+
+// title capitalizes the first letter of a string
+func title(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
+}
