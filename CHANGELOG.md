@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.3](https://github.com/inference-gateway/a2a-cli/compare/v0.4.2...v0.4.3) (2025-07-23)
+
+### 🐛 Bug Fixes
+
+* Update Go paths and environment variables in devcontainer configuration ([73e7626](https://github.com/inference-gateway/a2a-cli/commit/73e76268a387e70cc496f8502bd4d82258228c9d))
+
 ## [0.4.2](https://github.com/inference-gateway/a2a-cli/compare/v0.4.1...v0.4.2) (2025-07-23)
 
 ### 🐛 Bug Fixes
