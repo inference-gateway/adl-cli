@@ -102,7 +102,7 @@ func (g *Generator) generateDevcontainerJSON(adl *schema.ADL, devcontainerDir st
 					"terminal.integrated.defaultProfile.linux": "zsh",
 					"go.toolsManagement.checkForUpdates":       "local",
 					"go.useLanguageServer":                     true,
-					"go.gopath":                                "/go",
+					"go.gopath":                                "/home/vscode/go",
 					"go.goroot":                                "/usr/local/go",
 				},
 			},
@@ -128,7 +128,13 @@ func (g *Generator) generateDevcontainerJSON(adl *schema.ADL, devcontainerDir st
 		"mounts": []string{
 			"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
 		},
-		"remoteUser": remoteUser,
+		"remoteUser":        remoteUser,
+		"postCreateCommand": "go mod tidy",
+		"features": map[string]interface{}{
+			"ghcr.io/devcontainers/features/docker-in-docker:latest": map[string]interface{}{
+				"version": "latest",
+			},
+		},
 	}
 
 	jsonData, err := json.MarshalIndent(devcontainerConfig, "", "  ")
@@ -193,8 +199,18 @@ RUN echo 'source /home/vscode/.powerlevel10k/powerlevel10k.zsh-theme' >> /home/v
 # Set working directory
 WORKDIR /workspace
 
+# Create Go directories and set proper ownership
+RUN mkdir -p /home/vscode/.cache/go-mod /home/vscode/.cache/go-build /home/vscode/go && \
+    chown -R vscode:vscode /home/vscode/.cache /home/vscode/go
+
 # Switch to vscode user
 USER vscode
+
+ENV GOPATH=/home/vscode/go
+ENV GOMODCACHE=/home/vscode/.cache/go-mod
+ENV GOCACHE=/home/vscode/.cache/go-build
+ENV GOPROXY=https://proxy.golang.org,direct
+ENV GOSUMDB=sum.golang.org
 `, adl.Metadata.Name, goVersion)
 
 	} else if adl.Spec.Language.TypeScript != nil {
