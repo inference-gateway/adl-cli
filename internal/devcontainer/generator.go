@@ -86,43 +86,29 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 
 // generateDevcontainerJSON generates the devcontainer.json configuration
 func (g *Generator) generateDevcontainerJSON(adl *schema.ADL, devcontainerDir string) error {
-	var image string
-	var features map[string]interface{}
+	var remoteUser string
 	var customizations map[string]interface{}
 
-	// Determine language-specific configuration
 	if adl.Spec.Language.Go != nil {
-		image = "mcr.microsoft.com/devcontainers/go:1-1.23-bookworm"
-		features = map[string]interface{}{
-			"ghcr.io/devcontainers/features/docker-in-docker:2": map[string]interface{}{},
-			"ghcr.io/devcontainers/features/git:1":              map[string]interface{}{},
-		}
+		remoteUser = "vscode"
 		customizations = map[string]interface{}{
 			"vscode": map[string]interface{}{
 				"extensions": []string{
 					"golang.go",
 					"ms-vscode.vscode-json",
 					"redhat.vscode-yaml",
-					"ms-vscode.makefile-tools",
 				},
 				"settings": map[string]interface{}{
-					"go.toolsManagement.checkForUpdates": "local",
-					"go.useLanguageServer":                true,
-					"go.gopath":                          "/go",
-					"go.goroot":                          "/usr/local/go",
+					"terminal.integrated.defaultProfile.linux": "zsh",
+					"go.toolsManagement.checkForUpdates":       "local",
+					"go.useLanguageServer":                     true,
+					"go.gopath":                                "/go",
+					"go.goroot":                                "/usr/local/go",
 				},
 			},
 		}
 	} else if adl.Spec.Language.TypeScript != nil {
-		nodeVersion := "18"
-		if adl.Spec.Language.TypeScript.NodeVersion != "" {
-			nodeVersion = adl.Spec.Language.TypeScript.NodeVersion
-		}
-		image = fmt.Sprintf("mcr.microsoft.com/devcontainers/typescript-node:%s", nodeVersion)
-		features = map[string]interface{}{
-			"ghcr.io/devcontainers/features/docker-in-docker:2": map[string]interface{}{},
-			"ghcr.io/devcontainers/features/git:1":              map[string]interface{}{},
-		}
+		remoteUser = "node"
 		customizations = map[string]interface{}{
 			"vscode": map[string]interface{}{
 				"extensions": []string{
@@ -137,16 +123,12 @@ func (g *Generator) generateDevcontainerJSON(adl *schema.ADL, devcontainerDir st
 
 	devcontainerConfig := map[string]interface{}{
 		"name":           fmt.Sprintf("%s Development", adl.Metadata.Name),
-		"image":          image,
-		"features":       features,
+		"dockerFile":     "Dockerfile",
 		"customizations": customizations,
-		"postCreateCommand": []string{
-			"/bin/bash", ".devcontainer/setup.sh",
-		},
 		"mounts": []string{
 			"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
 		},
-		"remoteUser": "vscode",
+		"remoteUser": remoteUser,
 	}
 
 	jsonData, err := json.MarshalIndent(devcontainerConfig, "", "  ")
@@ -196,19 +178,27 @@ RUN go install -v golang.org/x/tools/gopls@latest \
     && go install -v github.com/go-delve/delve/cmd/dlv@latest \
     && go install -v honnef.co/go/tools/cmd/staticcheck@latest
 
+# Use Powerlevel10k theme
+RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /home/vscode/.powerlevel10k
+
+# Configure Powerlevel10k
+RUN echo 'source /home/vscode/.powerlevel10k/powerlevel10k.zsh-theme' >> /home/vscode/.zshrc && \
+    echo 'POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true' >> /home/vscode/.zshrc && \
+    echo 'POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs)' >> /home/vscode/.zshrc && \
+    echo 'POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(command_execution_time status)' >> /home/vscode/.zshrc && \
+    echo 'POWERLEVEL9K_COMMAND_EXECUTION_TIME_THRESHOLD=0' >> /home/vscode/.zshrc && \
+    echo 'POWERLEVEL9K_COMMAND_EXECUTION_TIME_PRECISION=2' >> /home/vscode/.zshrc && \
+    echo 'POWERLEVEL9K_COMMAND_EXECUTION_TIME_FORMAT="duration"' >> /home/vscode/.zshrc
+
 # Set working directory
 WORKDIR /workspace
-
-# Copy setup script
-COPY setup.sh /tmp/setup.sh
-RUN chmod +x /tmp/setup.sh
 
 # Switch to vscode user
 USER vscode
 `, adl.Metadata.Name, goVersion)
 
 	} else if adl.Spec.Language.TypeScript != nil {
-		nodeVersion := "18"
+		nodeVersion := "20"
 		if adl.Spec.Language.TypeScript.NodeVersion != "" {
 			nodeVersion = adl.Spec.Language.TypeScript.NodeVersion
 		}
@@ -239,12 +229,20 @@ RUN npm install -g \
     prettier \
     eslint
 
+# Use Powerlevel10k theme
+RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /home/node/.powerlevel10k
+
+# Configure Powerlevel10k
+RUN echo 'source /home/node/.powerlevel10k/powerlevel10k.zsh-theme' >> /home/node/.zshrc && \
+    echo 'POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true' >> /home/node/.zshrc && \
+    echo 'POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs)' >> /home/node/.zshrc && \
+    echo 'POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(command_execution_time status)' >> /home/node/.zshrc && \
+    echo 'POWERLEVEL9K_COMMAND_EXECUTION_TIME_THRESHOLD=0' >> /home/node/.zshrc && \
+    echo 'POWERLEVEL9K_COMMAND_EXECUTION_TIME_PRECISION=2' >> /home/node/.zshrc && \
+    echo 'POWERLEVEL9K_COMMAND_EXECUTION_TIME_FORMAT="duration"' >> /home/node/.zshrc
+
 # Set working directory
 WORKDIR /workspace
-
-# Copy setup script
-COPY setup.sh /tmp/setup.sh
-RUN chmod +x /tmp/setup.sh
 
 # Switch to node user
 USER node
@@ -256,36 +254,6 @@ USER node
 		return err
 	}
 
-	// Also generate setup script
-	setupScriptContent := `#!/bin/bash
-# Post-create setup script for A2A development environment
-
-echo "🚀 Setting up A2A development environment..."
-
-# Verify A2A CLI installation
-if command -v a2a &> /dev/null; then
-    echo "✅ A2A CLI is installed: $(a2a --version)"
-else
-    echo "❌ A2A CLI not found"
-fi
-
-# Verify Task installation  
-if command -v task &> /dev/null; then
-    echo "✅ Task is installed: $(task --version)"
-else
-    echo "❌ Task not found"
-fi
-
-echo "🎉 Development environment setup complete!"
-echo "💡 Try running 'a2a --help' to get started"
-`
-
-	setupScriptPath := filepath.Join(devcontainerDir, "setup.sh")
-	if err := os.WriteFile(setupScriptPath, []byte(setupScriptContent), 0755); err != nil {
-		return err
-	}
-
 	fmt.Printf("✅ Generated: %s\n", dockerfilePath)
-	fmt.Printf("✅ Generated: %s\n", setupScriptPath)
 	return nil
 }

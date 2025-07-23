@@ -9,14 +9,12 @@ import (
 )
 
 func TestGenerator_Generate(t *testing.T) {
-	// Create a temporary directory for testing
 	tempDir, err := os.MkdirTemp("", "devcontainer-test")
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
 	defer func() { _ = os.RemoveAll(tempDir) }()
 
-	// Create test ADL file
 	adlFile := filepath.Join(tempDir, "test-agent.yaml")
 	adlContent := `apiVersion: a2a.dev/v1
 kind: Agent
@@ -40,19 +38,16 @@ spec:
 		t.Fatalf("failed to write ADL file: %v", err)
 	}
 
-	// Generate devcontainer configuration
 	generator := New()
 	if err := generator.Generate(adlFile, tempDir); err != nil {
 		t.Fatalf("generation failed: %v", err)
 	}
 
-	// Verify files were created
 	devcontainerDir := filepath.Join(tempDir, ".devcontainer")
-	
+
 	files := []string{
 		"devcontainer.json",
-		"Dockerfile", 
-		"setup.sh",
+		"Dockerfile",
 	}
 
 	for _, file := range files {

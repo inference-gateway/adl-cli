@@ -60,25 +60,6 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to resolve output directory path: %w", err)
 	}
 
-	if generateDevcontainer {
-		devcontainerGen := devcontainer.New()
-
-		fmt.Printf("Generating devcontainer configuration from '%s' to '%s'\n", absADLFile, absOutputDir)
-
-		if err := devcontainerGen.Generate(absADLFile, absOutputDir); err != nil {
-			return fmt.Errorf("devcontainer generation failed: %w", err)
-		}
-
-		fmt.Println("✅ Devcontainer configuration generated successfully!")
-		fmt.Printf("📁 Files created in: %s/.devcontainer/\n", absOutputDir)
-		fmt.Println("📝 Next steps:")
-		fmt.Println("   1. Open project in VS Code")
-		fmt.Println("   2. Install the 'Dev Containers' extension")
-		fmt.Println("   3. Run 'Dev Containers: Reopen in Container' command")
-
-		return nil
-	}
-
 	gen := generator.New(generator.Config{
 		Template:  template,
 		Overwrite: overwrite,
@@ -93,10 +74,34 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("✅ A2A agent generated successfully!")
 	fmt.Printf("📁 Project location: %s\n", absOutputDir)
+
+	if generateDevcontainer {
+		devcontainerGen := devcontainer.New()
+
+		fmt.Printf("Generating devcontainer configuration...\n")
+
+		if err := devcontainerGen.Generate(absADLFile, absOutputDir); err != nil {
+			return fmt.Errorf("devcontainer generation failed: %w", err)
+		}
+
+		fmt.Println("✅ Devcontainer configuration generated successfully!")
+		fmt.Printf("📁 Devcontainer files created in: %s/.devcontainer/\n", absOutputDir)
+	}
+
+	fmt.Println()
 	fmt.Println("📝 Next steps:")
-	fmt.Println("   1. Implement the TODO placeholders in the generated files")
-	fmt.Println("   2. Run 'task build' to build your agent")
-	fmt.Println("   3. Run 'task run' to start your agent server")
+	if generateDevcontainer {
+		fmt.Println("   1. Open project in VS Code")
+		fmt.Println("   2. Install the 'Dev Containers' extension")
+		fmt.Println("   3. Run 'Dev Containers: Reopen in Container' command")
+		fmt.Println("   4. Implement the TODO placeholders in the generated files")
+		fmt.Println("   5. Run 'task build' to build your agent")
+		fmt.Println("   6. Run 'task run' to start your agent server")
+	} else {
+		fmt.Println("   1. Implement the TODO placeholders in the generated files")
+		fmt.Println("   2. Run 'task build' to build your agent")
+		fmt.Println("   3. Run 'task run' to start your agent server")
+	}
 
 	return nil
 }
