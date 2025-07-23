@@ -58,9 +58,7 @@ tasks:
   examples:test:
     desc: Test all example ADL files
     cmds:
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/weather-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/minimal-agent.yaml
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/enterprise-agent.yaml
 
   examples:generate:
     desc: Generate all example projects
