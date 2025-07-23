@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.2](https://github.com/inference-gateway/a2a-cli/compare/v0.4.1...v0.4.2) (2025-07-23)
+
+### 🐛 Bug Fixes
+
+* **ci:** Update installation step from GoReleaser to golangci-lint in workflow ([654f9e0](https://github.com/inference-gateway/a2a-cli/commit/654f9e07a0d112863afb06b133c59c293a768991))
+
 ## [0.4.1](https://github.com/inference-gateway/a2a-cli/compare/v0.4.0...v0.4.1) (2025-07-23)
 
 ### ♻️ Improvements
