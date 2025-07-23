@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0](https://github.com/inference-gateway/a2a-cli/compare/v0.2.5...v0.3.0) (2025-07-23)
+
+### ✨ Features
+
+* Implement `a2a generate --devcontainer` command ([#9](https://github.com/inference-gateway/a2a-cli/issues/9)) ([6b4556a](https://github.com/inference-gateway/a2a-cli/commit/6b4556ade1af97a5f68a7de60d43eef70cbf4838)), closes [#7](https://github.com/inference-gateway/a2a-cli/issues/7)
+
+### 📚 Documentation
+
+* Remove unrelated sections and update links ([8d7bb16](https://github.com/inference-gateway/a2a-cli/commit/8d7bb16066f5fd47b84f5667112515bc9358c054))
+
+### 🔧 Miscellaneous
+
+* Remove old examples ([83d871c](https://github.com/inference-gateway/a2a-cli/commit/83d871ce167c33987805f66bb25ac038722e6f91))
+
 ## [0.2.5](https://github.com/inference-gateway/a2a-cli/compare/v0.2.4...v0.2.5) (2025-07-23)
 
 ### 🐛 Bug Fixes
