@@ -166,13 +166,7 @@ const cardJSONTemplate = `{
 			"schema": {{ $tool.Schema | toJson }}
 		}
 		{{- end }}
-	],
-	"language": {
-		"go": {
-			"version": "{{ .ADL.Spec.Language.Go.Version }}",
-			"module": "{{ .ADL.Spec.Language.Go.Module }}"
-		}
-	}
+	]
 }
 `
 
