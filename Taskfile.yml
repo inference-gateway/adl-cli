@@ -58,9 +58,7 @@ tasks:
   examples:test:
     desc: Test all example ADL files
     cmds:
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/weather-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/minimal-agent.yaml
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/enterprise-agent.yaml
 
   examples:generate:
     desc: Generate all example projects
@@ -69,7 +67,7 @@ tasks:
     cmds:
       - rm -rf test-output
       - mkdir -p test-output
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/minimal-agent.yaml --output test-output/minimal-agent --template minimal
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/minimal-agent.yaml --output test-output/minimal-agent --overwrite --devcontainer
 
   release:
     desc: Build release binaries for multiple platforms

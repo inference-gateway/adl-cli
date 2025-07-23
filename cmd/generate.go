@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/inference-gateway/a2a-cli/internal/devcontainer"
 	"github.com/inference-gateway/a2a-cli/internal/generator"
 	"github.com/spf13/cobra"
 )
@@ -13,24 +14,16 @@ import (
 var generateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "Generate A2A agent code from ADL file",
-	Long: `Generate complete A2A agent project structure from an Agent Definition Language (ADL) file.
-
-This command reads a YAML or JSON ADL file and generates:
-- Complete Go project structure
-- Main server setup
-- Tool implementations with TODO placeholders
-- Agent configuration
-- .well-known/agent.json file
-- Taskfile.yml for development tasks
-- Dockerfile for containerization`,
-	RunE: runGenerate,
+	Long:  `Generate complete A2A agent project structure from an Agent Definition Language (ADL) file.`,
+	RunE:  runGenerate,
 }
 
 var (
-	adlFile   string
-	outputDir string
-	template  string
-	overwrite bool
+	adlFile              string
+	outputDir            string
+	template             string
+	overwrite            bool
+	generateDevcontainer bool
 )
 
 func init() {
@@ -40,6 +33,7 @@ func init() {
 	generateCmd.Flags().StringVarP(&outputDir, "output", "o", ".", "Output directory for generated code")
 	generateCmd.Flags().StringVarP(&template, "template", "t", "minimal", "Template to use (minimal)")
 	generateCmd.Flags().BoolVar(&overwrite, "overwrite", false, "Overwrite existing files")
+	generateCmd.Flags().BoolVar(&generateDevcontainer, "devcontainer", false, "Generate VS Code devcontainer configuration")
 }
 
 func runGenerate(cmd *cobra.Command, args []string) error {
@@ -60,6 +54,7 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	gen := generator.New(generator.Config{
 		Template:  template,
 		Overwrite: overwrite,
+		Version:   version,
 	})
 
 	fmt.Printf("Generating A2A agent from '%s' to '%s'\n", absADLFile, absOutputDir)
@@ -71,10 +66,34 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("✅ A2A agent generated successfully!")
 	fmt.Printf("📁 Project location: %s\n", absOutputDir)
+
+	if generateDevcontainer {
+		devcontainerGen := devcontainer.New()
+
+		fmt.Printf("Generating devcontainer configuration...\n")
+
+		if err := devcontainerGen.Generate(absADLFile, absOutputDir); err != nil {
+			return fmt.Errorf("devcontainer generation failed: %w", err)
+		}
+
+		fmt.Println("✅ Devcontainer configuration generated successfully!")
+		fmt.Printf("📁 Devcontainer files created in: %s/.devcontainer/\n", absOutputDir)
+	}
+
+	fmt.Println()
 	fmt.Println("📝 Next steps:")
-	fmt.Println("   1. Implement the TODO placeholders in the generated files")
-	fmt.Println("   2. Run 'task build' to build your agent")
-	fmt.Println("   3. Run 'task run' to start your agent server")
+	if generateDevcontainer {
+		fmt.Println("   1. Open project in VS Code")
+		fmt.Println("   2. Install the 'Dev Containers' extension")
+		fmt.Println("   3. Run 'Dev Containers: Reopen in Container' command")
+		fmt.Println("   4. Implement the TODO placeholders in the generated files")
+		fmt.Println("   5. Run 'task build' to build your agent")
+		fmt.Println("   6. Run 'task run' to start your agent server")
+	} else {
+		fmt.Println("   1. Implement the TODO placeholders in the generated files")
+		fmt.Println("   2. Run 'task build' to build your agent")
+		fmt.Println("   3. Run 'task run' to start your agent server")
+	}
 
 	return nil
 }

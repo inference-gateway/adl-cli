@@ -22,6 +22,7 @@ type Generator struct {
 type Config struct {
 	Template  string
 	Overwrite bool
+	Version   string
 }
 
 // New creates a new generator
@@ -168,7 +169,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		ADL: adl,
 		Metadata: schema.GeneratedMetadata{
 			GeneratedAt: time.Now(),
-			CLIVersion:  getVersion(),
+			CLIVersion:  g.getVersion(),
 			Template:    g.config.Template,
 		},
 	}
@@ -258,7 +259,7 @@ func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string, ignoreC
 		"capabilities": adl.Spec.Capabilities,
 		"_generated": map[string]interface{}{
 			"by":        "A2A CLI",
-			"version":   getVersion(),
+			"version":   g.getVersion(),
 			"timestamp": time.Now().Format(time.RFC3339),
 			"warning":   "This file was automatically generated. DO NOT EDIT.",
 		},
@@ -276,7 +277,7 @@ func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string, ignoreC
 		agentCard["tools"] = tools
 	}
 
-	jsonData, err := json.MarshalIndent(agentCard, "", "  ")
+	jsonData, err := g.formatJSONWithIndentation(agentCard)
 	if err != nil {
 		return err
 	}
@@ -287,12 +288,15 @@ func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string, ignoreC
 	}
 
 	agentJSONPath := filepath.Join(wellKnownDir, "agent.json")
-	return g.writeFile(agentJSONPath, string(jsonData))
+	return g.writeFile(agentJSONPath, jsonData)
 }
 
-// getVersion returns the CLI version (this would be injected at build time)
-func getVersion() string {
-	return "1.0.0"
+// getVersion returns the CLI version from config or default
+func (g *Generator) getVersion() string {
+	if g.config.Version != "" {
+		return g.config.Version
+	}
+	return "dev"
 }
 
 // generateA2aIgnoreFile creates a .a2a-ignore file with files that contain TODOs
@@ -309,7 +313,7 @@ func (g *Generator) generateA2aIgnoreFile(outputDir, templateName string) error 
 	switch templateName {
 	case "minimal":
 		filesToIgnore = []string{
-			"handlers.go",
+			"tools/*",
 		}
 	}
 
@@ -333,11 +337,12 @@ func (g *Generator) generateA2aIgnoreFile(outputDir, templateName string) error 
 func generateA2aIgnoreContent(filesToIgnore []string) string {
 	content := `# .a2a-ignore file
 # This file specifies which files should not be overwritten during generation operations.
-# Files listed here typically contain TODO implementations that users have completed.
+# Files listed here typically contain implementations that users have completed.
 #
 # Patterns supported:
 # - Exact file names: handlers.go
 # - Wildcards: *.go
+# - Directory patterns: tools/*
 # - Directories: build/
 # - Comments: lines starting with #
 
@@ -354,4 +359,13 @@ func generateA2aIgnoreContent(filesToIgnore []string) string {
 `
 
 	return content
+}
+
+// formatJSONWithIndentation formats JSON with proper indentation for nested objects
+func (g *Generator) formatJSONWithIndentation(data interface{}) (string, error) {
+	jsonBytes, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return "", err
+	}
+	return string(jsonBytes), nil
 }

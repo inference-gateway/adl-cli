@@ -64,6 +64,8 @@ jobs:
             2. Make your changes on the feature branch
             3. Open a pull request to main
             4. Wait for review and approval before merging
+          
+            IMPORTANT: Always add a new line at the end of each file and follow the coding style guidelines.
 
             COMMIT MESSAGE FORMAT: Always use conventional commits with capital letters. 
             Follow the format: "type(scope): Description" where the description starts with a capital letter.

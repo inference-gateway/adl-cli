@@ -16,11 +16,11 @@ func GetMinimalTemplate(adl *schema.ADL) map[string]string {
 		"Dockerfile":             dockerfileTemplate,
 		".gitignore":             gitignoreTemplate,
 		".gitattributes":         gitattributesTemplate,
+		".editorconfig":          editorconfigTemplate,
 		"README.md":              minimalReadmeTemplate,
 		"k8s/a2a-server.yaml":    minimalOperatorTemplate,
 	}
 
-	// Add individual tool files
 	for _, tool := range adl.Spec.Tools {
 		files["tools/"+tool.Name+".go"] = generateToolTemplate(tool)
 	}
@@ -663,3 +663,46 @@ func titleCase(s string) string {
 	}
 	return s
 }
+
+const editorconfigTemplate = `# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# All files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Go files
+[*.go]
+indent_style = tab
+indent_size = 4
+
+# YAML files
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# JSON files
+[*.json]
+indent_style = space
+indent_size = 2
+
+# Markdown files
+[*.md]
+indent_style = space
+indent_size = 2
+
+# Dockerfile
+[Dockerfile]
+indent_style = space
+indent_size = 2
+
+# Shell scripts
+[*.sh]
+indent_style = space
+indent_size = 2
+`
