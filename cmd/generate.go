@@ -28,11 +28,11 @@ This command reads a YAML or JSON ADL file and generates:
 }
 
 var (
-	adlFile      string
-	outputDir    string
-	template     string
-	overwrite    bool
-	devcontainer bool
+	adlFile           string
+	outputDir         string
+	template          string
+	overwrite         bool
+	generateDevcontainer bool
 )
 
 func init() {
@@ -42,7 +42,7 @@ func init() {
 	generateCmd.Flags().StringVarP(&outputDir, "output", "o", ".", "Output directory for generated code")
 	generateCmd.Flags().StringVarP(&template, "template", "t", "minimal", "Template to use (minimal)")
 	generateCmd.Flags().BoolVar(&overwrite, "overwrite", false, "Overwrite existing files")
-	generateCmd.Flags().BoolVar(&devcontainer, "devcontainer", false, "Generate VS Code devcontainer configuration")
+	generateCmd.Flags().BoolVar(&generateDevcontainer, "devcontainer", false, "Generate VS Code devcontainer configuration")
 }
 
 func runGenerate(cmd *cobra.Command, args []string) error {
@@ -61,7 +61,7 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Generate devcontainer configuration if flag is set
-	if devcontainer {
+	if generateDevcontainer {
 		devcontainerGen := devcontainer.New()
 
 		fmt.Printf("Generating devcontainer configuration from '%s' to '%s'\n", absADLFile, absOutputDir)
