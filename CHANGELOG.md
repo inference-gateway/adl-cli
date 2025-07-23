@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.1](https://github.com/inference-gateway/a2a-cli/compare/v0.4.0...v0.4.1) (2025-07-23)
+
+### ♻️ Improvements
+
+* Cleanups ([93a26fe](https://github.com/inference-gateway/a2a-cli/commit/93a26fefb13219142d40d49545426c6ee323c774))
+
 ## [0.4.0](https://github.com/inference-gateway/a2a-cli/compare/v0.3.0...v0.4.0) (2025-07-23)
 
 ### ✨ Features
