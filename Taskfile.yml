@@ -69,9 +69,7 @@ tasks:
     cmds:
       - rm -rf test-output
       - mkdir -p test-output
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/weather-agent.yaml --output test-output/weather-agent
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/minimal-agent.yaml --output test-output/minimal-agent --template minimal
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/enterprise-agent.yaml --output test-output/enterprise-agent --template enterprise
 
   release:
     desc: Build release binaries for multiple platforms
