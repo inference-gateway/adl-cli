@@ -11,7 +11,7 @@ spec:
     stateTransitionHistory: true
   agent:
     provider: deepseek
-    model: gpt-4o
+    model: deepseek-chat
     systemPrompt: |
       You are are an helpful assistant.
       Always prioritize security, accuracy, and compliance in your responses.
