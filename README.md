@@ -22,7 +22,7 @@ The A2A CLI helps you build production-ready A2A agents quickly by generating co
 
 - 🚀 **Rapid Development** - Generate complete projects in seconds
 - 📋 **Schema-Driven** - Use YAML ADL files to define your agents
-- 🎯 **Multiple Templates** - Choose from minimal, AI-powered, or enterprise templates
+- 🎯 **Production Ready** - Single unified template with AI integration and enterprise features
 - � **Smart Ignore** - Protect your implementations with .a2a-ignore files
 - ✅ **Validation** - Built-in ADL schema validation
 - 🛠️ **Interactive Setup** - Guided project initialization
@@ -117,23 +117,13 @@ task run
 ### Generate Command
 
 ```bash
-# Generate with default template (ai-powered)
+# Generate project from ADL file
 a2a generate --file agent.yaml --output ./my-agent
-
-# Use specific template
-a2a generate --file agent.yaml --output ./my-agent --template minimal
 
 # Overwrite existing files (respects .a2a-ignore)
 a2a generate --file agent.yaml --output ./my-agent --overwrite
 ```
 
-### Available Templates
-
-| Template | Description |
-|----------|-------------|
-| `minimal` | Basic HTTP server without AI capabilities |
-| `ai-powered` | Full AI agent with LLM integration (default) |
-| `enterprise` | Production-ready with auth, metrics, and monitoring |
 
 ## Agent Definition Language (ADL)
 
@@ -209,34 +199,17 @@ my-agent/
 └── README.md            # Project documentation
 ```
 
-### Enterprise Template Additions
-
-```
-├── middleware.go        # HTTP middleware (auth, metrics, CORS)
-├── metrics.go           # Prometheus metrics
-├── logging.go           # Structured logging
-├── auth.go              # Authentication logic
-├── docker-compose.yml   # Full stack deployment
-└── k8s/                 # Kubernetes manifests
-    ├── deployment.yaml
-    ├── service.yaml
-    └── configmap.yaml
-```
 
 ## Examples
 
 The CLI includes example ADL files in the `examples/` directory:
 
 ```bash
-# Validate examples
-a2a validate examples/weather-agent.yaml
+# Validate example
 a2a validate examples/minimal-agent.yaml
-a2a validate examples/enterprise-agent.yaml
 
-# Generate from examples
-a2a generate --file examples/weather-agent.yaml --output ./weather-agent
-a2a generate --file examples/minimal-agent.yaml --output ./minimal-agent --template minimal
-a2a generate --file examples/enterprise-agent.yaml --output ./enterprise-agent --template enterprise
+# Generate from example
+a2a generate --file examples/minimal-agent.yaml --output ./minimal-agent
 ```
 
 ## Customizing Generation with .a2a-ignore
@@ -245,11 +218,7 @@ The A2A CLI automatically creates a `.a2a-ignore` file during project generation
 
 ### Automatically Protected Files
 
-When you generate a project, these files are automatically added to `.a2a-ignore`:
-
-- **AI-powered template**: `tools.go`
-- **Minimal template**: `handlers.go` 
-- **Enterprise template**: `tools.go`, `auth.go`, `middleware.go`, `metrics.go`, `logging.go`, `tool_metrics.go`
+When you generate a project, implementation files are automatically added to `.a2a-ignore` to protect your business logic from being overwritten during regeneration.
 
 You can control which additional files are generated or updated by editing the `.a2a-ignore` file:
 
@@ -351,7 +320,7 @@ task examples:generate
 The A2A CLI currently supports Go, with plans to expand to additional programming languages:
 
 #### ✅ Currently Supported
-- **Go** - Full support with all templates (minimal, ai-powered, enterprise)
+- **Go** - Full support with unified template
 
 #### 🚧 Planned Support
 - **TypeScript/Node.js** - Complete A2A agent generation with Express.js framework

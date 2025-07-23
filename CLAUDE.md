@@ -17,8 +17,8 @@ The A2A CLI is a command-line tool for generating production-ready A2A (Agent-to
 
 ### Template System
 - **Engine**: `internal/templates/engine.go` - Template execution with Sprig functions and auto-generated headers
-- **Templates**: Three main types - `minimal` (basic HTTP), `ai-powered` (with AI integration), `enterprise` (full production features)
-- **Context**: Templates receive ADL data and metadata for rendering
+- **Template**: Single unified template that generates production-ready agents with AI integration and enterprise features
+- **Context**: Template receives ADL data and metadata for rendering
 - **Ignore System**: `.a2a-ignore` files protect user implementations from regeneration
 
 ### ADL Structure
@@ -122,7 +122,7 @@ task docker:build
 ## Language Support Architecture
 
 ### Current Support
-- **Go**: Full support with all templates (minimal, ai-powered, enterprise)
+- **Go**: Full support with unified template
 
 ### Language Detection
 The generator detects target language from ADL `spec.language` section and validates exactly one language is specified.
@@ -139,19 +139,19 @@ The generator detects target language from ADL `spec.language` section and valid
 ### Running CLI During Development
 ```bash
 # After building
-./bin/a2a generate --file examples/weather-agent.yaml --output ./test-output
+./bin/a2a generate --file examples/minimal-agent.yaml --output ./test-output
 
 # Using task dev
-task dev -- generate --file examples/weather-agent.yaml --output ./test-output
+task dev -- generate --file examples/minimal-agent.yaml --output ./test-output
 ```
 
-### Testing New Templates
+### Testing Generation
 ```bash
-# Generate from specific template
-./bin/a2a generate --file examples/enterprise-agent.yaml --output ./test-enterprise --template enterprise
+# Generate from example
+./bin/a2a generate --file examples/minimal-agent.yaml --output ./test-output
 
 # Validate ADL file
-./bin/a2a validate examples/weather-agent.yaml
+./bin/a2a validate examples/minimal-agent.yaml
 ```
 
 ### Debugging Generation Issues
@@ -169,5 +169,4 @@ task dev -- generate --file examples/weather-agent.yaml --output ./test-output
 ### Generate Command Options
 - `--file` - ADL file path (required)
 - `--output` - Output directory (required)  
-- `--template` - Template type (minimal/ai-powered/enterprise)
 - `--overwrite` - Overwrite existing files (respects .a2a-ignore)

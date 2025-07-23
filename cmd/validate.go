@@ -30,14 +30,12 @@ func runValidate(cmd *cobra.Command, args []string) error {
 		adlFile = args[0]
 	}
 
-	// Check if file exists
 	if _, err := os.Stat(adlFile); os.IsNotExist(err) {
 		return fmt.Errorf("ADL file '%s' does not exist", adlFile)
 	}
 
 	fmt.Printf("Validating '%s'...\n", adlFile)
 
-	// Validate the file
 	validator := schema.NewValidator()
 	if err := validator.ValidateFile(adlFile); err != nil {
 		fmt.Printf("❌ Validation failed: %v\n", err)

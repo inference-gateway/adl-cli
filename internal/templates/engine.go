@@ -72,18 +72,9 @@ func (e *Engine) ExecuteWithHeader(templateContent string, ctx Context, fileName
 	return header + content, nil
 }
 
-// GetFiles returns the template files for the current template
-func (e *Engine) GetFiles() map[string]string {
-	switch e.templateName {
-	case "minimal":
-		return getMinimalTemplate()
-	case "ai-powered":
-		return getAIPoweredTemplate()
-	case "enterprise":
-		return getEnterpriseTemplate()
-	default:
-		return getAIPoweredTemplate()
-	}
+// GetFiles returns the template files for the current template with ADL context
+func (e *Engine) GetFiles(adl *schema.ADL) map[string]string {
+	return GetMinimalTemplate(adl)
 }
 
 // GetTemplate returns the template name

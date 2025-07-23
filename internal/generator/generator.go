@@ -140,14 +140,6 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 		if adl.Spec.Agent.Provider == "" {
 			return fmt.Errorf("spec.agent.provider is required when agent configuration is specified")
 		}
-		if adl.Spec.Agent.Provider != "none" {
-			if adl.Spec.Agent.Model == "" {
-				return fmt.Errorf("spec.agent.model is required for AI-powered agents")
-			}
-			if adl.Spec.Agent.SystemPrompt == "" {
-				return fmt.Errorf("spec.agent.systemPrompt is required for AI-powered agents")
-			}
-		}
 	}
 
 	for i, tool := range adl.Spec.Tools {
@@ -167,10 +159,7 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 
 // detectTemplate detects the appropriate template based on the ADL
 func (g *Generator) detectTemplate(adl *schema.ADL) string {
-	if adl.Spec.Agent == nil || adl.Spec.Agent.Provider == "none" {
-		return "minimal"
-	}
-	return "ai-powered"
+	return "minimal"
 }
 
 // generateProject generates the complete project structure
@@ -189,7 +178,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		return fmt.Errorf("failed to initialize ignore checker: %w", err)
 	}
 
-	files := templateEngine.GetFiles()
+	files := templateEngine.GetFiles(adl)
 	for fileName, templateContent := range files {
 		fileName = g.replacePlaceholders(fileName, adl)
 
@@ -317,28 +306,10 @@ func (g *Generator) generateA2aIgnoreFile(outputDir, templateName string) error 
 
 	var filesToIgnore []string
 
-	// Files that contain TODOs and should only be generated once
 	switch templateName {
 	case "minimal":
 		filesToIgnore = []string{
 			"handlers.go",
-		}
-	case "ai-powered":
-		filesToIgnore = []string{
-			"tools.go",
-		}
-	case "enterprise":
-		filesToIgnore = []string{
-			"tools.go",
-			"auth.go",
-			"middleware.go",
-			"metrics.go",
-			"logging.go",
-			"tool_metrics.go",
-		}
-	default:
-		filesToIgnore = []string{
-			"tools.go",
 		}
 	}
 

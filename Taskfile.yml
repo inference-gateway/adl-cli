@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   APP_NAME: a2a
-  VERSION: 1.0.0
+  VERSION: 0.2.3
   BUILD_DIR: bin
 
 tasks:
@@ -50,7 +50,8 @@ tasks:
 
   dev:
     desc: Run in development mode
-    deps: [build]
+    deps:
+      - build
     cmds:
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} {{.CLI_ARGS}}
 
@@ -63,7 +64,8 @@ tasks:
 
   examples:generate:
     desc: Generate all example projects
-    deps: [build]
+    deps:
+      - build
     cmds:
       - rm -rf test-output
       - mkdir -p test-output

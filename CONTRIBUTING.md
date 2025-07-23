@@ -173,7 +173,7 @@ Adding support for a new programming language is a significant contribution. Her
 ### 1. Planning
 
 - Create an issue to discuss the language addition
-- Define the scope: minimal, AI-powered, and/or enterprise templates
+- Define the scope and features for the language template
 - Identify the web framework and dependencies to use
 
 ### 2. Implementation Steps
@@ -205,7 +205,7 @@ Create templates in `internal/templates/`:
 // internal/templates/rust.go
 package templates
 
-func getRustMinimalTemplate() map[string]string {
+func getRustTemplate() map[string]string {
     return map[string]string{
         "Cargo.toml":     rustCargoTemplate,
         "src/main.rs":    rustMainTemplate,
@@ -227,10 +227,8 @@ Update `internal/templates/engine.go` to handle the new language:
 ```go
 func (e *Engine) GetFiles() map[string]string {
     switch e.templateName {
-    case "rust-minimal":
-        return getRustMinimalTemplate()
-    case "rust-ai-powered":
-        return getRustAIPoweredTemplate()
+    case "rust":
+        return getRustTemplate()
     // ... existing cases
     }
 }
@@ -244,7 +242,7 @@ Update `internal/generator/generator.go` for language detection and validation.
 
 - Add comprehensive tests for the new language
 - Create example ADL files in `examples/`
-- Test all template types (minimal, AI-powered, enterprise)
+- Test the template thoroughly
 - Verify generated code compiles and runs
 
 ### 4. Documentation
@@ -286,14 +284,12 @@ func TestGenerator_GenerateRust(t *testing.T) {
     tests := []struct {
         name        string
         adlFile     string
-        template    string
         wantFiles   []string
         wantErr     bool
     }{
         {
-            name:      "rust minimal template",
-            adlFile:   "testdata/rust-minimal.yaml",
-            template:  "rust-minimal",
+            name:      "rust template",
+            adlFile:   "testdata/rust-agent.yaml",
             wantFiles: []string{"Cargo.toml", "src/main.rs"},
             wantErr:   false,
         },
