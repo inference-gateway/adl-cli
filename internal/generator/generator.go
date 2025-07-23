@@ -380,7 +380,7 @@ func (g *Generator) formatJSONWithIndentation(data interface{}) (string, error) 
 // generateCI generates CI/CD workflow configuration based on the programming language
 func (g *Generator) generateCI(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
 	language := g.detectLanguage(adl)
-	
+
 	switch language {
 	case "go":
 		return g.generateGitHubActionsWorkflow(adl, outputDir, ignoreChecker)
@@ -403,22 +403,22 @@ func (g *Generator) detectLanguage(adl *schema.ADL) string {
 // generateGitHubActionsWorkflow generates a GitHub Actions workflow for Go projects
 func (g *Generator) generateGitHubActionsWorkflow(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
 	workflowPath := ".github/workflows/ci.yml"
-	
+
 	if ignoreChecker.ShouldIgnore(workflowPath) {
 		fmt.Printf("🚫 Ignoring file (matches .a2a-ignore): %s\n", workflowPath)
 		return nil
 	}
 
 	workflowContent := g.generateGoWorkflowContent(adl)
-	
+
 	fullWorkflowPath := filepath.Join(outputDir, workflowPath)
 	if err := g.writeFile(fullWorkflowPath, workflowContent); err != nil {
 		return fmt.Errorf("failed to write GitHub Actions workflow: %w", err)
 	}
 
-	fmt.Println("✅ CI/CD workflow generated successfully!")
+	fmt.Println("✅ CI workflow generated successfully!")
 	fmt.Printf("📁 GitHub Actions workflow: %s\n", workflowPath)
-	
+
 	return nil
 }
 
@@ -433,19 +433,21 @@ func (g *Generator) generateGoWorkflowContent(adl *schema.ADL) string {
 
 on:
   push:
-    branches: [ main, develop ]
+    branches:
+      - main
   pull_request:
-    branches: [ main, develop ]
+    branches:
+      - main
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v4.2.2
     
     - name: Set up Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v5.5.0
       with:
         go-version: %s
     
@@ -478,31 +480,5 @@ jobs:
     - name: Build
       run: task build
 
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: %s
-    
-    - name: Install Task
-      uses: arduino/setup-task@v2
-      with:
-        version: 3.x
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Build application
-      run: task build
-    
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: %s-binary
-        path: bin/
-`, goVersion, goVersion, adl.Metadata.Name)
+`, goVersion)
 }
