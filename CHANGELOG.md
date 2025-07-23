@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.5](https://github.com/inference-gateway/a2a-cli/compare/v0.2.4...v0.2.5) (2025-07-23)
+
+### 🐛 Bug Fixes
+
+* **templates:** Remove language field from agent.json card ([#6](https://github.com/inference-gateway/a2a-cli/issues/6)) ([8dfb519](https://github.com/inference-gateway/a2a-cli/commit/8dfb51908674b0f23acaa54789a2fa3d1dc8c358)), closes [#5](https://github.com/inference-gateway/a2a-cli/issues/5)
+
 ## [0.2.4](https://github.com/inference-gateway/a2a-cli/compare/v0.2.3...v0.2.4) (2025-07-23)
 
 ### ♻️ Improvements
