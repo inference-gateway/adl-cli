@@ -69,7 +69,7 @@ tasks:
     cmds:
       - rm -rf test-output
       - mkdir -p test-output
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/minimal-agent.yaml --output test-output/minimal-agent --overwrite --devcontainer
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/minimal-agent.yaml --output test-output/minimal-agent --overwrite --devcontainer --ci
 
   release:
     desc: Build release binaries for multiple platforms
