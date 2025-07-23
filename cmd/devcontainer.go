@@ -30,7 +30,7 @@ var (
 )
 
 func init() {
-	developmentCmd.AddCommand(devcontainerCmd)
+	rootCmd.AddCommand(devcontainerCmd)
 
 	devcontainerCmd.Flags().StringVarP(&devcontainerADLFile, "file", "f", "agent.yaml", "ADL file to read language configuration from")
 	devcontainerCmd.Flags().StringVarP(&devcontainerOutputDir, "output", "o", ".", "Output directory for devcontainer files")
