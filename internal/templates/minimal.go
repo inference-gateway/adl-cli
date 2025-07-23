@@ -177,6 +177,10 @@ vars:
   VERSION: {{ .ADL.Metadata.Version }}
 
 tasks:
+  generate:
+    desc: Generate code from ADL
+    cmd: a2a generate --file agent.yaml --output .
+
   build:
     desc: Build the application
     cmd: go build -o bin/{{` + "`{{.APP_NAME}}`" + `}} .
@@ -362,6 +366,9 @@ Common A2A configuration:
 ` + "```bash" + `
 # Install dependencies
 go mod tidy
+
+# Generate code from ADL
+task generate
 
 # Run in development mode
 task run
