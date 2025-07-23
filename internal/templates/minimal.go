@@ -393,7 +393,7 @@ Configure the agent via environment variables:
 
 ### Core Application Settings
 
-- ` + "`ENVIRONMENT`" + ` - Deployment environment (default: ` + "`dev`" + `)
+- ` + "`ENVIRONMENT`" + ` - Deployment environment
 
 ### A2A Agent Configuration
 
