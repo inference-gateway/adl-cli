@@ -136,7 +136,7 @@ a2a generate --file agent.yaml --output ./my-agent --ci
 | `--template`, `-t` | Template to use (default: "minimal") |
 | `--overwrite` | Overwrite existing files (respects .a2a-ignore) |
 | `--devcontainer` | Generate VS Code devcontainer configuration |
-| `--ci` | Generate CI/CD workflow configuration |
+| `--ci` | Generate CI workflow configuration |
 
 
 ## Agent Definition Language (ADL)
@@ -222,12 +222,11 @@ When using the `--ci` flag, the A2A CLI generates GitHub Actions workflows for y
 a2a generate --file agent.yaml --output ./my-agent --ci
 ```
 
-This creates a comprehensive GitHub Actions workflow (`.github/workflows/ci.yml`) that includes:
+This creates a GitHub Actions workflow (`.github/workflows/ci.yml`) that includes:
 
 - **Automated Testing**: Runs all tests on every push and pull request
 - **Code Quality**: Format checking and linting
 - **Multi-Environment**: Supports main and develop branches
-- **Build Artifacts**: Automatically builds and uploads binaries
 - **Caching**: Go module caching for faster builds
 - **Task Integration**: Uses the generated Taskfile for consistent build steps
 
