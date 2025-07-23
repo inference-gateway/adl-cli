@@ -45,7 +45,12 @@ import (
 	"{{ .ADL.Spec.Language.Go.Module }}/tools"
 )
 
+// Config represents the application configuration
 type Config struct {
+	// Core application settings
+	Environment string ` + "`" + `env:"ENVIRONMENT"` + "`" + `
+	
+	// A2A framework configuration (all A2A_ prefixed vars)
 	A2A config.Config ` + "`" + `env:",prefix=A2A_"` + "`" + `
 }
 
@@ -58,16 +63,16 @@ var (
 func main() {
 	ctx := context.Background()
 
-	// Load configuration from environment first
+	// Load configuration from environment variables
 	var cfg Config
 	if err := envconfig.Process(ctx, &cfg); err != nil {
 		log.Fatal("failed to load config:", err)
 	}
 
-	// Initialize logger based on DEBUG environment variable
+	// Initialize logger with simple configuration
 	var logger *zap.Logger
 	var err error
-	if cfg.A2A.Debug {
+	if cfg.A2A.Debug || cfg.Environment == "dev" || cfg.Environment == "development" {
 		logger, err = zap.NewDevelopment()
 	} else {
 		logger, err = zap.NewProduction()
@@ -77,27 +82,33 @@ func main() {
 	}
 	defer logger.Sync()
 
-	logger.Debug("loaded configuration", zap.Any("config", cfg))
+	logger.Info("starting {{ .ADL.Metadata.Name }} agent", 
+		zap.String("version", Version),
+		zap.String("environment", cfg.Environment),
+	)
+	logger.Debug("loaded configuration")
 
-	// Create toolbox
+	// Create toolbox and register tools
 	toolBox := server.NewDefaultToolBox()
 
 	{{- range .ADL.Spec.Tools }}
-	// Add {{ .Name }} tool
+	// Register {{ .Name }} tool
 	{{ .Name }}Tool := tools.New{{ .Name | title }}Tool()
 	toolBox.AddTool({{ .Name }}Tool)
+	logger.Info("registered tool", zap.String("tool", "{{ .Name }}"), zap.String("description", "{{ .Description }}"))
 	{{- end }}
 
-	// Create A2A server with agent
+	// Create A2A agent with configuration
 	agent, err := server.NewAgentBuilder(logger).
 		WithConfig(&cfg.A2A.AgentConfig).
 		WithToolBox(toolBox).
 		WithSystemPrompt(` + "`" + `{{- if .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt }}{{- else }}You are a helpful AI assistant.{{- end }}` + "`" + `).
 		Build()
 	if err != nil {
-		log.Fatal("failed to create agent:", err)
+		logger.Fatal("failed to create agent", zap.Error(err))
 	}
 
+	// Create A2A server with agent and configuration
 	a2aServer, err := server.NewA2AServerBuilder(cfg.A2A, logger).
 		WithAgent(agent).
 		WithAgentCardFromFile("./.well-known/agent.json", map[string]interface{}{
@@ -108,25 +119,33 @@ func main() {
 		}).
 		Build()
 	if err != nil {
-		log.Fatal("failed to create A2A server:", err)
+		logger.Fatal("failed to create A2A server", zap.Error(err))
 	}
 
-	// Start server
+	// Start server in background
 	go func() {
+		logger.Info("starting A2A server", 
+			zap.String("port", cfg.A2A.ServerConfig.Port),
+			zap.String("host", cfg.A2A.ServerConfig.Host),
+		)
 		if err := a2aServer.Start(ctx); err != nil {
-			log.Fatal("server failed to start:", err)
+			logger.Fatal("server failed to start", zap.Error(err))
 		}
 	}()
 
-	logger.Info("{{ .ADL.Metadata.Name }} agent running", zap.String("port", cfg.A2A.ServerConfig.Port))
+	logger.Info("{{ .ADL.Metadata.Name }} agent running successfully", 
+		zap.String("port", cfg.A2A.ServerConfig.Port),
+		zap.String("environment", cfg.Environment),
+	)
 
 	// Wait for shutdown signal
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	logger.Info("shutting down server...")
+	logger.Info("shutdown signal received, gracefully stopping server...")
 	a2aServer.Stop(ctx)
+	logger.Info("{{ .ADL.Metadata.Name }} agent stopped")
 }
 `
 
@@ -320,29 +339,134 @@ coverage.txt
 coverage.html
 `
 
-const minimalReadmeTemplate = `# {{ .ADL.Metadata.Name | title }}
+const minimalReadmeTemplate = `<div align="center">
 
-{{ .ADL.Metadata.Description }}
+# {{ .ADL.Metadata.Name | title }}
 
-**Version:** {{ .ADL.Metadata.Version }}
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Go Version](https://img.shields.io/badge/Go-{{ .ADL.Spec.Language.Go.Version }}+-00ADD8?style=flat&logo=go)](https://golang.org)
+[![A2A Protocol](https://img.shields.io/badge/A2A-Protocol-blue?style=flat)](https://github.com/inference-gateway/a2a)
 
-## Overview
+**{{ .ADL.Metadata.Description }}**
 
-This A2A (Agent-to-Agent) server was generated using the A2A CLI from an Agent Definition Language (ADL) file. This agent uses the inference gateway A2A framework with AI-powered capabilities.
+A production-ready [Agent-to-Agent (A2A)](https://github.com/inference-gateway/a2a) server that provides AI-powered capabilities through a standardized protocol. Built with Go for high performance and reliability.
 
-### Capabilities
+</div>
 
-{{- if .ADL.Spec.Capabilities }}
-- **Streaming:** {{ .ADL.Spec.Capabilities.Streaming }}
-- **Push Notifications:** {{ .ADL.Spec.Capabilities.PushNotifications }}
-- **State Transition History:** {{ .ADL.Spec.Capabilities.StateTransitionHistory }}
-{{- end }}
+## Quick Start
 
-### Available Tools
+` + "```bash" + `
+# Run the agent
+go run .
+
+# Or with Docker
+docker build -t {{ .ADL.Metadata.Name }} .
+docker run -p {{ .ADL.Spec.Server.Port | default 8080 }}:{{ .ADL.Spec.Server.Port | default 8080 }} {{ .ADL.Metadata.Name }}
+` + "```" + `
+
+## Features
+
+- ✅ A2A protocol compliant
+- ✅ AI-powered capabilities{{- if .ADL.Spec.Capabilities }}{{- if .ADL.Spec.Capabilities.Streaming }}
+- ✅ Streaming support{{- end }}{{- if .ADL.Spec.Capabilities.PushNotifications }}
+- ✅ Push notifications{{- end }}{{- if .ADL.Spec.Capabilities.StateTransitionHistory }}
+- ✅ State transition history{{- end }}{{- end }}
+- ✅ Production ready
+- ✅ Minimal dependencies
+- ✅ Built with Go for performance
+
+## Endpoints
+
+- ` + "`GET /.well-known/agent.json`" + ` - Agent metadata and capabilities
+- ` + "`GET /health`" + ` - Health check endpoint
+- ` + "`POST /a2a`" + ` - A2A protocol endpoint
+
+## Available Tools
 
 {{- range .ADL.Spec.Tools }}
 - **{{ .Name }}** - {{ .Description }}
 {{- end }}
+
+## Configuration
+
+Configure the agent via environment variables:
+
+### Core Application Settings
+
+- ` + "`ENVIRONMENT`" + ` - Deployment environment (default: ` + "`dev`" + `)
+
+### A2A Agent Configuration
+
+#### Server Configuration
+
+- ` + "`A2A_SERVER_PORT`" + ` - Server port (default: ` + "`{{ .ADL.Spec.Server.Port | default 8080 }}`" + `)
+- ` + "`A2A_SERVER_READ_TIMEOUT`" + ` - Maximum duration for reading requests (default: ` + "`120s`" + `)
+- ` + "`A2A_SERVER_WRITE_TIMEOUT`" + ` - Maximum duration for writing responses (default: ` + "`120s`" + `)
+- ` + "`A2A_SERVER_IDLE_TIMEOUT`" + ` - Maximum time to wait for next request (default: ` + "`120s`" + `)
+- ` + "`A2A_SERVER_DISABLE_HEALTHCHECK_LOG`" + ` - Disable logging for health check requests (default: ` + "`true`" + `)
+
+#### LLM Client Configuration
+
+- ` + "`A2A_AGENT_CLIENT_PROVIDER`" + ` - LLM provider: ` + "`openai`" + `, ` + "`anthropic`" + `, ` + "`groq`" + `, ` + "`ollama`" + `, ` + "`deepseek`" + `, ` + "`cohere`" + `, ` + "`cloudflare`" + `
+- ` + "`A2A_AGENT_CLIENT_MODEL`" + ` - Model to use
+- ` + "`A2A_AGENT_CLIENT_API_KEY`" + ` - API key for LLM provider
+- ` + "`A2A_AGENT_CLIENT_BASE_URL`" + ` - Custom LLM API endpoint
+- ` + "`A2A_AGENT_CLIENT_TIMEOUT`" + ` - Timeout for LLM requests (default: ` + "`30s`" + `)
+- ` + "`A2A_AGENT_CLIENT_MAX_RETRIES`" + ` - Maximum retries for LLM requests (default: ` + "`3`" + `)
+- ` + "`A2A_AGENT_CLIENT_MAX_CHAT_COMPLETION_ITERATIONS`" + ` - Maximum chat completion iterations (default: ` + "`10`" + `)
+- ` + "`A2A_AGENT_CLIENT_MAX_TOKENS`" + ` - Maximum tokens for LLM responses (default: ` + "`4096`" + `)
+- ` + "`A2A_AGENT_CLIENT_TEMPERATURE`" + ` - Controls randomness of LLM output (default: ` + "`0.7`" + `)
+- ` + "`A2A_AGENT_CLIENT_TOP_P`" + ` - Top-p sampling parameter (default: ` + "`1.0`" + `)
+- ` + "`A2A_AGENT_CLIENT_FREQUENCY_PENALTY`" + ` - Frequency penalty (default: ` + "`0.0`" + `)
+- ` + "`A2A_AGENT_CLIENT_PRESENCE_PENALTY`" + ` - Presence penalty (default: ` + "`0.0`" + `)
+- ` + "`A2A_AGENT_CLIENT_SYSTEM_PROMPT`" + ` - System prompt to guide the LLM{{- if .ADL.Spec.Agent.SystemPrompt }} (default: ` + "`{{ .ADL.Spec.Agent.SystemPrompt }}`" + `){{- else }} (default: ` + "`You are a helpful AI assistant.`" + `){{- end }}
+- ` + "`A2A_AGENT_CLIENT_MAX_CONVERSATION_HISTORY`" + ` - Maximum conversation history per context (default: ` + "`20`" + `)
+- ` + "`A2A_AGENT_CLIENT_USER_AGENT`" + ` - User agent string (default: ` + "`a2a-agent/1.0`" + `)
+
+#### Capabilities Configuration
+
+{{- if .ADL.Spec.Capabilities }}
+- ` + "`A2A_CAPABILITIES_STREAMING`" + ` - Enable streaming support (default: ` + "`{{ .ADL.Spec.Capabilities.Streaming }}`" + `)
+- ` + "`A2A_CAPABILITIES_PUSH_NOTIFICATIONS`" + ` - Enable push notifications (default: ` + "`{{ .ADL.Spec.Capabilities.PushNotifications }}`" + `)
+- ` + "`A2A_CAPABILITIES_STATE_TRANSITION_HISTORY`" + ` - Enable state transition history (default: ` + "`{{ .ADL.Spec.Capabilities.StateTransitionHistory }}`" + `)
+{{- else }}
+- ` + "`A2A_CAPABILITIES_STREAMING`" + ` - Enable streaming support (default: ` + "`false`" + `)
+- ` + "`A2A_CAPABILITIES_PUSH_NOTIFICATIONS`" + ` - Enable push notifications (default: ` + "`false`" + `)
+- ` + "`A2A_CAPABILITIES_STATE_TRANSITION_HISTORY`" + ` - Enable state transition history (default: ` + "`false`" + `)
+{{- end }}
+
+#### Authentication Configuration
+
+- ` + "`A2A_AUTH_ENABLE`" + ` - Enable OIDC authentication (default: ` + "`false`" + `)
+- ` + "`A2A_AUTH_ISSUER_URL`" + ` - OIDC issuer URL (default: ` + "`http://keycloak:8080/realms/inference-gateway-realm`" + `)
+- ` + "`A2A_AUTH_CLIENT_ID`" + ` - OIDC client ID (default: ` + "`inference-gateway-client`" + `)
+- ` + "`A2A_AUTH_CLIENT_SECRET`" + ` - OIDC client secret
+
+#### TLS Configuration
+
+- ` + "`A2A_SERVER_TLS_ENABLE`" + ` - Enable TLS (default: ` + "`false`" + `)
+- ` + "`A2A_SERVER_TLS_CERT_PATH`" + ` - Path to TLS certificate file
+- ` + "`A2A_SERVER_TLS_KEY_PATH`" + ` - Path to TLS private key file
+
+#### Queue Configuration
+
+- ` + "`A2A_QUEUE_MAX_SIZE`" + ` - Queue maximum size (default: ` + "`100`" + `)
+- ` + "`A2A_QUEUE_CLEANUP_INTERVAL`" + ` - Queue cleanup interval (default: ` + "`30s`" + `)
+
+#### Telemetry Configuration
+
+- ` + "`A2A_TELEMETRY_ENABLE`" + ` - Enable OpenTelemetry metrics collection (default: ` + "`false`" + `)
+- ` + "`A2A_TELEMETRY_METRICS_PORT`" + ` - Metrics server port (default: ` + "`9090`" + `)
+- ` + "`A2A_TELEMETRY_METRICS_HOST`" + ` - Metrics server host
+- ` + "`A2A_TELEMETRY_METRICS_READ_TIMEOUT`" + ` - Metrics server read timeout (default: ` + "`30s`" + `)
+- ` + "`A2A_TELEMETRY_METRICS_WRITE_TIMEOUT`" + ` - Metrics server write timeout (default: ` + "`30s`" + `)
+- ` + "`A2A_TELEMETRY_METRICS_IDLE_TIMEOUT`" + ` - Metrics server idle timeout (default: ` + "`60s`" + `)
+
+### Logging Configuration
+
+- ` + "`A2A_DEBUG`" + ` - Enable debug mode (default: ` + "`false`" + `)
+- ` + "`LOG_LEVEL`" + ` - Log level: ` + "`debug`" + `, ` + "`info`" + `, ` + "`warn`" + `, ` + "`error`" + ` (default: ` + "`info`" + `)
+- ` + "`LOG_FORMAT`" + ` - Log format: ` + "`json`" + `, ` + "`console`" + ` (default: ` + "`json`" + `)
 
 ## Getting Started
 
@@ -351,15 +475,7 @@ This A2A (Agent-to-Agent) server was generated using the A2A CLI from an Agent D
 - Go {{ .ADL.Spec.Language.Go.Version }}+
 - [Task](https://taskfile.dev/) (optional, for using Taskfile commands)
 
-### Environment Variables
-
-Common A2A configuration:
-- ` + "`A2A_SERVER_PORT`" + `: Server port (default: {{ .ADL.Spec.Server.Port | default 8080 }})
-- ` + "`A2A_DEBUG`" + `: Enable debug mode (default: false)
-- ` + "`A2A_AGENT_SYSTEM_PROMPT`" + `: Override the system prompt
-- ` + "`A2A_AGENT_MODEL`" + `: AI model to use
-
-### Running the Server
+### Installation & Running
 
 #### Using Task (recommended)
 
@@ -367,10 +483,10 @@ Common A2A configuration:
 # Install dependencies
 go mod tidy
 
-# Generate code from ADL
+# Generate code from ADL (if needed)
 task generate
 
-# Run in development mode
+# Run in development mode with debug logging
 task run
 
 # Build the binary
@@ -378,6 +494,9 @@ task build
 
 # Run tests
 task test
+
+# Run linting
+task lint
 ` + "```" + `
 
 #### Using Go directly
@@ -395,10 +514,10 @@ go build -o bin/{{ .ADL.Metadata.Name }} .
 
 ` + "```bash" + `
 # Build Docker image
-task docker-build
+docker build -t {{ .ADL.Metadata.Name }}:{{ .ADL.Metadata.Version }} .
 
 # Run container
-task docker-run
+docker run -p {{ .ADL.Spec.Server.Port | default 8080 }}:{{ .ADL.Spec.Server.Port | default 8080 }} {{ .ADL.Metadata.Name }}:{{ .ADL.Metadata.Version }}
 ` + "```" + `
 
 #### Kubernetes Deployment
@@ -424,25 +543,54 @@ kubectl port-forward svc/{{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Port | def
 
 The operator automatically manages deployment, scaling, health checks, and configuration.
 
+## Example Usage
+
+` + "```bash" + `
+# Test the agent capabilities
+curl http://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}/.well-known/agent.json
+
+# Health check
+curl http://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}/health
+
+# Send a message to the agent
+curl -X POST http://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}/a2a \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "message/send",
+    "params": {
+      "message": {
+        "role": "user",
+        "content": "Hello! What can you help me with?"
+      }
+    },
+    "id": 1
+  }'
+` + "```" + `
+
 ## Development
 
 ### Project Structure
 
 ` + "```" + `
 .
-├── main.go              # Main server setup
-├── tools/               # Tool implementations
+├── main.go                    # Main server setup and configuration
+├── tools/                     # Tool implementations
 {{- range .ADL.Spec.Tools }}
-│   ├── {{ .Name }}.go   # {{ .Description }}
+│   ├── {{ .Name }}.go         # {{ .Description }}
 {{- end }}
-├── go.mod               # Go module definition
+├── go.mod                     # Go module definition
+├── go.sum                     # Go module checksums
 ├── .well-known/
-│   └── agent.json       # Agent capabilities
-├── Taskfile.yml         # Task definitions
-├── Dockerfile           # Container configuration
+│   └── agent.json             # Agent capabilities metadata
+├── Taskfile.yml               # Task runner definitions
+├── Dockerfile                 # Container configuration
+├── .gitignore                 # Git ignore patterns
+├── .gitattributes             # Git attributes
+├── .editorconfig              # Editor configuration
 ├── k8s/
-│   └── a2a-server.yaml  # Kubernetes deployment
-└── README.md            # This file
+│   └── a2a-server.yaml        # Kubernetes A2A Custom Resource
+└── README.md                  # This documentation
 ` + "```" + `
 
 ### Implementing Tools
@@ -450,6 +598,13 @@ The operator automatically manages deployment, scaling, health checks, and confi
 Each tool is implemented in its own file under the ` + "`tools/`" + ` directory. Tools follow this pattern:
 
 ` + "```go" + `
+package tools
+
+import (
+    "context"
+    "github.com/inference-gateway/a2a/adk/server"
+)
+
 func NewToolNameTool() server.Tool {
     return server.NewBasicTool(
         "tool_name",
@@ -467,44 +622,65 @@ func toolNameHandler(ctx context.Context, args map[string]interface{}) (string, 
 
 ### Testing
 
-Add tests for your tool implementations:
+Add comprehensive tests for your tool implementations:
 
 ` + "```bash" + `
-# Run tests
+# Run all tests
 go test -v ./...
 
 # Run tests with coverage
 go test -v -cover ./...
+
+# Run tests with race detection
+go test -v -race ./...
+
+# Run specific tool tests
+go test -v ./tools/
 ` + "```" + `
 
-### Example Usage
+### Code Quality
 
 ` + "```bash" + `
-# Test the agent capabilities
-curl http://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}/.well-known/agent.json
+# Format code
+go fmt ./...
+
+# Vet code for issues
+go vet ./...
+
+# Run linter (requires golangci-lint)
+golangci-lint run
+
+# Or use Task for convenience
+task lint
 ` + "```" + `
 
-## API Endpoints
-
-Once running, the server exposes:
-
-- ` + "`GET /.well-known/agent.json`" + ` - Agent capabilities and metadata
-
-## Generated Files
+## Version Information
 
 This project was generated with:
 - **CLI Version:** {{ .Metadata.CLIVersion }}
 - **Template:** {{ .Metadata.Template }}
 - **Generated At:** {{ .Metadata.GeneratedAt.Format "2006-01-02 15:04:05" }}
+- **A2A Version:** {{ .ADL.Metadata.Version }}
 
 To regenerate with ADL changes:
 ` + "```bash" + `
 a2a generate --file agent.yaml --output . --overwrite
 ` + "```" + `
 
+## License
+
+MIT
+
 ---
 
-> 🤖 This server is powered by the [A2A (Agent-to-Agent) framework](https://github.com/inference-gateway/a2a)
+<div align="center">
+
+🤖 **This server is powered by the [Inference Gateway A2A (Agent-to-Agent) framework](https://github.com/inference-gateway/a2a)**
+
+[![A2A Documentation](https://img.shields.io/badge/📚-A2A_Docs-blue?style=for-the-badge)](https://github.com/inference-gateway/a2a)
+[![Inference Gateway](https://img.shields.io/badge/🚀-Inference_Gateway-green?style=for-the-badge)](https://docs.inference-gateway.com)
+
+</div>
 `
 
 const minimalOperatorTemplate = `---
