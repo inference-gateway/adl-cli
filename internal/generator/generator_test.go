@@ -262,7 +262,7 @@ func TestGenerator_validateADL(t *testing.T) {
 	}
 }
 
-func TestGenerator_generateA2aIgnoreFile(t *testing.T) {
+func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 	goADL := &schema.ADL{
 		APIVersion: "adl.dev/v1",
 		Kind:       "Agent",
@@ -336,9 +336,9 @@ func TestGenerator_generateA2aIgnoreFile(t *testing.T) {
 				Template: tt.templateName,
 			})
 
-			err = gen.generateA2aIgnoreFile(tmpDir, tt.templateName, tt.adl)
+			err = gen.generateADLIgnoreFile(tmpDir, tt.templateName, tt.adl)
 			if err != nil {
-				t.Fatalf("generateA2aIgnoreFile() error = %v", err)
+				t.Fatalf("generateADLIgnoreFile() error = %v", err)
 			}
 
 			ignoreFilePath := filepath.Join(tmpDir, ".adl-ignore")
@@ -349,7 +349,7 @@ func TestGenerator_generateA2aIgnoreFile(t *testing.T) {
 
 			contentStr := string(content)
 			if !containsPattern(contentStr, tt.wantContent) {
-				t.Errorf("generateA2aIgnoreFile() content does not contain expected pattern %q", tt.wantContent)
+				t.Errorf("generateADLIgnoreFile() content does not contain expected pattern %q", tt.wantContent)
 			}
 		})
 	}

@@ -216,7 +216,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		return fmt.Errorf("failed to generate agent.json: %w", err)
 	}
 
-	if err := g.generateA2aIgnoreFile(outputDir, templateEngine.GetTemplate(), adl); err != nil {
+	if err := g.generateADLIgnoreFile(outputDir, templateEngine.GetTemplate(), adl); err != nil {
 		return fmt.Errorf("failed to generate .adl-ignore file: %w", err)
 	}
 
@@ -318,8 +318,8 @@ func (g *Generator) getVersion() string {
 	return "dev"
 }
 
-// generateA2aIgnoreFile creates a .adl-ignore file with files that contain TODOs
-func (g *Generator) generateA2aIgnoreFile(outputDir, templateName string, adl *schema.ADL) error {
+// generateADLIgnoreFile creates a .adl-ignore file with files that contain TODOs
+func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *schema.ADL) error {
 	ignoreFilePath := filepath.Join(outputDir, ".adl-ignore")
 
 	if _, err := os.Stat(ignoreFilePath); err == nil {
