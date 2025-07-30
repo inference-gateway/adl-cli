@@ -89,12 +89,7 @@ install_binary() {
     local platform="$2"
     local archive_name="${BINARY_NAME}_${platform}.tar.gz"
     local download_url="https://github.com/${REPO}/releases/download/${version}/${archive_name}"
-    
-    if [[ "$platform" == *"Windows"* ]]; then
-        local binary_path="${INSTALL_DIR}/${BINARY_NAME}.exe"
-    else
-        local binary_path="${INSTALL_DIR}/${BINARY_NAME}"
-    fi
+    local binary_path="${INSTALL_DIR}/${BINARY_NAME}"
     
     print_status "Downloading ${archive_name} ${version}..."
     
