@@ -75,10 +75,18 @@ type TypeScriptConfig struct {
 	NodeVersion string `yaml:"nodeVersion" json:"nodeVersion"`
 }
 
+// RustConfig for Rust-specific settings
+type RustConfig struct {
+	PackageName string `yaml:"packageName" json:"packageName"`
+	Version     string `yaml:"version" json:"version"`
+	Edition     string `yaml:"edition" json:"edition"`
+}
+
 // Language configuration for different programming languages
 type Language struct {
 	Go         *GoConfig         `yaml:"go,omitempty" json:"go,omitempty"`
 	TypeScript *TypeScriptConfig `yaml:"typescript,omitempty" json:"typescript,omitempty"`
+	Rust       *RustConfig       `yaml:"rust,omitempty" json:"rust,omitempty"`
 }
 
 // SCM contains source control management configuration

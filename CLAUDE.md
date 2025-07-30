@@ -139,19 +139,19 @@ The generator detects target language from ADL `spec.language` section and valid
 ### Running CLI During Development
 ```bash
 # After building
-./bin/adl generate --file examples/minimal-agent.yaml --output ./test-output
+./bin/adl generate --file examples/go-agent.yaml --output ./test-output
 
 # Using task dev
-task dev -- generate --file examples/minimal-agent.yaml --output ./test-output
+task dev -- generate --file examples/go-agent.yaml --output ./test-output
 ```
 
 ### Testing Generation
 ```bash
 # Generate from example
-./bin/adl generate --file examples/minimal-agent.yaml --output ./test-output
+./bin/adl generate --file examples/rust-agent.yaml --output ./test-output
 
 # Validate ADL file
-./bin/adl validate examples/minimal-agent.yaml
+./bin/adl validate examples/rust-agent.yaml
 ```
 
 ### Debugging Generation Issues

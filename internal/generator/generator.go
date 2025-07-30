@@ -130,6 +130,18 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 			return fmt.Errorf("spec.language.typescript.nodeVersion is required")
 		}
 	}
+	if adl.Spec.Language.Rust != nil {
+		languageCount++
+		if adl.Spec.Language.Rust.PackageName == "" {
+			return fmt.Errorf("spec.language.rust.packageName is required")
+		}
+		if adl.Spec.Language.Rust.Version == "" {
+			return fmt.Errorf("spec.language.rust.version is required")
+		}
+		if adl.Spec.Language.Rust.Edition == "" {
+			return fmt.Errorf("spec.language.rust.edition is required")
+		}
+	}
 
 	if languageCount == 0 {
 		return fmt.Errorf("at least one programming language must be defined in spec.language")
@@ -204,7 +216,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		return fmt.Errorf("failed to generate agent.json: %w", err)
 	}
 
-	if err := g.generateA2aIgnoreFile(outputDir, templateEngine.GetTemplate()); err != nil {
+	if err := g.generateADLIgnoreFile(outputDir, templateEngine.GetTemplate(), adl); err != nil {
 		return fmt.Errorf("failed to generate .adl-ignore file: %w", err)
 	}
 
@@ -306,8 +318,8 @@ func (g *Generator) getVersion() string {
 	return "dev"
 }
 
-// generateA2aIgnoreFile creates a .adl-ignore file with files that contain TODOs
-func (g *Generator) generateA2aIgnoreFile(outputDir, templateName string) error {
+// generateADLIgnoreFile creates a .adl-ignore file with files that contain TODOs
+func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *schema.ADL) error {
 	ignoreFilePath := filepath.Join(outputDir, ".adl-ignore")
 
 	if _, err := os.Stat(ignoreFilePath); err == nil {
@@ -316,11 +328,23 @@ func (g *Generator) generateA2aIgnoreFile(outputDir, templateName string) error 
 	}
 
 	var filesToIgnore []string
+	language := g.detectLanguage(adl)
 
 	switch templateName {
 	case "minimal":
-		filesToIgnore = []string{
-			"tools/*",
+		switch language {
+		case "go":
+			filesToIgnore = []string{
+				"tools/*",
+			}
+		case "rust":
+			filesToIgnore = []string{
+				"src/tools/*",
+			}
+		case "typescript":
+			filesToIgnore = []string{
+				"src/tools/*",
+			}
 		}
 	}
 
@@ -400,6 +424,9 @@ func (g *Generator) detectLanguage(adl *schema.ADL) string {
 	if adl.Spec.Language.TypeScript != nil {
 		return "typescript"
 	}
+	if adl.Spec.Language.Rust != nil {
+		return "rust"
+	}
 	return "unknown"
 }
 
@@ -428,6 +455,8 @@ func (g *Generator) generateGitHubActionsWorkflow(adl *schema.ADL, outputDir str
 		workflowContent = g.generateGoWorkflowContent(adl)
 	case "typescript":
 		workflowContent = g.generateTypeScriptWorkflowContent(adl)
+	case "rust":
+		workflowContent = g.generateRustWorkflowContent(adl)
 	default:
 		return fmt.Errorf("GitHub Actions generation not supported for language: %s", language)
 	}
@@ -546,6 +575,67 @@ jobs:
     - name: Build
       run: task build
 `, nodeVersion)
+}
+
+// generateRustWorkflowContent generates the GitHub Actions workflow content for Rust projects
+func (g *Generator) generateRustWorkflowContent(adl *schema.ADL) string {
+	rustVersion := "1.70"
+	if adl.Spec.Language.Rust != nil && adl.Spec.Language.Rust.Version != "" {
+		rustVersion = adl.Spec.Language.Rust.Version
+	}
+
+	return fmt.Sprintf(`name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    
+    steps:
+    - uses: actions/checkout@v4.2.2
+    
+    - name: Set up Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: %s
+        override: true
+        components: rustfmt, clippy
+
+    - name: Install Task
+      uses: arduino/setup-task@v2
+      with:
+        version: 3.x
+    
+    - name: Cache cargo dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: Format check
+      run: task fmt
+    
+    - name: Lint
+      run: task lint
+    
+    - name: Run tests
+      run: task test
+    
+    - name: Build
+      run: task build
+`, rustVersion)
 }
 
 // generateGitLabCIWorkflow generates a GitLab CI workflow

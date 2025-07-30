@@ -57,6 +57,8 @@ func (e *Engine) ExecuteWithHeader(templateContent string, ctx Context, fileName
 	switch {
 	case ext == ".go":
 		fileType = "go"
+	case ext == ".rs":
+		fileType = "rust"
 	case ext == ".yaml" || ext == ".yml":
 		fileType = "yaml"
 	case baseName == "dockerfile":

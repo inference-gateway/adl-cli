@@ -4,7 +4,7 @@ This directory contains example Agent Definition Language (ADL) files that demon
 
 ## Files
 
-- `minimal-agent.yaml` - Complete agent example with AI capabilities, multiple tools, and enterprise features
+- `go-agent.yaml` - Complete agent example with AI capabilities, multiple tools, and enterprise features
 
 ## Usage
 
@@ -12,8 +12,8 @@ Generate an agent from the example:
 
 ```bash
 # Generate agent from example
-a2a generate --file examples/minimal-agent.yaml --output ./my-agent
+a2a generate --file examples/go-agent.yaml --output ./my-agent
 
 # Validate the example
-a2a validate examples/minimal-agent.yaml
+a2a validate examples/go-agent.yaml
 ```

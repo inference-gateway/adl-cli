@@ -1,0 +1,83 @@
+apiVersion: adl.dev/v1
+kind: Agent
+metadata:
+  name: rust-agent
+  description: "Rust agent with basic functionality using Rust ADK"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: true
+    stateTransitionHistory: true
+  agent:
+    provider: openai
+    model: gpt-4o-mini
+    systemPrompt: |
+      You are a helpful assistant built with Rust.
+      Always prioritize safety, performance, and memory efficiency in your responses.
+      Log all interactions for audit purposes.
+    maxTokens: 8192
+    temperature: 0.3
+  tools:
+    - name: go_to_url
+      description: "Navigate to a specific URL and retrieve content"
+      schema:
+        type: object
+        properties:
+          url:
+            type: string
+            description: "URL to navigate to"
+            format: uri
+          headers:
+            type: object
+            description: "Optional HTTP headers"
+            additionalProperties:
+              type: string
+        required: [url]
+    - name: fetch_content
+      description: "Fetch and parse content from a web page"
+      schema:
+        type: object
+        properties:
+          url:
+            type: string
+            description: "URL to fetch content from"
+            format: uri
+          selector:
+            type: string
+            description: "CSS selector to extract specific content"
+          timeout:
+            type: integer
+            description: "Request timeout in seconds"
+            minimum: 1
+            maximum: 300
+            default: 30
+        required: [url]
+    - name: delete_cookies
+      description: "Delete browser cookies for specified domains"
+      schema:
+        type: object
+        properties:
+          domains:
+            type: array
+            description: "List of domains to delete cookies for"
+            items:
+              type: string
+          all:
+            type: boolean
+            description: "Delete all cookies if true"
+            default: false
+        required: [domains]
+  server:
+    port: 8080
+    debug: false
+    auth:
+      enabled: false
+  language:
+    rust:
+      packageName: "rust-agent"
+      version: "1.88"
+      edition: "2024"
+  scm:
+    provider: github
+    url: "https://github.com/company/rust-agent"

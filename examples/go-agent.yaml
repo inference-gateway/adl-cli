@@ -1,7 +1,7 @@
 apiVersion: adl.dev/v1
 kind: Agent
 metadata:
-  name: minimal-agent
+  name: go-agent
   description: "Minimal agent with basic functionality"
   version: "0.1.0"
 spec:
@@ -85,8 +85,8 @@ spec:
       enabled: true
   language:
     go:
-      module: "github.com/company/minimal-agent"
+      module: "github.com/company/go-agent"
       version: "1.24"
   scm:
     provider: github
-    url: "https://github.com/company/minimal-agent"
+    url: "https://github.com/company/go-agent"
