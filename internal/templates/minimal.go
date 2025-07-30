@@ -8,6 +8,36 @@ import (
 
 // GetMinimalTemplate returns the minimal agent template files
 func GetMinimalTemplate(adl *schema.ADL) map[string]string {
+	// Detect language
+	language := detectLanguageFromADL(adl)
+
+	switch language {
+	case "go":
+		return getGoMinimalTemplate(adl)
+	case "rust":
+		return getRustMinimalTemplate(adl)
+	default:
+		// Default to Go for backward compatibility
+		return getGoMinimalTemplate(adl)
+	}
+}
+
+// detectLanguageFromADL detects the programming language from ADL
+func detectLanguageFromADL(adl *schema.ADL) string {
+	if adl.Spec.Language.Go != nil {
+		return "go"
+	}
+	if adl.Spec.Language.Rust != nil {
+		return "rust"
+	}
+	if adl.Spec.Language.TypeScript != nil {
+		return "typescript"
+	}
+	return "go" // default
+}
+
+// getGoMinimalTemplate returns the minimal Go agent template files
+func getGoMinimalTemplate(adl *schema.ADL) map[string]string {
 	files := map[string]string{
 		"main.go":                minimalMainGoTemplate,
 		"go.mod":                 goModTemplate,
@@ -23,6 +53,33 @@ func GetMinimalTemplate(adl *schema.ADL) map[string]string {
 
 	for _, tool := range adl.Spec.Tools {
 		files["tools/"+tool.Name+".go"] = generateToolTemplate(tool)
+	}
+
+	return files
+}
+
+// getRustMinimalTemplate returns the minimal Rust agent template files
+func getRustMinimalTemplate(adl *schema.ADL) map[string]string {
+	files := map[string]string{
+		"src/main.rs":            minimalMainRustTemplate,
+		"Cargo.toml":             cargoTomlTemplate,
+		".well-known/agent.json": cardJSONTemplate,
+		"Taskfile.yml":           rustTaskfileTemplate,
+		"Dockerfile":             rustDockerfileTemplate,
+		".gitignore":             rustGitignoreTemplate,
+		".gitattributes":         gitattributesTemplate,
+		".editorconfig":          editorconfigTemplate,
+		"README.md":              minimalRustReadmeTemplate,
+		"k8s/a2a-server.yaml":    minimalOperatorTemplate,
+	}
+
+	for _, tool := range adl.Spec.Tools {
+		files["src/tools/"+tool.Name+".rs"] = generateRustToolTemplate(tool)
+	}
+
+	// Generate tools module file
+	if len(adl.Spec.Tools) > 0 {
+		files["src/tools/mod.rs"] = generateRustToolsModTemplate(adl)
 	}
 
 	return files
@@ -866,4 +923,605 @@ indent_size = 2
 [*.sh]
 indent_style = space
 indent_size = 2
+
+# Rust files
+[*.rs]
+indent_style = space
+indent_size = 4
 `
+
+// Rust Templates
+
+const minimalMainRustTemplate = `use std::sync::Arc;
+use tokio::signal;
+use tracing::{info, warn, error};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
+use rust_adk::{
+    agent::{Agent, AgentBuilder},
+    server::{Server, ServerConfig},
+    tools::ToolBox,
+};
+
+mod tools;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Initialize tracing
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "{{ .ADL.Metadata.Name | replace "-" "_" }}=info".into()),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
+    info!("Starting {{ .ADL.Metadata.Name }} agent v{{ .ADL.Metadata.Version }}");
+
+    // Create toolbox and register tools
+    let mut toolbox = ToolBox::new();
+    {{- range .ADL.Spec.Tools }}
+    
+    // Register {{ .Name }} tool
+    let {{ .Name }}_tool = tools::{{ .Name }}::{{ .Name | title }}Tool::new();
+    toolbox.add_tool("{{ .Name }}", Box::new({{ .Name }}_tool));
+    info!("Registered tool: {{ .Name }} - {{ .Description }}");
+    {{- end }}
+
+    // Build agent
+    let agent = AgentBuilder::new()
+        .with_system_prompt("{{- if .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt }}{{- else }}You are a helpful AI assistant.{{- end }}")
+        .with_toolbox(toolbox)
+        .build()
+        .await?;
+
+    // Server configuration
+    let server_config = ServerConfig {
+        host: "0.0.0.0".to_string(),
+        port: {{ .ADL.Spec.Server.Port | default 8080 }},
+        debug: {{ .ADL.Spec.Server.Debug | default false }},
+    };
+
+    // Create and start server
+    let server = Server::new(server_config, Arc::new(agent));
+    
+    // Start server in background
+    let server_handle = tokio::spawn(async move {
+        if let Err(e) = server.run().await {
+            error!("Server error: {}", e);
+        }
+    });
+
+    info!("{{ .ADL.Metadata.Name }} agent running on port {{ .ADL.Spec.Server.Port | default 8080 }}");
+
+    // Wait for shutdown signal
+    signal::ctrl_c().await?;
+    warn!("Shutdown signal received, gracefully stopping...");
+
+    // Cancel server
+    server_handle.abort();
+    
+    info!("{{ .ADL.Metadata.Name }} agent stopped");
+    Ok(())
+}
+`
+
+const cargoTomlTemplate = `[package]
+name = "{{ .ADL.Spec.Language.Rust.PackageName }}"
+version = "{{ .ADL.Metadata.Version }}"
+edition = "{{ .ADL.Spec.Language.Rust.Edition }}"
+rust-version = "{{ .ADL.Spec.Language.Rust.Version }}"
+description = "{{ .ADL.Metadata.Description }}"
+
+[dependencies]
+rust-adk = { git = "https://github.com/inference-gateway/rust-adk" }
+tokio = { version = "1.0", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+`
+
+const rustTaskfileTemplate = `version: '3'
+
+vars:
+  APP_NAME: {{ .ADL.Metadata.Name }}
+  VERSION: {{ .ADL.Metadata.Version }}
+
+tasks:
+  generate:
+    desc: Generate code from ADL
+    cmd: adl generate --file agent.yaml --output .
+
+  build:
+    desc: Build the application
+    cmd: cargo build --release
+    
+  run:
+    desc: Run the application in development mode
+    cmd: cargo run
+    env:
+      RUST_LOG: debug
+
+  test:
+    desc: Run tests
+    cmd: cargo test --verbose
+
+  test:coverage:
+    desc: Run tests with coverage
+    cmd: cargo tarpaulin --verbose --all-features --workspace --timeout 120
+
+  fmt:
+    desc: Format code
+    cmd: cargo fmt
+
+  fmt:check:
+    desc: Check code formatting
+    cmd: cargo fmt --check
+
+  lint:
+    desc: Run clippy linter
+    cmd: cargo clippy --all-targets --all-features -- -D warnings
+
+  clean:
+    desc: Clean build artifacts
+    cmd: cargo clean
+
+  docker:build:
+    desc: Build Docker image
+    cmd: docker build -t {{` + "`{{.APP_NAME}}`" + `}}:{{` + "`{{.VERSION}}`" + `}} .
+`
+
+const rustDockerfileTemplate = `FROM rust:{{ .ADL.Spec.Language.Rust.Version }}-slim as builder
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy manifest files
+COPY Cargo.toml Cargo.lock ./
+
+# Copy source code
+COPY src ./src
+
+# Build the application
+RUN cargo build --release
+
+# Runtime stage
+FROM debian:bookworm-slim
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy the binary from builder stage
+COPY --from=builder /app/target/release/{{ .ADL.Spec.Language.Rust.PackageName }} ./{{ .ADL.Metadata.Name }}
+
+# Copy agent card
+COPY --from=builder /app/.well-known ./.well-known
+
+# Create non-root user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN chown -R appuser:appuser /app
+USER appuser
+
+# Expose port
+EXPOSE {{ .ADL.Spec.Server.Port | default 8080 }}
+
+# Set environment variables
+ENV RUST_LOG=info
+
+# Run the application
+CMD ["./{{ .ADL.Metadata.Name }}"]
+`
+
+const rustGitignoreTemplate = `# Rust build artifacts
+/target/
+Cargo.lock
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Log files
+*.log
+
+# Temporary files
+tmp/
+temp/
+
+# Coverage reports
+tarpaulin-report.html
+lcov.info
+`
+
+const minimalRustReadmeTemplate = `<div align="center">
+
+# {{ .ADL.Metadata.Name | title }}
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Rust Version](https://img.shields.io/badge/Rust-{{ .ADL.Spec.Language.Rust.Version }}+-orange?style=flat&logo=rust)](https://www.rust-lang.org)
+[![A2A Protocol](https://img.shields.io/badge/A2A-Protocol-blue?style=flat)](https://github.com/inference-gateway/rust-adk)
+
+**{{ .ADL.Metadata.Description }}**
+
+A production-ready [Agent-to-Agent (A2A)](https://github.com/inference-gateway/rust-adk) server that provides AI-powered capabilities through a standardized protocol. Built with Rust for performance and safety.
+
+</div>
+
+## Quick Start
+
+` + "```bash" + `
+# Run the agent
+cargo run
+
+# Or with Docker
+docker build -t {{ .ADL.Metadata.Name }} .
+docker run -p {{ .ADL.Spec.Server.Port | default 8080 }}:{{ .ADL.Spec.Server.Port | default 8080 }} {{ .ADL.Metadata.Name }}
+` + "```" + `
+
+## Features
+
+- ✅ A2A protocol compliant
+- ✅ AI-powered capabilities{{- if .ADL.Spec.Capabilities }}{{- if .ADL.Spec.Capabilities.Streaming }}
+- ✅ Streaming support{{- end }}{{- if .ADL.Spec.Capabilities.PushNotifications }}
+- ✅ Push notifications{{- end }}{{- if .ADL.Spec.Capabilities.StateTransitionHistory }}
+- ✅ State transition history{{- end }}{{- end }}
+- ✅ Production ready
+- ✅ Memory safe with Rust
+- ✅ High performance async runtime
+
+## Endpoints
+
+- ` + "`GET /.well-known/agent.json`" + ` - Agent metadata and capabilities
+- ` + "`GET /health`" + ` - Health check endpoint
+- ` + "`POST /a2a`" + ` - A2A protocol endpoint
+
+## Available Tools
+
+{{- range .ADL.Spec.Tools }}
+- **{{ .Name }}** - {{ .Description }}
+{{- end }}
+
+## Configuration
+
+Configure the agent via environment variables:
+
+### Logging Configuration
+
+- ` + "`RUST_LOG`" + ` - Log level: ` + "`trace`" + `, ` + "`debug`" + `, ` + "`info`" + `, ` + "`warn`" + `, ` + "`error`" + ` (default: ` + "`info`" + `)
+
+## Getting Started
+
+### Prerequisites
+
+- Rust {{ .ADL.Spec.Language.Rust.Version }}+
+- [Task](https://taskfile.dev/) (optional, for using Taskfile commands)
+
+### Installation & Running
+
+#### Using Cargo (recommended)
+
+` + "```bash" + `
+# Run in development mode with debug logging
+RUST_LOG=debug cargo run
+
+# Build release binary
+cargo build --release
+
+# Run release binary
+./target/release/{{ .ADL.Spec.Language.Rust.PackageName }}
+` + "```" + `
+
+#### Using Task
+
+` + "```bash" + `
+# Run in development mode with debug logging
+task run
+
+# Build the binary
+task build
+
+# Run tests
+task test
+
+# Run linting
+task lint
+
+# Format code
+task fmt
+` + "```" + `
+
+#### Using Docker
+
+` + "```bash" + `
+# Build Docker image
+docker build -t {{ .ADL.Metadata.Name }}:{{ .ADL.Metadata.Version }} .
+
+# Run container
+docker run -p {{ .ADL.Spec.Server.Port | default 8080 }}:{{ .ADL.Spec.Server.Port | default 8080 }} {{ .ADL.Metadata.Name }}:{{ .ADL.Metadata.Version }}
+` + "```" + `
+
+#### Kubernetes Deployment
+
+For production deployment using the [Inference Gateway Operator](https://github.com/inference-gateway/operator):
+
+` + "```bash" + `
+# Install the Inference Gateway Operator (if not already installed)
+kubectl apply -f https://github.com/inference-gateway/operator/releases/latest/download/install.yaml
+
+# Apply A2A Custom Resource
+kubectl apply -f k8s/a2a-server.yaml
+
+# Check A2A status
+kubectl get a2a {{ .ADL.Metadata.Name }} -n {{ .ADL.Metadata.Name }}-ns
+
+# View operator-managed deployment
+kubectl get pods -n {{ .ADL.Metadata.Name }}-ns
+
+# Port forward for testing
+kubectl port-forward svc/{{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Port | default 8080 }}:80 -n {{ .ADL.Metadata.Name }}-ns
+` + "```" + `
+
+The operator automatically manages deployment, scaling, health checks, and configuration.
+
+## Example Usage
+
+` + "```bash" + `
+# Test the agent capabilities
+curl http://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}/.well-known/agent.json
+
+# Health check
+curl http://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}/health
+
+# Send a message to the agent
+curl -X POST http://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}/a2a \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "message/send",
+    "params": {
+      "message": {
+        "role": "user",
+        "content": "Hello! What can you help me with?"
+      }
+    },
+    "id": 1
+  }'
+` + "```" + `
+
+## Development
+
+### Project Structure
+
+` + "```" + `
+.
+├── src/
+│   ├── main.rs                # Main server setup and configuration
+│   └── tools/                 # Tool implementations
+{{- range .ADL.Spec.Tools }}
+│       ├── {{ .Name }}.rs     # {{ .Description }}
+{{- end }}
+│       └── mod.rs             # Tools module declaration
+├── Cargo.toml                 # Rust package manifest
+├── .well-known/
+│   └── agent.json             # Agent capabilities metadata
+├── Taskfile.yml               # Task runner definitions
+├── Dockerfile                 # Container configuration
+├── .gitignore                 # Git ignore patterns
+├── .gitattributes             # Git attributes
+├── .editorconfig              # Editor configuration
+├── k8s/
+│   └── a2a-server.yaml        # Kubernetes A2A Custom Resource
+└── README.md                  # This documentation
+` + "```" + `
+
+### Implementing Tools
+
+Each tool is implemented in its own file under the ` + "`src/tools/`" + ` directory. Tools follow this pattern:
+
+` + "```rust" + `
+use async_trait::async_trait;
+use rust_adk::tools::Tool;
+use serde_json::Value;
+
+pub struct ToolNameTool;
+
+impl ToolNameTool {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+#[async_trait]
+impl Tool for ToolNameTool {
+    fn name(&self) -> &str {
+        "tool_name"
+    }
+
+    fn description(&self) -> &str {
+        "Tool description"
+    }
+
+    async fn execute(&self, args: Value) -> Result<Value, Box<dyn std::error::Error + Send + Sync>> {
+        // Your implementation here
+        Ok(serde_json::json!({"result": "success"}))
+    }
+}
+` + "```" + `
+
+### Testing
+
+Add comprehensive tests for your tool implementations:
+
+` + "```bash" + `
+# Run all tests
+cargo test --verbose
+
+# Run tests with coverage
+cargo tarpaulin --verbose --all-features --workspace --timeout 120
+
+# Run specific tool tests
+cargo test tools::
+` + "```" + `
+
+### Code Quality
+
+` + "```bash" + `
+# Format code
+cargo fmt
+
+# Check formatting
+cargo fmt --check
+
+# Run linter
+cargo clippy --all-targets --all-features -- -D warnings
+
+# Or use Task for convenience
+task lint
+` + "```" + `
+
+## Version Information
+
+This project was generated with:
+- **CLI Version:** {{ .Metadata.CLIVersion }}
+- **Template:** {{ .Metadata.Template }}
+- **Generated At:** {{ .Metadata.GeneratedAt.Format "2006-01-02 15:04:05" }}
+- **A2A Version:** {{ .ADL.Metadata.Version }}
+
+To regenerate with ADL changes:
+` + "```bash" + `
+adl generate --file agent.yaml --output . --overwrite
+` + "```" + `
+
+## License
+
+MIT
+
+---
+
+<div align="center">
+
+🦀 **This server is powered by the [Rust ADK (Agent Development Kit)](https://github.com/inference-gateway/rust-adk)**
+
+[![Rust ADK Documentation](https://img.shields.io/badge/📚-Rust_ADK_Docs-blue?style=for-the-badge)](https://github.com/inference-gateway/rust-adk)
+[![Inference Gateway](https://img.shields.io/badge/🚀-Inference_Gateway-green?style=for-the-badge)](https://docs.inference-gateway.com)
+
+</div>
+`
+
+// generateRustToolTemplate creates a Rust template for an individual tool
+func generateRustToolTemplate(tool schema.Tool) string {
+	return `use async_trait::async_trait;
+use rust_adk::tools::Tool;
+use serde_json::Value;
+use tracing::{debug, error};
+
+pub struct ` + titleCase(tool.Name) + `Tool;
+
+impl ` + titleCase(tool.Name) + `Tool {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+#[async_trait]
+impl Tool for ` + titleCase(tool.Name) + `Tool {
+    fn name(&self) -> &str {
+        "` + tool.Name + `"
+    }
+
+    fn description(&self) -> &str {
+        "` + tool.Description + `"
+    }
+
+    async fn execute(&self, args: Value) -> Result<Value, Box<dyn std::error::Error + Send + Sync>> {
+        debug!("Executing ` + tool.Name + ` tool with args: {:?}", args);
+        
+        // TODO: Implement ` + tool.Name + ` logic
+        // ` + tool.Description + `
+        
+        ` + generateRustToolLogic(tool) + `
+        
+        // Placeholder implementation
+        let result = serde_json::json!({
+            "result": "TODO: Implement ` + tool.Name + ` logic",
+            "input": args
+        });
+        
+        debug!("` + titleCase(tool.Name) + ` tool result: {:?}", result);
+        Ok(result)
+    }
+}
+`
+}
+
+// generateRustToolLogic generates basic parameter extraction logic for Rust tools
+func generateRustToolLogic(tool schema.Tool) string {
+	if tool.Schema == nil {
+		return "// No parameters defined"
+	}
+
+	logic := "// Extract parameters from args\n"
+	if properties, ok := tool.Schema["properties"].(map[string]interface{}); ok {
+		for paramName, prop := range properties {
+			if propMap, ok := prop.(map[string]interface{}); ok {
+				if propType, ok := propMap["type"].(string); ok {
+					switch propType {
+					case "string":
+						logic += fmt.Sprintf("        // let %s = args[\"%s\"].as_str().unwrap_or_default();\n", paramName, paramName)
+					case "number":
+						logic += fmt.Sprintf("        // let %s = args[\"%s\"].as_f64().unwrap_or(0.0);\n", paramName, paramName)
+					case "boolean":
+						logic += fmt.Sprintf("        // let %s = args[\"%s\"].as_bool().unwrap_or(false);\n", paramName, paramName)
+					default:
+						logic += fmt.Sprintf("        // let %s = &args[\"%s\"];\n", paramName, paramName)
+					}
+				}
+			}
+		}
+	}
+
+	return logic
+}
+
+// generateRustToolsModTemplate creates a module declaration file for Rust tools
+func generateRustToolsModTemplate(adl *schema.ADL) string {
+	content := "// Module declarations for tools\n\n"
+
+	for _, tool := range adl.Spec.Tools {
+		content += fmt.Sprintf("pub mod %s;\n", tool.Name)
+	}
+
+	return content
+}

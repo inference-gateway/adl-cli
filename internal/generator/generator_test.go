@@ -263,15 +263,60 @@ func TestGenerator_validateADL(t *testing.T) {
 }
 
 func TestGenerator_generateA2aIgnoreFile(t *testing.T) {
+	goADL := &schema.ADL{
+		APIVersion: "adl.dev/v1",
+		Kind:       "Agent",
+		Metadata: schema.Metadata{
+			Name:        "test-agent",
+			Description: "Test agent",
+			Version:     "1.0.0",
+		},
+		Spec: schema.Spec{
+			Language: &schema.Language{
+				Go: &schema.GoConfig{
+					Module:  "github.com/example/test-agent",
+					Version: "1.24",
+				},
+			},
+		},
+	}
+
+	rustADL := &schema.ADL{
+		APIVersion: "adl.dev/v1",
+		Kind:       "Agent",
+		Metadata: schema.Metadata{
+			Name:        "rust-agent",
+			Description: "Rust test agent",
+			Version:     "1.0.0",
+		},
+		Spec: schema.Spec{
+			Language: &schema.Language{
+				Rust: &schema.RustConfig{
+					PackageName: "rust-agent",
+					Version:     "1.70",
+					Edition:     "2021",
+				},
+			},
+		},
+	}
+
 	tests := []struct {
 		name         string
 		templateName string
+		adl          *schema.ADL
 		wantContent  string
 	}{
 		{
-			name:         "minimal template creates tools ignore",
+			name:         "minimal template creates tools ignore for Go",
 			templateName: "minimal",
+			adl:          goADL,
 			wantContent:  "tools/*",
+		},
+		{
+			name:         "minimal template creates tools ignore for Rust",
+			templateName: "minimal",
+			adl:          rustADL,
+			wantContent:  "src/tools/*",
 		},
 	}
 
@@ -291,7 +336,7 @@ func TestGenerator_generateA2aIgnoreFile(t *testing.T) {
 				Template: tt.templateName,
 			})
 
-			err = gen.generateA2aIgnoreFile(tmpDir, tt.templateName)
+			err = gen.generateA2aIgnoreFile(tmpDir, tt.templateName, tt.adl)
 			if err != nil {
 				t.Fatalf("generateA2aIgnoreFile() error = %v", err)
 			}
