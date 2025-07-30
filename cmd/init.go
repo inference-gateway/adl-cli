@@ -133,7 +133,7 @@ func (a *adlData) getTemplate() string {
 
 func collectADLInfo(scanner *bufio.Scanner, projectName string) *adlData {
 	adl := &adlData{
-		APIVersion: "a2a.dev/v1",
+		APIVersion: "adl.dev/v1",
 		Kind:       "Agent",
 	}
 

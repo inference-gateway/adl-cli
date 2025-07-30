@@ -6,7 +6,7 @@ import (
 )
 
 func TestValidator_ValidateFile(t *testing.T) {
-	validADL := `apiVersion: a2a.dev/v1
+	validADL := `apiVersion: adl.dev/v1
 kind: Agent
 metadata:
   name: test-agent

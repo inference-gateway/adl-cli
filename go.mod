@@ -1,4 +1,4 @@
-module github.com/inference-gateway/a2a-cli
+module github.com/inference-gateway/adl-cli
 
 go 1.24
 

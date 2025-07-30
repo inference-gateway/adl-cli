@@ -3,7 +3,7 @@ package templates
 import (
 	"fmt"
 
-	"github.com/inference-gateway/a2a-cli/internal/schema"
+	"github.com/inference-gateway/adl-cli/internal/schema"
 )
 
 // GetMinimalTemplate returns the minimal agent template files
@@ -37,8 +37,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/inference-gateway/a2a/adk/server"
-	"github.com/inference-gateway/a2a/adk/server/config"
+	"github.com/inference-gateway/adk/server"
+	"github.com/inference-gateway/adk/server/config"
 	"github.com/sethvargo/go-envconfig"
 	"go.uber.org/zap"
 
@@ -393,7 +393,7 @@ Configure the agent via environment variables:
 
 ### Core Application Settings
 
-- ` + "`ENVIRONMENT`" + ` - Deployment environment (default: ` + "`dev`" + `)
+- ` + "`ENVIRONMENT`" + ` - Deployment environment
 
 ### A2A Agent Configuration
 
@@ -602,7 +602,7 @@ package tools
 
 import (
     "context"
-    "github.com/inference-gateway/a2a/adk/server"
+    "github.com/inference-gateway/adk/server"
 )
 
 func NewToolNameTool() server.Tool {
@@ -741,7 +741,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/inference-gateway/a2a/adk/server"
+	"github.com/inference-gateway/adk/server"
 )
 
 // New` + titleCase(tool.Name) + `Tool creates a new ` + tool.Name + ` tool

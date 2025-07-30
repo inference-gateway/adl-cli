@@ -5,12 +5,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/inference-gateway/a2a-cli/internal/schema"
+	"github.com/inference-gateway/adl-cli/internal/schema"
 )
 
 func TestGenerator_Generate(t *testing.T) {
 	validADL := &schema.ADL{
-		APIVersion: "a2a.dev/v1",
+		APIVersion: "adl.dev/v1",
 		Kind:       "Agent",
 		Metadata: schema.Metadata{
 			Name:        "test-agent",
@@ -70,7 +70,7 @@ func TestGenerator_validateADL(t *testing.T) {
 		{
 			name: "valid minimal ADL",
 			adl: &schema.ADL{
-				APIVersion: "a2a.dev/v1",
+				APIVersion: "adl.dev/v1",
 				Kind:       "Agent",
 				Metadata: schema.Metadata{
 					Name:        "test-agent",
@@ -99,7 +99,7 @@ func TestGenerator_validateADL(t *testing.T) {
 		{
 			name: "missing capabilities",
 			adl: &schema.ADL{
-				APIVersion: "a2a.dev/v1",
+				APIVersion: "adl.dev/v1",
 				Kind:       "Agent",
 				Metadata: schema.Metadata{
 					Name:        "test-agent",
@@ -124,7 +124,7 @@ func TestGenerator_validateADL(t *testing.T) {
 		{
 			name: "missing language",
 			adl: &schema.ADL{
-				APIVersion: "a2a.dev/v1",
+				APIVersion: "adl.dev/v1",
 				Kind:       "Agent",
 				Metadata: schema.Metadata{
 					Name:        "test-agent",
@@ -148,7 +148,7 @@ func TestGenerator_validateADL(t *testing.T) {
 		{
 			name: "missing Go module",
 			adl: &schema.ADL{
-				APIVersion: "a2a.dev/v1",
+				APIVersion: "adl.dev/v1",
 				Kind:       "Agent",
 				Metadata: schema.Metadata{
 					Name:        "test-agent",
@@ -177,7 +177,7 @@ func TestGenerator_validateADL(t *testing.T) {
 		{
 			name: "invalid port",
 			adl: &schema.ADL{
-				APIVersion: "a2a.dev/v1",
+				APIVersion: "adl.dev/v1",
 				Kind:       "Agent",
 				Metadata: schema.Metadata{
 					Name:        "test-agent",
@@ -207,7 +207,7 @@ func TestGenerator_validateADL(t *testing.T) {
 		{
 			name: "multiple languages specified",
 			adl: &schema.ADL{
-				APIVersion: "a2a.dev/v1",
+				APIVersion: "adl.dev/v1",
 				Kind:       "Agent",
 				Metadata: schema.Metadata{
 					Name:        "test-agent",
@@ -277,7 +277,7 @@ func TestGenerator_generateA2aIgnoreFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tmpDir, err := os.MkdirTemp("", "a2a-ignore-test-*")
+			tmpDir, err := os.MkdirTemp("", "adl-ignore-test-*")
 			if err != nil {
 				t.Fatalf("Failed to create temp dir: %v", err)
 			}
@@ -296,10 +296,10 @@ func TestGenerator_generateA2aIgnoreFile(t *testing.T) {
 				t.Fatalf("generateA2aIgnoreFile() error = %v", err)
 			}
 
-			ignoreFilePath := filepath.Join(tmpDir, ".a2a-ignore")
+			ignoreFilePath := filepath.Join(tmpDir, ".adl-ignore")
 			content, err := os.ReadFile(ignoreFilePath)
 			if err != nil {
-				t.Fatalf("Failed to read .a2a-ignore file: %v", err)
+				t.Fatalf("Failed to read .adl-ignore file: %v", err)
 			}
 
 			contentStr := string(content)

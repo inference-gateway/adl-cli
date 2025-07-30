@@ -1,4 +1,4 @@
-apiVersion: a2a.dev/v1
+apiVersion: adl.dev/v1
 kind: Agent
 metadata:
   name: minimal-agent

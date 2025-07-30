@@ -69,7 +69,7 @@ const adlSchema = `{
   "properties": {
     "apiVersion": {
       "type": "string",
-      "const": "a2a.dev/v1"
+      "const": "adl.dev/v1"
     },
     "kind": {
       "type": "string",

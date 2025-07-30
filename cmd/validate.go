@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/inference-gateway/a2a-cli/internal/schema"
+	"github.com/inference-gateway/adl-cli/internal/schema"
 	"github.com/spf13/cobra"
 )
 

@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/inference-gateway/a2a-cli/internal/devcontainer"
-	"github.com/inference-gateway/a2a-cli/internal/generator"
+	"github.com/inference-gateway/adl-cli/internal/devcontainer"
+	"github.com/inference-gateway/adl-cli/internal/generator"
 	"github.com/spf13/cobra"
 )
 
