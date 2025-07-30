@@ -65,7 +65,7 @@ tasks:
     deps:
       - build
     cmds:
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/minimal-agent.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent.yaml
 
   examples:generate:
     desc: Generate all example projects
@@ -74,7 +74,7 @@ tasks:
     cmds:
       - rm -rf test-output
       - mkdir -p test-output
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/minimal-agent.yaml --output test-output/minimal-agent --overwrite --devcontainer --ci
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/go-agent.yaml --output test-output/go-agent --overwrite --devcontainer --ci
 
   release:
     desc: Build release binaries for multiple platforms

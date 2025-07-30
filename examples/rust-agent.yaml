@@ -76,8 +76,8 @@ spec:
   language:
     rust:
       packageName: "rust-agent"
-      version: "1.70"
-      edition: "2021"
+      version: "1.88"
+      edition: "2024"
   scm:
     provider: github
     url: "https://github.com/company/rust-agent"

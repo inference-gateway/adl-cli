@@ -239,10 +239,10 @@ The CLI includes example ADL files in the `examples/` directory:
 
 ```bash
 # Validate example
-adl validate examples/minimal-agent.yaml
+adl validate examples/go-agent.yaml
 
 # Generate from example
-adl generate --file examples/minimal-agent.yaml --output ./minimal-agent
+adl generate --file examples/go-agent.yaml --output ./go-agent
 ```
 
 ## Customizing Generation with .adl-ignore
