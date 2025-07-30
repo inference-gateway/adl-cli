@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/inference-gateway/a2a-cli/cmd"
+	"github.com/inference-gateway/adl-cli/cmd"
 )
 
 // Version is set at build time

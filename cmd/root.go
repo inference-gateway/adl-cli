@@ -19,10 +19,10 @@ func SetVersion(v string) {
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:     "a2a",
+	Use:     "adl",
 	Version: version,
 	Short:   "A CLI for generating production-ready A2A agents",
-	Long: `A2A CLI is a command-line tool that helps you build production-ready A2A servers
+	Long: `ADL CLI is a command-line tool that helps you build production-ready A2A servers
 from YAML Agent Definition Language (ADL) files.
 
 It generates complete project scaffolding with business logic placeholders,
@@ -41,7 +41,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.a2a.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.adl.yaml)")
 
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
@@ -56,7 +56,7 @@ func initConfig() {
 
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".a2a")
+		viper.SetConfigName(".adl")
 	}
 
 	viper.AutomaticEnv()

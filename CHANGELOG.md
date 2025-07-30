@@ -120,7 +120,6 @@ All notable changes to this project will be documented in this file.
 
 * Introduce .adl-ignore file support to protect implementations during generation ([377bfb0](https://github.com/inference-gateway/a2a-cli/commit/377bfb085b487e73c75b887188ba0205dfba1122))
 * Remove commented-out code and clean up validation functions ([9ba910f](https://github.com/inference-gateway/a2a-cli/commit/9ba910fc1e71c4b2dd67fbb511f75c064749d210))
-* Rename .adl-ignore to .a2a-ignore and update related functionality ([86ea2b5](https://github.com/inference-gateway/a2a-cli/commit/86ea2b58c58f7f3cc3173cc5aa8d4a47bc73efcb))
 
 ### 👷 CI
 

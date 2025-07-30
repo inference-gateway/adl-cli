@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/inference-gateway/a2a-cli/internal/schema"
-	"github.com/inference-gateway/a2a-cli/internal/templates"
+	"github.com/inference-gateway/adl-cli/internal/schema"
+	"github.com/inference-gateway/adl-cli/internal/templates"
 	"gopkg.in/yaml.v3"
 )
 
@@ -79,7 +79,7 @@ func (g *Generator) parseADL(adlFile string) (*schema.ADL, error) {
 
 // validateADL validates the ADL structure for code generation requirements
 func (g *Generator) validateADL(adl *schema.ADL) error {
-	if adl.APIVersion != "a2a.dev/v1" {
+	if adl.APIVersion != "adl.dev/v1" {
 		return fmt.Errorf("unsupported API version: %s", adl.APIVersion)
 	}
 	if adl.Kind != "Agent" {
@@ -185,7 +185,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		fileName = g.replacePlaceholders(fileName, adl)
 
 		if ignoreChecker.ShouldIgnore(fileName) {
-			fmt.Printf("🚫 Ignoring file (matches .a2a-ignore): %s\n", fileName)
+			fmt.Printf("🚫 Ignoring file (matches .adl-ignore): %s\n", fileName)
 			continue
 		}
 
@@ -205,7 +205,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 	}
 
 	if err := g.generateA2aIgnoreFile(outputDir, templateEngine.GetTemplate()); err != nil {
-		return fmt.Errorf("failed to generate .a2a-ignore file: %w", err)
+		return fmt.Errorf("failed to generate .adl-ignore file: %w", err)
 	}
 
 	if g.config.GenerateCI {
@@ -255,7 +255,7 @@ func (g *Generator) writeFile(filePath, content string) error {
 // generateAgentJSON generates the .well-known/agent.json file
 func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
 	if ignoreChecker.ShouldIgnore(".well-known/agent.json") {
-		fmt.Printf("🚫 Ignoring file (matches .a2a-ignore): .well-known/agent.json\n")
+		fmt.Printf("🚫 Ignoring file (matches .adl-ignore): .well-known/agent.json\n")
 		return nil
 	}
 
@@ -306,12 +306,12 @@ func (g *Generator) getVersion() string {
 	return "dev"
 }
 
-// generateA2aIgnoreFile creates a .a2a-ignore file with files that contain TODOs
+// generateA2aIgnoreFile creates a .adl-ignore file with files that contain TODOs
 func (g *Generator) generateA2aIgnoreFile(outputDir, templateName string) error {
-	ignoreFilePath := filepath.Join(outputDir, ".a2a-ignore")
+	ignoreFilePath := filepath.Join(outputDir, ".adl-ignore")
 
 	if _, err := os.Stat(ignoreFilePath); err == nil {
-		fmt.Printf("📄 .a2a-ignore file already exists, skipping creation\n")
+		fmt.Printf("📄 .adl-ignore file already exists, skipping creation\n")
 		return nil
 	}
 
@@ -331,18 +331,18 @@ func (g *Generator) generateA2aIgnoreFile(outputDir, templateName string) error 
 	content := generateA2aIgnoreContent(filesToIgnore)
 
 	if err := os.WriteFile(ignoreFilePath, []byte(content), 0644); err != nil {
-		return fmt.Errorf("failed to write .a2a-ignore file: %w", err)
+		return fmt.Errorf("failed to write .adl-ignore file: %w", err)
 	}
 
-	fmt.Printf("✅ Generated: .a2a-ignore\n")
+	fmt.Printf("✅ Generated: .adl-ignore\n")
 	fmt.Printf("🔒 Files with TODO implementations will be preserved on future generations\n")
 
 	return nil
 }
 
-// generateA2aIgnoreContent generates the content for .a2a-ignore file
+// generateA2aIgnoreContent generates the content for .adl-ignore file
 func generateA2aIgnoreContent(filesToIgnore []string) string {
-	content := `# .a2a-ignore file
+	content := `# .adl-ignore file
 # This file specifies which files should not be overwritten during generation operations.
 # Files listed here typically contain implementations that users have completed.
 #
@@ -416,7 +416,7 @@ func (g *Generator) generateGitHubActionsWorkflow(adl *schema.ADL, outputDir str
 	workflowPath := ".github/workflows/ci.yml"
 
 	if ignoreChecker.ShouldIgnore(workflowPath) {
-		fmt.Printf("🚫 Ignoring file (matches .a2a-ignore): %s\n", workflowPath)
+		fmt.Printf("🚫 Ignoring file (matches .adl-ignore): %s\n", workflowPath)
 		return nil
 	}
 

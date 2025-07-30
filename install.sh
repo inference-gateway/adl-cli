@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# A2A CLI Installation Script
-# This script downloads and installs the latest release of a2a CLI from GitHub.
+# ADL CLI Installation Script
+# This script downloads and installs the latest release of adl CLI from GitHub.
 
 set -e
 
@@ -11,8 +11,8 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-REPO="inference-gateway/a2a-cli"
-BINARY_NAME="a2a"
+REPO="inference-gateway/adl-cli"
+BINARY_NAME="adl"
 
 if [ -n "${INSTALL_DIR:-}" ]; then
     INSTALL_DIR="$INSTALL_DIR"
@@ -206,7 +206,7 @@ verify_installation() {
 # Main installation process
 main() {
     echo "==================================="
-    echo "   A2A CLI Installation"
+    echo "   ADL CLI Installation"
     echo "==================================="
     echo
     
@@ -246,7 +246,7 @@ main() {
 # Handle command line arguments
 case "${1:-}" in
     -h|--help)
-        echo "A2A CLI Installation Script"
+        echo "ADL CLI Installation Script"
         echo
         echo "Usage: $0 [options]"
         echo

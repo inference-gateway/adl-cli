@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-The A2A CLI is a command-line tool for generating production-ready A2A (Agent-to-Agent) servers from YAML-based Agent Definition Language (ADL) files. It creates complete project scaffolding with business logic placeholders, allowing developers to focus on implementing agent functionality.
+The ADL CLI is a command-line tool for generating production-ready A2A (Agent-to-Agent) servers from YAML-based Agent Definition Language (ADL) files. It creates complete project scaffolding with business logic placeholders, allowing developers to focus on implementing agent functionality.
 
 ## Key Architecture Components
 
@@ -19,7 +19,7 @@ The A2A CLI is a command-line tool for generating production-ready A2A (Agent-to
 - **Engine**: `internal/templates/engine.go` - Template execution with Sprig functions and auto-generated headers
 - **Template**: Single unified template that generates production-ready agents with AI integration and enterprise features
 - **Context**: Template receives ADL data and metadata for rendering
-- **Ignore System**: `.a2a-ignore` files protect user implementations from regeneration
+- **Ignore System**: `.adl-ignore` files protect user implementations from regeneration
 
 ### ADL Structure
 ADL files define agents with:
@@ -139,7 +139,7 @@ The generator detects target language from ADL `spec.language` section and valid
 ### Running CLI During Development
 ```bash
 # After building
-./bin/a2a generate --file examples/minimal-agent.yaml --output ./test-output
+./bin/adl generate --file examples/minimal-agent.yaml --output ./test-output
 
 # Using task dev
 task dev -- generate --file examples/minimal-agent.yaml --output ./test-output
@@ -148,25 +148,25 @@ task dev -- generate --file examples/minimal-agent.yaml --output ./test-output
 ### Testing Generation
 ```bash
 # Generate from example
-./bin/a2a generate --file examples/minimal-agent.yaml --output ./test-output
+./bin/adl generate --file examples/minimal-agent.yaml --output ./test-output
 
 # Validate ADL file
-./bin/a2a validate examples/minimal-agent.yaml
+./bin/adl validate examples/minimal-agent.yaml
 ```
 
 ### Debugging Generation Issues
 - Check ADL validation errors first (detailed in `internal/generator/generator.go:validateADL`)
 - Template execution errors include context about which template failed
 - Generated files include headers showing generation metadata
-- Use `.a2a-ignore` to protect files during iterative development
+- Use `.adl-ignore` to protect files during iterative development
 
 ## CLI Command Structure
 
-- `a2a init [name]` - Interactive project initialization
-- `a2a generate` - Generate project from ADL file (main command)
-- `a2a validate [file]` - Validate ADL file against schema
+- `adl init [name]` - Interactive project initialization
+- `adl generate` - Generate project from ADL file (main command)
+- `adl validate [file]` - Validate ADL file against schema
 
 ### Generate Command Options
 - `--file` - ADL file path (required)
 - `--output` - Output directory (required)  
-- `--overwrite` - Overwrite existing files (respects .a2a-ignore)
+- `--overwrite` - Overwrite existing files (respects .adl-ignore)

@@ -1,19 +1,19 @@
 version: '3'
 
 vars:
-  APP_NAME: a2a
+  APP_NAME: adl
   VERSION: 0.5.0-rc.1
   BUILD_DIR: bin
 
 tasks:
   build:
-    desc: Build the a2a CLI
+    desc: Build the adl CLI
     cmds:
       - mkdir -p {{.BUILD_DIR}}
       - go build -ldflags "-X main.Version={{.VERSION}}" -o {{.BUILD_DIR}}/{{.APP_NAME}} .
 
   install:
-    desc: Install the a2a CLI to GOPATH/bin
+    desc: Install the adl CLI to GOPATH/bin
     cmds:
       - go install -ldflags "-X main.Version={{.VERSION}}" .
 
