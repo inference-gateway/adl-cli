@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0](https://github.com/inference-gateway/adl-cli/compare/v0.4.3...v0.5.0) (2025-07-30)
+
+### ✨ Features
+
+* Add generate task to create code from ADL ([a3d37bb](https://github.com/inference-gateway/adl-cli/commit/a3d37bbc316dcb5a547284c26b44150621f1ae5b))
+
+### ♻️ Improvements
+
+* Cleanup - update generated file patterns in gitattributes and generator ([456818d](https://github.com/inference-gateway/adl-cli/commit/456818d681d9d1f1ac943c571c0838101457e733))
+* General Improvements ([#12](https://github.com/inference-gateway/adl-cli/issues/12)) ([1e892f2](https://github.com/inference-gateway/adl-cli/commit/1e892f2fc02b5f86b5810902f9f870eb791ba66e)), closes [#14](https://github.com/inference-gateway/adl-cli/issues/14)
+
 ## [0.5.0-rc.2](https://github.com/inference-gateway/adl-cli/compare/v0.5.0-rc.1...v0.5.0-rc.2) (2025-07-30)
 
 ### 🐛 Bug Fixes
