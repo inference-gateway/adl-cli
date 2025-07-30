@@ -2,14 +2,14 @@
 ---
 version: 2
 
-project_name: a2a
+project_name: adl
 
 before:
   hooks:
     - go mod tidy
 
 builds:
-  - id: a2a
+  - id: adl
     main: .
     env:
       - CGO_ENABLED=0

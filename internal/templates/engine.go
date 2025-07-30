@@ -7,7 +7,7 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
-	"github.com/inference-gateway/a2a-cli/internal/schema"
+	"github.com/inference-gateway/adl-cli/internal/schema"
 )
 
 // Engine handles template execution

@@ -1,6 +1,6 @@
-# Contributing to A2A CLI
+# Contributing to ADL CLI
 
-Thank you for your interest in contributing to the A2A CLI! This guide will help you get started with contributing to the project.
+Thank you for your interest in contributing to the ADL CLI! This guide will help you get started with contributing to the project.
 
 ## Table of Contents
 
@@ -32,13 +32,13 @@ This project adheres to a code of conduct. By participating, you are expected to
 1. **Fork the repository**
    ```bash
    # Fork the repo on GitHub, then clone your fork
-   git clone https://github.com/YOUR_USERNAME/a2a-cli.git
-   cd a2a-cli
+   git clone https://github.com/YOUR_USERNAME/adl-cli.git
+   cd adl-cli
    ```
 
 2. **Add upstream remote**
    ```bash
-   git remote add upstream https://github.com/inference-gateway/a2a-cli.git
+   git remote add upstream https://github.com/inference-gateway/adl-cli.git
    ```
 
 3. **Install dependencies**
@@ -324,8 +324,8 @@ func TestGenerator_GenerateRust(t *testing.T) {
 
 ### Getting Help
 
-- **Discussions**: Use [GitHub Discussions](https://github.com/inference-gateway/a2a-cli/discussions) for questions
-- **Issues**: Use [GitHub Issues](https://github.com/inference-gateway/a2a-cli/issues) for bugs and feature requests
+- **Discussions**: Use [GitHub Discussions](https://github.com/inference-gateway/adl-cli/discussions) for questions
+- **Issues**: Use [GitHub Issues](https://github.com/inference-gateway/adl-cli/issues) for bugs and feature requests
 
 ### Reviewing Process
 
@@ -343,7 +343,7 @@ Contributors will be recognized in:
 
 ## Release Process
 
-The A2A CLI follows semantic versioning:
+The ADL CLI follows semantic versioning:
 
 - **Patch** (1.0.1) - Bug fixes and small improvements
 - **Minor** (1.1.0) - New features, backward compatible
@@ -360,7 +360,7 @@ If you have questions about contributing:
 3. Create a new discussion or issue
 4. Reach out to maintainers
 
-Thank you for contributing to A2A CLI! 🚀
+Thank you for contributing to ADL CLI! 🚀
 
 ---
 

@@ -6,11 +6,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/inference-gateway/a2a-cli/internal/schema"
+	"github.com/inference-gateway/adl-cli/internal/schema"
 	"gopkg.in/yaml.v3"
 )
 
-// Generator generates devcontainer configurations for A2A agents
+// Generator generates devcontainer configurations for A2A Agents
 type Generator struct{}
 
 // New creates a new devcontainer generator
@@ -176,8 +176,8 @@ RUN apt-get update && apt-get install -y \
 # Install Task (Taskfile)
 RUN curl -sL https://taskfile.dev/install.sh | sh
 
-# Install A2A CLI
-RUN curl -fsSL https://raw.githubusercontent.com/inference-gateway/a2a-cli/main/install.sh | bash
+# Install ADL CLI
+RUN curl -fsSL https://raw.githubusercontent.com/inference-gateway/adl-cli/main/install.sh | bash
 
 # Install Go tools for development
 RUN go install -v golang.org/x/tools/gopls@latest \
@@ -234,8 +234,8 @@ RUN apt-get update && apt-get install -y \
 # Install Task (Taskfile)
 RUN curl -sL https://taskfile.dev/install.sh | sh
 
-# Install A2A CLI
-RUN curl -fsSL https://raw.githubusercontent.com/inference-gateway/a2a-cli/main/install.sh | bash
+# Install ADL CLI
+RUN curl -fsSL https://raw.githubusercontent.com/inference-gateway/adl-cli/main/install.sh | bash
 
 # Install global npm packages for development
 RUN npm install -g \

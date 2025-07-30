@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/inference-gateway/a2a-cli/internal/schema"
+	"github.com/inference-gateway/adl-cli/internal/schema"
 )
 
 func TestGenerator_Generate(t *testing.T) {
@@ -16,7 +16,7 @@ func TestGenerator_Generate(t *testing.T) {
 	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	adlFile := filepath.Join(tempDir, "test-agent.yaml")
-	adlContent := `apiVersion: a2a.dev/v1
+	adlContent := `apiVersion: adl.dev/v1
 kind: Agent
 metadata:
   name: test-agent

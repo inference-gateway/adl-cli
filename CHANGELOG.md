@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0-rc.2](https://github.com/inference-gateway/adl-cli/compare/v0.5.0-rc.1...v0.5.0-rc.2) (2025-07-30)
+
+### 🐛 Bug Fixes
+
+* Remove default value from ENVIRONMENT variable documentation ([8f55f13](https://github.com/inference-gateway/adl-cli/commit/8f55f1358c2b564725065b81b676029c952523f3))
+* Update TASK_VERSION to v3.44.1 in Dockerfile ([2eb9aa3](https://github.com/inference-gateway/adl-cli/commit/2eb9aa3f2142d43c23def0aeea8ef5e19cb8c79b))
+
+### 👷 CI
+
+* Update repository name from a2a-cli to adl-cli in release workflow ([d37fa54](https://github.com/inference-gateway/adl-cli/commit/d37fa54be184f054790496e50414cd1633c9f826))
+
+### 🔧 Miscellaneous
+
+* Rename project from A2A CLI to ADL CLI, updating all references, file names, and documentation accordingly. Adjusted build scripts, configuration files, and generated files to reflect the new project name and API version. Updated ignore file handling and validation logic to ensure compatibility with the new naming conventions. ([03f4cf7](https://github.com/inference-gateway/adl-cli/commit/03f4cf7da2c5539e3568463faf531a971c00e658))
+
+## [0.5.0-rc.1](https://github.com/inference-gateway/a2a-cli/compare/v0.4.3...v0.5.0-rc.1) (2025-07-23)
+
+### ✨ Features
+
+* Add generate task to create code from ADL ([a3d37bb](https://github.com/inference-gateway/a2a-cli/commit/a3d37bbc316dcb5a547284c26b44150621f1ae5b))
+
+### ♻️ Improvements
+
+* Cleanup - update generated file patterns in gitattributes and generator ([456818d](https://github.com/inference-gateway/a2a-cli/commit/456818d681d9d1f1ac943c571c0838101457e733))
+* Enhance configuration management and logging in main application ([8b65915](https://github.com/inference-gateway/a2a-cli/commit/8b65915150fc5773e221b479d57ad817729d1294))
+
 ## [0.4.3](https://github.com/inference-gateway/a2a-cli/compare/v0.4.2...v0.4.3) (2025-07-23)
 
 ### 🐛 Bug Fixes
@@ -109,7 +135,6 @@ All notable changes to this project will be documented in this file.
 
 * Introduce .adl-ignore file support to protect implementations during generation ([377bfb0](https://github.com/inference-gateway/a2a-cli/commit/377bfb085b487e73c75b887188ba0205dfba1122))
 * Remove commented-out code and clean up validation functions ([9ba910f](https://github.com/inference-gateway/a2a-cli/commit/9ba910fc1e71c4b2dd67fbb511f75c064749d210))
-* Rename .adl-ignore to .a2a-ignore and update related functionality ([86ea2b5](https://github.com/inference-gateway/a2a-cli/commit/86ea2b58c58f7f3cc3173cc5aa8d4a47bc73efcb))
 
 ### 👷 CI
 
