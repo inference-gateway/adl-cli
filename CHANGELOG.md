@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0](https://github.com/inference-gateway/adl-cli/compare/v0.5.0...v0.6.0) (2025-09-01)
+
+### ✨ Features
+
+* Add support for using an existing ADL schema file during project initialization ([c4b6638](https://github.com/inference-gateway/adl-cli/commit/c4b6638a2d5a1c63565acd22726ef877bc258fc5))
+* Improve ADL templates with TypeScript and Rust support in gitattributes ([56c728b](https://github.com/inference-gateway/adl-cli/commit/56c728bddcb5aeed747dcd8b714aade7a189af38))
+* Improve project initialization with directory prompts and overwrite option ([273ded1](https://github.com/inference-gateway/adl-cli/commit/273ded18c4ce19834ec4e478c5b23b45b191fddd))
+* **rust:** Add Rust language support using Rust-ADK ([#16](https://github.com/inference-gateway/adl-cli/issues/16)) ([59d2674](https://github.com/inference-gateway/adl-cli/commit/59d2674105720d858346fa6a8804c5762b6d6b7d))
+
+### ♻️ Improvements
+
+* Improve Go module prompt with default value from Git remote URL ([ec208c6](https://github.com/inference-gateway/adl-cli/commit/ec208c61349321cb0728cbec5d5cf57a00e9ecf2))
+* Refactor input handling by removing scanner dependency and adding readline support ([6d47f0d](https://github.com/inference-gateway/adl-cli/commit/6d47f0d64abdf4a49615ee3d4b555d054144daa8))
+
+### 🐛 Bug Fixes
+
+* Improve error handling on readline closure in prompt functions ([4bacd91](https://github.com/inference-gateway/adl-cli/commit/4bacd9187d80c3a2fd043bdc8769bd754670d09f))
+
+### 🔧 Miscellaneous
+
+* Add initial configuration files for flox environment ([0e826e2](https://github.com/inference-gateway/adl-cli/commit/0e826e2dbec692f08183770ea535d84b8b72d816))
+* Update Go module dependency from a2a to adk v0.9.0 ([eae1973](https://github.com/inference-gateway/adl-cli/commit/eae19736089db717704e2abac8800aa4d00ab7ac))
+
 ## [0.5.0](https://github.com/inference-gateway/adl-cli/compare/v0.4.3...v0.5.0) (2025-07-30)
 
 ### ✨ Features
