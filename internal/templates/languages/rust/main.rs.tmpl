@@ -1,15 +1,51 @@
-use std::sync::Arc;
+use std::collections::HashMap;
 use tokio::signal;
 use tracing::{info, warn, error};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use serde_json::Value;
 
-use rust_adk::{
-    agent::{Agent, AgentBuilder},
-    server::{Server, ServerConfig},
-    tools::ToolBox,
+use inference_gateway_sdk::{
+    agent::{Agent, AgentBuilder, AgentConfig},
+    server::{A2AServerBuilder, ServerConfig, Context},
+    Function, FunctionResult,
 };
 
 mod tools;
+
+const VERSION: &str = "{{ .ADL.Metadata.Version }}";
+const AGENT_NAME: &str = "{{ .ADL.Metadata.Name }}";
+const AGENT_DESCRIPTION: &str = "{{ .ADL.Metadata.Description }}";
+
+#[derive(Debug, Clone)]
+pub struct Config {
+    pub environment: String,
+    pub agent_config: AgentConfig,
+    pub server_config: ServerConfig,
+    pub agent_url: String,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            environment: std::env::var("ENVIRONMENT").unwrap_or_else(|_| "production".to_string()),
+            agent_config: AgentConfig {
+                provider: "{{ .ADL.Spec.Agent.Provider | default "openai" }}".to_string(),
+                model: "{{ .ADL.Spec.Agent.Model | default "gpt-4o-mini" }}".to_string(),
+                max_tokens: {{ .ADL.Spec.Agent.MaxTokens | default 8192 }},
+                temperature: {{ .ADL.Spec.Agent.Temperature | default 0.7 }},
+                streaming: {{ .ADL.Spec.Capabilities.Streaming | default false }},
+                ..Default::default()
+            },
+            server_config: ServerConfig {
+                host: "0.0.0.0".to_string(),
+                port: {{ .ADL.Spec.Server.Port | default 8080 }},
+                debug: {{ .ADL.Spec.Server.Debug | default false }},
+                ..Default::default()
+            },
+            agent_url: std::env::var("AGENT_URL").unwrap_or_else(|_| format!("http://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}")),
+        }
+    }
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -22,43 +58,58 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    info!("Starting {{ .ADL.Metadata.Name }} agent v{{ .ADL.Metadata.Version }}");
+    info!("Starting {} agent v{}", AGENT_NAME, VERSION);
 
-    // Create toolbox and register tools
-    let mut toolbox = ToolBox::new();
-    {{- range .ADL.Spec.Tools }}
+    // Load configuration
+    let config = Config::default();
     
+    info!("Loaded configuration for environment: {}", config.environment);
+
+    // Create agent builder and register tools
+    let mut agent_builder = AgentBuilder::new()
+        .with_config(&config.agent_config)
+        .with_system_prompt("{{- if .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt }}{{- else }}You are a helpful AI assistant.{{- end }}");
+
+    {{- range .ADL.Spec.Tools }}
     // Register {{ .Name }} tool
-    let {{ .Name }}_tool = tools::{{ .Name }}::{{ .Name | title }}Tool::new();
-    toolbox.add_tool("{{ .Name }}", Box::new({{ .Name }}_tool));
+    agent_builder = agent_builder.with_function_tool(
+        "{{ .Name }}".to_string(),
+        |args: Value| async move {
+            match tools::{{ .Name }}_handler(args).await {
+                Ok(result) => FunctionResult::Success(result),
+                Err(e) => FunctionResult::Error(e.to_string()),
+            }
+        }
+    );
     info!("Registered tool: {{ .Name }} - {{ .Description }}");
     {{- end }}
 
-    // Build agent
-    let agent = AgentBuilder::new()
-        .with_system_prompt("{{- if .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt }}{{- else }}You are a helpful AI assistant.{{- end }}")
-        .with_toolbox(toolbox)
+    // Build the agent
+    let agent = agent_builder.build().await?;
+
+    // Create A2A server with agent and configuration
+    let a2a_server = A2AServerBuilder::new()
+        .with_config(config.clone())
+        .with_agent(agent)
+        .with_agent_card_from_file(".well-known/agent.json", Some({
+            let mut metadata = HashMap::new();
+            metadata.insert("name".to_string(), Value::String(AGENT_NAME.to_string()));
+            metadata.insert("version".to_string(), Value::String(VERSION.to_string()));
+            metadata.insert("description".to_string(), Value::String(AGENT_DESCRIPTION.to_string()));
+            metadata.insert("url".to_string(), Value::String(config.agent_url.clone()));
+            metadata
+        }))
         .build()
         .await?;
 
-    // Server configuration
-    let server_config = ServerConfig {
-        host: "0.0.0.0".to_string(),
-        port: {{ .ADL.Spec.Server.Port | default 8080 }},
-        debug: {{ .ADL.Spec.Server.Debug | default false }},
-    };
-
-    // Create and start server
-    let server = Server::new(server_config, Arc::new(agent));
-    
     // Start server in background
     let server_handle = tokio::spawn(async move {
-        if let Err(e) = server.run().await {
+        if let Err(e) = a2a_server.start().await {
             error!("Server error: {}", e);
         }
     });
 
-    info!("{{ .ADL.Metadata.Name }} agent running on port {{ .ADL.Spec.Server.Port | default 8080 }}");
+    info!("{} agent running successfully on port {}", AGENT_NAME, config.server_config.port);
 
     // Wait for shutdown signal
     signal::ctrl_c().await?;
@@ -67,6 +118,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Cancel server
     server_handle.abort();
     
-    info!("{{ .ADL.Metadata.Name }} agent stopped");
+    info!("{} agent stopped", AGENT_NAME);
     Ok(())
 }
