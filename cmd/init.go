@@ -194,6 +194,15 @@ type adlData struct {
 				Module  string `yaml:"module"`
 				Version string `yaml:"version"`
 			} `yaml:"go,omitempty"`
+			TypeScript *struct {
+				PackageName string `yaml:"packageName"`
+				NodeVersion string `yaml:"nodeVersion"`
+			} `yaml:"typescript,omitempty"`
+			Rust *struct {
+				PackageName string `yaml:"packageName"`
+				Version     string `yaml:"version"`
+				Edition     string `yaml:"edition"`
+			} `yaml:"rust,omitempty"`
 		} `yaml:"language,omitempty"`
 	} `yaml:"spec"`
 }
@@ -342,6 +351,15 @@ func collectADLInfo(projectName string) *adlData {
 			Module  string `yaml:"module"`
 			Version string `yaml:"version"`
 		} `yaml:"go,omitempty"`
+		TypeScript *struct {
+			PackageName string `yaml:"packageName"`
+			NodeVersion string `yaml:"nodeVersion"`
+		} `yaml:"typescript,omitempty"`
+		Rust *struct {
+			PackageName string `yaml:"packageName"`
+			Version     string `yaml:"version"`
+			Edition     string `yaml:"edition"`
+		} `yaml:"rust,omitempty"`
 	}{}
 
 	adl.Spec.Language.Go = &struct {

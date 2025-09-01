@@ -53,17 +53,16 @@ func getGeneratedFileHeader(fileType, cliVersion string, generatedAt time.Time) 
 	}
 }
 
-// gitattributesTemplate provides Git attributes for generated files
-const gitattributesTemplate = `# Generated files by A2A CLI
+// gitattributesGoTemplate provides Git attributes for Go projects
+const gitattributesGoTemplate = `# Generated files by ADL CLI
 # These files are automatically generated and should not be manually edited
 
-# Core generated files
+# Core Go generated files
 main.go linguist-generated=true
-config.go linguist-generated=true
 go.mod linguist-generated=true
-main.rs linguist-generated=true
-src/*.rs linguist-generated=true
-Cargo.toml linguist-generated=true
+go.sum linguist-generated=true
+
+# Build and deployment files
 Dockerfile linguist-generated=true
 Taskfile.yml linguist-generated=true
 .gitignore linguist-generated=true
@@ -80,10 +79,44 @@ README.md linguist-documentation=true
 
 # Preserve line endings for generated files
 *.go text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+Dockerfile text eol=lf
+Taskfile.yml text eol=lf
+`
+
+// gitattributesRustTemplate provides Git attributes for Rust projects
+const gitattributesRustTemplate = `# Generated files by ADL CLI
+# These files are automatically generated and should not be manually edited
+
+# Core Rust generated files
+src/main.rs linguist-generated=true
+Cargo.toml linguist-generated=true
+Cargo.lock linguist-generated=true
+
+# Build and deployment files
+Dockerfile linguist-generated=true
+Taskfile.yml linguist-generated=true
+.gitignore linguist-generated=true
+
+# Kubernetes manifests
+k8s/*.yaml linguist-generated=true
+k8s/*.yml linguist-generated=true
+
+# Agent capabilities
+.well-known/agent.json linguist-generated=true
+
+# Documentation (partially generated)
+README.md linguist-documentation=true
+
+# Preserve line endings for generated files
 *.rs text eol=lf
 *.yaml text eol=lf
 *.yml text eol=lf
 *.json text eol=lf
 *.md text eol=lf
 Dockerfile text eol=lf
+Taskfile.yml text eol=lf
 `
