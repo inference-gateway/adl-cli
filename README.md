@@ -80,7 +80,7 @@ Download pre-built binaries from the [releases page](https://github.com/inferenc
 adl init my-weather-agent
 
 # Or generate from an existing ADL file
-adl generate --file agent.yaml --output ./my-agent
+adl generate --file agent.yaml --output ./test-my-agent
 ```
 
 ### 2. Implement Your Business Logic
@@ -99,7 +99,7 @@ func GetWeatherTool(ctx context.Context, args map[string]interface{}) (string, e
 ### 3. Build and Run
 
 ```bash
-cd my-weather-agent
+cd test-weather-agent
 task build
 task run
 ```
@@ -118,13 +118,13 @@ task run
 
 ```bash
 # Generate project from ADL file
-adl generate --file agent.yaml --output ./my-agent
+adl generate --file agent.yaml --output ./test-my-agent
 
 # Overwrite existing files (respects .adl-ignore)
-adl generate --file agent.yaml --output ./my-agent --overwrite
+adl generate --file agent.yaml --output ./test-my-agent --overwrite
 
 # Generate with CI workflow configuration
-adl generate --file agent.yaml --output ./my-agent --ci
+adl generate --file agent.yaml --output ./test-my-agent --ci
 ```
 
 #### Generate Flags
@@ -219,7 +219,7 @@ When using the `--ci` flag, the ADL CLI generates GitHub Actions workflows for y
 
 ```bash
 # Generate project with CI workflow
-adl generate --file agent.yaml --output ./my-agent --ci
+adl generate --file agent.yaml --output ./test-my-agent --ci
 ```
 
 This creates a GitHub Actions workflow (`.github/workflows/ci.yml`) that includes:
@@ -238,11 +238,13 @@ The generated workflow automatically detects your Go version from the ADL file a
 The CLI includes example ADL files in the `examples/` directory:
 
 ```bash
-# Validate example
+# Validate examples
 adl validate examples/go-agent.yaml
+adl validate examples/rust-agent.yaml
 
-# Generate from example
-adl generate --file examples/go-agent.yaml --output ./go-agent
+# Generate from examples
+adl generate --file examples/go-agent.yaml --output ./test-go-agent
+adl generate --file examples/rust-agent.yaml --output ./test-rust-agent
 ```
 
 ## Customizing Generation with .adl-ignore
@@ -348,18 +350,14 @@ task examples:generate
 The ADL CLI currently supports Go, with plans to expand to additional programming languages:
 
 #### ✅ Currently Supported
-- **Go** - Full support with unified template
+- **Go** - Full support with templates for main.go, go.mod, and tools
+- **Rust** - Full support with templates for main.rs, Cargo.toml, and tools
 
 #### 🚧 Planned Support
 - **TypeScript/Node.js** - Complete A2A agent generation with Express.js framework
   - AI-powered agents with OpenAI/Anthropic integration
   - Enterprise features (auth, metrics, logging)
   - Docker and Kubernetes deployment configs
-  
-- **Rust** - High-performance A2A agents with async support
-  - Tokio-based async runtime
-  - Enterprise-grade performance and safety
-  - WebAssembly (WASM) compilation support
 
 - **Python** - Rapid prototyping and AI-first development
   - FastAPI-based server generation

@@ -1,19 +1,24 @@
-# Example ADL files for the A2A CLI
+# Example ADL files for the ADL CLI
 
 This directory contains example Agent Definition Language (ADL) files that demonstrate agent configurations.
 
 ## Files
 
-- `go-agent.yaml` - Complete agent example with AI capabilities, multiple tools, and enterprise features
+- `go-agent.yaml` - Complete Go agent example with AI capabilities, multiple tools, and enterprise features
+- `rust-agent.yaml` - Complete Rust agent example with web scraping tools and browser capabilities
 
 ## Usage
 
-Generate an agent from the example:
+Generate an agent from the examples:
 
 ```bash
-# Generate agent from example
-a2a generate --file examples/go-agent.yaml --output ./my-agent
+# Generate Go agent from example
+adl generate --file examples/go-agent.yaml --output ./test-go-agent
 
-# Validate the example
-a2a validate examples/go-agent.yaml
+# Generate Rust agent from example
+adl generate --file examples/rust-agent.yaml --output ./test-rust-agent
+
+# Validate the examples
+adl validate examples/go-agent.yaml
+adl validate examples/rust-agent.yaml
 ```
