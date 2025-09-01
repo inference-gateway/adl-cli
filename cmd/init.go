@@ -56,7 +56,9 @@ func init() {
 	initCmd.Flags().Bool("overwrite", false, "Overwrite existing files")
 	initCmd.Flags().String("sandbox", "", "Sandbox environment (flox/devcontainer/none)")
 
-	viper.BindPFlags(initCmd.Flags())
+	if err := viper.BindPFlags(initCmd.Flags()); err != nil {
+		fmt.Printf("Warning: failed to bind flags: %v\n", err)
+	}
 
 	viper.SetEnvPrefix("ADL")
 	viper.AutomaticEnv()
@@ -540,22 +542,6 @@ func conditionalPromptBool(useDefaults bool, promptText string, defaultValue boo
 	return promptBool(promptText, defaultValue)
 }
 
-func conditionalPromptBoolWithFlag(cmd *cobra.Command, flagName string, useDefaults bool, promptText string, defaultValue bool) bool {
-	if cmd.Flags().Changed(flagName) {
-		flagValue, _ := cmd.Flags().GetBool(flagName)
-		valueStr := "n"
-		if flagValue {
-			valueStr = "y"
-		}
-		defaultStr := "n"
-		if defaultValue {
-			defaultStr = "y"
-		}
-		fmt.Printf("%s [y/n] [%s]: %s\n", promptText, defaultStr, valueStr)
-		return flagValue
-	}
-	return conditionalPromptBool(useDefaults, promptText, defaultValue)
-}
 
 func conditionalPromptChoice(useDefaults bool, promptText string, choices []string, defaultValue string) string {
 	if useDefaults {
@@ -565,13 +551,6 @@ func conditionalPromptChoice(useDefaults bool, promptText string, choices []stri
 	return promptChoice(promptText, choices, defaultValue)
 }
 
-func conditionalPromptChoiceWithFlag(cmd *cobra.Command, flagName string, useDefaults bool, promptText string, choices []string, defaultValue string) string {
-	if flagValue, _ := cmd.Flags().GetString(flagName); flagValue != "" {
-		fmt.Printf("%s (%s) [%s]: %s\n", promptText, strings.Join(choices, "/"), defaultValue, flagValue)
-		return flagValue
-	}
-	return conditionalPromptChoice(useDefaults, promptText, choices, defaultValue)
-}
 
 func promptString(promptText, defaultValue string) string {
 	input, err := prompt.ReadString(promptText, defaultValue)
