@@ -3,7 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -273,10 +275,43 @@ func collectADLInfo(projectName string) *adlData {
 		Version string `yaml:"version"`
 	}{}
 
-	adl.Spec.Language.Go.Module = promptString("Go module", fmt.Sprintf("github.com/example/%s", adl.Metadata.Name))
+	defaultModule := getDefaultGoModule(adl.Metadata.Name)
+	adl.Spec.Language.Go.Module = promptString("Go module", defaultModule)
 	adl.Spec.Language.Go.Version = promptString("Go version", "1.24")
 
 	return adl
+}
+
+func getDefaultGoModule(projectName string) string {
+	cmd := exec.Command("git", "remote", "get-url", "origin")
+	output, err := cmd.Output()
+	if err != nil {
+		return fmt.Sprintf("github.com/example/%s", projectName)
+	}
+
+	remoteURL := strings.TrimSpace(string(output))
+
+	var modulePath string
+	
+	if strings.HasPrefix(remoteURL, "https://") {
+		re := regexp.MustCompile(`https://github\.com/([^/]+)/([^/]+?)(?:\.git)?$`)
+		matches := re.FindStringSubmatch(remoteURL)
+		if len(matches) >= 3 {
+			modulePath = fmt.Sprintf("github.com/%s/%s", matches[1], projectName)
+		}
+	} else if strings.HasPrefix(remoteURL, "git@") {
+		re := regexp.MustCompile(`git@github\.com:([^/]+)/([^/]+?)(?:\.git)?$`)
+		matches := re.FindStringSubmatch(remoteURL)
+		if len(matches) >= 3 {
+			modulePath = fmt.Sprintf("github.com/%s/%s", matches[1], projectName)
+		}
+	}
+	
+	if modulePath == "" {
+		return fmt.Sprintf("github.com/example/%s", projectName)
+	}
+	
+	return modulePath
 }
 
 func promptString(promptText, defaultValue string) string {
