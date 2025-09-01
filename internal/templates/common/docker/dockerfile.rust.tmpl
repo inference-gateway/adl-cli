@@ -1,0 +1,48 @@
+FROM rust:{{ .ADL.Spec.Language.Rust.Version }}-slim as builder
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy manifest files
+COPY Cargo.toml Cargo.lock ./
+
+# Copy source code
+COPY src ./src
+
+# Build the application
+RUN cargo build --release
+
+# Runtime stage
+FROM debian:bookworm-slim
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy the binary from builder stage
+COPY --from=builder /app/target/release/{{ .ADL.Spec.Language.Rust.PackageName }} ./{{ .ADL.Metadata.Name }}
+
+# Copy agent card
+COPY --from=builder /app/.well-known ./.well-known
+
+# Create non-root user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN chown -R appuser:appuser /app
+USER appuser
+
+# Expose port
+EXPOSE {{ .ADL.Spec.Server.Port | default 8080 }}
+
+# Set environment variables
+ENV RUST_LOG=info
+
+# Run the application
+CMD ["./{{ .ADL.Metadata.Name }}"]

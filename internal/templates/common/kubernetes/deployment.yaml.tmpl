@@ -1,0 +1,48 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .ADL.Metadata.Name }}-ns
+  labels:
+    inference-gateway.com/managed: "true"
+---
+apiVersion: core.inference-gateway.com/v1alpha1
+kind: A2A
+metadata:
+  name: {{ .ADL.Metadata.Name }}
+  namespace: {{ .ADL.Metadata.Name }}-ns
+spec:
+  replicas: 1
+  image: "{{ .ADL.Metadata.Name }}:{{ .ADL.Metadata.Version | default "latest" }}"
+  timezone: "UTC"
+  port: {{ .ADL.Spec.Server.Port | default 8080 }}
+  host: "0.0.0.0"
+  readTimeout: "30s"
+  writeTimeout: "30s"
+  idleTimeout: "60s"
+  logging:
+    level: "info"
+    format: "json"
+  telemetry:
+    enabled: true
+    metrics:
+      enabled: true
+      port: 9090
+  queue:
+    enabled: true
+    maxSize: 1000
+    cleanupInterval: "5m"
+  tls:
+    enabled: false
+    secretRef: ""
+  agent:
+    enabled: true
+    systemPrompt: |
+{{- if .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt | nindent 6 }}{{- else }}      You are a helpful AI assistant.{{- end }}
+  resources:
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+    requests:
+      memory: "128Mi"
+      cpu: "100m"

@@ -11,6 +11,7 @@ import (
 
 	"github.com/inference-gateway/adl-cli/internal/prompt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
 
@@ -28,14 +29,48 @@ and generates the initial project structure.`,
 
 func init() {
 	rootCmd.AddCommand(initCmd)
+
+	initCmd.Flags().Bool("defaults", false, "Use default values for all prompts")
+	initCmd.Flags().String("path", "", "Project directory path")
+	initCmd.Flags().String("name", "", "Agent name")
+	initCmd.Flags().String("description", "", "Agent description")
+	initCmd.Flags().String("version", "", "Agent version")
+	initCmd.Flags().String("type", "", "Agent type (ai-powered/minimal)")
+	initCmd.Flags().String("provider", "", "AI provider (openai/anthropic/azure/ollama/deepseek)")
+	initCmd.Flags().String("model", "", "AI model")
+	initCmd.Flags().String("system-prompt", "", "System prompt")
+	initCmd.Flags().Int("max-tokens", 0, "Maximum tokens")
+	initCmd.Flags().Float64("temperature", 0.0, "Temperature (0.0-2.0)")
+	initCmd.Flags().Bool("streaming", false, "Enable streaming")
+	initCmd.Flags().Bool("notifications", false, "Enable push notifications")
+	initCmd.Flags().Bool("history", false, "Enable state transition history")
+	initCmd.Flags().Int("port", 0, "Server port")
+	initCmd.Flags().Bool("debug", false, "Enable debug mode")
+	initCmd.Flags().String("language", "", "Programming language (go/rust/typescript)")
+	initCmd.Flags().String("go-module", "", "Go module path")
+	initCmd.Flags().String("go-version", "", "Go version")
+	initCmd.Flags().String("rust-package-name", "", "Rust package name")
+	initCmd.Flags().String("rust-version", "", "Rust version")
+	initCmd.Flags().String("rust-edition", "", "Rust edition")
+	initCmd.Flags().String("typescript-name", "", "TypeScript package name")
+	initCmd.Flags().Bool("overwrite", false, "Overwrite existing files")
+	initCmd.Flags().String("sandbox", "", "Sandbox environment (flox/devcontainer/none)")
+
+	viper.BindPFlags(initCmd.Flags())
+
+	viper.SetEnvPrefix("ADL")
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 }
 
 func runInit(cmd *cobra.Command, args []string) error {
+	useDefaults, _ := cmd.Flags().GetBool("defaults")
+
 	fmt.Println("\n🚀 A2A Agent Project Initialization")
 	fmt.Println("=====================================")
 	fmt.Println()
 
-	projectDir := promptString("Project directory (relative or absolute path)", ".")
+	projectDir := promptWithConfig("path", useDefaults, "Project directory (relative or absolute path)", ".")
 
 	var projectName string
 	if len(args) > 0 {
@@ -63,7 +98,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 	var adl *adlData
 	var adlFile string
 
-	useExisting := promptBool("Use an existing ADL schema file", false)
+	useExisting := conditionalPromptBool(useDefaults, "Use an existing ADL schema file", false)
 
 	if useExisting {
 		for {
@@ -103,7 +138,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		fmt.Printf("\n")
-		adl = collectADLInfo(projectName)
+		adl = collectADLInfo(cmd, projectName, useDefaults)
 		adlFile = filepath.Join(projectDir, "agent.yaml")
 
 		if err := writeADLFile(adl, adlFile); err != nil {
@@ -115,9 +150,9 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("🔨 Generating project structure...")
 
-	overwrite := false
-	if projectDir == "." || (projectDir != "" && dirExists(projectDir)) {
-		overwrite = promptBool("Overwrite existing files", true)
+	overwrite := promptBoolWithConfig("overwrite", useDefaults, "Overwrite existing files", true)
+	if !viper.IsSet("overwrite") && (projectDir == "." || (projectDir != "" && dirExists(projectDir))) {
+		overwrite = conditionalPromptBool(useDefaults, "Overwrite existing files", true)
 	}
 
 	if err := generateCmd.Flags().Set("file", adlFile); err != nil {
@@ -204,6 +239,9 @@ type adlData struct {
 				Edition     string `yaml:"edition"`
 			} `yaml:"rust,omitempty"`
 		} `yaml:"language,omitempty"`
+		Sandbox *struct {
+			Type string `yaml:"type,omitempty"`
+		} `yaml:"sandbox,omitempty"`
 	} `yaml:"spec"`
 }
 
@@ -214,7 +252,7 @@ func (a *adlData) getTemplate() string {
 	return "ai-powered"
 }
 
-func collectADLInfo(projectName string) *adlData {
+func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *adlData {
 	adl := &adlData{
 		APIVersion: "adl.dev/v1",
 		Kind:       "Agent",
@@ -222,13 +260,13 @@ func collectADLInfo(projectName string) *adlData {
 
 	fmt.Println("📋 Agent Metadata")
 	fmt.Println("-----------------")
-	adl.Metadata.Name = promptString("Agent name", projectName)
-	adl.Metadata.Description = promptString("Agent description", "A helpful AI agent")
-	adl.Metadata.Version = promptString("Version", "0.1.0")
+	adl.Metadata.Name = promptWithConfig("name", useDefaults, "Agent name", projectName)
+	adl.Metadata.Description = promptWithConfig("description", useDefaults, "Agent description", "A helpful AI agent")
+	adl.Metadata.Version = promptWithConfig("version", useDefaults, "Version", "0.1.0")
 
 	fmt.Println("\n🤖 Agent Type")
 	fmt.Println("--------------")
-	agentType := promptChoice("Agent type", []string{"ai-powered", "minimal"}, "ai-powered")
+	agentType := conditionalPromptChoice(useDefaults, "Agent type", []string{"ai-powered", "minimal"}, "ai-powered")
 
 	if agentType == "ai-powered" {
 		fmt.Println("\n🧠 AI Configuration")
@@ -242,7 +280,7 @@ func collectADLInfo(projectName string) *adlData {
 			Temperature  float64 `yaml:"temperature,omitempty"`
 		}{}
 
-		provider := promptChoice("AI Provider", []string{"openai", "anthropic", "azure", "ollama", "deepseek"}, "openai")
+		provider := conditionalPromptChoice(useDefaults, "AI Provider", []string{"openai", "anthropic", "azure", "ollama", "deepseek"}, "openai")
 		adl.Spec.Agent.Provider = provider
 
 		var defaultModel string
@@ -259,24 +297,18 @@ func collectADLInfo(projectName string) *adlData {
 			defaultModel = "deepseek-chat"
 		}
 
-		adl.Spec.Agent.Model = promptString("Model", defaultModel)
+		adl.Spec.Agent.Model = conditionalPrompt(useDefaults, "Model", defaultModel)
 
-		for {
-			systemPrompt := promptString("System prompt", "You are a helpful AI assistant.")
-			if systemPrompt != "" {
-				adl.Spec.Agent.SystemPrompt = systemPrompt
-				break
-			}
-			fmt.Println("⚠️  System prompt is required for AI-powered agents. Please provide a system prompt.")
-		}
+		systemPrompt := conditionalPrompt(useDefaults, "System prompt", "You are a helpful AI assistant.")
+		adl.Spec.Agent.SystemPrompt = systemPrompt
 
-		if maxTokensStr := promptString("Max tokens (optional, press enter to skip)", ""); maxTokensStr != "" {
+		if maxTokensStr := conditionalPrompt(useDefaults, "Max tokens (optional, press enter to skip)", ""); maxTokensStr != "" {
 			if maxTokens, err := strconv.Atoi(maxTokensStr); err == nil {
 				adl.Spec.Agent.MaxTokens = maxTokens
 			}
 		}
 
-		if tempStr := promptString("Temperature (0.0-2.0, optional)", ""); tempStr != "" {
+		if tempStr := conditionalPrompt(useDefaults, "Temperature (0.0-2.0, optional)", ""); tempStr != "" {
 			if temp, err := strconv.ParseFloat(tempStr, 64); err == nil {
 				adl.Spec.Agent.Temperature = temp
 			}
@@ -291,13 +323,13 @@ func collectADLInfo(projectName string) *adlData {
 		StateTransitionHistory bool `yaml:"stateTransitionHistory"`
 	}{}
 
-	adl.Spec.Capabilities.Streaming = promptBool("Enable streaming", true)
-	adl.Spec.Capabilities.PushNotifications = promptBool("Enable push notifications", false)
-	adl.Spec.Capabilities.StateTransitionHistory = promptBool("Enable state transition history", false)
+	adl.Spec.Capabilities.Streaming = conditionalPromptBool(useDefaults, "Enable streaming", true)
+	adl.Spec.Capabilities.PushNotifications = conditionalPromptBool(useDefaults, "Enable push notifications", false)
+	adl.Spec.Capabilities.StateTransitionHistory = conditionalPromptBool(useDefaults, "Enable state transition history", false)
 
 	fmt.Println("\n🔧 Tools")
 	fmt.Println("--------")
-	addTools := promptBool("Add tools to your agent", false)
+	addTools := conditionalPromptBool(useDefaults, "Add tools to your agent", false)
 
 	if addTools {
 		for {
@@ -335,16 +367,18 @@ func collectADLInfo(projectName string) *adlData {
 
 	fmt.Println("\n🌐 Server Configuration")
 	fmt.Println("-----------------------")
-	portStr := promptString("Server port", "8080")
+	portStr := conditionalPrompt(useDefaults, "Server port", "8080")
 	if port, err := strconv.Atoi(portStr); err == nil {
 		adl.Spec.Server.Port = port
 	} else {
 		adl.Spec.Server.Port = 8080
 	}
-	adl.Spec.Server.Debug = promptBool("Enable debug mode", false)
+	adl.Spec.Server.Debug = conditionalPromptBool(useDefaults, "Enable debug mode", false)
 
-	fmt.Println("\n🐹 Go Configuration")
-	fmt.Println("-------------------")
+	fmt.Println("\n💻 Language Configuration")
+	fmt.Println("-------------------------")
+
+	language := promptWithConfig("language", useDefaults, "Programming language", "go")
 
 	adl.Spec.Language = &struct {
 		Go *struct {
@@ -362,14 +396,56 @@ func collectADLInfo(projectName string) *adlData {
 		} `yaml:"rust,omitempty"`
 	}{}
 
-	adl.Spec.Language.Go = &struct {
-		Module  string `yaml:"module"`
-		Version string `yaml:"version"`
-	}{}
+	switch language {
+	case "go":
+		adl.Spec.Language.Go = &struct {
+			Module  string `yaml:"module"`
+			Version string `yaml:"version"`
+		}{}
+		defaultModule := getDefaultGoModule(adl.Metadata.Name)
+		adl.Spec.Language.Go.Module = promptWithConfig("go-module", useDefaults, "Go module", defaultModule)
+		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.24")
 
-	defaultModule := getDefaultGoModule(adl.Metadata.Name)
-	adl.Spec.Language.Go.Module = promptString("Go module", defaultModule)
-	adl.Spec.Language.Go.Version = promptString("Go version", "1.24")
+	case "rust":
+		adl.Spec.Language.Rust = &struct {
+			PackageName string `yaml:"packageName"`
+			Version     string `yaml:"version"`
+			Edition     string `yaml:"edition"`
+		}{}
+		adl.Spec.Language.Rust.PackageName = promptWithConfig("rust-package-name", useDefaults, "Rust package name", adl.Metadata.Name)
+		adl.Spec.Language.Rust.Version = promptWithConfig("rust-version", useDefaults, "Rust version", "1.89.0")
+		adl.Spec.Language.Rust.Edition = promptWithConfig("rust-edition", useDefaults, "Rust edition", "2024")
+
+	case "typescript":
+		adl.Spec.Language.TypeScript = &struct {
+			PackageName string `yaml:"packageName"`
+			NodeVersion string `yaml:"nodeVersion"`
+		}{}
+		adl.Spec.Language.TypeScript.PackageName = promptWithConfig("typescript-name", useDefaults, "TypeScript package name", adl.Metadata.Name)
+		adl.Spec.Language.TypeScript.NodeVersion = "20"
+
+	default:
+		// Default to Go
+		adl.Spec.Language.Go = &struct {
+			Module  string `yaml:"module"`
+			Version string `yaml:"version"`
+		}{}
+		defaultModule := getDefaultGoModule(adl.Metadata.Name)
+		adl.Spec.Language.Go.Module = promptWithConfig("go-module", useDefaults, "Go module", defaultModule)
+		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.24")
+	}
+
+	fmt.Println("\n🏗️ Sandbox Configuration")
+	fmt.Println("------------------------")
+	
+	sandboxType := promptWithConfig("sandbox", useDefaults, "Sandbox environment", "flox")
+	if sandboxType != "none" && sandboxType != "" {
+		adl.Spec.Sandbox = &struct {
+			Type string `yaml:"type,omitempty"`
+		}{
+			Type: sandboxType,
+		}
+	}
 
 	return adl
 }
@@ -416,6 +492,85 @@ func getDefaultGoModule(projectName string) string {
 func dirExists(path string) bool {
 	info, err := os.Stat(path)
 	return err == nil && info.IsDir()
+}
+
+func conditionalPrompt(useDefaults bool, promptText, defaultValue string) string {
+	if useDefaults {
+		fmt.Printf("%s [%s]: %s\n", promptText, defaultValue, defaultValue)
+		return defaultValue
+	}
+	return promptString(promptText, defaultValue)
+}
+
+func promptWithConfig(key string, useDefaults bool, promptText, defaultValue string) string {
+	if viper.IsSet(key) && viper.GetString(key) != "" {
+		value := viper.GetString(key)
+		fmt.Printf("%s [%s]: %s\n", promptText, defaultValue, value)
+		return value
+	}
+	return conditionalPrompt(useDefaults, promptText, defaultValue)
+}
+
+func promptBoolWithConfig(key string, useDefaults bool, promptText string, defaultValue bool) bool {
+	if viper.IsSet(key) {
+		value := viper.GetBool(key)
+		valueStr := "n"
+		if value {
+			valueStr = "y"
+		}
+		defaultStr := "n"
+		if defaultValue {
+			defaultStr = "y"
+		}
+		fmt.Printf("%s [y/n] [%s]: %s\n", promptText, defaultStr, valueStr)
+		return value
+	}
+	return conditionalPromptBool(useDefaults, promptText, defaultValue)
+}
+
+func conditionalPromptBool(useDefaults bool, promptText string, defaultValue bool) bool {
+	if useDefaults {
+		defaultStr := "n"
+		if defaultValue {
+			defaultStr = "y"
+		}
+		fmt.Printf("%s [y/n] [%s]: %s\n", promptText, defaultStr, defaultStr)
+		return defaultValue
+	}
+	return promptBool(promptText, defaultValue)
+}
+
+func conditionalPromptBoolWithFlag(cmd *cobra.Command, flagName string, useDefaults bool, promptText string, defaultValue bool) bool {
+	if cmd.Flags().Changed(flagName) {
+		flagValue, _ := cmd.Flags().GetBool(flagName)
+		valueStr := "n"
+		if flagValue {
+			valueStr = "y"
+		}
+		defaultStr := "n"
+		if defaultValue {
+			defaultStr = "y"
+		}
+		fmt.Printf("%s [y/n] [%s]: %s\n", promptText, defaultStr, valueStr)
+		return flagValue
+	}
+	return conditionalPromptBool(useDefaults, promptText, defaultValue)
+}
+
+func conditionalPromptChoice(useDefaults bool, promptText string, choices []string, defaultValue string) string {
+	if useDefaults {
+		fmt.Printf("%s (%s) [%s]: %s\n", promptText, strings.Join(choices, "/"), defaultValue, defaultValue)
+		return defaultValue
+	}
+	return promptChoice(promptText, choices, defaultValue)
+}
+
+func conditionalPromptChoiceWithFlag(cmd *cobra.Command, flagName string, useDefaults bool, promptText string, choices []string, defaultValue string) string {
+	if flagValue, _ := cmd.Flags().GetString(flagName); flagValue != "" {
+		fmt.Printf("%s (%s) [%s]: %s\n", promptText, strings.Join(choices, "/"), defaultValue, flagValue)
+		return flagValue
+	}
+	return conditionalPromptChoice(useDefaults, promptText, choices, defaultValue)
 }
 
 func promptString(promptText, defaultValue string) string {

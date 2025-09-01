@@ -25,6 +25,7 @@ type Spec struct {
 	Server       Server        `yaml:"server" json:"server"`
 	Language     *Language     `yaml:"language,omitempty" json:"language,omitempty"`
 	SCM          *SCM          `yaml:"scm,omitempty" json:"scm,omitempty"`
+	Sandbox      *SandboxConfig `yaml:"sandbox,omitempty" json:"sandbox,omitempty"`
 }
 
 // Capabilities defines what the agent can do
@@ -93,6 +94,11 @@ type Language struct {
 type SCM struct {
 	Provider string `yaml:"provider" json:"provider"`
 	URL      string `yaml:"url,omitempty" json:"url,omitempty"`
+}
+
+// SandboxConfig for sandbox environment settings
+type SandboxConfig struct {
+	Type string `yaml:"type,omitempty" json:"type,omitempty"`
 }
 
 // GeneratedMetadata contains information about the generation

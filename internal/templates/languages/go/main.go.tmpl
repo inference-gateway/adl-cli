@@ -1,0 +1,119 @@
+package main
+
+import (
+	"context"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/inference-gateway/adk/server"
+	"github.com/inference-gateway/adk/server/config"
+	"github.com/sethvargo/go-envconfig"
+	"go.uber.org/zap"
+
+	"{{ .ADL.Spec.Language.Go.Module }}/tools"
+)
+
+// Config represents the application configuration
+type Config struct {
+	// Core application settings
+	Environment string `env:"ENVIRONMENT"`
+	
+	// A2A framework configuration (all A2A_ prefixed vars)
+	A2A config.Config `env:",prefix=A2A_"`
+}
+
+var (
+	Version          = "{{ .ADL.Metadata.Version }}"
+	AgentName        = "{{ .ADL.Metadata.Name }}"
+	AgentDescription = "{{ .ADL.Metadata.Description }}"
+)
+
+func main() {
+	ctx := context.Background()
+
+	// Load configuration from environment variables
+	var cfg Config
+	if err := envconfig.Process(ctx, &cfg); err != nil {
+		log.Fatal("failed to load config:", err)
+	}
+
+	// Initialize logger with simple configuration
+	var logger *zap.Logger
+	var err error
+	if cfg.A2A.Debug || cfg.Environment == "dev" || cfg.Environment == "development" {
+		logger, err = zap.NewDevelopment()
+	} else {
+		logger, err = zap.NewProduction()
+	}
+	if err != nil {
+		log.Fatal("failed to initialize logger:", err)
+	}
+	defer logger.Sync()
+
+	logger.Info("starting {{ .ADL.Metadata.Name }} agent", 
+		zap.String("version", Version),
+		zap.String("environment", cfg.Environment),
+	)
+	logger.Debug("loaded configuration")
+
+	// Create toolbox and register tools
+	toolBox := server.NewDefaultToolBox()
+
+	{{- range .ADL.Spec.Tools }}
+	// Register {{ .Name }} tool
+	{{ .Name }}Tool := tools.New{{ .Name | title }}Tool()
+	toolBox.AddTool({{ .Name }}Tool)
+	logger.Info("registered tool", zap.String("tool", "{{ .Name }}"), zap.String("description", "{{ .Description }}"))
+	{{- end }}
+
+	// Create A2A agent with configuration
+	agent, err := server.NewAgentBuilder(logger).
+		WithConfig(&cfg.A2A.AgentConfig).
+		WithToolBox(toolBox).
+		WithSystemPrompt(`{{- if .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt }}{{- else }}You are a helpful AI assistant.{{- end }}`).
+		Build()
+	if err != nil {
+		logger.Fatal("failed to create agent", zap.Error(err))
+	}
+
+	// Create A2A server with agent and configuration
+	a2aServer, err := server.NewA2AServerBuilder(cfg.A2A, logger).
+		WithAgent(agent).
+		WithAgentCardFromFile("./.well-known/agent.json", map[string]interface{}{
+			"name":        AgentName,
+			"version":     Version,
+			"description": AgentDescription,
+			"url":         cfg.A2A.AgentURL,
+		}).
+		Build()
+	if err != nil {
+		logger.Fatal("failed to create A2A server", zap.Error(err))
+	}
+
+	// Start server in background
+	go func() {
+		logger.Info("starting A2A server", 
+			zap.String("port", cfg.A2A.ServerConfig.Port),
+			zap.String("host", cfg.A2A.ServerConfig.Host),
+		)
+		if err := a2aServer.Start(ctx); err != nil {
+			logger.Fatal("server failed to start", zap.Error(err))
+		}
+	}()
+
+	logger.Info("{{ .ADL.Metadata.Name }} agent running successfully", 
+		zap.String("port", cfg.A2A.ServerConfig.Port),
+		zap.String("environment", cfg.Environment),
+	)
+
+	// Wait for shutdown signal
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	logger.Info("shutdown signal received, gracefully stopping server...")
+	a2aServer.Stop(ctx)
+	logger.Info("{{ .ADL.Metadata.Name }} agent stopped")
+}

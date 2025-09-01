@@ -1,0 +1,72 @@
+use std::sync::Arc;
+use tokio::signal;
+use tracing::{info, warn, error};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
+use rust_adk::{
+    agent::{Agent, AgentBuilder},
+    server::{Server, ServerConfig},
+    tools::ToolBox,
+};
+
+mod tools;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Initialize tracing
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "{{ .ADL.Metadata.Name | replace "-" "_" }}=info".into()),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
+    info!("Starting {{ .ADL.Metadata.Name }} agent v{{ .ADL.Metadata.Version }}");
+
+    // Create toolbox and register tools
+    let mut toolbox = ToolBox::new();
+    {{- range .ADL.Spec.Tools }}
+    
+    // Register {{ .Name }} tool
+    let {{ .Name }}_tool = tools::{{ .Name }}::{{ .Name | title }}Tool::new();
+    toolbox.add_tool("{{ .Name }}", Box::new({{ .Name }}_tool));
+    info!("Registered tool: {{ .Name }} - {{ .Description }}");
+    {{- end }}
+
+    // Build agent
+    let agent = AgentBuilder::new()
+        .with_system_prompt("{{- if .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt }}{{- else }}You are a helpful AI assistant.{{- end }}")
+        .with_toolbox(toolbox)
+        .build()
+        .await?;
+
+    // Server configuration
+    let server_config = ServerConfig {
+        host: "0.0.0.0".to_string(),
+        port: {{ .ADL.Spec.Server.Port | default 8080 }},
+        debug: {{ .ADL.Spec.Server.Debug | default false }},
+    };
+
+    // Create and start server
+    let server = Server::new(server_config, Arc::new(agent));
+    
+    // Start server in background
+    let server_handle = tokio::spawn(async move {
+        if let Err(e) = server.run().await {
+            error!("Server error: {}", e);
+        }
+    });
+
+    info!("{{ .ADL.Metadata.Name }} agent running on port {{ .ADL.Spec.Server.Port | default 8080 }}");
+
+    // Wait for shutdown signal
+    signal::ctrl_c().await?;
+    warn!("Shutdown signal received, gracefully stopping...");
+
+    // Cancel server
+    server_handle.abort();
+    
+    info!("{{ .ADL.Metadata.Name }} agent stopped");
+    Ok(())
+}

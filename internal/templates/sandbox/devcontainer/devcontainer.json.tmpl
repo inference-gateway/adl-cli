@@ -1,0 +1,49 @@
+{
+  "name": "{{ .ADL.Metadata.Name }}",
+  {{- if eq .Language "go" }}
+  "image": "mcr.microsoft.com/devcontainers/go:1-{{ .ADL.Spec.Language.Go.Version }}-bullseye",
+  {{- else if eq .Language "rust" }}
+  "image": "mcr.microsoft.com/devcontainers/rust:1-bullseye",
+  {{- else if eq .Language "typescript" }}
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
+  {{- end }}
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        {{- if eq .Language "go" }}
+        "golang.go",
+        {{- else if eq .Language "rust" }}
+        "rust-lang.rust-analyzer",
+        {{- else if eq .Language "typescript" }}
+        "ms-vscode.vscode-typescript-next",
+        {{- end }}
+        "ms-azuretools.vscode-docker",
+        "redhat.vscode-yaml"
+      ],
+      "settings": {
+        {{- if eq .Language "go" }}
+        "go.toolsManagement.checkForUpdates": "local",
+        "go.useLanguageServer": true,
+        "go.gopath": "/go"
+        {{- else if eq .Language "rust" }}
+        "rust-analyzer.checkOnSave.command": "cargo check"
+        {{- else if eq .Language "typescript" }}
+        "typescript.preferences.includePackageJsonAutoImports": "auto"
+        {{- end }}
+      }
+    }
+  },
+  "forwardPorts": [{{ .ADL.Spec.Server.Port }}],
+  {{- if eq .Language "go" }}
+  "postCreateCommand": "go mod download",
+  {{- else if eq .Language "rust" }}
+  "postCreateCommand": "cargo build",
+  {{- else if eq .Language "typescript" }}
+  "postCreateCommand": "npm install",
+  {{- end }}
+  "remoteUser": "vscode"
+}

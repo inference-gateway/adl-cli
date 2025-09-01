@@ -53,7 +53,14 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
-	templateEngine := templates.New(template)
+	language := templates.DetectLanguageFromADL(adl)
+
+	registry, err := templates.NewRegistry(language)
+	if err != nil {
+		return fmt.Errorf("failed to create template registry: %w", err)
+	}
+
+	templateEngine := templates.NewWithRegistry(template, registry)
 
 	if err := g.generateProject(templateEngine, adl, outputDir); err != nil {
 		return fmt.Errorf("failed to generate project: %w", err)
@@ -185,6 +192,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 			CLIVersion:  g.getVersion(),
 			Template:    g.config.Template,
 		},
+		Language: templates.DetectLanguageFromADL(adl),
 	}
 
 	ignoreChecker, err := NewIgnoreChecker(outputDir)
@@ -193,7 +201,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 	}
 
 	files := templateEngine.GetFiles(adl)
-	for fileName, templateContent := range files {
+	for fileName, templateKey := range files {
 		fileName = g.replacePlaceholders(fileName, adl)
 
 		if ignoreChecker.ShouldIgnore(fileName) {
@@ -201,9 +209,31 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 			continue
 		}
 
-		content, err := templateEngine.ExecuteWithHeader(templateContent, ctx, fileName)
+		content, err := templateEngine.ExecuteTemplate(templateKey, ctx)
 		if err != nil {
-			return fmt.Errorf("failed to execute template for %s: %w", fileName, err)
+			return fmt.Errorf("failed to execute template %s: %w", templateKey, err)
+		}
+
+		ext := strings.ToLower(filepath.Ext(fileName))
+		baseName := strings.ToLower(filepath.Base(fileName))
+
+		var fileType string
+		switch {
+		case ext == ".go":
+			fileType = "go"
+		case ext == ".rs":
+			fileType = "rust"
+		case ext == ".yaml" || ext == ".yml":
+			fileType = "yaml"
+		case baseName == "dockerfile":
+			fileType = "dockerfile"
+		case baseName == "taskfile.yml":
+			fileType = "taskfile"
+		}
+
+		if fileType != "" {
+			header := templates.GetGeneratedFileHeader(fileType, ctx.Metadata.CLIVersion, ctx.Metadata.GeneratedAt)
+			content = header + content
 		}
 
 		filePath := filepath.Join(outputDir, fileName)

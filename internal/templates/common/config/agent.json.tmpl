@@ -1,0 +1,27 @@
+{
+	"schemaVersion": "0.1.0",
+	"name": "{{ .ADL.Metadata.Name }}",
+	"version": "{{ .ADL.Metadata.Version }}",
+	"description": "{{ .ADL.Metadata.Description }}",
+	"capabilities": {
+		{{- if .ADL.Spec.Capabilities }}
+		"streaming": {{ .ADL.Spec.Capabilities.Streaming }},
+		"pushNotifications": {{ .ADL.Spec.Capabilities.PushNotifications }},
+		"stateTransitionHistory": {{ .ADL.Spec.Capabilities.StateTransitionHistory }}
+		{{- else }}
+		"streaming": false,
+		"pushNotifications": false,
+		"stateTransitionHistory": false
+		{{- end }}
+	},
+	"tools": [
+		{{- range $index, $tool := .ADL.Spec.Tools }}
+		{{- if $index }},{{ end }}
+		{
+			"name": "{{ $tool.Name }}",
+			"description": "{{ $tool.Description }}",
+			"schema": {{ $tool.Schema | toJson }}
+		}
+		{{- end }}
+	]
+}

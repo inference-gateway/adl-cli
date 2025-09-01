@@ -1,0 +1,27 @@
+version = 1
+
+[install]
+{{- if eq .Language "go" }}
+go = { version = "{{ .ADL.Spec.Language.Go.Version }}" }
+{{- else if eq .Language "rust" }}
+rust = { version = "stable" }
+{{- else if eq .Language "typescript" }}
+nodejs = { version = "20" }
+{{- end }}
+
+# Development tools
+git = {}
+docker = {}
+task = {}
+
+[hook]
+on-activate = '''
+  echo "🌟 Welcome to {{ .ADL.Metadata.Name }} development environment!"
+  {{- if eq .Language "go" }}
+  echo "Go version: $(go version)"
+  {{- else if eq .Language "rust" }}
+  echo "Rust version: $(rustc --version)"
+  {{- else if eq .Language "typescript" }}
+  echo "Node version: $(node --version)"
+  {{- end }}
+'''

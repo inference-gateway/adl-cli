@@ -1,0 +1,51 @@
+package tools
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/inference-gateway/adk/server"
+)
+
+// New{{ .Name | title }}Tool creates a new {{ .Name }} tool
+func New{{ .Name | title }}Tool() server.Tool {
+	return server.NewBasicTool(
+		"{{ .Name }}",
+		"{{ .Description }}",
+		map[string]interface{}{
+			"type": "object",
+			"properties": map[string]interface{}{
+				{{- range $key, $value := .Schema.properties }}
+				"{{ $key }}": {{ $value | toJson }},
+				{{- end }}
+			},
+			{{- if .Schema.required }}
+			"required": {{ .Schema.required | toJson }},
+			{{- end }}
+		},
+		{{ .Name }}Handler,
+	)
+}
+
+// {{ .Name }}Handler handles the {{ .Name }} tool execution
+func {{ .Name }}Handler(ctx context.Context, args map[string]interface{}) (string, error) {
+	// TODO: Implement {{ .Name }} logic
+	// {{ .Description }}
+	
+	// Extract parameters from args
+	{{- range $key, $value := .Schema.properties }}
+	{{- if eq $value.type "string" }}
+	// {{ $key }} := args["{{ $key }}"].(string)
+	{{- else if eq $value.type "number" }}
+	// {{ $key }} := args["{{ $key }}"].(float64)
+	{{- else if eq $value.type "integer" }}
+	// {{ $key }} := args["{{ $key }}"].(int)
+	{{- else if eq $value.type "boolean" }}
+	// {{ $key }} := args["{{ $key }}"].(bool)
+	{{- else }}
+	// {{ $key }} := args["{{ $key }}"]
+	{{- end }}
+	{{- end }}
+	
+	return fmt.Sprintf(`{"result": "TODO: Implement {{ .Name }} logic", "input": %+v}`, args), nil
+}

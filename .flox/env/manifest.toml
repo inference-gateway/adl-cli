@@ -4,6 +4,9 @@ version = 1
 go.pkg-path = "go"
 go.version = "^1.24"
 
+claude-code.pkg-path = "claude-code"
+claude-code.version = "^1.0.96"
+
 [hook]
 on-activate = """
   export GOENV="$FLOX_ENV_CACHE/goenv"
