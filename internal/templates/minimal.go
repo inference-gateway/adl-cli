@@ -211,7 +211,7 @@ const goModTemplate = `module {{ .ADL.Spec.Language.Go.Module }}
 go {{ .ADL.Spec.Language.Go.Version }}
 
 require (
-	github.com/inference-gateway/a2a v0.7.3
+	github.com/inference-gateway/adk v0.9.0
 	github.com/sethvargo/go-envconfig v1.2.0
 	go.uber.org/zap v1.27.0
 )
