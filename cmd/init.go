@@ -437,7 +437,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 
 	fmt.Println("\n🏗️ Sandbox Configuration")
 	fmt.Println("------------------------")
-	
+
 	sandboxType := promptWithConfig("sandbox", useDefaults, "Sandbox environment", "flox")
 	if sandboxType != "none" && sandboxType != "" {
 		adl.Spec.Sandbox = &struct {

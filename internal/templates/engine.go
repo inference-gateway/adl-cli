@@ -52,7 +52,7 @@ func (e *Engine) Execute(templateContent string, ctx Context) (string, error) {
 	}
 
 	result := buf.String()
-	
+
 	if result != "" && !strings.HasSuffix(result, "\n") {
 		result += "\n"
 	}
@@ -104,12 +104,12 @@ func (e *Engine) ExecuteTemplate(templateKey string, ctx Context) (string, error
 	if e.registry == nil {
 		return "", fmt.Errorf("no registry configured")
 	}
-	
+
 	templateContent, err := e.registry.GetTemplate(templateKey)
 	if err != nil {
 		return "", fmt.Errorf("failed to get template %s: %w", templateKey, err)
 	}
-	
+
 	return e.Execute(templateContent, ctx)
 }
 
