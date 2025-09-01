@@ -31,21 +31,33 @@ func init() {
 }
 
 func runInit(cmd *cobra.Command, args []string) error {
-	fmt.Println("🚀 A2A Agent Project Initialization")
+	fmt.Println("\n🚀 A2A Agent Project Initialization")
 	fmt.Println("=====================================")
 	fmt.Println()
+
+	projectDir := promptString("Project directory (relative or absolute path)", ".")
 
 	var projectName string
 	if len(args) > 0 {
 		projectName = args[0]
 	} else {
-		projectName = promptString("Project name", "my-agent")
+		projectName = getProjectNameFromGit()
+		if projectName == "" {
+			if projectDir == "." {
+				cwd, _ := os.Getwd()
+				projectName = filepath.Base(cwd)
+			} else {
+				projectName = filepath.Base(projectDir)
+			}
+		}
+	}
+	if projectDir != "." && projectDir != "" {
+		if err := os.MkdirAll(projectDir, 0755); err != nil {
+			return fmt.Errorf("failed to create project directory: %w", err)
+		}
 	}
 
-	projectDir := filepath.Join(".", projectName)
-	if err := os.MkdirAll(projectDir, 0755); err != nil {
-		return fmt.Errorf("failed to create project directory: %w", err)
-	}
+	fmt.Printf("\n")
 
 	adl := collectADLInfo(projectName)
 
@@ -58,6 +70,11 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("🔨 Generating project structure...")
 
+	overwrite := false
+	if projectDir == "." || (projectDir != "" && dirExists(projectDir)) {
+		overwrite = promptBool("Overwrite existing files", true)
+	}
+
 	if err := generateCmd.Flags().Set("file", adlFile); err != nil {
 		return fmt.Errorf("failed to set file flag: %w", err)
 	}
@@ -67,6 +84,9 @@ func runInit(cmd *cobra.Command, args []string) error {
 	if err := generateCmd.Flags().Set("template", adl.getTemplate()); err != nil {
 		return fmt.Errorf("failed to set template flag: %w", err)
 	}
+	if err := generateCmd.Flags().Set("overwrite", fmt.Sprintf("%t", overwrite)); err != nil {
+		return fmt.Errorf("failed to set overwrite flag: %w", err)
+	}
 
 	if err := runGenerate(generateCmd, []string{}); err != nil {
 		return fmt.Errorf("failed to generate project: %w", err)
@@ -74,13 +94,22 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	fmt.Println()
 	fmt.Printf("🎉 Project '%s' initialized successfully!\n", projectName)
-	fmt.Printf("📁 Project location: %s\n", projectDir)
-	fmt.Println()
-	fmt.Println("📝 Next steps:")
-	fmt.Printf("   1. cd %s\n", projectName)
-	fmt.Println("   2. Implement the TODO placeholders in the generated files")
-	fmt.Println("   3. Run 'task build' to build your agent")
-	fmt.Println("   4. Run 'task run' to start your agent server")
+	if projectDir == "." {
+		fmt.Printf("📁 Project location: current directory\n")
+		fmt.Println()
+		fmt.Println("📝 Next steps:")
+		fmt.Println("   1. Implement the TODO placeholders in the generated files")
+		fmt.Println("   2. Run 'task build' to build your agent")
+		fmt.Println("   3. Run 'task run' to start your agent server")
+	} else {
+		fmt.Printf("📁 Project location: %s\n", projectDir)
+		fmt.Println()
+		fmt.Println("📝 Next steps:")
+		fmt.Printf("   1. cd %s\n", projectDir)
+		fmt.Println("   2. Implement the TODO placeholders in the generated files")
+		fmt.Println("   3. Run 'task build' to build your agent")
+		fmt.Println("   4. Run 'task run' to start your agent server")
+	}
 
 	return nil
 }
@@ -282,36 +311,48 @@ func collectADLInfo(projectName string) *adlData {
 	return adl
 }
 
-func getDefaultGoModule(projectName string) string {
+func parseGitRemote() (owner, repo string) {
 	cmd := exec.Command("git", "remote", "get-url", "origin")
 	output, err := cmd.Output()
 	if err != nil {
-		return fmt.Sprintf("github.com/example/%s", projectName)
+		return "", ""
 	}
 
 	remoteURL := strings.TrimSpace(string(output))
 
-	var modulePath string
-	
 	if strings.HasPrefix(remoteURL, "https://") {
 		re := regexp.MustCompile(`https://github\.com/([^/]+)/([^/]+?)(?:\.git)?$`)
 		matches := re.FindStringSubmatch(remoteURL)
 		if len(matches) >= 3 {
-			modulePath = fmt.Sprintf("github.com/%s/%s", matches[1], projectName)
+			return matches[1], matches[2]
 		}
 	} else if strings.HasPrefix(remoteURL, "git@") {
 		re := regexp.MustCompile(`git@github\.com:([^/]+)/([^/]+?)(?:\.git)?$`)
 		matches := re.FindStringSubmatch(remoteURL)
 		if len(matches) >= 3 {
-			modulePath = fmt.Sprintf("github.com/%s/%s", matches[1], projectName)
+			return matches[1], matches[2]
 		}
 	}
-	
-	if modulePath == "" {
+
+	return "", ""
+}
+
+func getProjectNameFromGit() string {
+	_, repo := parseGitRemote()
+	return repo
+}
+
+func getDefaultGoModule(projectName string) string {
+	owner, _ := parseGitRemote()
+	if owner == "" {
 		return fmt.Sprintf("github.com/example/%s", projectName)
 	}
-	
-	return modulePath
+	return fmt.Sprintf("github.com/%s/%s", owner, projectName)
+}
+
+func dirExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.IsDir()
 }
 
 func promptString(promptText, defaultValue string) string {
