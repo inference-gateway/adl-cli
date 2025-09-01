@@ -1,13 +1,13 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 
+	"github.com/inference-gateway/adl-cli/internal/prompt"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -29,8 +29,6 @@ func init() {
 }
 
 func runInit(cmd *cobra.Command, args []string) error {
-	scanner := bufio.NewScanner(os.Stdin)
-
 	fmt.Println("🚀 A2A Agent Project Initialization")
 	fmt.Println("=====================================")
 	fmt.Println()
@@ -39,7 +37,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 	if len(args) > 0 {
 		projectName = args[0]
 	} else {
-		projectName = promptString(scanner, "Project name", "my-agent")
+		projectName = promptString("Project name", "my-agent")
 	}
 
 	projectDir := filepath.Join(".", projectName)
@@ -47,7 +45,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to create project directory: %w", err)
 	}
 
-	adl := collectADLInfo(scanner, projectName)
+	adl := collectADLInfo(projectName)
 
 	adlFile := filepath.Join(projectDir, "agent.yaml")
 	if err := writeADLFile(adl, adlFile); err != nil {
@@ -131,7 +129,7 @@ func (a *adlData) getTemplate() string {
 	return "ai-powered"
 }
 
-func collectADLInfo(scanner *bufio.Scanner, projectName string) *adlData {
+func collectADLInfo(projectName string) *adlData {
 	adl := &adlData{
 		APIVersion: "adl.dev/v1",
 		Kind:       "Agent",
@@ -139,13 +137,13 @@ func collectADLInfo(scanner *bufio.Scanner, projectName string) *adlData {
 
 	fmt.Println("📋 Agent Metadata")
 	fmt.Println("-----------------")
-	adl.Metadata.Name = promptString(scanner, "Agent name", projectName)
-	adl.Metadata.Description = promptString(scanner, "Agent description", "A helpful AI agent")
-	adl.Metadata.Version = promptString(scanner, "Version", "1.0.0")
+	adl.Metadata.Name = promptString("Agent name", projectName)
+	adl.Metadata.Description = promptString("Agent description", "A helpful AI agent")
+	adl.Metadata.Version = promptString("Version", "0.1.0")
 
 	fmt.Println("\n🤖 Agent Type")
 	fmt.Println("--------------")
-	agentType := promptChoice(scanner, "Agent type", []string{"ai-powered", "minimal"}, "ai-powered")
+	agentType := promptChoice("Agent type", []string{"ai-powered", "minimal"}, "ai-powered")
 
 	if agentType == "ai-powered" {
 		fmt.Println("\n🧠 AI Configuration")
@@ -159,7 +157,7 @@ func collectADLInfo(scanner *bufio.Scanner, projectName string) *adlData {
 			Temperature  float64 `yaml:"temperature,omitempty"`
 		}{}
 
-		provider := promptChoice(scanner, "AI Provider", []string{"openai", "anthropic", "azure", "ollama", "deepseek"}, "openai")
+		provider := promptChoice("AI Provider", []string{"openai", "anthropic", "azure", "ollama", "deepseek"}, "openai")
 		adl.Spec.Agent.Provider = provider
 
 		var defaultModel string
@@ -176,10 +174,10 @@ func collectADLInfo(scanner *bufio.Scanner, projectName string) *adlData {
 			defaultModel = "deepseek-chat"
 		}
 
-		adl.Spec.Agent.Model = promptString(scanner, "Model", defaultModel)
+		adl.Spec.Agent.Model = promptString("Model", defaultModel)
 
 		for {
-			systemPrompt := promptString(scanner, "System prompt", "You are a helpful AI assistant.")
+			systemPrompt := promptString("System prompt", "You are a helpful AI assistant.")
 			if systemPrompt != "" {
 				adl.Spec.Agent.SystemPrompt = systemPrompt
 				break
@@ -187,13 +185,13 @@ func collectADLInfo(scanner *bufio.Scanner, projectName string) *adlData {
 			fmt.Println("⚠️  System prompt is required for AI-powered agents. Please provide a system prompt.")
 		}
 
-		if maxTokensStr := promptString(scanner, "Max tokens (optional, press enter to skip)", ""); maxTokensStr != "" {
+		if maxTokensStr := promptString("Max tokens (optional, press enter to skip)", ""); maxTokensStr != "" {
 			if maxTokens, err := strconv.Atoi(maxTokensStr); err == nil {
 				adl.Spec.Agent.MaxTokens = maxTokens
 			}
 		}
 
-		if tempStr := promptString(scanner, "Temperature (0.0-2.0, optional)", ""); tempStr != "" {
+		if tempStr := promptString("Temperature (0.0-2.0, optional)", ""); tempStr != "" {
 			if temp, err := strconv.ParseFloat(tempStr, 64); err == nil {
 				adl.Spec.Agent.Temperature = temp
 			}
@@ -208,13 +206,13 @@ func collectADLInfo(scanner *bufio.Scanner, projectName string) *adlData {
 		StateTransitionHistory bool `yaml:"stateTransitionHistory"`
 	}{}
 
-	adl.Spec.Capabilities.Streaming = promptBool(scanner, "Enable streaming", true)
-	adl.Spec.Capabilities.PushNotifications = promptBool(scanner, "Enable push notifications", false)
-	adl.Spec.Capabilities.StateTransitionHistory = promptBool(scanner, "Enable state transition history", false)
+	adl.Spec.Capabilities.Streaming = promptBool("Enable streaming", true)
+	adl.Spec.Capabilities.PushNotifications = promptBool("Enable push notifications", false)
+	adl.Spec.Capabilities.StateTransitionHistory = promptBool("Enable state transition history", false)
 
 	fmt.Println("\n🔧 Tools")
 	fmt.Println("--------")
-	addTools := promptBool(scanner, "Add tools to your agent", false)
+	addTools := promptBool("Add tools to your agent", false)
 
 	if addTools {
 		for {
@@ -224,12 +222,12 @@ func collectADLInfo(scanner *bufio.Scanner, projectName string) *adlData {
 				Schema      map[string]interface{} `yaml:"schema"`
 			}{}
 
-			tool.Name = promptString(scanner, "Tool name (e.g., 'get_weather')", "")
+			tool.Name = promptString("Tool name (e.g., 'get_weather')", "")
 			if tool.Name == "" {
 				break
 			}
 
-			tool.Description = promptString(scanner, "Tool description", "")
+			tool.Description = promptString("Tool description", "")
 
 			tool.Schema = map[string]interface{}{
 				"type": "object",
@@ -244,7 +242,7 @@ func collectADLInfo(scanner *bufio.Scanner, projectName string) *adlData {
 
 			adl.Spec.Tools = append(adl.Spec.Tools, tool)
 
-			if !promptBool(scanner, "Add another tool", false) {
+			if !promptBool("Add another tool", false) {
 				break
 			}
 		}
@@ -252,13 +250,13 @@ func collectADLInfo(scanner *bufio.Scanner, projectName string) *adlData {
 
 	fmt.Println("\n🌐 Server Configuration")
 	fmt.Println("-----------------------")
-	portStr := promptString(scanner, "Server port", "8080")
+	portStr := promptString("Server port", "8080")
 	if port, err := strconv.Atoi(portStr); err == nil {
 		adl.Spec.Server.Port = port
 	} else {
 		adl.Spec.Server.Port = 8080
 	}
-	adl.Spec.Server.Debug = promptBool(scanner, "Enable debug mode", false)
+	adl.Spec.Server.Debug = promptBool("Enable debug mode", false)
 
 	fmt.Println("\n🐹 Go Configuration")
 	fmt.Println("-------------------")
@@ -275,38 +273,35 @@ func collectADLInfo(scanner *bufio.Scanner, projectName string) *adlData {
 		Version string `yaml:"version"`
 	}{}
 
-	adl.Spec.Language.Go.Module = promptString(scanner, "Go module", fmt.Sprintf("github.com/example/%s", adl.Metadata.Name))
-	adl.Spec.Language.Go.Version = promptString(scanner, "Go version", "1.24")
+	adl.Spec.Language.Go.Module = promptString("Go module", fmt.Sprintf("github.com/example/%s", adl.Metadata.Name))
+	adl.Spec.Language.Go.Version = promptString("Go version", "1.24")
 
 	return adl
 }
 
-func promptString(scanner *bufio.Scanner, prompt, defaultValue string) string {
-	if defaultValue != "" {
-		fmt.Printf("%s [%s]: ", prompt, defaultValue)
-	} else {
-		fmt.Printf("%s: ", prompt)
-	}
-
-	scanner.Scan()
-	input := strings.TrimSpace(scanner.Text())
-
-	if input == "" {
-		return defaultValue
+func promptString(promptText, defaultValue string) string {
+	input, err := prompt.ReadString(promptText, defaultValue)
+	if err != nil {
+		fmt.Println()
+		os.Exit(0)
 	}
 	return input
 }
 
-func promptBool(scanner *bufio.Scanner, prompt string, defaultValue bool) bool {
+func promptBool(promptText string, defaultValue bool) bool {
 	defaultStr := "n"
 	if defaultValue {
 		defaultStr = "y"
 	}
 
-	fmt.Printf("%s [y/n] (default: %s): ", prompt, defaultStr)
-	scanner.Scan()
-	input := strings.ToLower(strings.TrimSpace(scanner.Text()))
+	promptWithDefault := fmt.Sprintf("%s [y/n]", promptText)
+	input, err := prompt.ReadString(promptWithDefault, defaultStr)
+	if err != nil {
+		fmt.Println()
+		os.Exit(0)
+	}
 
+	input = strings.ToLower(strings.TrimSpace(input))
 	if input == "" {
 		return defaultValue
 	}
@@ -314,11 +309,15 @@ func promptBool(scanner *bufio.Scanner, prompt string, defaultValue bool) bool {
 	return input == "y" || input == "yes"
 }
 
-func promptChoice(scanner *bufio.Scanner, prompt string, choices []string, defaultValue string) string {
-	fmt.Printf("%s (%s) [%s]: ", prompt, strings.Join(choices, "/"), defaultValue)
-	scanner.Scan()
-	input := strings.TrimSpace(scanner.Text())
+func promptChoice(promptText string, choices []string, defaultValue string) string {
+	promptWithChoices := fmt.Sprintf("%s (%s)", promptText, strings.Join(choices, "/"))
+	input, err := prompt.ReadString(promptWithChoices, defaultValue)
+	if err != nil {
+		fmt.Println()
+		os.Exit(0)
+	}
 
+	input = strings.TrimSpace(input)
 	if input == "" {
 		return defaultValue
 	}
