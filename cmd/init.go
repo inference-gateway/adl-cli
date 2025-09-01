@@ -57,13 +57,58 @@ func runInit(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	fmt.Printf("\n")
+	fmt.Printf("\n📋 ADL Schema Setup")
+	fmt.Println("-------------------")
 
-	adl := collectADLInfo(projectName)
+	var adl *adlData
+	var adlFile string
 
-	adlFile := filepath.Join(projectDir, "agent.yaml")
-	if err := writeADLFile(adl, adlFile); err != nil {
-		return fmt.Errorf("failed to write ADL file: %w", err)
+	useExisting := promptBool("Use an existing ADL schema file", false)
+
+	if useExisting {
+		for {
+			existingFile := promptString("Path to existing ADL schema file (relative or absolute)", "")
+			if existingFile == "" {
+				fmt.Println("⚠️  ADL file path is required. Please provide a path to the existing schema file.")
+				continue
+			}
+
+			if !filepath.IsAbs(existingFile) {
+				cwd, _ := os.Getwd()
+				existingFile = filepath.Join(cwd, existingFile)
+			}
+
+			if _, err := os.Stat(existingFile); os.IsNotExist(err) {
+				fmt.Printf("⚠️  ADL file does not exist: %s\n", existingFile)
+				fmt.Println("Please provide a valid path to an existing ADL schema file.")
+				continue
+			}
+
+			existingADL, err := readADLFile(existingFile)
+			if err != nil {
+				fmt.Printf("⚠️  Failed to read ADL file: %v\n", err)
+				fmt.Println("Please provide a valid ADL schema file.")
+				continue
+			}
+
+			adl = existingADL
+			adlFile = filepath.Join(projectDir, "agent.yaml")
+
+			if err := writeADLFile(adl, adlFile); err != nil {
+				return fmt.Errorf("failed to write ADL file: %w", err)
+			}
+
+			fmt.Printf("✅ Using existing ADL schema from: %s\n", existingFile)
+			break
+		}
+	} else {
+		fmt.Printf("\n")
+		adl = collectADLInfo(projectName)
+		adlFile = filepath.Join(projectDir, "agent.yaml")
+
+		if err := writeADLFile(adl, adlFile); err != nil {
+			return fmt.Errorf("failed to write ADL file: %w", err)
+		}
 	}
 
 	fmt.Printf("\n✅ ADL file created: %s\n", adlFile)
@@ -422,4 +467,28 @@ func writeADLFile(adl *adlData, filePath string) error {
 	}
 
 	return os.WriteFile(filePath, []byte(buf.String()), 0644)
+}
+
+func readADLFile(filePath string) (*adlData, error) {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file: %w", err)
+	}
+
+	var adl adlData
+	if err := yaml.Unmarshal(data, &adl); err != nil {
+		return nil, fmt.Errorf("failed to parse YAML: %w", err)
+	}
+
+	if adl.APIVersion == "" {
+		return nil, fmt.Errorf("missing apiVersion in ADL file")
+	}
+	if adl.Kind == "" {
+		return nil, fmt.Errorf("missing kind in ADL file")
+	}
+	if adl.Metadata.Name == "" {
+		return nil, fmt.Errorf("missing metadata.name in ADL file")
+	}
+
+	return &adl, nil
 }
