@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.0](https://github.com/inference-gateway/adl-cli/compare/v0.7.9...v0.8.0) (2025-09-02)
+
+### ✨ Features
+
+* **generator:** Add Go file formatting after project generation ([6fd5e7d](https://github.com/inference-gateway/adl-cli/commit/6fd5e7d4c94ce38838885e6f0ae589a0d6bf0bfc))
+
+### 🐛 Bug Fixes
+
+* **template:** Correctly format required fields in tool schema ([80351a6](https://github.com/inference-gateway/adl-cli/commit/80351a6e3797f5c2aff84644c17cf2c04a2d83ce))
+
 ## [0.7.9](https://github.com/inference-gateway/adl-cli/compare/v0.7.8...v0.7.9) (2025-09-02)
 
 ### 🐛 Bug Fixes
