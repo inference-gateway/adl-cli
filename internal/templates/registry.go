@@ -131,7 +131,13 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		".gitattributes":         "config/gitattributes",
 		".editorconfig":          "config/editorconfig",
 		"README.md":              "docs/README.md",
-		"k8s/deployment.yaml":    "kubernetes/deployment.yaml",
+	}
+
+	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" && adl.Spec.Deployment.Type != "none" {
+		switch adl.Spec.Deployment.Type {
+		case "kubernetes":
+			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"
+		}
 	}
 
 	for _, tool := range adl.Spec.Tools {
@@ -165,7 +171,13 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		".gitattributes":         "config/gitattributes",
 		".editorconfig":          "config/editorconfig",
 		"README.md":              "docs/README.md",
-		"k8s/deployment.yaml":    "kubernetes/deployment.yaml",
+	}
+
+	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" && adl.Spec.Deployment.Type != "none" {
+		switch adl.Spec.Deployment.Type {
+		case "kubernetes":
+			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"
+		}
 	}
 
 	for _, tool := range adl.Spec.Tools {
@@ -204,7 +216,13 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		".gitattributes":         "config/gitattributes",
 		".editorconfig":          "config/editorconfig",
 		"README.md":              "docs/README.md",
-		"k8s/deployment.yaml":    "kubernetes/deployment.yaml",
+	}
+
+	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" && adl.Spec.Deployment.Type != "none" {
+		switch adl.Spec.Deployment.Type {
+		case "kubernetes":
+			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"
+		}
 	}
 
 	for _, tool := range adl.Spec.Tools {
