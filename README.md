@@ -827,12 +827,12 @@ spec:
 ```yaml
 hooks:
   post:
-    - "go mod download"      # Download dependencies first
-    - "go generate ./..."    # Generate code if needed
-    - "gofumpt -l -w ."     # Enhanced formatting
-    - "golangci-lint run --fix"  # Lint and auto-fix
+    - "go mod download"             # Download dependencies first
+    - "go generate ./..."           # Generate code if needed
+    - "gofumpt -l -w ."             # Improved formatting
+    - "golangci-lint run --fix"     # Lint and auto-fix
     - "go test -race -short ./..."  # Run tests
-    - "go build -v ./..."   # Verify build works
+    - "go build -v ./..."           # Verify build works
 ```
 
 **Rust with Additional Tools:**
