@@ -90,3 +90,8 @@ spec:
   scm:
     provider: github
     url: "https://github.com/company/go-agent"
+  sandbox:
+    flox:
+      enabled: true
+    devcontainer:
+      enabled: false

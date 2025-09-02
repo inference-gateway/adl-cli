@@ -206,10 +206,73 @@ const adlSchema = `{
                   "type": "string"
                 }
               }
+            },
+            "rust": {
+              "type": "object",
+              "required": ["packageName", "version", "edition"],
+              "properties": {
+                "packageName": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "edition": {
+                  "type": "string"
+                }
+              }
             }
           },
           "minProperties": 1,
           "maxProperties": 1
+        },
+        "scm": {
+          "type": "object",
+          "properties": {
+            "provider": {
+              "type": "string",
+              "enum": ["github", "gitlab", "bitbucket"]
+            },
+            "url": {
+              "type": "string"
+            }
+          }
+        },
+        "sandbox": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["flox", "devcontainer", "none"]
+            },
+            "flox": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": ["enabled"]
+            },
+            "devcontainer": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": ["enabled"]
+            }
+          }
+        },
+        "deployment": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["kubernetes", "none"]
+            }
+          }
         }
       }
     }

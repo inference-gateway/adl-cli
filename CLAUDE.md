@@ -33,7 +33,7 @@ ADL files define agents with:
 - **Server**: HTTP server configuration with optional authentication
 - **Language**: Programming language settings (Go, Rust, TypeScript)
 - **SCM**: Source control management configuration (GitHub, etc.)
-- **Sandbox**: Environment configuration (Flox, DevContainer)
+- **Sandbox**: Environment configuration with extensible structure supporting multiple environments (Flox, DevContainer)
 
 ## Development Commands
 
@@ -200,7 +200,9 @@ task dev -- generate --file examples/go-agent.yaml --output ./test-go-agent
 - `--rust-edition` - Rust edition
 - `--typescript-name` - TypeScript package name
 - `--overwrite` - Overwrite existing files
-- `--sandbox` - Sandbox environment (flox/devcontainer/none)
+- `--sandbox` - Sandbox environment (flox/devcontainer/none) - legacy format
+- `--flox` - Enable Flox environment
+- `--devcontainer` - Enable DevContainer environment
 
 ### Generate Command
 `adl generate` - Generate project from ADL file (main command)
