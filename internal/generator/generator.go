@@ -371,6 +371,49 @@ func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string, ignoreC
 		},
 	}
 
+	if adl.Spec.Card != nil {
+		if adl.Spec.Card.ProtocolVersion != "" {
+			agentCard["protocolVersion"] = adl.Spec.Card.ProtocolVersion
+		} else {
+			agentCard["protocolVersion"] = "0.3.0"
+		}
+
+		if adl.Spec.Card.URL != "" {
+			agentCard["url"] = adl.Spec.Card.URL
+		}
+
+		if adl.Spec.Card.PreferredTransport != "" {
+			agentCard["preferredTransport"] = adl.Spec.Card.PreferredTransport
+		} else {
+			agentCard["preferredTransport"] = "JSONRPC"
+		}
+
+		if adl.Spec.Card.DocumentationURL != "" {
+			agentCard["documentationUrl"] = adl.Spec.Card.DocumentationURL
+		}
+
+		if adl.Spec.Card.IconURL != "" {
+			agentCard["iconUrl"] = adl.Spec.Card.IconURL
+		}
+
+		if len(adl.Spec.Card.DefaultInputModes) > 0 {
+			agentCard["defaultInputModes"] = adl.Spec.Card.DefaultInputModes
+		} else {
+			agentCard["defaultInputModes"] = []string{"text"}
+		}
+
+		if len(adl.Spec.Card.DefaultOutputModes) > 0 {
+			agentCard["defaultOutputModes"] = adl.Spec.Card.DefaultOutputModes
+		} else {
+			agentCard["defaultOutputModes"] = []string{"text"}
+		}
+	} else {
+		agentCard["protocolVersion"] = "0.3.0"
+		agentCard["preferredTransport"] = "JSONRPC"
+		agentCard["defaultInputModes"] = []string{"text"}
+		agentCard["defaultOutputModes"] = []string{"text"}
+	}
+
 	if len(adl.Spec.Skills) > 0 {
 		skills := make([]map[string]any, len(adl.Spec.Skills))
 		for i, skill := range adl.Spec.Skills {
