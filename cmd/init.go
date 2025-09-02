@@ -329,7 +329,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 			skill.ID = skill.Name
 
 			skill.Description = promptString("Skill description", "")
-			
+
 			tagsStr := promptString("Skill tags (comma-separated, e.g., 'weather,api,data')", "")
 			if tagsStr != "" {
 				skill.Tags = strings.Split(tagsStr, ",")

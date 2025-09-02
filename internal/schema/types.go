@@ -33,13 +33,13 @@ type Spec struct {
 
 // Card represents the agent card configuration
 type Card struct {
-	ProtocolVersion      string   `yaml:"protocolVersion,omitempty" json:"protocolVersion,omitempty"`
-	URL                  string   `yaml:"url,omitempty" json:"url,omitempty"`
-	PreferredTransport   string   `yaml:"preferredTransport,omitempty" json:"preferredTransport,omitempty"`
-	DefaultInputModes    []string `yaml:"defaultInputModes,omitempty" json:"defaultInputModes,omitempty"`
-	DefaultOutputModes   []string `yaml:"defaultOutputModes,omitempty" json:"defaultOutputModes,omitempty"`
-	DocumentationURL     string   `yaml:"documentationUrl,omitempty" json:"documentationUrl,omitempty"`
-	IconURL              string   `yaml:"iconUrl,omitempty" json:"iconUrl,omitempty"`
+	ProtocolVersion    string   `yaml:"protocolVersion,omitempty" json:"protocolVersion,omitempty"`
+	URL                string   `yaml:"url,omitempty" json:"url,omitempty"`
+	PreferredTransport string   `yaml:"preferredTransport,omitempty" json:"preferredTransport,omitempty"`
+	DefaultInputModes  []string `yaml:"defaultInputModes,omitempty" json:"defaultInputModes,omitempty"`
+	DefaultOutputModes []string `yaml:"defaultOutputModes,omitempty" json:"defaultOutputModes,omitempty"`
+	DocumentationURL   string   `yaml:"documentationUrl,omitempty" json:"documentationUrl,omitempty"`
+	IconURL            string   `yaml:"iconUrl,omitempty" json:"iconUrl,omitempty"`
 }
 
 // Capabilities defines what the agent can do
