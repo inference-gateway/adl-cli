@@ -54,7 +54,6 @@ func init() {
 	initCmd.Flags().String("rust-edition", "", "Rust edition")
 	initCmd.Flags().String("typescript-name", "", "TypeScript package name")
 	initCmd.Flags().Bool("overwrite", false, "Overwrite existing files")
-	initCmd.Flags().String("sandbox", "", "Sandbox environment (flox/devcontainer/none) - legacy format")
 	initCmd.Flags().Bool("flox", false, "Enable Flox environment")
 	initCmd.Flags().Bool("devcontainer", false, "Enable DevContainer environment")
 	initCmd.Flags().String("deployment", "", "Deployment type (kubernetes/none, defaults to none)")
@@ -245,9 +244,6 @@ type adlData struct {
 			} `yaml:"rust,omitempty"`
 		} `yaml:"language,omitempty"`
 		Sandbox *struct {
-			// Legacy field for backward compatibility
-			Type string `yaml:"type,omitempty"`
-			// New extensible structure
 			Flox *struct {
 				Enabled bool `yaml:"enabled"`
 			} `yaml:"flox,omitempty"`
@@ -454,17 +450,12 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 	fmt.Println("\n🏗️ Sandbox Configuration")
 	fmt.Println("------------------------")
 
-	// Handle both legacy and new format
-	sandboxType := promptWithConfig("sandbox", useDefaults, "Sandbox environment (legacy format - use individual flags for new format)", "")
 	floxEnabled := promptBoolWithConfig("flox", useDefaults, "Enable Flox environment", false)
 	devcontainerEnabled := promptBoolWithConfig("devcontainer", useDefaults, "Enable DevContainer environment", false)
 
 	// Create sandbox configuration if any option is enabled
-	if (sandboxType != "none" && sandboxType != "") || floxEnabled || devcontainerEnabled {
+	if floxEnabled || devcontainerEnabled {
 		sandboxConfig := &struct {
-			// Legacy field for backward compatibility
-			Type string `yaml:"type,omitempty"`
-			// New extensible structure
 			Flox *struct {
 				Enabled bool `yaml:"enabled"`
 			} `yaml:"flox,omitempty"`
@@ -473,12 +464,6 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 			} `yaml:"devcontainer,omitempty"`
 		}{}
 
-		// Handle legacy format for backward compatibility
-		if sandboxType != "none" && sandboxType != "" {
-			sandboxConfig.Type = sandboxType
-		}
-
-		// Handle new extensible format
 		if floxEnabled {
 			sandboxConfig.Flox = &struct {
 				Enabled bool `yaml:"enabled"`
