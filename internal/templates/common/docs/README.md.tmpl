@@ -92,8 +92,8 @@ Configure the agent via environment variables:
 | **LLM Client** | `A2A_AGENT_CLIENT_BASE_URL` | Custom LLM API endpoint | - |
 | **LLM Client** | `A2A_AGENT_CLIENT_TIMEOUT` | Timeout for LLM requests | `30s` |
 | **LLM Client** | `A2A_AGENT_CLIENT_MAX_RETRIES` | Maximum retries for LLM requests | `3` |
-| **LLM Client** | `A2A_AGENT_CLIENT_MAX_TOKENS` | Maximum tokens for LLM responses | {{- if .ADL.Spec.Agent.MaxTokens }}`{{ .ADL.Spec.Agent.MaxTokens }}`{{- else }}`4096`{{- end }} |
-| **LLM Client** | `A2A_AGENT_CLIENT_TEMPERATURE` | Controls randomness of LLM output | {{- if .ADL.Spec.Agent.Temperature }}`{{ .ADL.Spec.Agent.Temperature }}`{{- else }}`0.7`{{- end }} |
+| **LLM Client** | `A2A_AGENT_CLIENT_MAX_TOKENS` | Maximum tokens for LLM responses | {{- if and .ADL.Spec.Agent .ADL.Spec.Agent.MaxTokens }}`{{ .ADL.Spec.Agent.MaxTokens }}`{{- else }}`4096`{{- end }} |
+| **LLM Client** | `A2A_AGENT_CLIENT_TEMPERATURE` | Controls randomness of LLM output | {{- if and .ADL.Spec.Agent .ADL.Spec.Agent.Temperature }}`{{ .ADL.Spec.Agent.Temperature }}`{{- else }}`0.7`{{- end }} |
 
 ## Development
 

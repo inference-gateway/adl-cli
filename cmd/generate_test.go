@@ -81,9 +81,11 @@ spec:
   agent:
     provider: openai
     model: gpt-4o-mini
-  tools:
-    - name: test_tool
-      description: A test tool
+  skills:
+    - id: test_skill_id
+      name: test_skill
+      description: A test skill
+      tags: ["test"]
       schema:
         type: object
         properties:
@@ -127,13 +129,13 @@ spec:
 		t.Errorf("expected main.go to be generated")
 	}
 
-	toolsDir := filepath.Join(outputPath, "tools")
-	if _, err := os.Stat(toolsDir); os.IsNotExist(err) {
-		t.Errorf("expected tools directory to be generated")
+	skillsDir := filepath.Join(outputPath, "skills")
+	if _, err := os.Stat(skillsDir); os.IsNotExist(err) {
+		t.Errorf("expected skills directory to be generated")
 	}
 
-	testToolPath := filepath.Join(toolsDir, "test_tool.go")
-	if _, err := os.Stat(testToolPath); os.IsNotExist(err) {
-		t.Errorf("expected test_tool.go to be generated")
+	testSkillPath := filepath.Join(skillsDir, "test_skill.go")
+	if _, err := os.Stat(testSkillPath); os.IsNotExist(err) {
+		t.Errorf("expected test_skill.go to be generated")
 	}
 }
