@@ -45,7 +45,9 @@ plugins:
           - { type: 'security', section: '🔒 Security' }
 
   - - '@semantic-release/exec'
-    - prepareCmd: 'sed -i "s/VERSION: [0-9]\\+\\.[0-9]\\+\\.[0-9]\\+/VERSION: ${nextRelease.version}/" Taskfile.yml'
+    - prepareCmd: |
+        sed -i "s/VERSION: [0-9]\\+\\.[0-9]\\+\\.[0-9]\\+.*/VERSION: ${nextRelease.version}/" Taskfile.yml
+        goreleaser release --clean --snapshot --skip=publish
 
   - - '@semantic-release/changelog'
     - changelogFile: CHANGELOG.md
@@ -55,6 +57,16 @@ plugins:
   - - '@semantic-release/github'
     - assets:
         - CHANGELOG.md
+        - path: dist/adl_linux_amd64.tar.gz
+          name: adl_linux_amd64.tar.gz
+        - path: dist/adl_linux_arm64.tar.gz
+          name: adl_linux_arm64.tar.gz
+        - path: dist/adl_darwin_amd64.tar.gz
+          name: adl_darwin_amd64.tar.gz
+        - path: dist/adl_darwin_arm64.tar.gz
+          name: adl_darwin_arm64.tar.gz
+        - path: dist/checksums.txt
+          name: checksums.txt
       releasedLabels: ['released']
       releaseNameTemplate: '🚀 Version ${nextRelease.version}'
       successCommentCondition: 'false'
