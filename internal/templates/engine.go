@@ -21,42 +21,42 @@ type Engine struct {
 // toPascalCase converts snake_case to PascalCase with special handling for acronyms
 func toPascalCase(s string) string {
 	acronyms := map[string]string{
-		"id":   "ID",
-		"api":  "API",
-		"url":  "URL",
-		"uri":  "URI",
-		"http": "HTTP",
+		"id":    "ID",
+		"api":   "API",
+		"url":   "URL",
+		"uri":   "URI",
+		"http":  "HTTP",
 		"https": "HTTPS",
-		"json": "JSON",
-		"xml":  "XML",
-		"sql":  "SQL",
-		"html": "HTML",
-		"css":  "CSS",
-		"js":   "JS",
-		"ui":   "UI",
-		"uuid": "UUID",
-		"tcp":  "TCP",
-		"udp":  "UDP",
-		"ip":   "IP",
-		"dns":  "DNS",
-		"tls":  "TLS",
-		"ssl":  "SSL",
-		"cpu":  "CPU",
-		"gpu":  "GPU",
-		"ram":  "RAM",
-		"io":   "IO",
-		"os":   "OS",
-		"db":   "DB",
+		"json":  "JSON",
+		"xml":   "XML",
+		"sql":   "SQL",
+		"html":  "HTML",
+		"css":   "CSS",
+		"js":    "JS",
+		"ui":    "UI",
+		"uuid":  "UUID",
+		"tcp":   "TCP",
+		"udp":   "UDP",
+		"ip":    "IP",
+		"dns":   "DNS",
+		"tls":   "TLS",
+		"ssl":   "SSL",
+		"cpu":   "CPU",
+		"gpu":   "GPU",
+		"ram":   "RAM",
+		"io":    "IO",
+		"os":    "OS",
+		"db":    "DB",
 	}
-	
+
 	words := strings.Split(s, "_")
 	result := make([]string, len(words))
-	
+
 	for i, word := range words {
 		if len(word) == 0 {
 			continue
 		}
-		
+
 		lowerWord := strings.ToLower(word)
 		if acronym, exists := acronyms[lowerWord]; exists {
 			result[i] = acronym
@@ -69,7 +69,7 @@ func toPascalCase(s string) string {
 			result[i] = string(runes)
 		}
 	}
-	
+
 	return strings.Join(result, "")
 }
 
@@ -177,7 +177,7 @@ func (e *Engine) ExecuteTemplate(templateKey string, ctx Context) (string, error
 }
 
 // ExecuteToolTemplate executes a tool template with tool-specific data
-func (e *Engine) ExecuteToolTemplate(templateKey string, toolData interface{}) (string, error) {
+func (e *Engine) ExecuteToolTemplate(templateKey string, toolData any) (string, error) {
 	if e.registry == nil {
 		return "", fmt.Errorf("no registry configured")
 	}

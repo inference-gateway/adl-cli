@@ -119,7 +119,7 @@ The generated project includes TODO placeholders for your implementations:
 
 ```go
 // TODO: Implement weather API logic
-func GetWeatherTool(ctx context.Context, args map[string]interface{}) (string, error) {
+func GetWeatherTool(ctx context.Context, args map[string]any) (string, error) {
     city := args["city"].(string)
     // TODO: Replace with actual weather API call
     return fmt.Sprintf(`{"city": "%s", "temp": "22°C"}`, city), nil

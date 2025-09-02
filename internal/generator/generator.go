@@ -351,12 +351,12 @@ func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string, ignoreC
 		return nil
 	}
 
-	agentCard := map[string]interface{}{
+	agentCard := map[string]any{
 		"name":         adl.Metadata.Name,
 		"description":  adl.Metadata.Description,
 		"version":      adl.Metadata.Version,
 		"capabilities": adl.Spec.Capabilities,
-		"_generated": map[string]interface{}{
+		"_generated": map[string]any{
 			"by":        "A2A CLI",
 			"version":   g.getVersion(),
 			"timestamp": time.Now().Format(time.RFC3339),
@@ -365,9 +365,9 @@ func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string, ignoreC
 	}
 
 	if len(adl.Spec.Tools) > 0 {
-		tools := make([]map[string]interface{}, len(adl.Spec.Tools))
+		tools := make([]map[string]any, len(adl.Spec.Tools))
 		for i, tool := range adl.Spec.Tools {
-			tools[i] = map[string]interface{}{
+			tools[i] = map[string]any{
 				"name":        tool.Name,
 				"description": tool.Description,
 				"schema":      tool.Schema,
@@ -476,7 +476,7 @@ go.sum
 }
 
 // formatJSONWithIndentation formats JSON with proper indentation for nested objects
-func (g *Generator) formatJSONWithIndentation(data interface{}) (string, error) {
+func (g *Generator) formatJSONWithIndentation(data any) (string, error) {
 	jsonBytes, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		return "", err

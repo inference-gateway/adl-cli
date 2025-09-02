@@ -194,9 +194,9 @@ type adlData struct {
 			Temperature  float64 `yaml:"temperature,omitempty"`
 		} `yaml:"agent,omitempty"`
 		Tools []struct {
-			Name        string                 `yaml:"name"`
-			Description string                 `yaml:"description"`
-			Schema      map[string]interface{} `yaml:"schema"`
+			Name        string         `yaml:"name"`
+			Description string         `yaml:"description"`
+			Schema      map[string]any `yaml:"schema"`
 		} `yaml:"tools,omitempty"`
 		Server struct {
 			Port  int  `yaml:"port"`
@@ -313,9 +313,9 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 	if addTools {
 		for {
 			tool := struct {
-				Name        string                 `yaml:"name"`
-				Description string                 `yaml:"description"`
-				Schema      map[string]interface{} `yaml:"schema"`
+				Name        string         `yaml:"name"`
+				Description string         `yaml:"description"`
+				Schema      map[string]any `yaml:"schema"`
 			}{}
 
 			tool.Name = promptString("Tool name (e.g., 'get_weather')", "")
@@ -325,10 +325,10 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 
 			tool.Description = promptString("Tool description", "")
 
-			tool.Schema = map[string]interface{}{
+			tool.Schema = map[string]any{
 				"type": "object",
-				"properties": map[string]interface{}{
-					"input": map[string]interface{}{
+				"properties": map[string]any{
+					"input": map[string]any{
 						"type":        "string",
 						"description": "Input parameter for " + tool.Name,
 					},

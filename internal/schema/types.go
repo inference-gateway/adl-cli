@@ -48,10 +48,10 @@ type Agent struct {
 
 // Tool represents a function the agent can call
 type Tool struct {
-	Name           string                 `yaml:"name" json:"name"`
-	Description    string                 `yaml:"description" json:"description"`
-	Schema         map[string]interface{} `yaml:"schema" json:"schema"`
-	Implementation string                 `yaml:"implementation,omitempty" json:"implementation,omitempty"`
+	Name           string         `yaml:"name" json:"name"`
+	Description    string         `yaml:"description" json:"description"`
+	Schema         map[string]any `yaml:"schema" json:"schema"`
+	Implementation string         `yaml:"implementation,omitempty" json:"implementation,omitempty"`
 }
 
 // Server configuration

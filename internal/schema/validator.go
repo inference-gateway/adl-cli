@@ -34,7 +34,7 @@ func (v *Validator) ValidateFile(filePath string) error {
 		return fmt.Errorf("failed to read file: %w", err)
 	}
 
-	var yamlData interface{}
+	var yamlData any
 	if err := yaml.Unmarshal(data, &yamlData); err != nil {
 		return fmt.Errorf("failed to parse YAML: %w", err)
 	}
