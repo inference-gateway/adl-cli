@@ -144,7 +144,6 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		files[fmt.Sprintf("tools/%s.go", tool.Name)] = "tools.go"
 	}
 
-	// Add sandbox files
 	r.addSandboxFiles(adl, files)
 
 	return files
@@ -179,7 +178,6 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		files["src/tools/mod.rs"] = "tools.mod.rs"
 	}
 
-	// Add sandbox files
 	r.addSandboxFiles(adl, files)
 
 	return files
@@ -211,7 +209,6 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		files[fmt.Sprintf("src/tools/%s.ts", tool.Name)] = "tools.ts"
 	}
 
-	// Add sandbox files
 	r.addSandboxFiles(adl, files)
 
 	return files
@@ -223,7 +220,6 @@ func (r *Registry) addSandboxFiles(adl *schema.ADL, files map[string]string) {
 		return
 	}
 
-	// Handle legacy Type field for backward compatibility
 	if adl.Spec.Sandbox.Type != "" && adl.Spec.Sandbox.Type != "none" {
 		switch adl.Spec.Sandbox.Type {
 		case "flox":
@@ -236,7 +232,6 @@ func (r *Registry) addSandboxFiles(adl *schema.ADL, files map[string]string) {
 		}
 	}
 
-	// Handle new extensible structure
 	if adl.Spec.Sandbox.Flox != nil && adl.Spec.Sandbox.Flox.Enabled {
 		files[".flox/env/manifest.toml"] = "flox/manifest.toml"
 		files[".flox/env.json"] = "flox/env.json"

@@ -99,9 +99,6 @@ type SCM struct {
 
 // SandboxConfig for sandbox environment settings
 type SandboxConfig struct {
-	// Legacy field for backward compatibility
-	Type string `yaml:"type,omitempty" json:"type,omitempty"`
-	// New extensible structure
 	Flox         *FloxConfig         `yaml:"flox,omitempty" json:"flox,omitempty"`
 	DevContainer *DevContainerConfig `yaml:"devcontainer,omitempty" json:"devcontainer,omitempty"`
 }

@@ -453,7 +453,6 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 	floxEnabled := promptBoolWithConfig("flox", useDefaults, "Enable Flox environment", false)
 	devcontainerEnabled := promptBoolWithConfig("devcontainer", useDefaults, "Enable DevContainer environment", false)
 
-	// Create sandbox configuration if any option is enabled
 	if floxEnabled || devcontainerEnabled {
 		sandboxConfig := &struct {
 			Flox *struct {
