@@ -133,7 +133,6 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		"README.md":              "docs/README.md",
 	}
 
-	// Add deployment files only if deployment is configured
 	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" && adl.Spec.Deployment.Type != "none" {
 		switch adl.Spec.Deployment.Type {
 		case "kubernetes":
@@ -174,7 +173,6 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		"README.md":              "docs/README.md",
 	}
 
-	// Add deployment files only if deployment is configured
 	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" && adl.Spec.Deployment.Type != "none" {
 		switch adl.Spec.Deployment.Type {
 		case "kubernetes":
@@ -220,7 +218,6 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		"README.md":              "docs/README.md",
 	}
 
-	// Add deployment files only if deployment is configured
 	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" && adl.Spec.Deployment.Type != "none" {
 		switch adl.Spec.Deployment.Type {
 		case "kubernetes":

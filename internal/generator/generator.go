@@ -45,7 +45,6 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 		return fmt.Errorf("ADL validation failed: %w", err)
 	}
 
-	// Override deployment configuration if specified via CLI flag
 	if g.config.DeploymentType != "" {
 		if adl.Spec.Deployment == nil {
 			adl.Spec.Deployment = &schema.DeploymentConfig{}
