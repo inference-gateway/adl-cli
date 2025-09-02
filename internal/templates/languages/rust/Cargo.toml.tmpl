@@ -6,7 +6,8 @@ rust-version = "{{ .ADL.Spec.Language.Rust.Version }}"
 description = "{{ .ADL.Metadata.Description }}"
 
 [dependencies]
-inference-gateway-sdk = "0.1.0"
+inference-gateway-adk = "0.2.2"
+inference-gateway-sdk = "0.11.0"
 tokio = { version = "1.0", features = ["full", "signal"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

@@ -142,6 +142,7 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		switch adl.Spec.Sandbox.Type {
 		case "flox":
 			files[".flox/env/manifest.toml"] = "flox/manifest.toml"
+			files[".flox/env.json"] = "flox/env.json"
 			files[".flox/.gitignore"] = "flox/gitignore"
 			files[".flox/.gitattributes"] = "flox/gitattributes"
 		case "devcontainer":
@@ -179,6 +180,7 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		switch adl.Spec.Sandbox.Type {
 		case "flox":
 			files[".flox/env/manifest.toml"] = "flox/manifest.toml"
+			files[".flox/env.json"] = "flox/env.json"
 			files[".flox/.gitignore"] = "flox/gitignore"
 			files[".flox/.gitattributes"] = "flox/gitattributes"
 		case "devcontainer":
@@ -213,6 +215,7 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		switch adl.Spec.Sandbox.Type {
 		case "flox":
 			files[".flox/env/manifest.toml"] = "flox/manifest.toml"
+			files[".flox/env.json"] = "flox/env.json"
 			files[".flox/.gitignore"] = "flox/gitignore"
 			files[".flox/.gitattributes"] = "flox/gitattributes"
 		case "devcontainer":

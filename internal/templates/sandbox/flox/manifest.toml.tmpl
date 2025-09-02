@@ -4,15 +4,32 @@ version = 1
 {{- if eq .Language "go" }}
 go = { version = "{{ .ADL.Spec.Language.Go.Version }}" }
 {{- else if eq .Language "rust" }}
-rust = { version = "stable" }
+cargo.pkg-path = "cargo"
+cargo.pkg-group = "rust-toolchain"
+
+rustc.pkg-path = "rustc"
+rustc.pkg-group = "rust-toolchain"
+
+clippy.pkg-path = "clippy"
+clippy.pkg-group = "rust-toolchain"
+
+rustfmt.pkg-path = "rustfmt"
+rustfmt.pkg-group = "rust-toolchain"
+
+rust-analyzer.pkg-path = "rust-analyzer"
+rust-analyzer.pkg-group = "rust-analyzer"
 {{- else if eq .Language "typescript" }}
 nodejs = { version = "20" }
 {{- end }}
 
-# Development tools
-git = {}
-docker = {}
-task = {}
+go-task.pkg-path = "go-task"
+go-task.pkg-group = "common"
+
+git.pkg-path = "git"
+git.pkg-group = "common"
+
+docker.pkg-path = "docker"
+docker.pkg-group = "common"
 
 [hook]
 on-activate = '''

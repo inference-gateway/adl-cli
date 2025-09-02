@@ -1,53 +1,49 @@
-use std::collections::HashMap;
 use serde_json::{Value, json};
-use anyhow::Result;
 use tracing::info;
 
-/// {{ .Description }}
-pub async fn {{ .Name }}_handler(args: Value) -> Result<Value> {
-    info!("Executing {{ .Name }} tool with args: {}", args);
+/// Example tool: Get current time
+pub fn get_current_time(_args: Value) -> Result<Value, Box<dyn std::error::Error>> {
+    info!("Getting current time");
     
-    // TODO: Implement {{ .Name }} logic
-    // {{ .Description }}
+    let result = json!({
+        "time": "2025-01-02T12:00:00Z",
+        "timestamp": 1735819200
+    });
     
-    // Extract parameters from args
-    let args_map = args.as_object()
-        .ok_or_else(|| anyhow::anyhow!("Invalid arguments format"))?;
+    Ok(result)
+}
+
+/// Example tool: Echo message
+pub fn echo_message(args: Value) -> Result<Value, Box<dyn std::error::Error>> {
+    info!("Echoing message");
     
-    {{- range $key, $value := .Schema.properties }}
-    {{- if eq $value.type "string" }}
-    // let {{ $key }} = args_map.get("{{ $key }}")
-    //     .and_then(|v| v.as_str())
-    //     .ok_or_else(|| anyhow::anyhow!("Missing or invalid {{ $key }}"))?;
-    {{- else if eq $value.type "number" }}
-    // let {{ $key }} = args_map.get("{{ $key }}")
-    //     .and_then(|v| v.as_f64())
-    //     .ok_or_else(|| anyhow::anyhow!("Missing or invalid {{ $key }}"))?;
-    {{- else if eq $value.type "integer" }}
-    // let {{ $key }} = args_map.get("{{ $key }}")
-    //     .and_then(|v| v.as_i64())
-    //     .ok_or_else(|| anyhow::anyhow!("Missing or invalid {{ $key }}"))?;
-    {{- else if eq $value.type "boolean" }}
-    // let {{ $key }} = args_map.get("{{ $key }}")
-    //     .and_then(|v| v.as_bool())
-    //     .ok_or_else(|| anyhow::anyhow!("Missing or invalid {{ $key }}"))?;
-    {{- else if eq $value.type "array" }}
-    // let {{ $key }} = args_map.get("{{ $key }}")
-    //     .and_then(|v| v.as_array())
-    //     .ok_or_else(|| anyhow::anyhow!("Missing or invalid {{ $key }}"))?;
-    {{- else if eq $value.type "object" }}
-    // let {{ $key }} = args_map.get("{{ $key }}")
-    //     .and_then(|v| v.as_object())
-    //     .ok_or_else(|| anyhow::anyhow!("Missing or invalid {{ $key }}"))?;
-    {{- else }}
-    // let {{ $key }} = args_map.get("{{ $key }}")
-    //     .ok_or_else(|| anyhow::anyhow!("Missing {{ $key }}"))?;
-    {{- end }}
-    {{- end }}
+    let message = args.get("message")
+        .and_then(|v| v.as_str())
+        .unwrap_or("No message provided");
     
-    // Placeholder implementation
-    Ok(json!({
-        "result": "TODO: Implement {{ .Name }} logic",
-        "input": args
-    }))
+    let result = json!({
+        "echo": message,
+        "length": message.len()
+    });
+    
+    Ok(result)
+}
+
+/// Example async tool: Simulated API call
+pub async fn fetch_data(args: Value) -> Result<Value, Box<dyn std::error::Error>> {
+    info!("Fetching data");
+    
+    let endpoint = args.get("endpoint")
+        .and_then(|v| v.as_str())
+        .unwrap_or("default");
+    
+    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+    
+    let result = json!({
+        "endpoint": endpoint,
+        "data": "Sample data from endpoint",
+        "status": "success"
+    });
+    
+    Ok(result)
 }
