@@ -58,12 +58,12 @@ func main() {
 
 	toolBox := server.NewDefaultToolBox()
 
-	{{- range .ADL.Spec.Tools }}
+	{{- range .ADL.Spec.Skills }}
 
-	// Register {{ .Name }} tool
-	{{ .Name }}Tool := tools.New{{ .Name | toPascalCase }}Tool()
-	toolBox.AddTool({{ .Name }}Tool)
-	logger.Info("registered tool", zap.String("tool", "{{ .Name }}"), zap.String("description", "{{ .Description }}"))
+	// Register {{ .Name }} skill
+	{{ .Name | toCamelCase }}Skill := tools.New{{ .Name | toPascalCase }}Skill()
+	toolBox.AddTool({{ .Name | toCamelCase }}Skill)
+	logger.Info("registered skill", zap.String("skill", "{{ .Name }}"), zap.String("description", "{{ .Description }}"))
 	{{- end }}
 
 	agent, err := server.NewAgentBuilder(logger).

@@ -20,14 +20,26 @@ type Metadata struct {
 // Spec contains the agent specification
 type Spec struct {
 	Capabilities *Capabilities     `yaml:"capabilities,omitempty" json:"capabilities,omitempty"`
+	Card         *Card             `yaml:"card,omitempty" json:"card,omitempty"`
 	Agent        *Agent            `yaml:"agent,omitempty" json:"agent,omitempty"`
-	Tools        []Tool            `yaml:"tools,omitempty" json:"tools,omitempty"`
+	Skills       []Skill           `yaml:"skills,omitempty" json:"skills,omitempty"`
 	Server       Server            `yaml:"server" json:"server"`
 	Language     *Language         `yaml:"language,omitempty" json:"language,omitempty"`
 	SCM          *SCM              `yaml:"scm,omitempty" json:"scm,omitempty"`
 	Sandbox      *SandboxConfig    `yaml:"sandbox,omitempty" json:"sandbox,omitempty"`
 	Deployment   *DeploymentConfig `yaml:"deployment,omitempty" json:"deployment,omitempty"`
 	Hooks        *Hooks            `yaml:"hooks,omitempty" json:"hooks,omitempty"`
+}
+
+// Card represents the agent card configuration
+type Card struct {
+	ProtocolVersion      string   `yaml:"protocolVersion,omitempty" json:"protocolVersion,omitempty"`
+	URL                  string   `yaml:"url,omitempty" json:"url,omitempty"`
+	PreferredTransport   string   `yaml:"preferredTransport,omitempty" json:"preferredTransport,omitempty"`
+	DefaultInputModes    []string `yaml:"defaultInputModes,omitempty" json:"defaultInputModes,omitempty"`
+	DefaultOutputModes   []string `yaml:"defaultOutputModes,omitempty" json:"defaultOutputModes,omitempty"`
+	DocumentationURL     string   `yaml:"documentationUrl,omitempty" json:"documentationUrl,omitempty"`
+	IconURL              string   `yaml:"iconUrl,omitempty" json:"iconUrl,omitempty"`
 }
 
 // Capabilities defines what the agent can do
@@ -46,10 +58,15 @@ type Agent struct {
 	Temperature  float64 `yaml:"temperature" json:"temperature"`
 }
 
-// Tool represents a function the agent can call
-type Tool struct {
+// Skill represents a distinct capability or function that an agent can perform
+type Skill struct {
+	ID             string         `yaml:"id" json:"id"`
 	Name           string         `yaml:"name" json:"name"`
 	Description    string         `yaml:"description" json:"description"`
+	Tags           []string       `yaml:"tags" json:"tags"`
+	Examples       []string       `yaml:"examples,omitempty" json:"examples,omitempty"`
+	InputModes     []string       `yaml:"inputModes,omitempty" json:"inputModes,omitempty"`
+	OutputModes    []string       `yaml:"outputModes,omitempty" json:"outputModes,omitempty"`
 	Schema         map[string]any `yaml:"schema" json:"schema"`
 	Implementation string         `yaml:"implementation,omitempty" json:"implementation,omitempty"`
 }

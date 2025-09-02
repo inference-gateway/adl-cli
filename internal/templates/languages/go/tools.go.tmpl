@@ -7,8 +7,8 @@ import (
 	"github.com/inference-gateway/adk/server"
 )
 
-// New{{ .Name | toPascalCase }}Tool creates a new {{ .Name }} tool
-func New{{ .Name | toPascalCase }}Tool() server.Tool {
+// New{{ .Name | toPascalCase }}Skill creates a new {{ .Name }} skill
+func New{{ .Name | toPascalCase }}Skill() server.Tool {
 	return server.NewBasicTool(
 		"{{ .Name }}",
 		"{{ .Description }}",
@@ -16,7 +16,19 @@ func New{{ .Name | toPascalCase }}Tool() server.Tool {
 			"type": "object",
 			"properties": map[string]any{
 				{{- range $key, $value := .Schema.properties }}
-				"{{ $key }}": map[string]any{{ $value | toJson }},
+				"{{ $key }}": map[string]any{
+					{{- range $k, $v := $value }}
+					{{- if eq $k "enum" }}
+					"{{ $k }}": []string{ {{- range $i, $e := $v }}{{ if $i }}, {{ end }}"{{ $e }}"{{ end -}} },
+					{{- else if eq $k "required" }}
+					"{{ $k }}": []string{ {{- range $i, $e := $v }}{{ if $i }}, {{ end }}"{{ $e }}"{{ end -}} },
+					{{- else if eq $k "properties" }}
+					"{{ $k }}": {{ $v | toGoMap }},
+					{{- else }}
+					"{{ $k }}": {{ $v | toJson }},
+					{{- end }}
+					{{- end }}
+				},
 				{{- end }}
 			},
 			{{- if .Schema.required }}
@@ -27,7 +39,7 @@ func New{{ .Name | toPascalCase }}Tool() server.Tool {
 	)
 }
 
-// {{ .Name | toPascalCase }}Handler handles the {{ .Name }} tool execution
+// {{ .Name | toPascalCase }}Handler handles the {{ .Name }} skill execution
 func {{ .Name | toPascalCase }}Handler(ctx context.Context, args map[string]any) (string, error) {
 	// TODO: Implement {{ .Name }} logic
 	// {{ .Description }}

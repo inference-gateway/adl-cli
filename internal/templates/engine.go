@@ -2,6 +2,7 @@ package templates
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -73,6 +74,17 @@ func toPascalCase(s string) string {
 	return strings.Join(result, "")
 }
 
+// toCamelCase converts snake_case to camelCase with special handling for acronyms
+func toCamelCase(s string) string {
+	pascalCase := toPascalCase(s)
+	if len(pascalCase) == 0 {
+		return pascalCase
+	}
+	runes := []rune(pascalCase)
+	runes[0] = unicode.ToLower(runes[0])
+	return string(runes)
+}
+
 // Context provides data for template execution
 type Context struct {
 	ADL        *schema.ADL
@@ -96,10 +108,79 @@ func NewWithRegistry(templateName string, registry *Registry) *Engine {
 	}
 }
 
+// toJson converts a value to JSON string representation
+func toJson(v interface{}) string {
+	jsonBytes, err := json.Marshal(v)
+	if err != nil {
+		return "{}"
+	}
+	return string(jsonBytes)
+}
+
+// toGoMap converts a value to Go map literal string representation
+func toGoMap(v interface{}) string {
+	return convertToGoMapLiteral(v)
+}
+
+// convertToGoMapLiteral recursively converts values to Go map literal format
+func convertToGoMapLiteral(v interface{}) string {
+	switch val := v.(type) {
+	case map[string]interface{}:
+		if len(val) == 0 {
+			return "map[string]any{}"
+		}
+		result := "map[string]any{"
+		first := true
+		for k, v := range val {
+			if !first {
+				result += ", "
+			}
+			first = false
+			result += fmt.Sprintf(`"%s": %s`, k, convertToGoMapLiteral(v))
+		}
+		result += "}"
+		return result
+	case []interface{}:
+		if len(val) == 0 {
+			return "[]string{}"
+		}
+
+		allStrings := true
+		for _, item := range val {
+			if _, ok := item.(string); !ok {
+				allStrings = false
+				break
+			}
+		}
+		if allStrings {
+			result := "[]string{"
+			for i, item := range val {
+				if i > 0 {
+					result += ", "
+				}
+				result += fmt.Sprintf(`"%s"`, item.(string))
+			}
+			result += "}"
+			return result
+		}
+
+		jsonBytes, _ := json.Marshal(val)
+		return string(jsonBytes)
+	case string:
+		return fmt.Sprintf(`"%s"`, val)
+	default:
+		jsonBytes, _ := json.Marshal(val)
+		return string(jsonBytes)
+	}
+}
+
 // customFuncMap returns a function map with Sprig functions plus custom functions
 func customFuncMap() template.FuncMap {
 	funcMap := sprig.TxtFuncMap()
 	funcMap["toPascalCase"] = toPascalCase
+	funcMap["toCamelCase"] = toCamelCase
+	funcMap["toJson"] = toJson
+	funcMap["toGoMap"] = toGoMap
 	return funcMap
 }
 
@@ -177,8 +258,8 @@ func (e *Engine) ExecuteTemplate(templateKey string, ctx Context) (string, error
 	return e.Execute(templateContent, ctx)
 }
 
-// ExecuteToolTemplate executes a tool template with tool-specific data
-func (e *Engine) ExecuteToolTemplate(templateKey string, toolData any) (string, error) {
+// ExecuteToolTemplate executes a skill template with skill-specific data
+func (e *Engine) ExecuteToolTemplate(templateKey string, skillData any) (string, error) {
 	if e.registry == nil {
 		return "", fmt.Errorf("no registry configured")
 	}
@@ -194,7 +275,7 @@ func (e *Engine) ExecuteToolTemplate(templateKey string, toolData any) (string, 
 	}
 
 	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, toolData); err != nil {
+	if err := tmpl.Execute(&buf, skillData); err != nil {
 		return "", err
 	}
 

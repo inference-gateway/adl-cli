@@ -111,6 +111,38 @@ const adlSchema = `{
             }
           }
         },
+        "card": {
+          "type": "object",
+          "properties": {
+            "protocolVersion": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            },
+            "preferredTransport": {
+              "type": "string"
+            },
+            "defaultInputModes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "defaultOutputModes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "documentationUrl": {
+              "type": "string"
+            },
+            "iconUrl": {
+              "type": "string"
+            }
+          }
+        },
         "agent": {
           "type": "object",
           "properties": {
@@ -135,18 +167,45 @@ const adlSchema = `{
             }
           }
         },
-        "tools": {
+        "skills": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["name", "description", "schema"],
+            "required": ["id", "name", "description", "tags", "schema"],
             "properties": {
-              "name": {
+              "id": {
                 "type": "string",
                 "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
               },
+              "name": {
+                "type": "string"
+              },
               "description": {
                 "type": "string"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "examples": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "inputModes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "outputModes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               },
               "schema": {
                 "type": "object",

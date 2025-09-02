@@ -185,15 +185,21 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 		return fmt.Errorf("exactly one programming language must be defined for code generation, found %d", languageCount)
 	}
 
-	for i, tool := range adl.Spec.Tools {
-		if tool.Name == "" {
-			return fmt.Errorf("spec.tools[%d].name is required", i)
+	for i, skill := range adl.Spec.Skills {
+		if skill.ID == "" {
+			return fmt.Errorf("spec.skills[%d].id is required", i)
 		}
-		if tool.Description == "" {
-			return fmt.Errorf("spec.tools[%d].description is required", i)
+		if skill.Name == "" {
+			return fmt.Errorf("spec.skills[%d].name is required", i)
 		}
-		if tool.Schema == nil {
-			return fmt.Errorf("spec.tools[%d].schema is required", i)
+		if skill.Description == "" {
+			return fmt.Errorf("spec.skills[%d].description is required", i)
+		}
+		if len(skill.Tags) == 0 {
+			return fmt.Errorf("spec.skills[%d].tags is required and must have at least one tag", i)
+		}
+		if skill.Schema == nil {
+			return fmt.Errorf("spec.skills[%d].schema is required", i)
 		}
 	}
 
@@ -241,21 +247,21 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 				toolFileName := parts[len(parts)-1]
 				toolName := strings.TrimSuffix(toolFileName, filepath.Ext(toolFileName))
 
-				var foundTool *schema.Tool
-				for _, tool := range adl.Spec.Tools {
-					if tool.Name == toolName {
-						foundTool = &tool
+				var foundSkill *schema.Skill
+				for _, skill := range adl.Spec.Skills {
+					if skill.Name == toolName {
+						foundSkill = &skill
 						break
 					}
 				}
 
-				if foundTool != nil {
-					content, err = templateEngine.ExecuteToolTemplate(templateKey, foundTool)
+				if foundSkill != nil {
+					content, err = templateEngine.ExecuteToolTemplate(templateKey, foundSkill)
 					if err != nil {
-						return fmt.Errorf("failed to execute template %s for tool %s: %w", templateKey, toolName, err)
+						return fmt.Errorf("failed to execute template %s for skill %s: %w", templateKey, toolName, err)
 					}
 				} else {
-					return fmt.Errorf("tool %s not found in ADL spec", toolName)
+					return fmt.Errorf("skill %s not found in ADL spec", toolName)
 				}
 			}
 		} else {
@@ -365,16 +371,27 @@ func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string, ignoreC
 		},
 	}
 
-	if len(adl.Spec.Tools) > 0 {
-		tools := make([]map[string]any, len(adl.Spec.Tools))
-		for i, tool := range adl.Spec.Tools {
-			tools[i] = map[string]any{
-				"name":        tool.Name,
-				"description": tool.Description,
-				"schema":      tool.Schema,
+	if len(adl.Spec.Skills) > 0 {
+		skills := make([]map[string]any, len(adl.Spec.Skills))
+		for i, skill := range adl.Spec.Skills {
+			skills[i] = map[string]any{
+				"id":          skill.ID,
+				"name":        skill.Name,
+				"description": skill.Description,
+				"tags":        skill.Tags,
+				"schema":      skill.Schema,
+			}
+			if len(skill.Examples) > 0 {
+				skills[i]["examples"] = skill.Examples
+			}
+			if len(skill.InputModes) > 0 {
+				skills[i]["inputModes"] = skill.InputModes
+			}
+			if len(skill.OutputModes) > 0 {
+				skills[i]["outputModes"] = skill.OutputModes
 			}
 		}
-		agentCard["tools"] = tools
+		agentCard["skills"] = skills
 	}
 
 	jsonData, err := g.formatJSONWithIndentation(agentCard)

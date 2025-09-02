@@ -1,8 +1,18 @@
 {
-	"schemaVersion": "0.1.0",
 	"name": "{{ .ADL.Metadata.Name }}",
 	"version": "{{ .ADL.Metadata.Version }}",
 	"description": "{{ .ADL.Metadata.Description }}",
+	"protocolVersion": "{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.ProtocolVersion }}{{ .ADL.Spec.Card.ProtocolVersion }}{{- else }}0.3.0{{- end }}{{- else }}0.3.0{{- end }}",
+	"url": "{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.URL }}{{ .ADL.Spec.Card.URL }}{{- else }}{{- end }}{{- else }}{{- end }}",
+	"preferredTransport": "{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.PreferredTransport }}{{ .ADL.Spec.Card.PreferredTransport }}{{- else }}JSONRPC{{- end }}{{- else }}JSONRPC{{- end }}",
+	{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.DocumentationURL }}
+	"documentationUrl": "{{ .ADL.Spec.Card.DocumentationURL }}",
+	{{- end }}{{- end }}
+	{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.IconURL }}
+	"iconUrl": "{{ .ADL.Spec.Card.IconURL }}",
+	{{- end }}{{- end }}
+	"defaultInputModes": {{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.DefaultInputModes }} {{ .ADL.Spec.Card.DefaultInputModes | toJson }}{{- else }} ["text"]{{- end }}{{- else }} ["text"]{{- end }},
+	"defaultOutputModes": {{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.DefaultOutputModes }} {{ .ADL.Spec.Card.DefaultOutputModes | toJson }}{{- else }} ["text"]{{- end }}{{- else }} ["text"]{{- end }},
 	"capabilities": {
 		{{- if .ADL.Spec.Capabilities }}
 		"streaming": {{ .ADL.Spec.Capabilities.Streaming }},
@@ -14,13 +24,24 @@
 		"stateTransitionHistory": false
 		{{- end }}
 	},
-	"tools": [
-		{{- range $index, $tool := .ADL.Spec.Tools }}
+	"skills": [
+		{{- range $index, $skill := .ADL.Spec.Skills }}
 		{{- if $index }},{{ end }}
 		{
-			"name": "{{ $tool.Name }}",
-			"description": "{{ $tool.Description }}",
-			"schema": {{ $tool.Schema | toJson }}
+			"id": "{{ $skill.ID }}",
+			"name": "{{ $skill.Name }}",
+			"description": "{{ $skill.Description }}",
+			"tags": {{ $skill.Tags | toJson }},
+			{{- if $skill.Examples }}
+			"examples": {{ $skill.Examples | toJson }},
+			{{- end }}
+			{{- if $skill.InputModes }}
+			"inputModes": {{ $skill.InputModes | toJson }},
+			{{- end }}
+			{{- if $skill.OutputModes }}
+			"outputModes": {{ $skill.OutputModes | toJson }},
+			{{- end }}
+			"schema": {{ $skill.Schema | toJson }}
 		}
 		{{- end }}
 	]

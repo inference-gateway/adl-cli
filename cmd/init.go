@@ -193,11 +193,13 @@ type adlData struct {
 			MaxTokens    int     `yaml:"maxTokens,omitempty"`
 			Temperature  float64 `yaml:"temperature,omitempty"`
 		} `yaml:"agent,omitempty"`
-		Tools []struct {
+		Skills []struct {
+			ID          string         `yaml:"id"`
 			Name        string         `yaml:"name"`
 			Description string         `yaml:"description"`
+			Tags        []string       `yaml:"tags"`
 			Schema      map[string]any `yaml:"schema"`
-		} `yaml:"tools,omitempty"`
+		} `yaml:"skills,omitempty"`
 		Server struct {
 			Port  int  `yaml:"port"`
 			Debug bool `yaml:"debug"`
@@ -306,39 +308,52 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 	adl.Spec.Capabilities.PushNotifications = conditionalPromptBool(useDefaults, "Enable push notifications", false)
 	adl.Spec.Capabilities.StateTransitionHistory = conditionalPromptBool(useDefaults, "Enable state transition history", false)
 
-	fmt.Println("\n🔧 Tools")
-	fmt.Println("--------")
-	addTools := conditionalPromptBool(useDefaults, "Add tools to your agent", false)
+	fmt.Println("\n🔧 Skills")
+	fmt.Println("---------")
+	addSkills := conditionalPromptBool(useDefaults, "Add skills to your agent", false)
 
-	if addTools {
+	if addSkills {
 		for {
-			tool := struct {
+			skill := struct {
+				ID          string         `yaml:"id"`
 				Name        string         `yaml:"name"`
 				Description string         `yaml:"description"`
+				Tags        []string       `yaml:"tags"`
 				Schema      map[string]any `yaml:"schema"`
 			}{}
 
-			tool.Name = promptString("Tool name (e.g., 'get_weather')", "")
-			if tool.Name == "" {
+			skill.Name = promptString("Skill name (e.g., 'get_weather')", "")
+			if skill.Name == "" {
 				break
 			}
+			skill.ID = skill.Name
 
-			tool.Description = promptString("Tool description", "")
+			skill.Description = promptString("Skill description", "")
+			
+			tagsStr := promptString("Skill tags (comma-separated, e.g., 'weather,api,data')", "")
+			if tagsStr != "" {
+				skill.Tags = strings.Split(tagsStr, ",")
+				for i, tag := range skill.Tags {
+					skill.Tags[i] = strings.TrimSpace(tag)
+				}
+			} else {
+				skill.Tags = []string{"general"}
+			}
 
-			tool.Schema = map[string]any{
+			skill.Schema = map[string]any{
 				"type": "object",
 				"properties": map[string]any{
 					"input": map[string]any{
 						"type":        "string",
-						"description": "Input parameter for " + tool.Name,
+						"description": "Input parameter for " + skill.Name,
 					},
 				},
 				"required": []string{"input"},
 			}
 
-			adl.Spec.Tools = append(adl.Spec.Tools, tool)
+			adl.Spec.Skills = append(adl.Spec.Skills, skill)
 
-			if !promptBool("Add another tool", false) {
+			if !promptBool("Add another skill", false) {
 				break
 			}
 		}

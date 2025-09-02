@@ -66,9 +66,9 @@ docker run -p {{ .ADL.Spec.Server.Port | default 8080 }}:{{ .ADL.Spec.Server.Por
 - `GET /health` - Health check endpoint
 - `POST /a2a` - A2A protocol endpoint
 
-## Available Tools
+## Available Skills
 
-{{- range .ADL.Spec.Tools }}
+{{- range .ADL.Spec.Skills }}
 - **{{ .Name }}** - {{ .Description }}
 {{- end }}
 

@@ -18,9 +18,11 @@ spec:
       Log all interactions for audit purposes.
     maxTokens: 8192
     temperature: 0.3
-  tools:
-    - name: query_database
+  skills:
+    - id: query_database
+      name: query_database
       description: "Query the company database with proper authentication"
+      tags: ["database", "query", "data"]
       schema:
         type: object
         properties:
@@ -35,8 +37,10 @@ spec:
             description: "Maximum number of results"
             maximum: 1000
         required: [query, table]
-    - name: send_notification
+    - id: send_notification
+      name: send_notification
       description: "Send notifications to users or teams"
+      tags: ["notification", "communication", "alert"]
       schema:
         type: object
         properties:
@@ -55,8 +59,10 @@ spec:
             description: "Notification channel"
             enum: ["email", "slack", "teams", "webhook"]
         required: [recipient, message, priority, channel]
-    - name: generate_report
+    - id: generate_report
+      name: generate_report
       description: "Generate business reports based on data analysis"
+      tags: ["report", "analytics", "business"]
       schema:
         type: object
         properties:
