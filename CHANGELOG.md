@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.11.0](https://github.com/inference-gateway/adl-cli/compare/v0.10.3...v0.11.0) (2025-09-02)
+
+### ✨ Features
+
+* **generator:** Add GenerateCI field to context and update README template for CI badge ([b17a64e](https://github.com/inference-gateway/adl-cli/commit/b17a64e02b5cfdc68edc1afe2c66b0fa6877f35b))
+
 ## [0.10.3](https://github.com/inference-gateway/adl-cli/compare/v0.10.2...v0.10.3) (2025-09-02)
 
 ### 🐛 Bug Fixes
