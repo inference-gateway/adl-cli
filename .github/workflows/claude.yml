@@ -66,6 +66,10 @@ jobs:
             4. Wait for review and approval before merging
           
             IMPORTANT: Always add a new line at the end of each file and follow the coding style guidelines.
+            
+            VERY IMPORTANT: You DO NOT care about backward comaptibility - if you DO NOT need the code, simply delete it.
+
+            VERY IMPORTANT: You DO NOT add inline comments above code inside of a function body - docblocks are ok for function and types signatures.
 
             COMMIT MESSAGE FORMAT: Always use conventional commits with capital letters. 
             Follow the format: "type(scope): Description" where the description starts with a capital letter.
