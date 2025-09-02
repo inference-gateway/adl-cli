@@ -68,38 +68,32 @@ docker run -p {{ .ADL.Spec.Server.Port | default 8080 }}:{{ .ADL.Spec.Server.Por
 
 ## Available Skills
 
+| Skill | Description | Parameters |
+|-------|-------------|------------|
 {{- range .ADL.Spec.Skills }}
-- **{{ .Name }}** - {{ .Description }}
+| `{{ .Name }}` | {{ .Description }} | {{- if .Schema.properties }}{{- $props := list }}{{- range $key, $value := .Schema.properties }}{{- $props = append $props $key }}{{- end }}{{ $props | join ", " }}{{- else }}None{{- end }} |
 {{- end }}
 
 ## Configuration
 
 Configure the agent via environment variables:
 
-### Core Application Settings
-
-- `ENVIRONMENT` - Deployment environment
-
-### A2A Agent Configuration
-
-#### Server Configuration
-
-- `A2A_SERVER_PORT` - Server port (default: `{{ .ADL.Spec.Server.Port | default 8080 }}`)
-- `A2A_SERVER_READ_TIMEOUT` - Maximum duration for reading requests (default: `120s`)
-- `A2A_SERVER_WRITE_TIMEOUT` - Maximum duration for writing responses (default: `120s`)
-- `A2A_SERVER_IDLE_TIMEOUT` - Maximum time to wait for next request (default: `120s`)
-- `A2A_SERVER_DISABLE_HEALTHCHECK_LOG` - Disable logging for health check requests (default: `true`)
-
-#### LLM Client Configuration
-
-- `A2A_AGENT_CLIENT_PROVIDER` - LLM provider: `openai`, `anthropic`, `groq`, `ollama`, `deepseek`, `cohere`, `cloudflare`
-- `A2A_AGENT_CLIENT_MODEL` - Model to use
-- `A2A_AGENT_CLIENT_API_KEY` - API key for LLM provider
-- `A2A_AGENT_CLIENT_BASE_URL` - Custom LLM API endpoint
-- `A2A_AGENT_CLIENT_TIMEOUT` - Timeout for LLM requests (default: `30s`)
-- `A2A_AGENT_CLIENT_MAX_RETRIES` - Maximum retries for LLM requests (default: `3`)
-- `A2A_AGENT_CLIENT_MAX_TOKENS` - Maximum tokens for LLM responses (default: `4096`)
-- `A2A_AGENT_CLIENT_TEMPERATURE` - Controls randomness of LLM output (default: `0.7`)
+| Category | Variable | Description | Default |
+|----------|----------|-------------|---------|
+| **Core Application** | `ENVIRONMENT` | Deployment environment | - |
+| **Server** | `A2A_SERVER_PORT` | Server port | `{{ .ADL.Spec.Server.Port | default 8080 }}` |
+| **Server** | `A2A_SERVER_READ_TIMEOUT` | Maximum duration for reading requests | `120s` |
+| **Server** | `A2A_SERVER_WRITE_TIMEOUT` | Maximum duration for writing responses | `120s` |
+| **Server** | `A2A_SERVER_IDLE_TIMEOUT` | Maximum time to wait for next request | `120s` |
+| **Server** | `A2A_SERVER_DISABLE_HEALTHCHECK_LOG` | Disable logging for health check requests | `true` |
+| **LLM Client** | `A2A_AGENT_CLIENT_PROVIDER` | LLM provider (`openai`, `anthropic`, `groq`, `ollama`, `deepseek`, `cohere`, `cloudflare`) | - |
+| **LLM Client** | `A2A_AGENT_CLIENT_MODEL` | Model to use | - |
+| **LLM Client** | `A2A_AGENT_CLIENT_API_KEY` | API key for LLM provider | - |
+| **LLM Client** | `A2A_AGENT_CLIENT_BASE_URL` | Custom LLM API endpoint | - |
+| **LLM Client** | `A2A_AGENT_CLIENT_TIMEOUT` | Timeout for LLM requests | `30s` |
+| **LLM Client** | `A2A_AGENT_CLIENT_MAX_RETRIES` | Maximum retries for LLM requests | `3` |
+| **LLM Client** | `A2A_AGENT_CLIENT_MAX_TOKENS` | Maximum tokens for LLM responses | {{- if .ADL.Spec.Agent.MaxTokens }}`{{ .ADL.Spec.Agent.MaxTokens }}`{{- else }}`4096`{{- end }} |
+| **LLM Client** | `A2A_AGENT_CLIENT_TEMPERATURE` | Controls randomness of LLM output | {{- if .ADL.Spec.Agent.Temperature }}`{{ .ADL.Spec.Agent.Temperature }}`{{- else }}`0.7`{{- end }} |
 
 ## Development
 
