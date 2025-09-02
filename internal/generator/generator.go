@@ -433,15 +433,15 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 		switch language {
 		case "go":
 			filesToIgnore = []string{
-				"tools/*",
+				"skills/*",
 			}
 		case "rust":
 			filesToIgnore = []string{
-				"src/tools/*",
+				"src/skills/*",
 			}
 		case "typescript":
 			filesToIgnore = []string{
-				"src/tools/*",
+				"src/skills/*",
 			}
 		}
 	}
@@ -469,9 +469,9 @@ func generateA2aIgnoreContent(filesToIgnore []string) string {
 # Files listed here typically contain implementations that users have completed.
 #
 # Patterns supported:
-# - Exact file names: tools/my_tool.go
+# - Exact file names: skills/agent_skill.go
 # - Wildcards: *.go
-# - Directory patterns: tools/*
+# - Directory patterns: skills/*
 # - Directories: build/
 # - Comments: lines starting with #
 

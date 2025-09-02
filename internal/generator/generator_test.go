@@ -310,13 +310,13 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 			name:         "minimal template creates tools ignore for Go",
 			templateName: "minimal",
 			adl:          goADL,
-			wantContent:  "tools/*",
+			wantContent:  "skills/*",
 		},
 		{
 			name:         "minimal template creates tools ignore for Rust",
 			templateName: "minimal",
 			adl:          rustADL,
-			wantContent:  "src/tools/*",
+			wantContent:  "src/skills/*",
 		},
 	}
 
