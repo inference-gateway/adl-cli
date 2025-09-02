@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.12.2](https://github.com/inference-gateway/adl-cli/compare/v0.12.1...v0.12.2) (2025-09-02)
+
+### 🐛 Bug Fixes
+
+* Update ignore patterns from 'tools' to 'skills' in generator and tests ([cbb30b7](https://github.com/inference-gateway/adl-cli/commit/cbb30b74a893a9b706fba396c69c1d405e17e9a8))
+
+### 📚 Documentation
+
+* Add card configuration to go-agent and rust-agent YAML files ([aa171ba](https://github.com/inference-gateway/adl-cli/commit/aa171ba138123fb202d7e7364b396bd4ba8104b1))
+
 ## [0.12.1](https://github.com/inference-gateway/adl-cli/compare/v0.12.0...v0.12.1) (2025-09-02)
 
 ### ♻️ Improvements
