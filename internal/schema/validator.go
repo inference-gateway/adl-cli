@@ -116,7 +116,7 @@ const adlSchema = `{
           "properties": {
             "provider": {
               "type": "string",
-              "enum": ["openai", "anthropic", "ollama", "azure", "deepseek"]
+              "enum": ["", "openai", "anthropic", "ollama", "deepseek", "google", "mistral", "groq"]
             },
             "model": {
               "type": "string"
