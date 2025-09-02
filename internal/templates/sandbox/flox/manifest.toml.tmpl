@@ -2,7 +2,8 @@ version = 1
 
 [install]
 {{- if eq .Language "go" }}
-go = { version = "{{ .ADL.Spec.Language.Go.Version }}" }
+go.pkg-path = "go"
+go.version = "^{{ .ADL.Spec.Language.Go.Version }}"
 {{- else if eq .Language "rust" }}
 cargo.pkg-path = "cargo"
 cargo.pkg-group = "rust-toolchain"
