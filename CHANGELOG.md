@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.6](https://github.com/inference-gateway/adl-cli/compare/v0.7.5...v0.7.6) (2025-09-02)
+
+### 🐛 Bug Fixes
+
+* **validator:** Update provider enum to include additional options ([e22ec05](https://github.com/inference-gateway/adl-cli/commit/e22ec057ff9896854dbd1c3edff3d55e810ea943))
+
 ## [0.7.5](https://github.com/inference-gateway/adl-cli/compare/v0.7.4...v0.7.5) (2025-09-02)
 
 ### 🐛 Bug Fixes
