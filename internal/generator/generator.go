@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -180,7 +181,6 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 		return fmt.Errorf("exactly one programming language must be defined for code generation, found %d", languageCount)
 	}
 
-
 	for i, tool := range adl.Spec.Tools {
 		if tool.Name == "" {
 			return fmt.Errorf("spec.tools[%d].name is required", i)
@@ -299,6 +299,12 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 	if g.config.GenerateCI {
 		if err := g.generateCI(adl, outputDir, ignoreChecker); err != nil {
 			return fmt.Errorf("failed to generate CI configuration: %w", err)
+		}
+	}
+
+	if adl.Spec.Language.Go != nil {
+		if err := g.formatGoFiles(outputDir); err != nil {
+			fmt.Printf("⚠️  Warning: Failed to format Go files: %v\n", err)
 		}
 	}
 
@@ -712,6 +718,41 @@ jobs:
     - name: Build
       run: task build
 `, rustVersion)
+}
+
+// formatGoFiles runs go fmt on all Go files in the output directory
+func (g *Generator) formatGoFiles(outputDir string) error {
+	if _, err := exec.LookPath("go"); err != nil {
+		return fmt.Errorf("go command not found in PATH")
+	}
+
+	var goFiles []string
+	err := filepath.Walk(outputDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && strings.HasSuffix(path, ".go") {
+			goFiles = append(goFiles, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("failed to find Go files: %w", err)
+	}
+
+	if len(goFiles) == 0 {
+		return nil
+	}
+
+	cmd := exec.Command("go", "fmt", "./...")
+	cmd.Dir = outputDir
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("go fmt failed: %w\nOutput: %s", err, string(output))
+	}
+
+	fmt.Printf("✨ Formatted %d Go files with go fmt\n", len(goFiles))
+	return nil
 }
 
 // generateGitLabCIWorkflow generates a GitLab CI workflow
