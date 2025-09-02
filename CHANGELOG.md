@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.0](https://github.com/inference-gateway/adl-cli/compare/v0.8.1...v0.9.0) (2025-09-02)
+
+### ✨ Features
+
+* **generator:** Implement post-generation hooks for custom commands ([0148ccf](https://github.com/inference-gateway/adl-cli/commit/0148ccf74cccb8260ff331e364760dd93bd26957))
+
+### 📚 Documentation
+
+* **readme:** Update Table of Contents with additional sections ([b2ee05a](https://github.com/inference-gateway/adl-cli/commit/b2ee05ae92ce8a179a191cb5a31f9e77bd9d9d2c))
+
 ## [0.8.1](https://github.com/inference-gateway/adl-cli/compare/v0.8.0...v0.8.1) (2025-09-02)
 
 ### 🐛 Bug Fixes
