@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.1](https://github.com/inference-gateway/adl-cli/compare/v0.9.0...v0.9.1) (2025-09-02)
+
+### ♻️ Improvements
+
+* **generator:** Add toPascalCase function for improved tool name formatting ([a819a86](https://github.com/inference-gateway/adl-cli/commit/a819a86398ec51df1f03aa381c15938bb4157ef0))
+
+### 📚 Documentation
+
+* **hooks:** Improve formatting in post-generation hook comments ([a96deae](https://github.com/inference-gateway/adl-cli/commit/a96deae4234e1fc7e98fff8333ebbb44903a9183))
+
 ## [0.9.0](https://github.com/inference-gateway/adl-cli/compare/v0.8.1...v0.9.0) (2025-09-02)
 
 ### ✨ Features
