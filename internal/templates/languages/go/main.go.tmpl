@@ -59,6 +59,7 @@ func main() {
 	toolBox := server.NewDefaultToolBox()
 
 	{{- range .ADL.Spec.Tools }}
+
 	// Register {{ .Name }} tool
 	{{ .Name }}Tool := tools.New{{ .Name | title }}Tool()
 	toolBox.AddTool({{ .Name }}Tool)
