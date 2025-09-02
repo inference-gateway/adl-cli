@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
@@ -35,7 +35,6 @@ EXPOSE {{ .ADL.Spec.Server.Port | default 8080 }}
 
 # Set environment variables
 ENV A2A_SERVER_PORT={{ .ADL.Spec.Server.Port | default 8080 }}
-ENV A2A_SERVER_HOST=0.0.0.0
 
 # Run the application
 CMD ["./main"]
