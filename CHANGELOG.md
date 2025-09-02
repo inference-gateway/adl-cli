@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.3](https://github.com/inference-gateway/adl-cli/compare/v0.10.2...v0.10.3) (2025-09-02)
+
+### 🐛 Bug Fixes
+
+* **dockerfile:** Update Go base image to 1.24-alpine and remove A2A_SERVER_HOST environment variable ([316963c](https://github.com/inference-gateway/adl-cli/commit/316963ce3e6ffd05e0545fb9ad36f204cf7026f7))
+
 ## [0.10.2](https://github.com/inference-gateway/adl-cli/compare/v0.10.1...v0.10.2) (2025-09-02)
 
 ### 🐛 Bug Fixes
