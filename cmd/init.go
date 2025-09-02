@@ -22,7 +22,7 @@ var initCmd = &cobra.Command{
 	Long: `Initialize a new A2A agent project with an interactive wizard.
 
 This command guides you through creating an Agent Definition Language (ADL) file
-and generates the initial project structure.`,
+with your agent specifications. Use 'adl generate' afterwards to create the project code.`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runInit,
 }
@@ -53,10 +53,9 @@ func init() {
 	initCmd.Flags().String("rust-version", "", "Rust version")
 	initCmd.Flags().String("rust-edition", "", "Rust edition")
 	initCmd.Flags().String("typescript-name", "", "TypeScript package name")
-	initCmd.Flags().Bool("overwrite", false, "Overwrite existing files")
 	initCmd.Flags().Bool("flox", false, "Enable Flox environment")
 	initCmd.Flags().Bool("devcontainer", false, "Enable DevContainer environment")
-	initCmd.Flags().String("deployment", "", "Deployment type (kubernetes/none, defaults to none)")
+	initCmd.Flags().String("deployment", "", "Deployment type (kubernetes, defaults to empty for no deployment)")
 
 	if err := viper.BindPFlags(initCmd.Flags()); err != nil {
 		fmt.Printf("Warning: failed to bind flags: %v\n", err)
@@ -152,47 +151,22 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	fmt.Printf("\n✅ ADL file created: %s\n", adlFile)
 
-	fmt.Println("🔨 Generating project structure...")
-
-	overwrite := promptBoolWithConfig("overwrite", useDefaults, "Overwrite existing files", true)
-	if !viper.IsSet("overwrite") && (projectDir == "." || (projectDir != "" && dirExists(projectDir))) {
-		overwrite = conditionalPromptBool(useDefaults, "Overwrite existing files", true)
-	}
-
-	if err := generateCmd.Flags().Set("file", adlFile); err != nil {
-		return fmt.Errorf("failed to set file flag: %w", err)
-	}
-	if err := generateCmd.Flags().Set("output", projectDir); err != nil {
-		return fmt.Errorf("failed to set output flag: %w", err)
-	}
-	if err := generateCmd.Flags().Set("template", adl.getTemplate()); err != nil {
-		return fmt.Errorf("failed to set template flag: %w", err)
-	}
-	if err := generateCmd.Flags().Set("overwrite", fmt.Sprintf("%t", overwrite)); err != nil {
-		return fmt.Errorf("failed to set overwrite flag: %w", err)
-	}
-
-	if err := runGenerate(generateCmd, []string{}); err != nil {
-		return fmt.Errorf("failed to generate project: %w", err)
-	}
-
 	fmt.Println()
 	fmt.Printf("🎉 Project '%s' initialized successfully!\n", projectName)
+	fmt.Printf("📁 ADL manifest location: %s\n", adlFile)
+	fmt.Println()
+	fmt.Println("📝 Next steps:")
 	if projectDir == "." {
-		fmt.Printf("📁 Project location: current directory\n")
-		fmt.Println()
-		fmt.Println("📝 Next steps:")
-		fmt.Println("   1. Implement the TODO placeholders in the generated files")
-		fmt.Println("   2. Run 'task build' to build your agent")
-		fmt.Println("   3. Run 'task run' to start your agent server")
-	} else {
-		fmt.Printf("📁 Project location: %s\n", projectDir)
-		fmt.Println()
-		fmt.Println("📝 Next steps:")
-		fmt.Printf("   1. cd %s\n", projectDir)
+		fmt.Println("   1. Run 'adl generate' to generate the project code")
 		fmt.Println("   2. Implement the TODO placeholders in the generated files")
 		fmt.Println("   3. Run 'task build' to build your agent")
 		fmt.Println("   4. Run 'task run' to start your agent server")
+	} else {
+		fmt.Printf("   1. cd %s\n", projectDir)
+		fmt.Println("   2. Run 'adl generate' to generate the project code")
+		fmt.Println("   3. Implement the TODO placeholders in the generated files")
+		fmt.Println("   4. Run 'task build' to build your agent")
+		fmt.Println("   5. Run 'task run' to start your agent server")
 	}
 
 	return nil
@@ -255,13 +229,6 @@ type adlData struct {
 			Type string `yaml:"type,omitempty"`
 		} `yaml:"deployment,omitempty"`
 	} `yaml:"spec"`
-}
-
-func (a *adlData) getTemplate() string {
-	if a.Spec.Agent == nil || a.Spec.Agent.Provider == "none" {
-		return "minimal"
-	}
-	return "ai-powered"
 }
 
 func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *adlData {
@@ -485,8 +452,8 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 	fmt.Println("\n🚀 Deployment Configuration")
 	fmt.Println("---------------------------")
 
-	deploymentType := promptWithConfig("deployment", useDefaults, "Deployment type (kubernetes/none)", "none")
-	if deploymentType != "none" && deploymentType != "" {
+	deploymentType := promptWithConfig("deployment", useDefaults, "Deployment type (kubernetes, leave empty for no deployment)", "")
+	if deploymentType != "" {
 		adl.Spec.Deployment = &struct {
 			Type string `yaml:"type,omitempty"`
 		}{
@@ -534,11 +501,6 @@ func getDefaultGoModule(projectName string) string {
 		return fmt.Sprintf("github.com/example/%s", projectName)
 	}
 	return fmt.Sprintf("github.com/%s/%s", owner, projectName)
-}
-
-func dirExists(path string) bool {
-	info, err := os.Stat(path)
-	return err == nil && info.IsDir()
 }
 
 func conditionalPrompt(useDefaults bool, promptText, defaultValue string) string {

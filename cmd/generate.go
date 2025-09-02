@@ -18,12 +18,14 @@ var generateCmd = &cobra.Command{
 }
 
 var (
-	adlFile              string
-	outputDir            string
-	template             string
-	overwrite            bool
-	generateCI           bool
-	deploymentType       string
+	adlFile            string
+	outputDir          string
+	template           string
+	overwrite          bool
+	generateCI         bool
+	deploymentType     string
+	enableFlox         bool
+	enableDevContainer bool
 )
 
 func init() {
@@ -34,7 +36,9 @@ func init() {
 	generateCmd.Flags().StringVarP(&template, "template", "t", "minimal", "Template to use (minimal)")
 	generateCmd.Flags().BoolVar(&overwrite, "overwrite", false, "Overwrite existing files")
 	generateCmd.Flags().BoolVar(&generateCI, "ci", false, "Generate CI workflow configuration")
-	generateCmd.Flags().StringVar(&deploymentType, "deployment", "", "Deployment type (kubernetes/none, defaults to none)")
+	generateCmd.Flags().StringVar(&deploymentType, "deployment", "", "Deployment type (kubernetes, defaults to empty for no deployment)")
+	generateCmd.Flags().BoolVar(&enableFlox, "flox", false, "Enable Flox environment")
+	generateCmd.Flags().BoolVar(&enableDevContainer, "devcontainer", false, "Enable DevContainer environment")
 }
 
 func runGenerate(cmd *cobra.Command, args []string) error {
@@ -53,11 +57,13 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	}
 
 	gen := generator.New(generator.Config{
-		Template:       template,
-		Overwrite:      overwrite,
-		Version:        version,
-		GenerateCI:     generateCI,
-		DeploymentType: deploymentType,
+		Template:           template,
+		Overwrite:          overwrite,
+		Version:            version,
+		GenerateCI:         generateCI,
+		DeploymentType:     deploymentType,
+		EnableFlox:         enableFlox,
+		EnableDevContainer: enableDevContainer,
 	})
 
 	fmt.Printf("Generating A2A agent from '%s' to '%s'\n", absADLFile, absOutputDir)
@@ -68,7 +74,13 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	if deploymentType != "" {
 		fmt.Printf("Deployment type: %s\n", deploymentType)
 	} else {
-		fmt.Printf("Deployment type: none (no deployment files generated)\n")
+		fmt.Printf("Deployment left empty - no deployment files generated\n")
+	}
+	if enableFlox {
+		fmt.Printf("Flox environment: enabled\n")
+	}
+	if enableDevContainer {
+		fmt.Printf("DevContainer environment: enabled\n")
 	}
 
 	if err := gen.Generate(absADLFile, absOutputDir); err != nil {
@@ -77,7 +89,6 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("✅ A2A agent generated successfully!")
 	fmt.Printf("📁 Project location: %s\n", absOutputDir)
-
 
 	fmt.Println()
 	fmt.Println("📝 Next steps:")

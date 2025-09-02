@@ -116,7 +116,7 @@ const adlSchema = `{
           "properties": {
             "provider": {
               "type": "string",
-              "enum": ["openai", "anthropic", "ollama", "azure", "deepseek", "none"]
+              "enum": ["openai", "anthropic", "ollama", "azure", "deepseek"]
             },
             "model": {
               "type": "string"
@@ -242,7 +242,7 @@ const adlSchema = `{
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["flox", "devcontainer", "none"]
+              "enum": ["flox", "devcontainer"]
             },
             "flox": {
               "type": "object",
@@ -269,7 +269,7 @@ const adlSchema = `{
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["kubernetes", "none"]
+              "enum": ["kubernetes"]
             }
           }
         }

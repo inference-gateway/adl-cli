@@ -68,7 +68,7 @@ func main() {
 	agent, err := server.NewAgentBuilder(logger).
 		WithConfig(&cfg.A2A.AgentConfig).
 		WithToolBox(toolBox).
-		WithSystemPrompt(`{{- if .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt }}{{- else }}You are a helpful AI assistant.{{- end }}`).
+		WithSystemPrompt(`{{- if and .ADL.Spec.Agent .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt }}{{- else }}You are a helpful AI assistant.{{- end }}`).
 		Build()
 	if err != nil {
 		logger.Fatal("failed to create agent", zap.Error(err))

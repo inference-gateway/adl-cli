@@ -171,7 +171,7 @@ task dev -- generate --file examples/go-agent.yaml --output ./test-go-agent
 ## CLI Command Structure
 
 ### Init Command
-`adl init [project-name]` - Interactive project initialization with wizard
+`adl init [project-name]` - Interactive ADL manifest creation with wizard
 
 #### Init Command Options
 - `--defaults` - Use default values for all prompts
@@ -197,7 +197,6 @@ task dev -- generate --file examples/go-agent.yaml --output ./test-go-agent
 - `--rust-version` - Rust version
 - `--rust-edition` - Rust edition
 - `--typescript-name` - TypeScript package name
-- `--overwrite` - Overwrite existing files
 - `--flox` - Enable Flox environment
 - `--devcontainer` - Enable DevContainer environment
 

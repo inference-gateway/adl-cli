@@ -20,11 +20,13 @@ type Generator struct {
 
 // Config holds generator configuration
 type Config struct {
-	Template       string
-	Overwrite      bool
-	Version        string
-	GenerateCI     bool
-	DeploymentType string
+	Template           string
+	Overwrite          bool
+	Version            string
+	GenerateCI         bool
+	DeploymentType     string
+	EnableFlox         bool
+	EnableDevContainer bool
 }
 
 // New creates a new generator
@@ -50,6 +52,19 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 			adl.Spec.Deployment = &schema.DeploymentConfig{}
 		}
 		adl.Spec.Deployment.Type = g.config.DeploymentType
+	}
+
+	// Apply sandbox configuration from CLI flags if not already set in ADL
+	if g.config.EnableFlox || g.config.EnableDevContainer {
+		if adl.Spec.Sandbox == nil {
+			adl.Spec.Sandbox = &schema.SandboxConfig{}
+		}
+		if g.config.EnableFlox && (adl.Spec.Sandbox.Flox == nil || !adl.Spec.Sandbox.Flox.Enabled) {
+			adl.Spec.Sandbox.Flox = &schema.FloxConfig{Enabled: true}
+		}
+		if g.config.EnableDevContainer && (adl.Spec.Sandbox.DevContainer == nil || !adl.Spec.Sandbox.DevContainer.Enabled) {
+			adl.Spec.Sandbox.DevContainer = &schema.DevContainerConfig{Enabled: true}
+		}
 	}
 
 	template := g.config.Template
@@ -217,9 +232,37 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 			continue
 		}
 
-		content, err := templateEngine.ExecuteTemplate(templateKey, ctx)
-		if err != nil {
-			return fmt.Errorf("failed to execute template %s: %w", templateKey, err)
+		var content string
+		var err error
+
+		if (templateKey == "tools.go" || templateKey == "tools.rs" || templateKey == "tools.ts") && strings.Contains(fileName, "/") {
+			parts := strings.Split(fileName, "/")
+			if len(parts) >= 2 {
+				toolFileName := parts[len(parts)-1]
+				toolName := strings.TrimSuffix(toolFileName, filepath.Ext(toolFileName))
+
+				var foundTool *schema.Tool
+				for _, tool := range adl.Spec.Tools {
+					if tool.Name == toolName {
+						foundTool = &tool
+						break
+					}
+				}
+
+				if foundTool != nil {
+					content, err = templateEngine.ExecuteToolTemplate(templateKey, foundTool)
+					if err != nil {
+						return fmt.Errorf("failed to execute template %s for tool %s: %w", templateKey, toolName, err)
+					}
+				} else {
+					return fmt.Errorf("tool %s not found in ADL spec", toolName)
+				}
+			}
+		} else {
+			content, err = templateEngine.ExecuteTemplate(templateKey, ctx)
+			if err != nil {
+				return fmt.Errorf("failed to execute template %s: %w", templateKey, err)
+			}
 		}
 
 		ext := strings.ToLower(filepath.Ext(fileName))

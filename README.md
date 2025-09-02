@@ -79,10 +79,10 @@ Download pre-built binaries from the [releases page](https://github.com/inferenc
 ### 1. Initialize a New Project
 
 ```bash
-# Interactive project setup
+# Interactive project setup - creates ADL manifest
 adl init my-weather-agent
 
-# Or generate from an existing ADL file
+# Generate project code from the manifest
 adl generate --file agent.yaml --output ./test-my-agent
 ```
 
@@ -113,16 +113,16 @@ task run
 
 | Command | Description |
 |---------|-------------|
-| `adl init [name]` | Initialize a new project interactively with comprehensive options |
-| `adl generate` | Generate project from ADL file with CI/CD and sandbox support |
+| `adl init [name]` | Create ADL manifest file interactively with options |
+| `adl generate` | Generate project code from ADL file with CI/CD and sandbox support |
 | `adl validate [file]` | Validate an ADL file against the complete schema |
 
 ### Init Command
 
-The `adl init` command provides a comprehensive interactive wizard for creating new A2A agent projects:
+The `adl init` command provides a interactive wizard for creating ADL manifest files:
 
 ```bash
-# Interactive project setup
+# Interactive ADL manifest creation
 adl init my-weather-agent
 
 # Use defaults for all prompts
@@ -135,8 +135,7 @@ adl init my-agent \
   --provider openai \
   --model gpt-4o-mini \
   --language go \
-  --flox \
-  --overwrite
+  --flox
 ```
 
 #### Init Command Options
@@ -149,7 +148,6 @@ The init command supports extensive configuration options:
 - `--name` - Agent name
 - `--description` - Agent description  
 - `--version` - Agent version
-- `--overwrite` - Overwrite existing files
 
 **Agent Configuration:**
 - `--type` - Agent type (`ai-powered`/`minimal`)
@@ -354,7 +352,7 @@ spec:
 
 ## Generated Project Structure
 
-The ADL CLI generates comprehensive project scaffolding tailored to your chosen language:
+The ADL CLI generates project scaffolding tailored to your chosen language:
 
 ### Go Project Structure
 ```
