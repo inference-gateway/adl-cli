@@ -47,7 +47,7 @@ plugins:
   - - '@semantic-release/exec'
     - prepareCmd: |
         sed -i "s/VERSION: [0-9]\\+\\.[0-9]\\+\\.[0-9]\\+.*/VERSION: ${nextRelease.version}/" Taskfile.yml
-        goreleaser release --clean --snapshot --skip=publish
+        goreleaser release --clean --skip=publish
 
   - - '@semantic-release/changelog'
     - changelogFile: CHANGELOG.md
