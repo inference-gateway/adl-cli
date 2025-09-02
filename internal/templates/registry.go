@@ -133,7 +133,7 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		"README.md":              "docs/README.md",
 	}
 
-	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" && adl.Spec.Deployment.Type != "none" {
+	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" {
 		switch adl.Spec.Deployment.Type {
 		case "kubernetes":
 			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"
@@ -163,7 +163,7 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		"README.md":              "docs/README.md",
 	}
 
-	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" && adl.Spec.Deployment.Type != "none" {
+	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" {
 		switch adl.Spec.Deployment.Type {
 		case "kubernetes":
 			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"
@@ -198,7 +198,7 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		"README.md":              "docs/README.md",
 	}
 
-	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" && adl.Spec.Deployment.Type != "none" {
+	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" {
 		switch adl.Spec.Deployment.Type {
 		case "kubernetes":
 			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"

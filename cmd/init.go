@@ -55,7 +55,7 @@ func init() {
 	initCmd.Flags().String("typescript-name", "", "TypeScript package name")
 	initCmd.Flags().Bool("flox", false, "Enable Flox environment")
 	initCmd.Flags().Bool("devcontainer", false, "Enable DevContainer environment")
-	initCmd.Flags().String("deployment", "", "Deployment type (kubernetes/none, defaults to none)")
+	initCmd.Flags().String("deployment", "", "Deployment type (kubernetes, defaults to empty for no deployment)")
 
 	if err := viper.BindPFlags(initCmd.Flags()); err != nil {
 		fmt.Printf("Warning: failed to bind flags: %v\n", err)
@@ -452,8 +452,8 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 	fmt.Println("\n🚀 Deployment Configuration")
 	fmt.Println("---------------------------")
 
-	deploymentType := promptWithConfig("deployment", useDefaults, "Deployment type (kubernetes/none)", "none")
-	if deploymentType != "none" && deploymentType != "" {
+	deploymentType := promptWithConfig("deployment", useDefaults, "Deployment type (kubernetes, leave empty for no deployment)", "")
+	if deploymentType != "" {
 		adl.Spec.Deployment = &struct {
 			Type string `yaml:"type,omitempty"`
 		}{

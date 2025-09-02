@@ -113,6 +113,36 @@ func (e *Engine) ExecuteTemplate(templateKey string, ctx Context) (string, error
 	return e.Execute(templateContent, ctx)
 }
 
+// ExecuteToolTemplate executes a tool template with tool-specific data
+func (e *Engine) ExecuteToolTemplate(templateKey string, toolData interface{}) (string, error) {
+	if e.registry == nil {
+		return "", fmt.Errorf("no registry configured")
+	}
+
+	templateContent, err := e.registry.GetTemplate(templateKey)
+	if err != nil {
+		return "", fmt.Errorf("failed to get template %s: %w", templateKey, err)
+	}
+
+	tmpl, err := template.New("template").Funcs(sprig.TxtFuncMap()).Parse(templateContent)
+	if err != nil {
+		return "", err
+	}
+
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, toolData); err != nil {
+		return "", err
+	}
+
+	result := buf.String()
+
+	if result != "" && !strings.HasSuffix(result, "\n") {
+		result += "\n"
+	}
+
+	return result, nil
+}
+
 // GetTemplate returns the template name
 func (e *Engine) GetTemplate() string {
 	return e.templateName
