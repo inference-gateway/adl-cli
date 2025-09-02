@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+	"unicode"
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/inference-gateway/adl-cli/internal/schema"
@@ -15,6 +16,61 @@ import (
 type Engine struct {
 	templateName string
 	registry     *Registry
+}
+
+// toPascalCase converts snake_case to PascalCase with special handling for acronyms
+func toPascalCase(s string) string {
+	acronyms := map[string]string{
+		"id":   "ID",
+		"api":  "API",
+		"url":  "URL",
+		"uri":  "URI",
+		"http": "HTTP",
+		"https": "HTTPS",
+		"json": "JSON",
+		"xml":  "XML",
+		"sql":  "SQL",
+		"html": "HTML",
+		"css":  "CSS",
+		"js":   "JS",
+		"ui":   "UI",
+		"uuid": "UUID",
+		"tcp":  "TCP",
+		"udp":  "UDP",
+		"ip":   "IP",
+		"dns":  "DNS",
+		"tls":  "TLS",
+		"ssl":  "SSL",
+		"cpu":  "CPU",
+		"gpu":  "GPU",
+		"ram":  "RAM",
+		"io":   "IO",
+		"os":   "OS",
+		"db":   "DB",
+	}
+	
+	words := strings.Split(s, "_")
+	result := make([]string, len(words))
+	
+	for i, word := range words {
+		if len(word) == 0 {
+			continue
+		}
+		
+		lowerWord := strings.ToLower(word)
+		if acronym, exists := acronyms[lowerWord]; exists {
+			result[i] = acronym
+		} else {
+			runes := []rune(word)
+			runes[0] = unicode.ToUpper(runes[0])
+			for j := 1; j < len(runes); j++ {
+				runes[j] = unicode.ToLower(runes[j])
+			}
+			result[i] = string(runes)
+		}
+	}
+	
+	return strings.Join(result, "")
 }
 
 // Context provides data for template execution
@@ -39,9 +95,16 @@ func NewWithRegistry(templateName string, registry *Registry) *Engine {
 	}
 }
 
+// customFuncMap returns a function map with Sprig functions plus custom functions
+func customFuncMap() template.FuncMap {
+	funcMap := sprig.TxtFuncMap()
+	funcMap["toPascalCase"] = toPascalCase
+	return funcMap
+}
+
 // Execute executes a template with the given context
 func (e *Engine) Execute(templateContent string, ctx Context) (string, error) {
-	tmpl, err := template.New("template").Funcs(sprig.TxtFuncMap()).Parse(templateContent)
+	tmpl, err := template.New("template").Funcs(customFuncMap()).Parse(templateContent)
 	if err != nil {
 		return "", err
 	}
@@ -124,7 +187,7 @@ func (e *Engine) ExecuteToolTemplate(templateKey string, toolData interface{}) (
 		return "", fmt.Errorf("failed to get template %s: %w", templateKey, err)
 	}
 
-	tmpl, err := template.New("template").Funcs(sprig.TxtFuncMap()).Parse(templateContent)
+	tmpl, err := template.New("template").Funcs(customFuncMap()).Parse(templateContent)
 	if err != nil {
 		return "", err
 	}

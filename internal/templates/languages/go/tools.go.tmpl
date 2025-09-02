@@ -7,8 +7,8 @@ import (
 	"github.com/inference-gateway/adk/server"
 )
 
-// New{{ .Name | title }}Tool creates a new {{ .Name }} tool
-func New{{ .Name | title }}Tool() server.Tool {
+// New{{ .Name | toPascalCase }}Tool creates a new {{ .Name }} tool
+func New{{ .Name | toPascalCase }}Tool() server.Tool {
 	return server.NewBasicTool(
 		"{{ .Name }}",
 		"{{ .Description }}",
@@ -23,12 +23,12 @@ func New{{ .Name | title }}Tool() server.Tool {
 			"required": []string{ {{- range $i, $field := .Schema.required }}{{ if $i }}, {{ end }}"{{ $field }}"{{ end -}} },
 			{{- end }}
 		},
-		{{ .Name }}Handler,
+		{{ .Name | toPascalCase }}Handler,
 	)
 }
 
-// {{ .Name }}Handler handles the {{ .Name }} tool execution
-func {{ .Name }}Handler(ctx context.Context, args map[string]any) (string, error) {
+// {{ .Name | toPascalCase }}Handler handles the {{ .Name }} tool execution
+func {{ .Name | toPascalCase }}Handler(ctx context.Context, args map[string]any) (string, error) {
 	// TODO: Implement {{ .Name }} logic
 	// {{ .Description }}
 	

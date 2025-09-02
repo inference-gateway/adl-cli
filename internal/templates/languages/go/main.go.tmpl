@@ -61,7 +61,7 @@ func main() {
 	{{- range .ADL.Spec.Tools }}
 
 	// Register {{ .Name }} tool
-	{{ .Name }}Tool := tools.New{{ .Name | title }}Tool()
+	{{ .Name }}Tool := tools.New{{ .Name | toPascalCase }}Tool()
 	toolBox.AddTool({{ .Name }}Tool)
 	logger.Info("registered tool", zap.String("tool", "{{ .Name }}"), zap.String("description", "{{ .Description }}"))
 	{{- end }}
