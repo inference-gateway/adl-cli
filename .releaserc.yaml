@@ -45,7 +45,13 @@ plugins:
           - { type: 'security', section: '🔒 Security' }
 
   - - '@semantic-release/exec'
-    - prepareCmd: 'sed -i "s/VERSION: [0-9]\\+\\.[0-9]\\+\\.[0-9]\\+/VERSION: ${nextRelease.version}/" Taskfile.yml'
+    - prepareCmd: |
+        sed -i "s/VERSION: [0-9]\\+\\.[0-9]\\+\\.[0-9]\\+.*/VERSION: ${nextRelease.version}/" Taskfile.yml
+        mkdir -p bin/release
+        GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=${nextRelease.version}" -o bin/release/adl-linux-amd64 .
+        GOOS=linux GOARCH=arm64 go build -ldflags "-X main.Version=${nextRelease.version}" -o bin/release/adl-linux-arm64 .
+        GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=${nextRelease.version}" -o bin/release/adl-darwin-amd64 .
+        GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.Version=${nextRelease.version}" -o bin/release/adl-darwin-arm64 .
 
   - - '@semantic-release/changelog'
     - changelogFile: CHANGELOG.md
@@ -55,6 +61,18 @@ plugins:
   - - '@semantic-release/github'
     - assets:
         - CHANGELOG.md
+        - path: bin/release/adl-linux-amd64
+          name: adl-linux-amd64
+          label: Linux AMD64 Binary
+        - path: bin/release/adl-linux-arm64
+          name: adl-linux-arm64
+          label: Linux ARM64 Binary
+        - path: bin/release/adl-darwin-amd64
+          name: adl-darwin-amd64
+          label: macOS Intel Binary
+        - path: bin/release/adl-darwin-arm64
+          name: adl-darwin-arm64
+          label: macOS Apple Silicon Binary
       releasedLabels: ['released']
       releaseNameTemplate: '🚀 Version ${nextRelease.version}'
       successCommentCondition: 'false'
