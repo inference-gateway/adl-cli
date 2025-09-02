@@ -220,17 +220,6 @@ func (r *Registry) addSandboxFiles(adl *schema.ADL, files map[string]string) {
 		return
 	}
 
-	if adl.Spec.Sandbox.Type != "" && adl.Spec.Sandbox.Type != "none" {
-		switch adl.Spec.Sandbox.Type {
-		case "flox":
-			files[".flox/env/manifest.toml"] = "flox/manifest.toml"
-			files[".flox/env.json"] = "flox/env.json"
-			files[".flox/.gitignore"] = "flox/gitignore"
-			files[".flox/.gitattributes"] = "flox/gitattributes"
-		case "devcontainer":
-			files[".devcontainer/devcontainer.json"] = "devcontainer/devcontainer.json"
-		}
-	}
 
 	if adl.Spec.Sandbox.Flox != nil && adl.Spec.Sandbox.Flox.Enabled {
 		files[".flox/env/manifest.toml"] = "flox/manifest.toml"
