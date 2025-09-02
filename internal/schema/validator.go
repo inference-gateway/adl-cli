@@ -149,7 +149,50 @@ const adlSchema = `{
                 "type": "string"
               },
               "schema": {
-                "type": "object"
+                "type": "object",
+                "required": ["type"],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": ["object", "array", "string", "number", "integer", "boolean", "null"]
+                  },
+                  "properties": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": ["object", "array", "string", "number", "integer", "boolean", "null"]
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "enum": {
+                          "type": "array"
+                        },
+                        "format": {
+                          "type": "string"
+                        },
+                        "minimum": {
+                          "type": "number"
+                        },
+                        "maximum": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  },
+                  "required": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
               },
               "implementation": {
                 "type": "string"
