@@ -14,6 +14,32 @@
 
 </div>
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Installation](#installation)
+  - [Quick Install (Recommended)](#quick-install-recommended)
+  - [From Source](#from-source)
+  - [Using Go Install](#using-go-install)
+  - [Pre-built Binaries](#pre-built-binaries)
+- [Quick Start](#quick-start)
+- [Usage](#usage)
+  - [Commands](#commands)
+  - [Init Command](#init-command)
+  - [Generate Command](#generate-command)
+- [Agent Definition Language (ADL)](#agent-definition-language-adl)
+- [Generated Project Structure](#generated-project-structure)
+- [Sandbox Environments](#sandbox-environments)
+- [Enterprise Features](#enterprise-features)
+- [Examples](#examples)
+- [Template System & Architecture](#template-system--architecture)
+- [Customizing Generation with .adl-ignore](#customizing-generation-with-adl-ignore)
+- [Post-Generation Hooks](#post-generation-hooks)
+- [Development](#development)
+- [Roadmap](#roadmap)
+- [License](#license)
+- [Support](#support)
+
 ## Overview
 
 The ADL CLI helps you build production-ready A2A agents quickly by generating complete project scaffolding from YAML-based Agent Definition Language (ADL) files. It eliminates boilerplate code and ensures consistent patterns across your agent implementations.
