@@ -4,6 +4,7 @@ vars:
   APP_NAME: adl
   VERSION: 0.7.2
   BUILD_DIR: bin
+  DIST_DIR: dist
 
 tasks:
   build:
@@ -52,6 +53,7 @@ tasks:
     desc: Clean build artifacts
     cmds:
       - rm -rf {{.BUILD_DIR}}
+      - rm -rf {{.DIST_DIR}}
 
   dev:
     desc: Run in development mode
@@ -79,11 +81,7 @@ tasks:
   release:
     desc: Build release binaries for multiple platforms
     cmds:
-      - mkdir -p {{.BUILD_DIR}}/release
-      - GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version={{.VERSION}}" -o {{.BUILD_DIR}}/release/{{.APP_NAME}}-linux-amd64 .
-      - GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version={{.VERSION}}" -o {{.BUILD_DIR}}/release/{{.APP_NAME}}-darwin-amd64 .
-      - GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.Version={{.VERSION}}" -o {{.BUILD_DIR}}/release/{{.APP_NAME}}-darwin-arm64 .
-      - GOOS=windows GOARCH=amd64 go build -ldflags "-X main.Version={{.VERSION}}" -o {{.BUILD_DIR}}/release/{{.APP_NAME}}-windows-amd64.exe .
+     - goreleaser release --clean --snapshot --skip=publish
 
   docker:build:
     desc: Build Docker image
