@@ -113,7 +113,6 @@ const adlSchema = `{
         },
         "agent": {
           "type": "object",
-          "required": ["provider"],
           "properties": {
             "provider": {
               "type": "string",
