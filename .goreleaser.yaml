@@ -11,6 +11,7 @@ before:
 builds:
   - id: adl
     main: .
+    binary: adl
     env:
       - CGO_ENABLED=0
     goos:
@@ -19,10 +20,6 @@ builds:
     goarch:
       - amd64
       - arm64
-    goarm:
-      - '7'
-    goamd64:
-      - 'v1'
     mod_timestamp: '{{ .CommitTimestamp }}'
     flags:
       - -trimpath
@@ -34,9 +31,8 @@ archives:
       - tar.gz
     name_template: >-
       {{ .ProjectName }}_
-      {{- title .Os }}_
-      {{- if eq .Arch "amd64" }}x86_64
-      {{- else }}{{ .Arch }}{{ end }}
+      {{- .Os }}_
+      {{- .Arch }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
     files:
       - README.md
