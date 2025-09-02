@@ -83,6 +83,8 @@ func main() {
 			"description": AgentDescription,
 			"url":         cfg.A2A.AgentURL,
 		}).
+		WithDefaultBackgroundTaskHandler().
+		WithDefaultStreamingTaskHandler().
 		Build()
 	if err != nil {
 		logger.Fatal("failed to create A2A server", zap.Error(err))
