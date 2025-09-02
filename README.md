@@ -135,7 +135,6 @@ adl generate --file agent.yaml --output ./test-my-agent --ci
 | `--output`, `-o` | Output directory for generated code (default: ".") |
 | `--template`, `-t` | Template to use (default: "minimal") |
 | `--overwrite` | Overwrite existing files (respects .adl-ignore) |
-| `--devcontainer` | Generate VS Code devcontainer configuration |
 | `--ci` | Generate CI workflow configuration |
 
 

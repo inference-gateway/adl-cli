@@ -210,7 +210,6 @@ task dev -- generate --file examples/go-agent.yaml --output ./test-go-agent
 - `--output` - Output directory (default: current directory)
 - `--template` - Template to use (default: minimal)
 - `--overwrite` - Overwrite existing files (respects .adl-ignore)
-- `--devcontainer` - Generate VS Code devcontainer configuration
 - `--ci` - Generate CI workflow configuration
 
 ### Validate Command
