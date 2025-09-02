@@ -81,7 +81,7 @@ tasks:
   release:
     desc: Build release binaries for multiple platforms
     cmds:
-     - goreleaser release --clean --skip=publish
+     - GORELEASER_CURRENT_TAG=v{{.VERSION}} goreleaser release --snapshot --clean --skip=publish
 
   docker:build:
     desc: Build Docker image
