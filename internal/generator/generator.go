@@ -20,10 +20,11 @@ type Generator struct {
 
 // Config holds generator configuration
 type Config struct {
-	Template   string
-	Overwrite  bool
-	Version    string
-	GenerateCI bool
+	Template       string
+	Overwrite      bool
+	Version        string
+	GenerateCI     bool
+	DeploymentType string
 }
 
 // New creates a new generator
@@ -42,6 +43,14 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 
 	if err := g.validateADL(adl); err != nil {
 		return fmt.Errorf("ADL validation failed: %w", err)
+	}
+
+	// Override deployment configuration if specified via CLI flag
+	if g.config.DeploymentType != "" {
+		if adl.Spec.Deployment == nil {
+			adl.Spec.Deployment = &schema.DeploymentConfig{}
+		}
+		adl.Spec.Deployment.Type = g.config.DeploymentType
 	}
 
 	template := g.config.Template

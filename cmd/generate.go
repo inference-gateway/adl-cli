@@ -25,6 +25,7 @@ var (
 	overwrite            bool
 	generateDevcontainer bool
 	generateCI           bool
+	deploymentType       string
 )
 
 func init() {
@@ -36,6 +37,7 @@ func init() {
 	generateCmd.Flags().BoolVar(&overwrite, "overwrite", false, "Overwrite existing files")
 	generateCmd.Flags().BoolVar(&generateDevcontainer, "devcontainer", false, "Generate VS Code devcontainer configuration")
 	generateCmd.Flags().BoolVar(&generateCI, "ci", false, "Generate CI workflow configuration")
+	generateCmd.Flags().StringVar(&deploymentType, "deployment", "", "Deployment type (kubernetes/none, defaults to none)")
 }
 
 func runGenerate(cmd *cobra.Command, args []string) error {
@@ -54,16 +56,22 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	}
 
 	gen := generator.New(generator.Config{
-		Template:   template,
-		Overwrite:  overwrite,
-		Version:    version,
-		GenerateCI: generateCI,
+		Template:       template,
+		Overwrite:      overwrite,
+		Version:        version,
+		GenerateCI:     generateCI,
+		DeploymentType: deploymentType,
 	})
 
 	fmt.Printf("Generating A2A agent from '%s' to '%s'\n", absADLFile, absOutputDir)
 	fmt.Printf("Using template: %s\n", template)
 	if generateCI {
 		fmt.Printf("CI workflow generation: enabled\n")
+	}
+	if deploymentType != "" {
+		fmt.Printf("Deployment type: %s\n", deploymentType)
+	} else {
+		fmt.Printf("Deployment type: none (no deployment files generated)\n")
 	}
 
 	if err := gen.Generate(absADLFile, absOutputDir); err != nil {

@@ -19,13 +19,14 @@ type Metadata struct {
 
 // Spec contains the agent specification
 type Spec struct {
-	Capabilities *Capabilities  `yaml:"capabilities,omitempty" json:"capabilities,omitempty"`
-	Agent        *Agent         `yaml:"agent,omitempty" json:"agent,omitempty"`
-	Tools        []Tool         `yaml:"tools,omitempty" json:"tools,omitempty"`
-	Server       Server         `yaml:"server" json:"server"`
-	Language     *Language      `yaml:"language,omitempty" json:"language,omitempty"`
-	SCM          *SCM           `yaml:"scm,omitempty" json:"scm,omitempty"`
-	Sandbox      *SandboxConfig `yaml:"sandbox,omitempty" json:"sandbox,omitempty"`
+	Capabilities *Capabilities     `yaml:"capabilities,omitempty" json:"capabilities,omitempty"`
+	Agent        *Agent            `yaml:"agent,omitempty" json:"agent,omitempty"`
+	Tools        []Tool            `yaml:"tools,omitempty" json:"tools,omitempty"`
+	Server       Server            `yaml:"server" json:"server"`
+	Language     *Language         `yaml:"language,omitempty" json:"language,omitempty"`
+	SCM          *SCM              `yaml:"scm,omitempty" json:"scm,omitempty"`
+	Sandbox      *SandboxConfig    `yaml:"sandbox,omitempty" json:"sandbox,omitempty"`
+	Deployment   *DeploymentConfig `yaml:"deployment,omitempty" json:"deployment,omitempty"`
 }
 
 // Capabilities defines what the agent can do
@@ -98,6 +99,11 @@ type SCM struct {
 
 // SandboxConfig for sandbox environment settings
 type SandboxConfig struct {
+	Type string `yaml:"type,omitempty" json:"type,omitempty"`
+}
+
+// DeploymentConfig for deployment platform settings
+type DeploymentConfig struct {
 	Type string `yaml:"type,omitempty" json:"type,omitempty"`
 }
 

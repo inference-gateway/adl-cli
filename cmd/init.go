@@ -55,6 +55,7 @@ func init() {
 	initCmd.Flags().String("typescript-name", "", "TypeScript package name")
 	initCmd.Flags().Bool("overwrite", false, "Overwrite existing files")
 	initCmd.Flags().String("sandbox", "", "Sandbox environment (flox/devcontainer/none)")
+	initCmd.Flags().String("deployment", "", "Deployment type (kubernetes/none, defaults to none)")
 
 	if err := viper.BindPFlags(initCmd.Flags()); err != nil {
 		fmt.Printf("Warning: failed to bind flags: %v\n", err)
@@ -244,6 +245,9 @@ type adlData struct {
 		Sandbox *struct {
 			Type string `yaml:"type,omitempty"`
 		} `yaml:"sandbox,omitempty"`
+		Deployment *struct {
+			Type string `yaml:"type,omitempty"`
+		} `yaml:"deployment,omitempty"`
 	} `yaml:"spec"`
 }
 
@@ -449,6 +453,18 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 		}
 	}
 
+	fmt.Println("\n🚀 Deployment Configuration")
+	fmt.Println("---------------------------")
+
+	deploymentType := promptWithConfig("deployment", useDefaults, "Deployment type (kubernetes/none)", "none")
+	if deploymentType != "none" && deploymentType != "" {
+		adl.Spec.Deployment = &struct {
+			Type string `yaml:"type,omitempty"`
+		}{
+			Type: deploymentType,
+		}
+	}
+
 	return adl
 }
 
@@ -542,7 +558,6 @@ func conditionalPromptBool(useDefaults bool, promptText string, defaultValue boo
 	return promptBool(promptText, defaultValue)
 }
 
-
 func conditionalPromptChoice(useDefaults bool, promptText string, choices []string, defaultValue string) string {
 	if useDefaults {
 		fmt.Printf("%s (%s) [%s]: %s\n", promptText, strings.Join(choices, "/"), defaultValue, defaultValue)
@@ -550,7 +565,6 @@ func conditionalPromptChoice(useDefaults bool, promptText string, choices []stri
 	}
 	return promptChoice(promptText, choices, defaultValue)
 }
-
 
 func promptString(promptText, defaultValue string) string {
 	input, err := prompt.ReadString(promptText, defaultValue)
