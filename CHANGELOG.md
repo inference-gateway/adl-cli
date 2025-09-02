@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.0](https://github.com/inference-gateway/adl-cli/compare/v0.9.1...v0.10.0) (2025-09-02)
+
+### ✨ Features
+
+* **server:** Add default task handlers for A2A server ([532ea20](https://github.com/inference-gateway/adl-cli/commit/532ea20a6532c63f63826fc3ce64ba11095498d9))
+
+### ♻️ Improvements
+
+* **schema:** Replace map[string]interface{} with map[string]any for improved type handling ([131071e](https://github.com/inference-gateway/adl-cli/commit/131071e8f28f13cec8be58e7f827f4ee39df14f8))
+
 ## [0.9.1](https://github.com/inference-gateway/adl-cli/compare/v0.9.0...v0.9.1) (2025-09-02)
 
 ### ♻️ Improvements
