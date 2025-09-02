@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.1](https://github.com/inference-gateway/adl-cli/compare/v0.7.0...v0.7.1) (2025-09-02)
+
+### ♻️ Improvements
+
+* Remove redundant comments in main.go.tmpl for cleaner code ([44385dc](https://github.com/inference-gateway/adl-cli/commit/44385dc1ddf7304119015dc9d624cc4148408748))
+
+### 🐛 Bug Fixes
+
+* **schema:** Make agent.spec.provider and agent.spec.model optional fields ([#29](https://github.com/inference-gateway/adl-cli/issues/29)) ([b52d515](https://github.com/inference-gateway/adl-cli/commit/b52d51573697143bc2f0e76bc0d7ee1c8481a1fd)), closes [#28](https://github.com/inference-gateway/adl-cli/issues/28)
+
+### 📚 Documentation
+
+* Update A2A protocol link in README.md.tmpl to point to the correct repository ([a55b5f9](https://github.com/inference-gateway/adl-cli/commit/a55b5f9a0a33b20bc0be7eca36a46db569c2536f))
+
 ## [0.7.0](https://github.com/inference-gateway/adl-cli/compare/v0.6.0...v0.7.0) (2025-09-02)
 
 ### ✨ Features
