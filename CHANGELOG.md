@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.8](https://github.com/inference-gateway/adl-cli/compare/v0.7.7...v0.7.8) (2025-09-02)
+
+### 🐛 Bug Fixes
+
+* **main:** Remove host logging from A2A server startup ([c295a14](https://github.com/inference-gateway/adl-cli/commit/c295a145a9bd75e14b12b941e3db2ee8a84592bb))
+* **template:** Add blank line before tool registration for improved readability ([916ae05](https://github.com/inference-gateway/adl-cli/commit/916ae05fbe3383aebf8c2e327e1fccaa08c733d7))
+* **template:** Update property type declaration to use map[string]any for consistency ([b8f2b17](https://github.com/inference-gateway/adl-cli/commit/b8f2b17ee58d6f4bbcbe5f23bfb7d2d46f609ecc))
+
 ## [0.7.7](https://github.com/inference-gateway/adl-cli/compare/v0.7.6...v0.7.7) (2025-09-02)
 
 ### ♻️ Improvements
