@@ -44,15 +44,24 @@ plugins:
           - { type: 'build', section: '🔨 Miscellaneous' }
           - { type: 'security', section: '🔒 Security' }
 
-  - - '@semantic-release/exec'
-    - prepareCmd: |
-        sed -i "s/VERSION: [0-9]\\+\\.[0-9]\\+\\.[0-9]\\+.*/VERSION: ${nextRelease.version}/" Taskfile.yml
-        GORELEASER_CURRENT_TAG=v${nextRelease.version} goreleaser release --clean --skip=publish
-
   - - '@semantic-release/changelog'
     - changelogFile: CHANGELOG.md
       changelogTitle: "# Changelog\n\nAll notable changes to this project will be documented in this file."
       verifyConditions: true
+
+  - - '@semantic-release/exec'
+    - prepareCmd: |
+        sed -i "s/VERSION: [0-9]\\+\\.[0-9]\\+\\.[0-9]\\+.*/VERSION: ${nextRelease.version}/" Taskfile.yml
+
+  - - '@semantic-release/git'
+    - assets:
+        - CHANGELOG.md
+        - Taskfile.yml
+      message: "chore(release): 🔖 ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+
+  - - '@semantic-release/exec'
+    - publishCmd: |
+        GORELEASER_CURRENT_TAG=v${nextRelease.version} goreleaser release --clean --skip=publish
 
   - - '@semantic-release/github'
     - assets:
@@ -73,9 +82,3 @@ plugins:
       labels:
         - 'release'
         - "<%= nextRelease.channel === 'rc' ? 'rc' : '' %>"
-
-  - - '@semantic-release/git'
-    - assets:
-        - CHANGELOG.md
-        - Taskfile.yml
-      message: "chore(release): 🔖 ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
