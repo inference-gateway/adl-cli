@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.9](https://github.com/inference-gateway/adl-cli/compare/v0.7.8...v0.7.9) (2025-09-02)
+
+### 🐛 Bug Fixes
+
+* **template:** Update type declarations to use map[string]any for consistency ([225b918](https://github.com/inference-gateway/adl-cli/commit/225b918e6f6383f701ff34f957787f2194a06601))
+
 ## [0.7.8](https://github.com/inference-gateway/adl-cli/compare/v0.7.7...v0.7.8) (2025-09-02)
 
 ### 🐛 Bug Fixes
