@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0](https://github.com/inference-gateway/adl-cli/compare/v0.6.0...v0.7.0) (2025-09-02)
+
+### ✨ Features
+
+* Add template registry and language-specific templates for Go, Rust, and TypeScript ([e4bb4f5](https://github.com/inference-gateway/adl-cli/commit/e4bb4f50f45f2c7c563b51b1cb2ec9e183ca4e5a))
+* **deployment:** Add optional deployment configuration ([#21](https://github.com/inference-gateway/adl-cli/issues/21)) ([c76f9aa](https://github.com/inference-gateway/adl-cli/commit/c76f9aac34b209a764a94f8a35ad06c65ae205b3)), closes [#19](https://github.com/inference-gateway/adl-cli/issues/19)
+* **rust:** Implement missing Rust ADK templates and fix API patterns ([#18](https://github.com/inference-gateway/adl-cli/issues/18)) ([32a19eb](https://github.com/inference-gateway/adl-cli/commit/32a19eb577aa8eb93cdf7143a8e5d229276bac7b))
+
+### ♻️ Improvements
+
+* **cli:** Remove --devcontainer flag ([#22](https://github.com/inference-gateway/adl-cli/issues/22)) ([4262e96](https://github.com/inference-gateway/adl-cli/commit/4262e96efbb35e84c22c39450e1209ce1caa85ca))
+* Refactor sandbox configurations for extensible multi-environment support ([#27](https://github.com/inference-gateway/adl-cli/issues/27)) ([60cc096](https://github.com/inference-gateway/adl-cli/commit/60cc09696e521e8d6e971e729ab7fc3347d16d54))
+
+### 🐛 Bug Fixes
+
+* Remove unnecessary blank lines in multiple files for cleaner code ([3b2a475](https://github.com/inference-gateway/adl-cli/commit/3b2a4757e3a8c5c3672e28ccfe4ba979c4461364))
+
+### 📚 Documentation
+
+* Clarify YAML ADL usage in README ([#26](https://github.com/inference-gateway/adl-cli/issues/26)) ([b6513d2](https://github.com/inference-gateway/adl-cli/commit/b6513d2afb5346ac4279314f9d626783e84b2d00))
+* Reconcile README with improved feature documentation ([#24](https://github.com/inference-gateway/adl-cli/issues/24)) ([16a8c0c](https://github.com/inference-gateway/adl-cli/commit/16a8c0c31735e96d3fdc7bf6efb3937cbc9720da)), closes [#23](https://github.com/inference-gateway/adl-cli/issues/23)
+* Update CLAUDE.md and README.md for improved template system and usage examples ([8eb2328](https://github.com/inference-gateway/adl-cli/commit/8eb2328a0a43578e46fd6b45b698fbdcac4d2d13))
+
+### 🔧 Miscellaneous
+
+* Add golangci-lint package support and improve flag binding error handling ([6a07aab](https://github.com/inference-gateway/adl-cli/commit/6a07aaba25290bff063509d1ae9c2f5e91d94358))
+* Add issue templates for bug reports, feature requests, and refactor requests ([a473ca5](https://github.com/inference-gateway/adl-cli/commit/a473ca5c16027b2ea0a99b8665c15962d5497117))
+* Improve Rust templates and add support for additional files in flox environment ([a7c7869](https://github.com/inference-gateway/adl-cli/commit/a7c7869e545473a14da90fe574529aa2f10d0880))
+
 ## [0.6.0](https://github.com/inference-gateway/adl-cli/compare/v0.5.0...v0.6.0) (2025-09-01)
 
 ### ✨ Features
