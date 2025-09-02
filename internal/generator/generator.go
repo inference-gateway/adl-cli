@@ -749,7 +749,7 @@ func (g *Generator) runPostGenerationSteps(adl *schema.ADL, outputDir, language 
 	} else {
 		switch language {
 		case "go":
-			commands = []string{"go fmt ./...", "go mod tidy"}
+			commands = []string{"go mod tidy", "go fmt ./..."}
 			fmt.Println("🔧 Running default Go post-generation commands...")
 		case "rust":
 			commands = []string{"cargo fmt", "cargo check"}
