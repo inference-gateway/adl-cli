@@ -10,11 +10,6 @@ end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-# Go files
-[*.go]
-indent_style = tab
-indent_size = 4
-
 # YAML files
 [*.{yml,yaml}]
 indent_style = space
@@ -39,8 +34,26 @@ indent_size = 2
 [*.sh]
 indent_style = space
 indent_size = 2
+{{- if .ADL.Spec.Language.Rust }}
 
 # Rust files
 [*.rs]
 indent_style = space
 indent_size = 4
+{{- end }}
+
+{{- if .ADL.Spec.Language.Go }}
+
+# Go files
+[*.go]
+indent_style = tab
+indent_size = 4
+{{- end }}
+
+{{- if .ADL.Spec.Language.TypeScript }}
+
+# TypeScript files
+[*.{ts,tsx,js,jsx}]
+indent_style = space
+indent_size = 2
+{{- end }}
