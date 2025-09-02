@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.1](https://github.com/inference-gateway/adl-cli/compare/v0.10.0...v0.10.1) (2025-09-02)
+
+### 🐛 Bug Fixes
+
+* **main:** Correct path for agent card file in A2A server initialization ([d639a10](https://github.com/inference-gateway/adl-cli/commit/d639a10718d73f06a8be336a2a5ec9a36b75f31a))
+
 ## [0.10.0](https://github.com/inference-gateway/adl-cli/compare/v0.9.1...v0.10.0) (2025-09-02)
 
 ### ✨ Features
