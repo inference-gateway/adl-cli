@@ -241,7 +241,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		var content string
 		var err error
 
-		if (templateKey == "tools.go" || templateKey == "tools.rs" || templateKey == "tools.ts") && strings.Contains(fileName, "/") {
+		if (templateKey == "skill.go" || templateKey == "skill.rs" || templateKey == "skill.ts") && strings.Contains(fileName, "/") {
 			parts := strings.Split(fileName, "/")
 			if len(parts) >= 2 {
 				toolFileName := parts[len(parts)-1]

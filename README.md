@@ -267,18 +267,18 @@ spec:
     systemPrompt: "You are a helpful weather assistant."
     maxTokens: 4096
     temperature: 0.7
-  tools:
+  skills:
     - name: get_weather
       description: "Get current weather for a city"
       schema:
         type: object
         properties:
           city:
-            - type: string
-              description: "City name"
+            type: string
+            description: "City name"
           country:
-            - type: string
-              description: "Country code"
+            type: string
+            description: "Country code"
         required:
           - city
   server:
@@ -297,7 +297,7 @@ The complete ADL schema includes:
 - **metadata**: Agent name, description, and version
 - **capabilities**: Streaming, notifications, state history
 - **agent**: AI provider configuration (OpenAI, Anthropic, Azure, Ollama, DeepSeek)
-- **tools**: Function definitions with complex JSON schemas and validation
+- **skills**: Function definitions with complex JSON schemas and validation
 - **server**: HTTP server configuration with authentication support
 - **language**: Programming language-specific settings (Go, Rust, TypeScript)
 - **scm**: Source control management configuration (GitHub, GitLab) 
@@ -325,7 +325,7 @@ spec:
       Always prioritize security and compliance.
     maxTokens: 8192
     temperature: 0.3
-  tools:
+  skills:
     - name: query_database
       description: "Execute database queries with validation"
       schema:
@@ -386,8 +386,8 @@ The ADL CLI generates project scaffolding tailored to your chosen language:
 my-go-agent/
 ├── main.go                    # Main server setup
 ├── go.mod                     # Go module definition
-├── tools/                     # Tool implementations directory
-│   ├── query_database.go      # Individual tool files (TODO placeholders)
+├── skills/                    # Skill implementations directory
+│   ├── query_database.go      # Individual skill files (TODO placeholders)
 │   └── send_notification.go
 ├── Taskfile.yml               # Development tasks (build, test, lint)
 ├── Dockerfile                 # Container configuration
@@ -414,9 +414,9 @@ my-go-agent/
 my-rust-agent/
 ├── src/
 │   ├── main.rs                # Main application entry point
-│   └── tools/                 # Tool implementations directory
+│   └── skills/                # Skill implementations directory
 │       ├── mod.rs             # Module declarations
-│       ├── query_database.rs  # Individual tool implementations
+│       ├── query_database.rs  # Individual skill implementations
 │       └── send_notification.rs
 ├── Cargo.toml                 # Rust package configuration
 ├── Taskfile.yml               # Development tasks
@@ -649,14 +649,14 @@ Each language has its own file mapping that determines what gets generated:
 
 **Go Projects:**
 - `main.go` → Go main server setup
-- `tools/{toolname}.go` → Individual tool implementations  
+- `skills/{skillname}.go` → Individual skill implementations  
 - `go.mod` → Go module configuration
 - Language-specific Dockerfile and CI configurations
 
 **Rust Projects:**  
 - `src/main.rs` → Rust main application
-- `src/tools/{toolname}.rs` → Tool implementations
-- `src/tools/mod.rs` → Module declarations
+- `src/skills/{skillname}.rs` → Skill implementations
+- `src/skills/mod.rs` → Module declarations
 - `Cargo.toml` → Rust package configuration
 
 **Universal Files:**

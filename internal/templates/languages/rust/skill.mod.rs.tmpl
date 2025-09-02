@@ -1,0 +1,7 @@
+//! Skills module
+//!
+//! This module contains all skill implementations for the agent.
+
+{{- range .ADL.Spec.Skills }}
+pub mod {{ .Name }};
+{{- end }}

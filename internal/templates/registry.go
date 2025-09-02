@@ -141,7 +141,7 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 	}
 
 	for _, skill := range adl.Spec.Skills {
-		files[fmt.Sprintf("tools/%s.go", skill.Name)] = "tools.go"
+		files[fmt.Sprintf("skills/%s.go", skill.Name)] = "skill.go"
 	}
 
 	r.addSandboxFiles(adl, files)
@@ -171,11 +171,11 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 	}
 
 	for _, skill := range adl.Spec.Skills {
-		files[fmt.Sprintf("src/tools/%s.rs", skill.Name)] = "tools.rs"
+		files[fmt.Sprintf("src/skills/%s.rs", skill.Name)] = "skill.rs"
 	}
 
 	if len(adl.Spec.Skills) > 0 {
-		files["src/tools/mod.rs"] = "tools.mod.rs"
+		files["src/skills/mod.rs"] = "skill.mod.rs"
 	}
 
 	r.addSandboxFiles(adl, files)
@@ -206,7 +206,7 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 	}
 
 	for _, skill := range adl.Spec.Skills {
-		files[fmt.Sprintf("src/tools/%s.ts", skill.Name)] = "tools.ts"
+		files[fmt.Sprintf("src/skills/%s.ts", skill.Name)] = "skill.ts"
 	}
 
 	r.addSandboxFiles(adl, files)

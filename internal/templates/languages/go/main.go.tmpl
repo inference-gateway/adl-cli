@@ -12,7 +12,7 @@ import (
 	"github.com/sethvargo/go-envconfig"
 	"go.uber.org/zap"
 
-	"{{ .ADL.Spec.Language.Go.Module }}/tools"
+	"{{ .ADL.Spec.Language.Go.Module }}/skills"
 )
 
 // Config represents the application configuration
@@ -61,7 +61,7 @@ func main() {
 	{{- range .ADL.Spec.Skills }}
 
 	// Register {{ .Name }} skill
-	{{ .Name | toCamelCase }}Skill := tools.New{{ .Name | toPascalCase }}Skill()
+	{{ .Name | toCamelCase }}Skill := skills.New{{ .Name | toPascalCase }}Skill()
 	toolBox.AddTool({{ .Name | toCamelCase }}Skill)
 	logger.Info("registered skill", zap.String("skill", "{{ .Name }}"), zap.String("description", "{{ .Description }}"))
 	{{- end }}
