@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.12.3](https://github.com/inference-gateway/adl-cli/compare/v0.12.2...v0.12.3) (2025-09-02)
+
+### 🐛 Bug Fixes
+
+* Correct command in taskfile to use 'adl' instead of 'a2a' for code generation ([e1cdd40](https://github.com/inference-gateway/adl-cli/commit/e1cdd40fab59113229940cc6416574c49a5e94f4))
+* Improve agent card generation with default values and protocol handling ([61b4e32](https://github.com/inference-gateway/adl-cli/commit/61b4e32e1f9e18912724353b8a0fd2571d39f8b0))
+* Reorder Go post-generation commands for improved execution flow ([56a6a7d](https://github.com/inference-gateway/adl-cli/commit/56a6a7d9a2159daca55959726ebc9c5e96ef0050))
+
 ## [0.12.2](https://github.com/inference-gateway/adl-cli/compare/v0.12.1...v0.12.2) (2025-09-02)
 
 ### 🐛 Bug Fixes
