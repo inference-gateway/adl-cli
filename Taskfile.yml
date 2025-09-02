@@ -74,7 +74,7 @@ tasks:
     cmds:
       - rm -rf test-output
       - mkdir -p test-output
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/go-agent.yaml --output test-output/go-agent --overwrite --devcontainer --ci
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/go-agent.yaml --output test-output/go-agent --overwrite --ci
 
   release:
     desc: Build release binaries for multiple platforms
