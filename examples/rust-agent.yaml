@@ -9,6 +9,13 @@ spec:
     streaming: true
     pushNotifications: true
     stateTransitionHistory: true
+  card:
+    protocolVersion: "0.3.0"
+    preferredTransport: "JSONRPC"
+    defaultInputModes: ["text", "voice"]
+    defaultOutputModes: ["text", "audio"]
+    documentationUrl: "https://github.com/company/go-agent/docs"
+    iconUrl: "https://github.com/company/go-agent/icon.png"
   agent:
     provider: openai
     model: gpt-4o-mini
