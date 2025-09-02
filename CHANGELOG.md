@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.12.1](https://github.com/inference-gateway/adl-cli/compare/v0.12.0...v0.12.1) (2025-09-02)
+
+### ♻️ Improvements
+
+* Clean up whitespace in skill description prompt and card struct fields ([ef55a43](https://github.com/inference-gateway/adl-cli/commit/ef55a431d5f416f103e1401dd842e2b4cd89e592))
+* Rename tools to skills in documentation and code templates ([9b21eeb](https://github.com/inference-gateway/adl-cli/commit/9b21eeb9c7042b3f1d3781af98becc7a8a3511d2))
+
+### 🐛 Bug Fixes
+
+* Update AI provider options in init command for accuracy ([b4d8481](https://github.com/inference-gateway/adl-cli/commit/b4d8481bc8eabaef6316b474b1f244d7c6e33512))
+
+### ✅ Miscellaneous
+
+* Update test cases to replace 'tools' with 'skills' and adjust README for agent configuration ([30c978e](https://github.com/inference-gateway/adl-cli/commit/30c978e39f28bf9f0ab038a0c5b7bfc0b477e018))
+
 ## [0.12.0](https://github.com/inference-gateway/adl-cli/compare/v0.11.0...v0.12.0) (2025-09-02)
 
 ### ✨ Features
