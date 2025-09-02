@@ -11,13 +11,21 @@
         "pkg-path": "go",
         "version": "^1.24"
       },
+      "go-task": {
+        "pkg-path": "go-task",
+        "version": "^3.44.1"
+      },
       "golangci-lint": {
         "pkg-path": "golangci-lint",
         "version": "^2.4.0"
+      },
+      "goreleaser": {
+        "pkg-path": "goreleaser",
+        "version": "^2.11.2"
       }
     },
     "hook": {
-      "on-activate": "  export GOENV=\"$FLOX_ENV_CACHE/goenv\"\n  go get .\n"
+      "on-activate": "  export GOENV=\"$FLOX_ENV_CACHE/goenv\"\n  go get .\n\n  source <(goreleaser completion zsh)\n  source <(task --completion zsh)\n"
     },
     "options": {}
   },
@@ -255,6 +263,122 @@
       "priority": 5
     },
     {
+      "attr_path": "go-task",
+      "broken": false,
+      "derivation": "/nix/store/jadn997y3mfi3dg0j099glscd9al3iqf-go-task-3.44.1.drv",
+      "description": "Task runner / simpler Make alternative written in Go",
+      "install_id": "go-task",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=d7600c775f877cd87b4f5a831c28aa94137377aa",
+      "name": "go-task-3.44.1",
+      "pname": "go-task",
+      "rev": "d7600c775f877cd87b4f5a831c28aa94137377aa",
+      "rev_count": 854036,
+      "rev_date": "2025-08-30T08:25:00Z",
+      "scrape_date": "2025-08-31T03:28:53.283811Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.44.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/qyq1sb8q9w2zl48k0m3aqjfiwz8hd3jp-go-task-3.44.1"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "go-task",
+      "broken": false,
+      "derivation": "/nix/store/bxsrnh17nki8m4nizz0jdya1km0my98j-go-task-3.44.1.drv",
+      "description": "Task runner / simpler Make alternative written in Go",
+      "install_id": "go-task",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=d7600c775f877cd87b4f5a831c28aa94137377aa",
+      "name": "go-task-3.44.1",
+      "pname": "go-task",
+      "rev": "d7600c775f877cd87b4f5a831c28aa94137377aa",
+      "rev_count": 854036,
+      "rev_date": "2025-08-30T08:25:00Z",
+      "scrape_date": "2025-08-31T03:37:17.544685Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.44.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/wn0iyd47an6y4crq2gbkpzqy8bg6g0dc-go-task-3.44.1"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "go-task",
+      "broken": false,
+      "derivation": "/nix/store/90dzgp34lh738l8xiw14yrj2203c92rv-go-task-3.44.1.drv",
+      "description": "Task runner / simpler Make alternative written in Go",
+      "install_id": "go-task",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=d7600c775f877cd87b4f5a831c28aa94137377aa",
+      "name": "go-task-3.44.1",
+      "pname": "go-task",
+      "rev": "d7600c775f877cd87b4f5a831c28aa94137377aa",
+      "rev_count": 854036,
+      "rev_date": "2025-08-30T08:25:00Z",
+      "scrape_date": "2025-08-31T03:45:26.366165Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.44.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/f2f60s2qfq2aj92vxkq03p92sl5kdp5k-go-task-3.44.1"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "go-task",
+      "broken": false,
+      "derivation": "/nix/store/fqfsx5zc954765l5lji5kcr6hs7vbly1-go-task-3.44.1.drv",
+      "description": "Task runner / simpler Make alternative written in Go",
+      "install_id": "go-task",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=d7600c775f877cd87b4f5a831c28aa94137377aa",
+      "name": "go-task-3.44.1",
+      "pname": "go-task",
+      "rev": "d7600c775f877cd87b4f5a831c28aa94137377aa",
+      "rev_count": 854036,
+      "rev_date": "2025-08-30T08:25:00Z",
+      "scrape_date": "2025-08-31T03:52:54.372396Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.44.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/f0h4by70y193kp3sipng7yycpclygif5-go-task-3.44.1"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
       "attr_path": "golangci-lint",
       "broken": false,
       "derivation": "/nix/store/gjpp09llq117kb14gza3nlgv6zvplp6x-golangci-lint-2.4.0.drv",
@@ -365,6 +489,122 @@
       ],
       "outputs": {
         "out": "/nix/store/arxp4wfknba8kazch9s18dm609bis8jg-golangci-lint-2.4.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "goreleaser",
+      "broken": false,
+      "derivation": "/nix/store/fhhfd6bfpxb00ib1p0h8iynnym3gsnj0-goreleaser-2.11.2.drv",
+      "description": "Deliver Go binaries as fast and easily as possible",
+      "install_id": "goreleaser",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=d7600c775f877cd87b4f5a831c28aa94137377aa",
+      "name": "goreleaser-2.11.2",
+      "pname": "goreleaser",
+      "rev": "d7600c775f877cd87b4f5a831c28aa94137377aa",
+      "rev_count": 854036,
+      "rev_date": "2025-08-30T08:25:00Z",
+      "scrape_date": "2025-08-31T03:28:53.334460Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.11.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/vz7n92z8y14y6qlx559smm12ahbdijzd-goreleaser-2.11.2"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "goreleaser",
+      "broken": false,
+      "derivation": "/nix/store/5m1bvs3x344ixacl5mwavlq2gh39fp06-goreleaser-2.11.2.drv",
+      "description": "Deliver Go binaries as fast and easily as possible",
+      "install_id": "goreleaser",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=d7600c775f877cd87b4f5a831c28aa94137377aa",
+      "name": "goreleaser-2.11.2",
+      "pname": "goreleaser",
+      "rev": "d7600c775f877cd87b4f5a831c28aa94137377aa",
+      "rev_count": 854036,
+      "rev_date": "2025-08-30T08:25:00Z",
+      "scrape_date": "2025-08-31T03:37:17.634068Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.11.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/vf7gka7s5p6ffnfwvxxdlk1h7hd6d3qh-goreleaser-2.11.2"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "goreleaser",
+      "broken": false,
+      "derivation": "/nix/store/4x7wx19snwa9i6v3hir58c30n2jm3c1q-goreleaser-2.11.2.drv",
+      "description": "Deliver Go binaries as fast and easily as possible",
+      "install_id": "goreleaser",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=d7600c775f877cd87b4f5a831c28aa94137377aa",
+      "name": "goreleaser-2.11.2",
+      "pname": "goreleaser",
+      "rev": "d7600c775f877cd87b4f5a831c28aa94137377aa",
+      "rev_count": 854036,
+      "rev_date": "2025-08-30T08:25:00Z",
+      "scrape_date": "2025-08-31T03:45:26.420245Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.11.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/f4wl4ahfziy3xsy3m7wvky572gnal9ia-goreleaser-2.11.2"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "goreleaser",
+      "broken": false,
+      "derivation": "/nix/store/fw4j1mscigv9g0ji9icrylhw0k2yn52k-goreleaser-2.11.2.drv",
+      "description": "Deliver Go binaries as fast and easily as possible",
+      "install_id": "goreleaser",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=d7600c775f877cd87b4f5a831c28aa94137377aa",
+      "name": "goreleaser-2.11.2",
+      "pname": "goreleaser",
+      "rev": "d7600c775f877cd87b4f5a831c28aa94137377aa",
+      "rev_count": 854036,
+      "rev_date": "2025-08-30T08:25:00Z",
+      "scrape_date": "2025-08-31T03:52:54.468680Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.11.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/2bybqzaiw7fg22w70fhf2x00jfdq91pr-goreleaser-2.11.2"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
