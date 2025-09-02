@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.7](https://github.com/inference-gateway/adl-cli/compare/v0.7.6...v0.7.7) (2025-09-02)
+
+### ♻️ Improvements
+
+* **editorconfig:** Rearrange language-specific sections for better clarity and organization ([9b9a780](https://github.com/inference-gateway/adl-cli/commit/9b9a7800c978b31954bc033b62692c3f41d4ef17))
+
+### 🐛 Bug Fixes
+
+* **template:** Update Go installation configuration in manifest template ([f80751c](https://github.com/inference-gateway/adl-cli/commit/f80751c279327777fe2e516d1f96f86ca6562495))
+* **validator:** Improve ADL schema validation with additional properties and requirements ([6316b39](https://github.com/inference-gateway/adl-cli/commit/6316b3985f556e07d4bb6d2997a7046b347a22a9))
+
 ## [0.7.6](https://github.com/inference-gateway/adl-cli/compare/v0.7.5...v0.7.6) (2025-09-02)
 
 ### 🐛 Bug Fixes
