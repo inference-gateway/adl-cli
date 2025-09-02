@@ -2,6 +2,12 @@
 
 # {{ .ADL.Metadata.Name | title }}
 
+{{- if .GenerateCI }}
+{{- if and .ADL.Spec.SCM (eq .ADL.Spec.SCM.Provider "github") .ADL.Spec.SCM.URL }}
+{{- $url := .ADL.Spec.SCM.URL | trimSuffix ".git" | trimPrefix "https://github.com/" | trimPrefix "git@github.com:" }}
+[![CI](https://github.com/{{ $url }}/workflows/CI/badge.svg)](https://github.com/{{ $url }}/actions/workflows/ci.yml)
+{{- end }}
+{{- end }}
 {{- if eq .Language "go" }}
 [![Go Version](https://img.shields.io/badge/Go-{{ .ADL.Spec.Language.Go.Version }}+-00ADD8?style=flat&logo=go)](https://golang.org)
 {{- else if eq .Language "rust" }}

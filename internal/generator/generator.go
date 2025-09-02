@@ -214,7 +214,8 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 			CLIVersion:  g.getVersion(),
 			Template:    g.config.Template,
 		},
-		Language: templates.DetectLanguageFromADL(adl),
+		Language:   templates.DetectLanguageFromADL(adl),
+		GenerateCI: g.config.GenerateCI,
 	}
 
 	ignoreChecker, err := NewIgnoreChecker(outputDir)

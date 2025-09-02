@@ -75,9 +75,10 @@ func toPascalCase(s string) string {
 
 // Context provides data for template execution
 type Context struct {
-	ADL      *schema.ADL
-	Metadata schema.GeneratedMetadata
-	Language string
+	ADL        *schema.ADL
+	Metadata   schema.GeneratedMetadata
+	Language   string
+	GenerateCI bool
 }
 
 // New creates a new template engine
