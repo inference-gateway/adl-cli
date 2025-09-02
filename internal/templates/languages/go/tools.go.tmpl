@@ -12,7 +12,7 @@ func New{{ .Name | title }}Tool() server.Tool {
 	return server.NewBasicTool(
 		"{{ .Name }}",
 		"{{ .Description }}",
-		map[string]interface{}{
+		map[string]any{
 			"type": "object",
 			"properties": map[string]any{
 				{{- range $key, $value := .Schema.properties }}
@@ -20,7 +20,7 @@ func New{{ .Name | title }}Tool() server.Tool {
 				{{- end }}
 			},
 			{{- if .Schema.required }}
-			"required": map[string]any{{ .Schema.required | toJson }},
+			"required": []string{{ .Schema.required | toJson }},
 			{{- end }}
 		},
 		{{ .Name }}Handler,
@@ -28,7 +28,7 @@ func New{{ .Name | title }}Tool() server.Tool {
 }
 
 // {{ .Name }}Handler handles the {{ .Name }} tool execution
-func {{ .Name }}Handler(ctx context.Context, args map[string]interface{}) (string, error) {
+func {{ .Name }}Handler(ctx context.Context, args map[string]any) (string, error) {
 	// TODO: Implement {{ .Name }} logic
 	// {{ .Description }}
 	
