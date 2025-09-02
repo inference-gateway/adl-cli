@@ -18,12 +18,12 @@ var generateCmd = &cobra.Command{
 }
 
 var (
-	adlFile              string
-	outputDir            string
-	template             string
-	overwrite            bool
-	generateCI           bool
-	deploymentType       string
+	adlFile        string
+	outputDir      string
+	template       string
+	overwrite      bool
+	generateCI     bool
+	deploymentType string
 )
 
 func init() {
@@ -77,7 +77,6 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("✅ A2A agent generated successfully!")
 	fmt.Printf("📁 Project location: %s\n", absOutputDir)
-
 
 	fmt.Println()
 	fmt.Println("📝 Next steps:")
