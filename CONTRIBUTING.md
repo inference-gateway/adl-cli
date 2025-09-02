@@ -240,7 +240,7 @@ Update `internal/generator/generator.go` for language detection and validation.
 
 ### 3. Testing
 
-- Add comprehensive tests for the new language
+- Add tests for the new language
 - Create example ADL files in `examples/`
 - Test the template thoroughly
 - Verify generated code compiles and runs

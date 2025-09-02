@@ -113,13 +113,13 @@ task run
 
 | Command | Description |
 |---------|-------------|
-| `adl init [name]` | Create ADL manifest file interactively with comprehensive options |
+| `adl init [name]` | Create ADL manifest file interactively with options |
 | `adl generate` | Generate project code from ADL file with CI/CD and sandbox support |
 | `adl validate [file]` | Validate an ADL file against the complete schema |
 
 ### Init Command
 
-The `adl init` command provides a comprehensive interactive wizard for creating ADL manifest files:
+The `adl init` command provides a interactive wizard for creating ADL manifest files:
 
 ```bash
 # Interactive ADL manifest creation
@@ -352,7 +352,7 @@ spec:
 
 ## Generated Project Structure
 
-The ADL CLI generates comprehensive project scaffolding tailored to your chosen language:
+The ADL CLI generates project scaffolding tailored to your chosen language:
 
 ### Go Project Structure
 ```
