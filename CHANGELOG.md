@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.3](https://github.com/inference-gateway/adl-cli/compare/v0.7.2...v0.7.3) (2025-09-02)
+
+### ♻️ Improvements
+
+* **commands:** Reconcile init and generate command options ([#33](https://github.com/inference-gateway/adl-cli/issues/33)) ([7937bf7](https://github.com/inference-gateway/adl-cli/commit/7937bf7fd09d5c204f9a9c37fe5a076f4fdd08fb)), closes [#32](https://github.com/inference-gateway/adl-cli/issues/32)
+
+### 🔧 Miscellaneous
+
+* Update manifest and Taskfile for goreleaser and go-task integration ([6d22b64](https://github.com/inference-gateway/adl-cli/commit/6d22b64dd084d5cfb3e2d8058719104235687370))
+
 ## [0.7.2](https://github.com/inference-gateway/adl-cli/compare/v0.7.1...v0.7.2) (2025-09-02)
 
 ### ♻️ Improvements
