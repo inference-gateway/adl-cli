@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.12.0](https://github.com/inference-gateway/adl-cli/compare/v0.11.0...v0.12.0) (2025-09-02)
+
+### ✨ Features
+
+* **docs:** Improve README with structured skills and configuration tables ([6f502a0](https://github.com/inference-gateway/adl-cli/commit/6f502a0405aa561d29b75542e182f237a1699eb2))
+
+### ♻️ Improvements
+
+* Refactor tools to skills and enhance schema with tags and IDs ([31939b8](https://github.com/inference-gateway/adl-cli/commit/31939b8d1aba3717d525845d554c27f515685115))
+
 ## [0.11.0](https://github.com/inference-gateway/adl-cli/compare/v0.10.3...v0.11.0) (2025-09-02)
 
 ### ✨ Features
