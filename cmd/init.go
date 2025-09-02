@@ -36,7 +36,7 @@ func init() {
 	initCmd.Flags().String("description", "", "Agent description")
 	initCmd.Flags().String("version", "", "Agent version")
 	initCmd.Flags().String("type", "", "Agent type (ai-powered/minimal)")
-	initCmd.Flags().String("provider", "", "AI provider (openai/anthropic/azure/ollama/deepseek)")
+	initCmd.Flags().String("provider", "", "AI provider (openai/anthropic/groq/mistral/ollama/deepseek/cloudflare)")
 	initCmd.Flags().String("model", "", "AI model")
 	initCmd.Flags().String("system-prompt", "", "System prompt")
 	initCmd.Flags().Int("max-tokens", 0, "Maximum tokens")
@@ -95,7 +95,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	fmt.Printf("\n📋 ADL Schema Setup")
+	fmt.Println("\n📋 ADL Schema Setup")
 	fmt.Println("-------------------")
 
 	var adl *adlData
