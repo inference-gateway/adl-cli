@@ -14,13 +14,13 @@ func New{{ .Name | title }}Tool() server.Tool {
 		"{{ .Description }}",
 		map[string]interface{}{
 			"type": "object",
-			"properties": map[string]interface{}{
+			"properties": map[string]any{
 				{{- range $key, $value := .Schema.properties }}
-				"{{ $key }}": {{ $value | toJson }},
+				"{{ $key }}": map[string]any{{ $value | toJson }},
 				{{- end }}
 			},
 			{{- if .Schema.required }}
-			"required": {{ .Schema.required | toJson }},
+			"required": map[string]any{{ .Schema.required | toJson }},
 			{{- end }}
 		},
 		{{ .Name }}Handler,
