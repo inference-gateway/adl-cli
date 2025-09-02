@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.1](https://github.com/inference-gateway/adl-cli/compare/v0.8.0...v0.8.1) (2025-09-02)
+
+### 🐛 Bug Fixes
+
+* **template:** Correctly format required fields in tool schema ([7374038](https://github.com/inference-gateway/adl-cli/commit/7374038b85636262cb5d64e871740d7c85356401))
+
 ## [0.8.0](https://github.com/inference-gateway/adl-cli/compare/v0.7.9...v0.8.0) (2025-09-02)
 
 ### ✨ Features
