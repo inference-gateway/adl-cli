@@ -20,7 +20,7 @@ func New{{ .Name | title }}Tool() server.Tool {
 				{{- end }}
 			},
 			{{- if .Schema.required }}
-			"required": []string{{ range $i, $field := .Schema.required }}{{ if $i }}, {{ end }}"{{ $field }}"{{ end }},
+			"required": []string{ {{- range $i, $field := .Schema.required }}{{ if $i }}, {{ end }}"{{ $field }}"{{ end -}} },
 			{{- end }}
 		},
 		{{ .Name }}Handler,
