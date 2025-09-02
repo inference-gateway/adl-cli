@@ -220,7 +220,6 @@ func (r *Registry) addSandboxFiles(adl *schema.ADL, files map[string]string) {
 		return
 	}
 
-
 	if adl.Spec.Sandbox.Flox != nil && adl.Spec.Sandbox.Flox.Enabled {
 		files[".flox/env/manifest.toml"] = "flox/manifest.toml"
 		files[".flox/env.json"] = "flox/env.json"

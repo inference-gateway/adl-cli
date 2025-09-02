@@ -231,7 +231,6 @@ type adlData struct {
 	} `yaml:"spec"`
 }
 
-
 func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *adlData {
 	adl := &adlData{
 		APIVersion: "adl.dev/v1",
@@ -503,7 +502,6 @@ func getDefaultGoModule(projectName string) string {
 	}
 	return fmt.Sprintf("github.com/%s/%s", owner, projectName)
 }
-
 
 func conditionalPrompt(useDefaults bool, promptText, defaultValue string) string {
 	if useDefaults {
