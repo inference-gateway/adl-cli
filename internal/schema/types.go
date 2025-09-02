@@ -27,6 +27,7 @@ type Spec struct {
 	SCM          *SCM              `yaml:"scm,omitempty" json:"scm,omitempty"`
 	Sandbox      *SandboxConfig    `yaml:"sandbox,omitempty" json:"sandbox,omitempty"`
 	Deployment   *DeploymentConfig `yaml:"deployment,omitempty" json:"deployment,omitempty"`
+	Hooks        *Hooks            `yaml:"hooks,omitempty" json:"hooks,omitempty"`
 }
 
 // Capabilities defines what the agent can do
@@ -116,6 +117,11 @@ type DevContainerConfig struct {
 // DeploymentConfig for deployment platform settings
 type DeploymentConfig struct {
 	Type string `yaml:"type,omitempty" json:"type,omitempty"`
+}
+
+// Hooks contains lifecycle hooks for the generation process
+type Hooks struct {
+	Post []string `yaml:"post,omitempty" json:"post,omitempty"`
 }
 
 // GeneratedMetadata contains information about the generation

@@ -90,6 +90,10 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 		return fmt.Errorf("failed to generate project: %w", err)
 	}
 
+	if err := g.runPostGenerationSteps(adl, outputDir, language); err != nil {
+		return fmt.Errorf("post-generation steps failed: %w", err)
+	}
+
 	return nil
 }
 
@@ -302,12 +306,6 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		}
 	}
 
-	if adl.Spec.Language.Go != nil {
-		if err := g.formatGoFiles(outputDir); err != nil {
-			fmt.Printf("⚠️  Warning: Failed to format Go files: %v\n", err)
-		}
-	}
-
 	return nil
 }
 
@@ -466,6 +464,9 @@ func generateA2aIgnoreContent(filesToIgnore []string) string {
 	}
 
 	content += `
+# Go dependency files
+go.sum
+
 # Add your own files to ignore here:
 # my-custom-file.go
 # config/secrets.yaml
@@ -720,38 +721,66 @@ jobs:
 `, rustVersion)
 }
 
-// formatGoFiles runs go fmt on all Go files in the output directory
-func (g *Generator) formatGoFiles(outputDir string) error {
-	if _, err := exec.LookPath("go"); err != nil {
-		return fmt.Errorf("go command not found in PATH")
+// runPostGenerationSteps runs language-specific post-generation steps
+func (g *Generator) runPostGenerationSteps(adl *schema.ADL, outputDir, language string) error {
+	var commands []string
+
+	if adl.Spec.Hooks != nil && len(adl.Spec.Hooks.Post) > 0 {
+		commands = adl.Spec.Hooks.Post
+		fmt.Println("🔧 Running custom post-generation hooks...")
+	} else {
+		switch language {
+		case "go":
+			commands = []string{"go fmt ./...", "go mod tidy"}
+			fmt.Println("🔧 Running default Go post-generation commands...")
+		case "rust":
+			commands = []string{"cargo fmt", "cargo check"}
+		case "typescript":
+			// Default TypeScript commands could be added here
+			// commands = []string{"npm install", "npm run format"}
+			return nil
+		default:
+			return nil
+		}
 	}
 
-	var goFiles []string
-	err := filepath.Walk(outputDir, func(path string, info os.FileInfo, err error) error {
+	for _, cmdStr := range commands {
+		fmt.Printf("  ▶ Running: %s\n", cmdStr)
+
+		parts := strings.Fields(cmdStr)
+		if len(parts) == 0 {
+			continue
+		}
+
+		cmd := exec.Command(parts[0], parts[1:]...)
+		cmd.Dir = outputDir
+		output, err := cmd.CombinedOutput()
+
 		if err != nil {
-			return err
+			fmt.Printf("    ⚠️  Warning: command failed: %v\n", err)
+			if len(output) > 0 {
+				lines := strings.Split(string(output), "\n")
+				for _, line := range lines {
+					if line != "" {
+						fmt.Printf("       %s\n", line)
+					}
+				}
+			}
+			fmt.Printf("       You can run '%s' manually later\n", cmdStr)
+			continue
 		}
-		if !info.IsDir() && strings.HasSuffix(path, ".go") {
-			goFiles = append(goFiles, path)
+
+		fmt.Printf("    ✅ Successfully completed\n")
+		if len(output) > 0 && strings.TrimSpace(string(output)) != "" {
+			lines := strings.Split(string(output), "\n")
+			for _, line := range lines {
+				if line != "" {
+					fmt.Printf("       %s\n", line)
+				}
+			}
 		}
-		return nil
-	})
-	if err != nil {
-		return fmt.Errorf("failed to find Go files: %w", err)
 	}
 
-	if len(goFiles) == 0 {
-		return nil
-	}
-
-	cmd := exec.Command("go", "fmt", "./...")
-	cmd.Dir = outputDir
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("go fmt failed: %w\nOutput: %s", err, string(output))
-	}
-
-	fmt.Printf("✨ Formatted %d Go files with go fmt\n", len(goFiles))
 	return nil
 }
 
@@ -761,6 +790,6 @@ func (g *Generator) generateGitLabCIWorkflow(adl *schema.ADL, outputDir string, 
 	// This should generate .gitlab-ci.yml based on the programming language
 	// and follow similar patterns to the GitHub Actions implementation
 	fmt.Printf("⚠️  GitLab CI generation is not yet implemented\n")
-	fmt.Printf("� This is a planned feature - contributions welcome!\n")
+	fmt.Printf("This is a planned feature - contributions welcome!\n")
 	return nil
 }

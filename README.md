@@ -29,6 +29,7 @@ The ADL CLI helps you build production-ready A2A agents quickly by generating co
 - 🛠️ **Interactive Setup** - Guided project initialization with extensive CLI options
 - 🔧 **CI/CD Generation** - Automatic GitHub Actions and GitLab CI workflows
 - 🏗️ **Sandbox Environments** - Flox and DevContainer support for isolated development
+- 🎣 **Post-Generation Hooks** - Customize build, format, and test commands after generation
 - 🤖 **Multi-Provider AI** - OpenAI, Anthropic, Azure, Ollama, and DeepSeek support
 
 ## Installation
@@ -747,6 +748,94 @@ task examples:generate
 4. Add tests for new functionality
 5. Run `task ci` to ensure everything passes
 6. Submit a pull request
+
+## Post-Generation Hooks
+
+The ADL CLI supports custom post-generation hooks that run automatically after project generation. These hooks allow you to execute commands like formatting, linting, testing, or custom setup scripts.
+
+### Default Hooks
+
+Each language has sensible defaults:
+
+**Go Projects:**
+- `go fmt ./...` - Format all Go source files
+- `go mod tidy` - Download dependencies and clean up go.mod
+
+**Rust Projects:**
+- `cargo fmt` - Format all Rust source files  
+- `cargo check` - Check the project for errors
+
+### Custom Hooks
+
+You can customize or extend the default behavior by adding a `hooks` section to your ADL file:
+
+```yaml
+apiVersion: adl.dev/v1
+kind: Agent
+metadata:
+  name: my-agent
+spec:
+  # ... other configuration ...
+  
+  # Custom post-generation hooks
+  hooks:
+    post:
+      - "go fmt ./..."
+      - "go mod tidy"
+      - "go vet ./..."
+      - "go test -short ./..."
+      - "golangci-lint run --fix"
+```
+
+### Hooks Behavior
+
+- **Override Defaults**: When you specify custom hooks, they completely replace the language defaults
+- **Command Execution**: Commands run in the generated project directory
+- **Error Handling**: Failed commands show warnings but don't stop generation
+- **Sequential Execution**: Commands run in the order specified
+- **Shell Support**: Commands are executed through the system shell
+
+### Example Configurations
+
+**Extended Go Development:**
+```yaml
+hooks:
+  post:
+    - "go mod download"      # Download dependencies first
+    - "go generate ./..."    # Generate code if needed
+    - "gofumpt -l -w ."     # Enhanced formatting
+    - "golangci-lint run --fix"  # Lint and auto-fix
+    - "go test -race -short ./..."  # Run tests
+    - "go build -v ./..."   # Verify build works
+```
+
+**Rust with Additional Tools:**
+```yaml
+hooks:
+  post:
+    - "cargo fmt"
+    - "cargo clippy --fix --allow-dirty"
+    - "cargo check --all-targets"
+    - "cargo test --lib"
+```
+
+**TypeScript/Node.js:**
+```yaml
+hooks:
+  post:
+    - "npm install"
+    - "npm run format"
+    - "npm run lint:fix"
+    - "npm run type-check"
+    - "npm test"
+```
+
+### Best Practices
+
+- **Keep hooks fast** - Avoid long-running commands that slow down generation
+- **Use error-tolerant commands** - Commands should gracefully handle missing tools
+- **Order matters** - Place dependencies first (e.g., `npm install` before `npm run lint`)
+- **Document requirements** - Note any required tools in your project README
 
 ## Roadmap
 

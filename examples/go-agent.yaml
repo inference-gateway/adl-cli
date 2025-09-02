@@ -95,3 +95,7 @@ spec:
       enabled: true
     devcontainer:
       enabled: false
+  # hooks:
+  #   post:
+  #     - "go mod tidy"
+  #     - "go generate ./..."
