@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.4](https://github.com/inference-gateway/adl-cli/compare/v0.7.3...v0.7.4) (2025-09-02)
+
+### 🐛 Bug Fixes
+
+* **release:** Set GORELEASER_CURRENT_TAG for versioning in release command ([addc2fe](https://github.com/inference-gateway/adl-cli/commit/addc2fe837e1fa8702e5938f4cc5d10674c44aeb))
+
+### 🔧 Miscellaneous
+
+* **release:** Update git plugin configuration for changelog and Taskfile assets ([61bdc4a](https://github.com/inference-gateway/adl-cli/commit/61bdc4a4202818f49c3045f991d41c01f14caed1))
+* Update version to 0.7.3 and remove snapshot flag from release command ([d7a004f](https://github.com/inference-gateway/adl-cli/commit/d7a004f19d55c10ba0e42afdd6170668797614a3))
+
 ## [0.7.3](https://github.com/inference-gateway/adl-cli/compare/v0.7.2...v0.7.3) (2025-09-02)
 
 ### ♻️ Improvements
