@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.5](https://github.com/inference-gateway/adl-cli/compare/v0.7.4...v0.7.5) (2025-09-02)
+
+### 🐛 Bug Fixes
+
+* **generator:** Remove unnecessary agent provider validation in ADL ([b405ef4](https://github.com/inference-gateway/adl-cli/commit/b405ef49a0dab776068d189ad3b6bd900624c28a))
+
 ## [0.7.4](https://github.com/inference-gateway/adl-cli/compare/v0.7.3...v0.7.4) (2025-09-02)
 
 ### 🐛 Bug Fixes
