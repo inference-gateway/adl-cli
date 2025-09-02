@@ -144,17 +144,7 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		files[fmt.Sprintf("tools/%s.go", tool.Name)] = "tools.go"
 	}
 
-	if adl.Spec.Sandbox != nil && adl.Spec.Sandbox.Type != "" {
-		switch adl.Spec.Sandbox.Type {
-		case "flox":
-			files[".flox/env/manifest.toml"] = "flox/manifest.toml"
-			files[".flox/env.json"] = "flox/env.json"
-			files[".flox/.gitignore"] = "flox/gitignore"
-			files[".flox/.gitattributes"] = "flox/gitattributes"
-		case "devcontainer":
-			files[".devcontainer/devcontainer.json"] = "devcontainer/devcontainer.json"
-		}
-	}
+	r.addSandboxFiles(adl, files)
 
 	return files
 }
@@ -188,17 +178,7 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		files["src/tools/mod.rs"] = "tools.mod.rs"
 	}
 
-	if adl.Spec.Sandbox != nil && adl.Spec.Sandbox.Type != "" {
-		switch adl.Spec.Sandbox.Type {
-		case "flox":
-			files[".flox/env/manifest.toml"] = "flox/manifest.toml"
-			files[".flox/env.json"] = "flox/env.json"
-			files[".flox/.gitignore"] = "flox/gitignore"
-			files[".flox/.gitattributes"] = "flox/gitattributes"
-		case "devcontainer":
-			files[".devcontainer/devcontainer.json"] = "devcontainer/devcontainer.json"
-		}
-	}
+	r.addSandboxFiles(adl, files)
 
 	return files
 }
@@ -229,19 +209,28 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		files[fmt.Sprintf("src/tools/%s.ts", tool.Name)] = "tools.ts"
 	}
 
-	if adl.Spec.Sandbox != nil && adl.Spec.Sandbox.Type != "" {
-		switch adl.Spec.Sandbox.Type {
-		case "flox":
-			files[".flox/env/manifest.toml"] = "flox/manifest.toml"
-			files[".flox/env.json"] = "flox/env.json"
-			files[".flox/.gitignore"] = "flox/gitignore"
-			files[".flox/.gitattributes"] = "flox/gitattributes"
-		case "devcontainer":
-			files[".devcontainer/devcontainer.json"] = "devcontainer/devcontainer.json"
-		}
-	}
+	r.addSandboxFiles(adl, files)
 
 	return files
+}
+
+// addSandboxFiles adds sandbox-related files to the file mapping
+func (r *Registry) addSandboxFiles(adl *schema.ADL, files map[string]string) {
+	if adl.Spec.Sandbox == nil {
+		return
+	}
+
+
+	if adl.Spec.Sandbox.Flox != nil && adl.Spec.Sandbox.Flox.Enabled {
+		files[".flox/env/manifest.toml"] = "flox/manifest.toml"
+		files[".flox/env.json"] = "flox/env.json"
+		files[".flox/.gitignore"] = "flox/gitignore"
+		files[".flox/.gitattributes"] = "flox/gitattributes"
+	}
+
+	if adl.Spec.Sandbox.DevContainer != nil && adl.Spec.Sandbox.DevContainer.Enabled {
+		files[".devcontainer/devcontainer.json"] = "devcontainer/devcontainer.json"
+	}
 }
 
 // ListTemplates returns a list of all loaded template keys

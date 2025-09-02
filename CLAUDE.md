@@ -22,7 +22,6 @@ The ADL CLI is a command-line tool for generating production-ready A2A (Agent-to
 - **Common Templates**: Shared templates in `internal/templates/common/` (CI, Docker, docs, etc.)
 - **Sandbox Templates**: Environment-specific templates in `internal/templates/sandbox/`
 - **Context**: Template receives ADL data and metadata for rendering
-- **Ignore System**: `.adl-ignore` files protect user implementations from regeneration
 
 ### ADL Structure
 ADL files define agents with:
@@ -33,7 +32,7 @@ ADL files define agents with:
 - **Server**: HTTP server configuration with optional authentication
 - **Language**: Programming language settings (Go, Rust, TypeScript)
 - **SCM**: Source control management configuration (GitHub, etc.)
-- **Sandbox**: Environment configuration (Flox, DevContainer)
+- **Sandbox**: Environment configuration with extensible structure supporting multiple environments (Flox, DevContainer)
 
 ## Development Commands
 
@@ -168,7 +167,6 @@ task dev -- generate --file examples/go-agent.yaml --output ./test-go-agent
 - Check ADL validation errors first (detailed in `internal/generator/generator.go:validateADL`)
 - Template execution errors include context about which template failed
 - Generated files include headers showing generation metadata
-- Use `.adl-ignore` to protect files during iterative development
 
 ## CLI Command Structure
 
@@ -200,7 +198,8 @@ task dev -- generate --file examples/go-agent.yaml --output ./test-go-agent
 - `--rust-edition` - Rust edition
 - `--typescript-name` - TypeScript package name
 - `--overwrite` - Overwrite existing files
-- `--sandbox` - Sandbox environment (flox/devcontainer/none)
+- `--flox` - Enable Flox environment
+- `--devcontainer` - Enable DevContainer environment
 
 ### Generate Command
 `adl generate` - Generate project from ADL file (main command)
@@ -209,7 +208,7 @@ task dev -- generate --file examples/go-agent.yaml --output ./test-go-agent
 - `--file` - ADL file path (default: agent.yaml)
 - `--output` - Output directory (default: current directory)
 - `--template` - Template to use (default: minimal)
-- `--overwrite` - Overwrite existing files (respects .adl-ignore)
+- `--overwrite` - Overwrite existing files
 - `--ci` - Generate CI workflow configuration
 
 ### Validate Command
