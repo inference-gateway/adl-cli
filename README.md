@@ -21,15 +21,14 @@ The ADL CLI helps you build production-ready A2A agents quickly by generating co
 ### Key Features
 
 - 🚀 **Rapid Development** - Generate complete projects in seconds
-- 📋 **Schema-Driven** - Use YAML ADL files to define your agents
+- 📋 **Schema-Driven** - Use YAML Agent Definition Language files (ADL) to define your agents
 - 🎯 **Production Ready** - Single unified template with AI integration and enterprise features
+- 🔐 **Enterprise Features** - Authentication, SCM integration, and audit logging
 - 🛠️ **Smart Ignore** - Protect your implementations with .adl-ignore files
 - ✅ **Validation** - Built-in ADL schema validation
 - 🛠️ **Interactive Setup** - Guided project initialization with extensive CLI options
-- 📦 **Production Ready** - Includes Docker, Kubernetes, and monitoring configs
 - 🔧 **CI/CD Generation** - Automatic GitHub Actions and GitLab CI workflows
 - 🏗️ **Sandbox Environments** - Flox and DevContainer support for isolated development
-- 🔐 **Enterprise Features** - Authentication, SCM integration, and audit logging
 - 🤖 **Multi-Provider AI** - OpenAI, Anthropic, Azure, Ollama, and DeepSeek support
 
 ## Installation
