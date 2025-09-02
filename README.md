@@ -135,7 +135,7 @@ adl init my-agent \
   --provider openai \
   --model gpt-4o-mini \
   --language go \
-  --sandbox flox \
+  --flox \
   --overwrite
 ```
 
@@ -184,7 +184,8 @@ The init command supports extensive configuration options:
 - `--typescript-name` - TypeScript package name
 
 **Environment Options:**
-- `--sandbox` - Sandbox environment (`flox`/`devcontainer`/`none`)
+- `--flox` - Enable Flox environment
+- `--devcontainer` - Enable DevContainer environment
 
 ### Generate Command
 
@@ -347,7 +348,8 @@ spec:
     provider: github
     url: "https://github.com/company/advanced-agent"
   sandbox:
-    type: flox
+    flox:
+      enabled: true
 ```
 
 ## Generated Project Structure
@@ -416,9 +418,9 @@ All projects include these essential files regardless of language:
 - **CI Workflows** - When using `--ci` flag, generates appropriate workflows:
   - **GitHub Actions**: `.github/workflows/ci.yml`
   - **GitLab CI**: `.gitlab-ci.yml` (planned)
-- **Development Environment** - Based on `sandbox.type`:
-  - **Flox**: `.flox/` directory with environment configuration
-  - **DevContainer**: `.devcontainer/devcontainer.json`
+- **Development Environment** - Based on `sandbox` configuration:
+  - **Flox**: `.flox/` directory with environment configuration when `sandbox.flox.enabled: true`
+  - **DevContainer**: `.devcontainer/devcontainer.json` when `sandbox.devcontainer.enabled: true`
 
 ### CI Integration
 
@@ -450,7 +452,8 @@ Configure Flox for your project by adding to your ADL file:
 ```yaml
 spec:
   sandbox:
-    type: flox
+    flox:
+      enabled: true
 ```
 
 Generated files:
@@ -466,11 +469,27 @@ Configure DevContainer for your project:
 ```yaml
 spec:
   sandbox:
-    type: devcontainer
+    devcontainer:
+      enabled: true
 ```
 
 Generated files:
 - `.devcontainer/devcontainer.json` - VS Code DevContainer configuration with language support
+
+### Multiple Environment Support
+
+You can enable multiple sandbox environments simultaneously:
+
+```yaml
+spec:
+  sandbox:
+    flox:
+      enabled: true
+    devcontainer:
+      enabled: true
+```
+
+This generates both Flox and DevContainer configurations, allowing developers to choose their preferred environment.
 
 ### Benefits of Sandbox Environments
 
