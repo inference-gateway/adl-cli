@@ -20,12 +20,12 @@ type Generator struct {
 
 // Config holds generator configuration
 type Config struct {
-	Template       string
-	Overwrite      bool
-	Version        string
-	GenerateCI     bool
-	DeploymentType string
-	EnableFlox     bool
+	Template           string
+	Overwrite          bool
+	Version            string
+	GenerateCI         bool
+	DeploymentType     string
+	EnableFlox         bool
 	EnableDevContainer bool
 }
 
