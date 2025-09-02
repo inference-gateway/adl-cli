@@ -90,7 +90,6 @@ func main() {
 	go func() {
 		logger.Info("starting A2A server", 
 			zap.String("port", cfg.A2A.ServerConfig.Port),
-			zap.String("host", cfg.A2A.ServerConfig.Host),
 		)
 		if err := a2aServer.Start(ctx); err != nil {
 			logger.Fatal("server failed to start", zap.Error(err))
