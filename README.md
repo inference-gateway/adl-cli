@@ -23,10 +23,14 @@ The ADL CLI helps you build production-ready A2A agents quickly by generating co
 - 🚀 **Rapid Development** - Generate complete projects in seconds
 - 📋 **Schema-Driven** - Use YAML ADL files to define your agents
 - 🎯 **Production Ready** - Single unified template with AI integration and enterprise features
-- � **Smart Ignore** - Protect your implementations with .adl-ignore files
+- 🛠️ **Smart Ignore** - Protect your implementations with .adl-ignore files
 - ✅ **Validation** - Built-in ADL schema validation
-- 🛠️ **Interactive Setup** - Guided project initialization
+- 🛠️ **Interactive Setup** - Guided project initialization with extensive CLI options
 - 📦 **Production Ready** - Includes Docker, Kubernetes, and monitoring configs
+- 🔧 **CI/CD Generation** - Automatic GitHub Actions and GitLab CI workflows
+- 🏗️ **Sandbox Environments** - Flox and DevContainer support for isolated development
+- 🔐 **Enterprise Features** - Authentication, SCM integration, and audit logging
+- 🤖 **Multi-Provider AI** - OpenAI, Anthropic, Azure, Ollama, and DeepSeek support
 
 ## Installation
 
@@ -110,9 +114,78 @@ task run
 
 | Command | Description |
 |---------|-------------|
-| `adl init [name]` | Initialize a new project interactively |
-| `adl generate` | Generate project from ADL file |
-| `adl validate [file]` | Validate an ADL file |
+| `adl init [name]` | Initialize a new project interactively with comprehensive options |
+| `adl generate` | Generate project from ADL file with CI/CD and sandbox support |
+| `adl validate [file]` | Validate an ADL file against the complete schema |
+
+### Init Command
+
+The `adl init` command provides a comprehensive interactive wizard for creating new A2A agent projects:
+
+```bash
+# Interactive project setup
+adl init my-weather-agent
+
+# Use defaults for all prompts
+adl init my-agent --defaults
+
+# Non-interactive with specific configuration
+adl init my-agent \
+  --name "Weather Agent" \
+  --description "Provides weather information" \
+  --provider openai \
+  --model gpt-4o-mini \
+  --language go \
+  --sandbox flox \
+  --overwrite
+```
+
+#### Init Command Options
+
+The init command supports extensive configuration options:
+
+**Project Settings:**
+- `--defaults` - Use default values for all prompts
+- `--path` - Project directory path
+- `--name` - Agent name
+- `--description` - Agent description  
+- `--version` - Agent version
+- `--overwrite` - Overwrite existing files
+
+**Agent Configuration:**
+- `--type` - Agent type (`ai-powered`/`minimal`)
+- `--provider` - AI provider (`openai`/`anthropic`/`azure`/`ollama`/`deepseek`)
+- `--model` - AI model name
+- `--system-prompt` - System prompt for the agent
+- `--max-tokens` - Maximum tokens (integer)
+- `--temperature` - Temperature (0.0-2.0)
+
+**Capabilities:**
+- `--streaming` - Enable streaming responses
+- `--notifications` - Enable push notifications
+- `--history` - Enable state transition history
+
+**Server Configuration:**
+- `--port` - Server port (integer)
+- `--debug` - Enable debug mode
+
+**Language-Specific Options:**
+- `--language` - Programming language (`go`/`rust`/`typescript`)
+
+**Go Options:**
+- `--go-module` - Go module path (e.g., `github.com/user/project`)
+- `--go-version` - Go version (e.g., `1.24`)
+
+**Rust Options:**
+- `--rust-package-name` - Rust package name
+- `--rust-version` - Rust version (e.g., `1.88`)  
+- `--rust-edition` - Rust edition (e.g., `2024`)
+
+**TypeScript Options:**
+- `--typescript-name` - TypeScript package name
+
+**Environment Options:**
+- `--sandbox` - Sandbox environment (`flox`/`devcontainer`/`none`)
 
 ### Generate Command
 
@@ -135,7 +208,14 @@ adl generate --file agent.yaml --output ./test-my-agent --ci
 | `--output`, `-o` | Output directory for generated code (default: ".") |
 | `--template`, `-t` | Template to use (default: "minimal") |
 | `--overwrite` | Overwrite existing files (respects .adl-ignore) |
-| `--ci` | Generate CI workflow configuration |
+| `--ci` | Generate CI workflow configuration (GitHub Actions, GitLab CI) |
+
+**CI Generation Features:**
+- **Automatic Provider Detection**: Detects GitHub/GitLab from ADL `spec.scm.provider`
+- **Language-Specific Workflows**: Tailored CI configurations for Go, Rust, and TypeScript
+- **Version Integration**: Uses language versions from ADL configuration
+- **Task Integration**: Leverages generated Taskfile for consistent build processes
+- **Caching**: Includes dependency caching for faster builds
 
 
 ## Agent Definition Language (ADL)
@@ -191,26 +271,155 @@ The complete ADL schema includes:
 
 - **metadata**: Agent name, description, and version
 - **capabilities**: Streaming, notifications, state history
-- **agent**: AI provider configuration (OpenAI, Anthropic, etc.)
-- **tools**: Function definitions with JSON schemas
-- **server**: HTTP server configuration
-- **language**: Programming language-specific settings (Go, TypeScript, etc.)
+- **agent**: AI provider configuration (OpenAI, Anthropic, Azure, Ollama, DeepSeek)
+- **tools**: Function definitions with complex JSON schemas and validation
+- **server**: HTTP server configuration with authentication support
+- **language**: Programming language-specific settings (Go, Rust, TypeScript)
+- **scm**: Source control management configuration (GitHub, GitLab) 
+- **sandbox**: Development environment configuration (Flox, DevContainer)
+
+### Complete ADL Example
+
+```yaml
+apiVersion: adl.dev/v1
+kind: Agent
+metadata:
+  name: advanced-agent
+  description: "Enterprise agent with full feature set"
+  version: "1.0.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: true
+    stateTransitionHistory: true
+  agent:
+    provider: openai
+    model: gpt-4o-mini
+    systemPrompt: |
+      You are a helpful assistant with enterprise capabilities.
+      Always prioritize security and compliance.
+    maxTokens: 8192
+    temperature: 0.3
+  tools:
+    - name: query_database
+      description: "Execute database queries with validation"
+      schema:
+        type: object
+        properties:
+          query:
+            type: string
+            description: "SQL query to execute"
+          table:
+            type: string
+            description: "Target table name"
+          limit:
+            type: integer
+            description: "Result limit"
+            maximum: 1000
+        required: [query, table]
+    - name: send_notification
+      description: "Send multi-channel notifications"
+      schema:
+        type: object
+        properties:
+          recipient:
+            type: string
+            description: "Recipient identifier"
+          message:
+            type: string
+            description: "Message content"
+          priority:
+            type: string
+            enum: ["low", "medium", "high", "critical"]
+          channel:
+            type: string
+            enum: ["email", "slack", "teams", "webhook"]
+        required: [recipient, message, priority, channel]
+  server:
+    port: 8443
+    debug: false
+    auth:
+      enabled: true
+  language:
+    go:
+      module: "github.com/company/advanced-agent"
+      version: "1.24"
+  scm:
+    provider: github
+    url: "https://github.com/company/advanced-agent"
+  sandbox:
+    type: flox
+```
 
 ## Generated Project Structure
 
+The ADL CLI generates comprehensive project scaffolding tailored to your chosen language:
+
+### Go Project Structure
 ```
-my-agent/
-├── main.go              # Main server setup
-├── tools.go             # Tool implementations (TODO placeholders)
-├── config.go            # Configuration management
-├── go.mod               # Go module definition
-├── Taskfile.yml         # Development tasks
-├── Dockerfile           # Container configuration
-├── .adl-ignore          # Files to protect from regeneration
+my-go-agent/
+├── main.go                    # Main server setup
+├── go.mod                     # Go module definition
+├── tools/                     # Tool implementations directory
+│   ├── query_database.go      # Individual tool files (TODO placeholders)
+│   └── send_notification.go
+├── Taskfile.yml               # Development tasks (build, test, lint)
+├── Dockerfile                 # Container configuration
+├── .adl-ignore                # Files to protect from regeneration
 ├── .well-known/
-│   └── agent.json       # Agent capabilities (auto-generated)
-└── README.md            # Project documentation
+│   └── agent.json             # Agent capabilities (auto-generated)
+├── .github/workflows/         # Generated when using --ci flag
+│   └── ci.yml                 # GitHub Actions workflow
+├── k8s/
+│   └── deployment.yaml        # Kubernetes deployment manifest
+├── .flox/                     # Generated when sandbox: flox
+│   ├── env/manifest.toml
+│   ├── env.json
+│   ├── .gitignore
+│   └── .gitattributes
+├── .gitignore                 # Standard Git ignore patterns
+├── .gitattributes             # Git attributes configuration
+├── .editorconfig              # Editor configuration
+└── README.md                  # Project documentation with setup instructions
 ```
+
+### Rust Project Structure
+```
+my-rust-agent/
+├── src/
+│   ├── main.rs                # Main application entry point
+│   └── tools/                 # Tool implementations directory
+│       ├── mod.rs             # Module declarations
+│       ├── query_database.rs  # Individual tool implementations
+│       └── send_notification.rs
+├── Cargo.toml                 # Rust package configuration
+├── Taskfile.yml               # Development tasks
+├── Dockerfile                 # Rust-optimized container
+├── .adl-ignore                # Protection configuration
+├── .well-known/
+│   └── agent.json             # Agent capabilities
+├── .github/workflows/         # CI configuration (with --ci)
+│   └── ci.yml                 # Rust-specific workflow
+├── k8s/
+│   └── deployment.yaml        # Kubernetes deployment
+└── README.md                  # Documentation
+```
+
+### Universal Generated Files
+
+All projects include these essential files regardless of language:
+
+- **`.well-known/agent.json`** - A2A agent discovery and capabilities manifest
+- **`Taskfile.yml`** - Unified task runner configuration for build, test, lint, run
+- **`Dockerfile`** - Language-optimized container configuration  
+- **`k8s/deployment.yaml`** - Kubernetes deployment manifest
+- **`.adl-ignore`** - Protects user implementations from overwrite
+- **CI Workflows** - When using `--ci` flag, generates appropriate workflows:
+  - **GitHub Actions**: `.github/workflows/ci.yml`
+  - **GitLab CI**: `.gitlab-ci.yml` (planned)
+- **Development Environment** - Based on `sandbox.type`:
+  - **Flox**: `.flox/` directory with environment configuration
+  - **DevContainer**: `.devcontainer/devcontainer.json`
 
 ### CI Integration
 
@@ -231,6 +440,133 @@ This creates a GitHub Actions workflow (`.github/workflows/ci.yml`) that include
 
 The generated workflow automatically detects your Go version from the ADL file and configures the appropriate environment.
 
+## Sandbox Environments
+
+The ADL CLI supports multiple development environments for isolated, reproducible development:
+
+### Flox Environment
+
+Configure Flox for your project by adding to your ADL file:
+
+```yaml
+spec:
+  sandbox:
+    type: flox
+```
+
+Generated files:
+- `.flox/env/manifest.toml` - Flox environment manifest with language-specific dependencies
+- `.flox/env.json` - Environment configuration
+- `.flox/.gitignore` - Flox-specific ignore patterns  
+- `.flox/.gitattributes` - Git attributes for Flox files
+
+### DevContainer Environment  
+
+Configure DevContainer for your project:
+
+```yaml
+spec:
+  sandbox:
+    type: devcontainer
+```
+
+Generated files:
+- `.devcontainer/devcontainer.json` - VS Code DevContainer configuration with language support
+
+### Benefits of Sandbox Environments
+
+- **Reproducible Development** - Consistent environments across team members
+- **Isolated Dependencies** - No conflicts with system-wide installations
+- **Language-Specific Tooling** - Pre-configured with appropriate development tools
+- **CI/CD Integration** - Matches production environment characteristics
+
+## Enterprise Features
+
+### Authentication Configuration
+
+Enable server authentication in your ADL file:
+
+```yaml
+spec:
+  server:
+    port: 8443
+    debug: false  
+    auth:
+      enabled: true
+```
+
+This generates enterprise-ready authentication scaffolding in your project.
+
+### SCM Integration
+
+Configure source control management for automatic CI/CD provider detection:
+
+```yaml
+spec:
+  scm:
+    provider: github  # or gitlab
+    url: "https://github.com/company/my-agent"
+```
+
+**Features:**
+- **Automatic CI Detection** - Generates appropriate workflows based on SCM provider
+- **Repository Integration** - Links generated projects to source control
+- **Workflow Optimization** - SCM-specific optimizations and best practices
+
+### AI Provider Support
+
+The ADL CLI supports multiple AI providers with provider-specific optimizations:
+
+#### OpenAI
+```yaml
+spec:
+  agent:
+    provider: openai
+    model: gpt-4o-mini
+    maxTokens: 8192
+    temperature: 0.7
+```
+
+#### Anthropic  
+```yaml
+spec:
+  agent:
+    provider: anthropic
+    model: claude-3-haiku-20240307
+    maxTokens: 4096
+    temperature: 0.3
+```
+
+#### Azure OpenAI
+```yaml
+spec:
+  agent:
+    provider: azure
+    model: gpt-4o
+    maxTokens: 8192
+    temperature: 0.5
+```
+
+#### Ollama (Local LLMs)
+```yaml
+spec:
+  agent:
+    provider: ollama
+    model: llama3.1
+    maxTokens: 4096
+    temperature: 0.7
+```
+
+#### DeepSeek
+```yaml
+spec:
+  agent:
+    provider: deepseek
+    model: deepseek-chat
+    maxTokens: 8192
+    temperature: 0.3
+```
+
 
 ## Examples
 
@@ -245,6 +581,60 @@ adl validate examples/rust-agent.yaml
 adl generate --file examples/go-agent.yaml --output ./test-go-agent
 adl generate --file examples/rust-agent.yaml --output ./test-rust-agent
 ```
+
+## Template System & Architecture
+
+The ADL CLI uses a sophisticated template system that generates language-specific projects:
+
+### Language Detection
+
+The generator automatically detects your target language from the ADL file:
+
+```go
+// Automatic detection based on spec.language configuration
+func DetectLanguageFromADL(adl *schema.ADL) string {
+    if adl.Spec.Language.Go != nil     { return "go" }
+    if adl.Spec.Language.Rust != nil   { return "rust" }  
+    if adl.Spec.Language.TypeScript != nil { return "typescript" }
+    return "go" // default
+}
+```
+
+### File Mapping System
+
+Each language has its own file mapping that determines what gets generated:
+
+**Go Projects:**
+- `main.go` → Go main server setup
+- `tools/{toolname}.go` → Individual tool implementations  
+- `go.mod` → Go module configuration
+- Language-specific Dockerfile and CI configurations
+
+**Rust Projects:**  
+- `src/main.rs` → Rust main application
+- `src/tools/{toolname}.rs` → Tool implementations
+- `src/tools/mod.rs` → Module declarations
+- `Cargo.toml` → Rust package configuration
+
+**Universal Files:**
+- `Taskfile.yml` → Development task runner
+- `.well-known/agent.json` → A2A capabilities manifest
+- `k8s/deployment.yaml` → Kubernetes deployment
+- CI workflows and sandbox configurations
+
+### Template Context
+
+All templates receive a rich context object:
+
+```go
+type Context struct {
+    ADL      *schema.ADL           // Complete ADL configuration
+    Metadata GeneratedMetadata     // Generation metadata
+    Language string               // Detected language
+}
+```
+
+This allows templates to access any ADL configuration and generate language-appropriate code.
 
 ## Customizing Generation with .adl-ignore
 
