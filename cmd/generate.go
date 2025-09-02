@@ -22,7 +22,6 @@ var (
 	outputDir            string
 	template             string
 	overwrite            bool
-	generateDevcontainer bool
 	generateCI           bool
 	deploymentType       string
 )
