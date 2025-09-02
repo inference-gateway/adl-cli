@@ -180,11 +180,6 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 		return fmt.Errorf("exactly one programming language must be defined for code generation, found %d", languageCount)
 	}
 
-	if adl.Spec.Agent != nil {
-		if adl.Spec.Agent.Provider == "" {
-			return fmt.Errorf("spec.agent.provider is required when agent configuration is specified")
-		}
-	}
 
 	for i, tool := range adl.Spec.Tools {
 		if tool.Name == "" {
