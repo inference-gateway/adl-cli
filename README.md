@@ -6,7 +6,7 @@
 
 > ⚠️ **Early Development Warning**: This project is in its early stages of development. Breaking changes are expected and acceptable until we reach a stable version. Use with caution in production environments.
 
-[![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg?style=flat-square&logo=go)](https://golang.org)
+[![Go Version](https://img.shields.io/badge/go-1.24+-blue.svg?style=flat-square&logo=go)](https://golang.org)
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/inference-gateway/adl-cli/ci.yml?style=flat-square&logo=github)](https://github.com/inference-gateway/adl-cli/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/inference-gateway/adl-cli?style=flat-square)](https://goreportcard.com/report/github.com/inference-gateway/adl-cli)
@@ -736,7 +736,7 @@ Taskfile.yml
 
 ### Prerequisites
 
-- Go 1.21+
+- Go 1.24+
 - [Task](https://taskfile.dev/) (optional, for using Taskfile commands)
 
 ### Building from Source
