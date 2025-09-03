@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.14.2](https://github.com/inference-gateway/adl-cli/compare/v0.14.1...v0.14.2) (2025-09-03)
+
+### ♻️ Improvements
+
+* **tmpl:** Improve logging of loaded configuration in main.go.tmpl ([b89d715](https://github.com/inference-gateway/adl-cli/commit/b89d715282cd82904957839e7762623f3473c196))
+
 ## [0.14.1](https://github.com/inference-gateway/adl-cli/compare/v0.14.0...v0.14.1) (2025-09-03)
 
 ### 🐛 Bug Fixes
