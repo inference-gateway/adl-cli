@@ -433,19 +433,16 @@ func TestGenerator_generateCD(t *testing.T) {
 		t.Fatalf("generateCD() error = %v", err)
 	}
 
-	// Check that .releaserc.yaml was created
 	releasercPath := filepath.Join(tmpDir, ".releaserc.yaml")
 	if _, err := os.Stat(releasercPath); os.IsNotExist(err) {
 		t.Errorf("expected .releaserc.yaml to be created")
 	}
 
-	// Check that CD workflow was created
 	cdWorkflowPath := filepath.Join(tmpDir, ".github/workflows/cd.yml")
 	if _, err := os.Stat(cdWorkflowPath); os.IsNotExist(err) {
 		t.Errorf("expected .github/workflows/cd.yml to be created")
 	}
 
-	// Verify .releaserc.yaml content
 	releasercContent, err := os.ReadFile(releasercPath)
 	if err != nil {
 		t.Fatalf("failed to read .releaserc.yaml: %v", err)
@@ -457,7 +454,6 @@ func TestGenerator_generateCD(t *testing.T) {
 		t.Errorf("expected .releaserc.yaml to contain semantic-release plugins")
 	}
 
-	// Verify CD workflow content
 	cdContent, err := os.ReadFile(cdWorkflowPath)
 	if err != nil {
 		t.Fatalf("failed to read CD workflow: %v", err)
@@ -472,5 +468,3 @@ func TestGenerator_generateCD(t *testing.T) {
 		t.Errorf("expected CD workflow to contain semantic-release")
 	}
 }
-
-
