@@ -53,7 +53,7 @@ The ADL CLI helps you build production-ready A2A agents quickly by generating co
 - 🛠️ **Smart Ignore** - Protect your implementations with .adl-ignore files
 - ✅ **Validation** - Built-in ADL schema validation
 - 🛠️ **Interactive Setup** - Guided project initialization with extensive CLI options
-- 🔧 **CI/CD Generation** - Automatic GitHub Actions and GitLab CI workflows
+- 🔧 **CI/CD Generation** - Automatic GitHub Actions workflows with semantic-release CD pipelines
 - 🏗️ **Sandbox Environments** - Flox and DevContainer support for isolated development
 - 🎣 **Post-Generation Hooks** - Customize build, format, and test commands after generation
 - 🤖 **Multi-Provider AI** - OpenAI, Anthropic, Azure, Ollama, and DeepSeek support
@@ -234,6 +234,7 @@ adl generate --file agent.yaml --output ./test-my-agent --ci
 | `--template`, `-t` | Template to use (default: "minimal") |
 | `--overwrite` | Overwrite existing files (respects .adl-ignore) |
 | `--ci` | Generate CI workflow configuration (GitHub Actions, GitLab CI) |
+| `--cd` | Generate CD pipeline configuration with semantic-release |
 
 **CI Generation Features:**
 - **Automatic Provider Detection**: Detects GitHub/GitLab from ADL `spec.scm.provider`
@@ -241,6 +242,14 @@ adl generate --file agent.yaml --output ./test-my-agent --ci
 - **Version Integration**: Uses language versions from ADL configuration
 - **Task Integration**: Leverages generated Taskfile for consistent build processes
 - **Caching**: Includes dependency caching for faster builds
+
+**CD Generation Features:**
+- **Semantic Release Integration**: Automatic versioning based on conventional commits
+- **Multi-Language Support**: Builds and tests for Go, Rust, and TypeScript projects
+- **Container Publishing**: Builds and pushes Docker images to GitHub Container Registry
+- **Manual Dispatch**: CD workflow triggered manually via GitHub Actions
+- **Changelog Generation**: Automatic CHANGELOG.md generation with release notes
+- **GitHub Releases**: Creates GitHub releases with appropriate tagging
 
 
 ## Agent Definition Language (ADL)
@@ -395,7 +404,9 @@ my-go-agent/
 ├── .well-known/
 │   └── agent.json             # Agent capabilities (auto-generated)
 ├── .github/workflows/         # Generated when using --ci flag
-│   └── ci.yml                 # GitHub Actions workflow
+│   ├── ci.yml                 # GitHub Actions CI workflow
+│   └── cd.yml                 # GitHub Actions CD workflow (with --cd flag)
+├── .releaserc.yaml            # Semantic-release configuration (with --cd flag)
 ├── k8s/
 │   └── deployment.yaml        # Kubernetes deployment manifest
 ├── .flox/                     # Generated when sandbox: flox
@@ -425,7 +436,9 @@ my-rust-agent/
 ├── .well-known/
 │   └── agent.json             # Agent capabilities
 ├── .github/workflows/         # CI configuration (with --ci)
-│   └── ci.yml                 # Rust-specific workflow
+│   ├── ci.yml                 # Rust-specific CI workflow
+│   └── cd.yml                 # GitHub Actions CD workflow (with --cd flag)
+├── .releaserc.yaml            # Semantic-release configuration (with --cd flag)
 ├── k8s/
 │   └── deployment.yaml        # Kubernetes deployment
 └── README.md                  # Documentation
@@ -443,6 +456,9 @@ All projects include these essential files regardless of language:
 - **CI Workflows** - When using `--ci` flag, generates appropriate workflows:
   - **GitHub Actions**: `.github/workflows/ci.yml`
   - **GitLab CI**: `.gitlab-ci.yml` (planned)
+- **CD Workflows** - When using `--cd` flag, generates continuous deployment:
+  - **GitHub Actions**: `.github/workflows/cd.yml`
+  - **Semantic Release**: `.releaserc.yaml`
 - **Development Environment** - Based on `sandbox` configuration:
   - **Flox**: `.flox/` directory with environment configuration when `sandbox.flox.enabled: true`
   - **DevContainer**: `.devcontainer/devcontainer.json` when `sandbox.devcontainer.enabled: true`
@@ -465,6 +481,51 @@ This creates a GitHub Actions workflow (`.github/workflows/ci.yml`) that include
 - **Task Integration**: Uses the generated Taskfile for consistent build steps
 
 The generated workflow automatically detects your Go version from the ADL file and configures the appropriate environment.
+
+### CD Integration
+
+The ADL CLI can generate continuous deployment (CD) pipelines with semantic release automation:
+
+```bash
+# Generate project with CD pipeline
+adl generate --file agent.yaml --output ./test-my-agent --cd
+```
+
+This creates a complete CD setup including:
+
+- **`.releaserc.yaml`** - Semantic-release configuration with conventional commits
+- **`.github/workflows/cd.yml`** - GitHub Actions CD workflow with manual dispatch
+
+The generated CD pipeline includes:
+
+- **Semantic Versioning**: Automatic version bumping based on conventional commit messages
+- **Release Automation**: Creates GitHub releases with generated release notes
+- **Container Publishing**: Builds and publishes Docker images to GitHub Container Registry
+- **Multi-Platform Builds**: Supports both AMD64 and ARM64 architectures
+- **Language Detection**: Automatically configures build steps based on your project language
+- **Change Detection**: Only publishes releases when there are changes to release
+
+#### CD Workflow Features
+
+**Manual Trigger**: The CD workflow uses `workflow_dispatch` for controlled releases:
+```bash
+# Trigger via GitHub CLI
+gh workflow run cd.yml
+
+# Or trigger via GitHub Actions UI
+```
+
+**Conventional Commits Support**: The pipeline recognizes these commit types for versioning:
+- `feat:` - Minor version bump (new features)
+- `fix:` - Patch version bump (bug fixes)
+- `refactor:`, `perf:`, `ci:`, `docs:`, `style:`, `test:`, `build:`, `chore:` - Patch version bump
+
+**Container Registry**: Published images are available at:
+```
+ghcr.io/your-org/your-agent:latest
+ghcr.io/your-org/your-agent:v1.0.0
+ghcr.io/your-org/your-agent:1.0
+```
 
 ## Sandbox Environments
 

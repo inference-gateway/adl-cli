@@ -24,6 +24,7 @@ type Config struct {
 	Overwrite          bool
 	Version            string
 	GenerateCI         bool
+	GenerateCD         bool
 	DeploymentType     string
 	EnableFlox         bool
 	EnableDevContainer bool
@@ -221,6 +222,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		},
 		Language:   templates.DetectLanguageFromADL(adl),
 		GenerateCI: g.config.GenerateCI,
+		GenerateCD: g.config.GenerateCD,
 	}
 
 	ignoreChecker, err := NewIgnoreChecker(outputDir)
@@ -311,6 +313,12 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		}
 	}
 
+	if g.config.GenerateCD {
+		if err := g.generateCD(adl, outputDir, ignoreChecker); err != nil {
+			return fmt.Errorf("failed to generate CD configuration: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -348,7 +356,6 @@ func (g *Generator) writeFile(filePath, content string) error {
 	fmt.Printf("✅ Generated: %s\n", filePath)
 	return nil
 }
-
 
 // getVersion returns the CLI version from config or default
 func (g *Generator) getVersion() string {
@@ -434,7 +441,6 @@ go.sum
 
 	return content
 }
-
 
 // generateCI generates CI workflow configuration based on the programming language and SCM provider
 func (g *Generator) generateCI(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
@@ -742,6 +748,102 @@ func (g *Generator) generateGitLabCIWorkflow(adl *schema.ADL, outputDir string, 
 	// This should generate .gitlab-ci.yml based on the programming language
 	// and follow similar patterns to the GitHub Actions implementation
 	fmt.Printf("⚠️  GitLab CI generation is not yet implemented\n")
+	fmt.Printf("This is a planned feature - contributions welcome!\n")
+	return nil
+}
+
+// generateCD generates CD configuration files based on the programming language and SCM provider
+func (g *Generator) generateCD(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
+	scmProvider := g.detectSCMProvider(adl)
+
+	switch scmProvider {
+	case "github":
+		return g.generateGitHubCDWorkflow(adl, outputDir, ignoreChecker)
+	case "gitlab":
+		return g.generateGitLabCDWorkflow(adl, outputDir, ignoreChecker)
+	default:
+		fmt.Printf("⚠️  No SCM provider specified, defaulting to GitHub Actions\n")
+		return g.generateGitHubCDWorkflow(adl, outputDir, ignoreChecker)
+	}
+}
+
+// generateGitHubCDWorkflow generates GitHub CD workflow and semantic-release configuration
+func (g *Generator) generateGitHubCDWorkflow(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
+	language := g.detectLanguage(adl)
+	template := g.detectTemplate(adl)
+
+	registry, err := templates.NewRegistry(language)
+	if err != nil {
+		return fmt.Errorf("failed to create template registry: %w", err)
+	}
+
+	templateEngine := templates.NewWithRegistry(template, registry)
+
+	ctx := templates.Context{
+		ADL: adl,
+		Metadata: schema.GeneratedMetadata{
+			GeneratedAt: time.Now(),
+			CLIVersion:  g.getVersion(),
+			Template:    g.config.Template,
+		},
+		Language:   language,
+		GenerateCI: g.config.GenerateCI,
+		GenerateCD: g.config.GenerateCD,
+	}
+
+	if err := g.generateReleaseRC(templateEngine, ctx, outputDir, ignoreChecker); err != nil {
+		return fmt.Errorf("failed to generate .releaserc.yaml: %w", err)
+	}
+
+	workflowPath := ".github/workflows/cd.yml"
+
+	if ignoreChecker.ShouldIgnore(workflowPath) {
+		fmt.Printf("🚫 Ignoring file (matches .adl-ignore): %s\n", workflowPath)
+		return nil
+	}
+
+	workflowContent, err := templateEngine.ExecuteTemplate("ci/cd.yml", ctx)
+	if err != nil {
+		return fmt.Errorf("failed to execute CD workflow template: %w", err)
+	}
+
+	fullWorkflowPath := filepath.Join(outputDir, workflowPath)
+	if err := g.writeFile(fullWorkflowPath, workflowContent); err != nil {
+		return fmt.Errorf("failed to write GitHub CD workflow: %w", err)
+	}
+
+	fmt.Println("✅ CD pipeline generated successfully!")
+	fmt.Printf("📁 GitHub CD workflow: %s\n", workflowPath)
+	fmt.Printf("📁 Semantic release config: .releaserc.yaml\n")
+
+	return nil
+}
+
+// generateReleaseRC generates the .releaserc.yaml configuration file
+func (g *Generator) generateReleaseRC(templateEngine *templates.Engine, ctx templates.Context, outputDir string, ignoreChecker *IgnoreChecker) error {
+	releasercPath := ".releaserc.yaml"
+
+	if ignoreChecker.ShouldIgnore(releasercPath) {
+		fmt.Printf("🚫 Ignoring file (matches .adl-ignore): %s\n", releasercPath)
+		return nil
+	}
+
+	releasercContent, err := templateEngine.ExecuteTemplate("config/releaserc.yaml", ctx)
+	if err != nil {
+		return fmt.Errorf("failed to execute releaserc template: %w", err)
+	}
+
+	fullReleasercPath := filepath.Join(outputDir, releasercPath)
+	if err := g.writeFile(fullReleasercPath, releasercContent); err != nil {
+		return fmt.Errorf("failed to write .releaserc.yaml: %w", err)
+	}
+
+	return nil
+}
+
+// generateGitLabCDWorkflow generates a GitLab CD workflow
+func (g *Generator) generateGitLabCDWorkflow(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
+	fmt.Printf("⚠️  GitLab CD generation is not yet implemented\n")
 	fmt.Printf("This is a planned feature - contributions welcome!\n")
 	return nil
 }

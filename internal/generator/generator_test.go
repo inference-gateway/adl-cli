@@ -373,3 +373,98 @@ func containsSubstring(content, pattern string) bool {
 	}
 	return false
 }
+
+func TestGenerator_generateCD(t *testing.T) {
+	validADL := &schema.ADL{
+		APIVersion: "adl.dev/v1",
+		Kind:       "Agent",
+		Metadata: schema.Metadata{
+			Name:        "test-cd-agent",
+			Description: "Test CD agent",
+			Version:     "1.0.0",
+		},
+		Spec: schema.Spec{
+			Capabilities: &schema.Capabilities{
+				Streaming:              true,
+				PushNotifications:      false,
+				StateTransitionHistory: false,
+			},
+			Server: schema.Server{
+				Port:  8080,
+				Debug: false,
+			},
+			Language: &schema.Language{
+				Go: &schema.GoConfig{
+					Module:  "github.com/example/test-cd-agent",
+					Version: "1.24",
+				},
+			},
+			SCM: &schema.SCM{
+				Provider: "github",
+				URL:      "https://github.com/example/test-cd-agent",
+			},
+		},
+	}
+
+	tmpDir, err := os.MkdirTemp("", "adl-cd-test-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer func() {
+		if err := os.RemoveAll(tmpDir); err != nil {
+			t.Logf("Failed to remove temp dir: %v", err)
+		}
+	}()
+
+	gen := New(Config{
+		Template:   "minimal",
+		Overwrite:  true,
+		Version:    "test-version",
+		GenerateCD: true,
+	})
+
+	ignoreChecker, err := NewIgnoreChecker(tmpDir)
+	if err != nil {
+		t.Fatalf("Failed to create ignore checker: %v", err)
+	}
+
+	err = gen.generateCD(validADL, tmpDir, ignoreChecker)
+	if err != nil {
+		t.Fatalf("generateCD() error = %v", err)
+	}
+
+	releasercPath := filepath.Join(tmpDir, ".releaserc.yaml")
+	if _, err := os.Stat(releasercPath); os.IsNotExist(err) {
+		t.Errorf("expected .releaserc.yaml to be created")
+	}
+
+	cdWorkflowPath := filepath.Join(tmpDir, ".github/workflows/cd.yml")
+	if _, err := os.Stat(cdWorkflowPath); os.IsNotExist(err) {
+		t.Errorf("expected .github/workflows/cd.yml to be created")
+	}
+
+	releasercContent, err := os.ReadFile(releasercPath)
+	if err != nil {
+		t.Fatalf("failed to read .releaserc.yaml: %v", err)
+	}
+	if !containsSubstring(string(releasercContent), "https://github.com/example/test-cd-agent") {
+		t.Errorf("expected .releaserc.yaml to contain repository URL")
+	}
+	if !containsSubstring(string(releasercContent), "@semantic-release/github") {
+		t.Errorf("expected .releaserc.yaml to contain semantic-release plugins")
+	}
+
+	cdContent, err := os.ReadFile(cdWorkflowPath)
+	if err != nil {
+		t.Fatalf("failed to read CD workflow: %v", err)
+	}
+	if !containsSubstring(string(cdContent), "workflow_dispatch") {
+		t.Errorf("expected CD workflow to contain workflow_dispatch trigger")
+	}
+	if !containsSubstring(string(cdContent), "ghcr.io") {
+		t.Errorf("expected CD workflow to contain GitHub Container Registry")
+	}
+	if !containsSubstring(string(cdContent), "semantic-release") {
+		t.Errorf("expected CD workflow to contain semantic-release")
+	}
+}

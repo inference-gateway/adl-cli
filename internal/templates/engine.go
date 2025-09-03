@@ -91,6 +91,7 @@ type Context struct {
 	Metadata   schema.GeneratedMetadata
 	Language   string
 	GenerateCI bool
+	GenerateCD bool
 }
 
 // New creates a new template engine

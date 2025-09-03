@@ -1,0 +1,212 @@
+---
+name: CD
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  packages: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-24.04
+    outputs:
+      new_release_version: ${{`{{ steps.semantic.outputs.new_release_version }}`}}
+      new_release_published: ${{`{{ steps.semantic.outputs.new_release_published }}`}}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+        with:
+          ref: ${{`{{ github.ref }}`}}
+          fetch-depth: 0
+          persist-credentials: false
+          token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
+
+{{- if eq .Language "go" }}
+      - name: Set up Go
+        uses: actions/setup-go@v5.5.0
+        with:
+          go-version: {{ if and .ADL.Spec.Language.Go .ADL.Spec.Language.Go.Version }}{{ .ADL.Spec.Language.Go.Version }}{{ else }}1.24{{ end }}
+          cache: true
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run tests
+        run: task test
+
+      - name: Build
+        run: task build
+{{- else if eq .Language "rust" }}
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: {{ if and .ADL.Spec.Language.Rust .ADL.Spec.Language.Rust.Version }}{{ .ADL.Spec.Language.Rust.Version }}{{ else }}1.70{{ end }}
+          override: true
+          components: rustfmt, clippy
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+
+      - name: Cache cargo dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{`{{ runner.os }}`}}-cargo-${{`{{ hashFiles('**/Cargo.lock') }}`}}
+
+      - name: Run tests
+        run: task test
+
+      - name: Build
+        run: task build
+{{- else if eq .Language "typescript" }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v4.1.0
+        with:
+          node-version: {{ if and .ADL.Spec.Language.TypeScript .ADL.Spec.Language.TypeScript.NodeVersion }}{{ .ADL.Spec.Language.TypeScript.NodeVersion }}{{ else }}18{{ end }}
+          cache: 'npm'
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: task test
+
+      - name: Build
+        run: task build
+{{- else }}
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+
+      - name: Build
+        run: task build
+{{- end }}
+
+      - name: Set up Node.js for semantic-release
+        uses: actions/setup-node@v4.4.0
+        with:
+          node-version: 22
+
+      - name: Install semantic-release and plugins
+        run: |
+          npm install -g semantic-release@v24.2.7 \
+            conventional-changelog-cli \
+            conventional-changelog-conventionalcommits \
+            @semantic-release/changelog \
+            @semantic-release/git \
+            @semantic-release/github
+
+      - name: Create a release if needed
+        id: semantic
+        env:
+          CI: true
+          GITHUB_TOKEN: ${{`{{ secrets.GITHUB_TOKEN }}`}}
+        run: |
+          # Create first release if not exists - Initial Release Version 0.1.0
+          if ! gh release view v0.1.0 >/dev/null 2>&1; then
+            gh release create v0.1.0 --title "Initial Release" --notes "Initial Release" --target main
+          fi
+
+          # Run semantic-release in dry-run first to capture version
+          DRY_OUTPUT=$(semantic-release --dry-run 2>&1 || true)
+
+          # Check if there are no changes
+          if $(echo "$DRY_OUTPUT" | grep -q "no new version is released"); then
+            echo "No new release needed"
+            echo "new_release_published=false" >> ${{`$GITHUB_OUTPUT`}}
+            exit 0
+          fi
+
+          # Extract version from dry run output
+          VERSION=$(echo "$DRY_OUTPUT" | grep -o "The next release version is [0-9]\+\.[0-9]\+\.[0-9]\+\(-rc\.[0-9]\+\)\?" | cut -d ' ' -f6)
+          if [ -z "$VERSION" ]; then
+            echo "Error: Could not determine version"
+            echo "Output: $DRY_OUTPUT"
+            exit 1
+          fi
+
+          echo "new_release_version=$VERSION" >> ${{`$GITHUB_OUTPUT`}}
+
+          # Run actual release
+          if semantic-release; then
+            echo "Successfully released version $VERSION"
+            echo "new_release_published=true" >> ${{`$GITHUB_OUTPUT`}}
+          else
+            echo "Release failed"
+            exit 1
+          fi
+
+  build_and_push_image:
+    name: Build and Push Container Image
+    runs-on: ubuntu-24.04
+    needs: release
+    if: needs.release.outputs.new_release_published == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+        with:
+          ref: ${{`{{ github.ref }}`}}
+          fetch-depth: 0
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          version: latest
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{`{{ github.actor }}`}}
+          password: ${{`{{ secrets.GITHUB_TOKEN }}`}}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{`{{ github.repository_owner }}`}}/{{ .ADL.Metadata.Name }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{`{{version}}`}},value=${{`{{ needs.release.outputs.new_release_version }}`}}
+            type=semver,pattern={{`{{major}}.{{minor}}`}},value=${{`{{ needs.release.outputs.new_release_version }}`}}
+            type=raw,value=latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{`{{ steps.meta.outputs.tags }}`}}
+          labels: ${{`{{ steps.meta.outputs.labels }}`}}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
