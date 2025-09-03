@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.13.0](https://github.com/inference-gateway/adl-cli/compare/v0.12.3...v0.13.0) (2025-09-03)
+
+### ✨ Features
+
+* Add env.example template for configuration and update registry mappings ([46bc43a](https://github.com/inference-gateway/adl-cli/commit/46bc43a12d0a90331c820241e2c3ddc17c71878a))
+
+### ♻️ Improvements
+
+* Update agent configuration and improve README with environment variable details ([f0cdf36](https://github.com/inference-gateway/adl-cli/commit/f0cdf367457a74b024a0be7c9deb03d2d197744f))
+
 ## [0.12.3](https://github.com/inference-gateway/adl-cli/compare/v0.12.2...v0.12.3) (2025-09-02)
 
 ### 🐛 Bug Fixes
