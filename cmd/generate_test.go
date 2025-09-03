@@ -189,13 +189,11 @@ spec:
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Check basic files
 	mainGoPath := filepath.Join(outputPath, "main.go")
 	if _, err := os.Stat(mainGoPath); os.IsNotExist(err) {
 		t.Errorf("expected main.go to be generated")
 	}
 
-	// Check CD specific files
 	releasercPath := filepath.Join(outputPath, ".releaserc.yaml")
 	if _, err := os.Stat(releasercPath); os.IsNotExist(err) {
 		t.Errorf("expected .releaserc.yaml to be generated")
@@ -206,7 +204,6 @@ spec:
 		t.Errorf("expected .github/workflows/cd.yml to be generated")
 	}
 
-	// Verify .releaserc.yaml content
 	releasercContent, err := os.ReadFile(releasercPath)
 	if err != nil {
 		t.Fatalf("failed to read .releaserc.yaml: %v", err)
@@ -218,7 +215,6 @@ spec:
 		t.Errorf("expected .releaserc.yaml to contain semantic-release plugins")
 	}
 
-	// Verify CD workflow content
 	cdContent, err := os.ReadFile(cdWorkflowPath)
 	if err != nil {
 		t.Fatalf("failed to read CD workflow: %v", err)
