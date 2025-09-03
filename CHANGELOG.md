@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.13.1](https://github.com/inference-gateway/adl-cli/compare/v0.13.0...v0.13.1) (2025-09-03)
+
+### 🐛 Bug Fixes
+
+* Remove optional inference gateway URL from env.example template ([83fb697](https://github.com/inference-gateway/adl-cli/commit/83fb697d7d26956f4ab56a5931c1506a827b6f10))
+
 ## [0.13.0](https://github.com/inference-gateway/adl-cli/compare/v0.12.3...v0.13.0) (2025-09-03)
 
 ### ✨ Features
