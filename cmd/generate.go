@@ -23,6 +23,7 @@ var (
 	template           string
 	overwrite          bool
 	generateCI         bool
+	generateCD         bool
 	deploymentType     string
 	enableFlox         bool
 	enableDevContainer bool
@@ -36,6 +37,7 @@ func init() {
 	generateCmd.Flags().StringVarP(&template, "template", "t", "minimal", "Template to use (minimal)")
 	generateCmd.Flags().BoolVar(&overwrite, "overwrite", false, "Overwrite existing files")
 	generateCmd.Flags().BoolVar(&generateCI, "ci", false, "Generate CI workflow configuration")
+	generateCmd.Flags().BoolVar(&generateCD, "cd", false, "Generate CD pipeline configuration with semantic-release")
 	generateCmd.Flags().StringVar(&deploymentType, "deployment", "", "Deployment type (kubernetes, defaults to empty for no deployment)")
 	generateCmd.Flags().BoolVar(&enableFlox, "flox", false, "Enable Flox environment")
 	generateCmd.Flags().BoolVar(&enableDevContainer, "devcontainer", false, "Enable DevContainer environment")
@@ -61,6 +63,7 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		Overwrite:          overwrite,
 		Version:            version,
 		GenerateCI:         generateCI,
+		GenerateCD:         generateCD,
 		DeploymentType:     deploymentType,
 		EnableFlox:         enableFlox,
 		EnableDevContainer: enableDevContainer,
@@ -70,6 +73,9 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	fmt.Printf("Using template: %s\n", template)
 	if generateCI {
 		fmt.Printf("CI workflow generation: enabled\n")
+	}
+	if generateCD {
+		fmt.Printf("CD pipeline generation: enabled\n")
 	}
 	if deploymentType != "" {
 		fmt.Printf("Deployment type: %s\n", deploymentType)

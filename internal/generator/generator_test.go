@@ -373,3 +373,228 @@ func containsSubstring(content, pattern string) bool {
 	}
 	return false
 }
+
+func TestGenerator_generateCD(t *testing.T) {
+	validADL := &schema.ADL{
+		APIVersion: "adl.dev/v1",
+		Kind:       "Agent",
+		Metadata: schema.Metadata{
+			Name:        "test-cd-agent",
+			Description: "Test CD agent",
+			Version:     "1.0.0",
+		},
+		Spec: schema.Spec{
+			Capabilities: &schema.Capabilities{
+				Streaming:              true,
+				PushNotifications:      false,
+				StateTransitionHistory: false,
+			},
+			Server: schema.Server{
+				Port:  8080,
+				Debug: false,
+			},
+			Language: &schema.Language{
+				Go: &schema.GoConfig{
+					Module:  "github.com/example/test-cd-agent",
+					Version: "1.24",
+				},
+			},
+			SCM: &schema.SCM{
+				Provider: "github",
+				URL:      "https://github.com/example/test-cd-agent",
+			},
+		},
+	}
+
+	tmpDir, err := os.MkdirTemp("", "adl-cd-test-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer func() {
+		if err := os.RemoveAll(tmpDir); err != nil {
+			t.Logf("Failed to remove temp dir: %v", err)
+		}
+	}()
+
+	gen := New(Config{
+		Template:   "minimal",
+		Overwrite:  true,
+		Version:    "test-version",
+		GenerateCD: true,
+	})
+
+	ignoreChecker, err := NewIgnoreChecker(tmpDir)
+	if err != nil {
+		t.Fatalf("Failed to create ignore checker: %v", err)
+	}
+
+	err = gen.generateCD(validADL, tmpDir, ignoreChecker)
+	if err != nil {
+		t.Fatalf("generateCD() error = %v", err)
+	}
+
+	// Check that .releaserc.yaml was created
+	releasercPath := filepath.Join(tmpDir, ".releaserc.yaml")
+	if _, err := os.Stat(releasercPath); os.IsNotExist(err) {
+		t.Errorf("expected .releaserc.yaml to be created")
+	}
+
+	// Check that CD workflow was created
+	cdWorkflowPath := filepath.Join(tmpDir, ".github/workflows/cd.yml")
+	if _, err := os.Stat(cdWorkflowPath); os.IsNotExist(err) {
+		t.Errorf("expected .github/workflows/cd.yml to be created")
+	}
+
+	// Verify .releaserc.yaml content
+	releasercContent, err := os.ReadFile(releasercPath)
+	if err != nil {
+		t.Fatalf("failed to read .releaserc.yaml: %v", err)
+	}
+	if !containsSubstring(string(releasercContent), "https://github.com/example/test-cd-agent") {
+		t.Errorf("expected .releaserc.yaml to contain repository URL")
+	}
+	if !containsSubstring(string(releasercContent), "@semantic-release/github") {
+		t.Errorf("expected .releaserc.yaml to contain semantic-release plugins")
+	}
+
+	// Verify CD workflow content
+	cdContent, err := os.ReadFile(cdWorkflowPath)
+	if err != nil {
+		t.Fatalf("failed to read CD workflow: %v", err)
+	}
+	if !containsSubstring(string(cdContent), "workflow_dispatch") {
+		t.Errorf("expected CD workflow to contain workflow_dispatch trigger")
+	}
+	if !containsSubstring(string(cdContent), "ghcr.io") {
+		t.Errorf("expected CD workflow to contain GitHub Container Registry")
+	}
+	if !containsSubstring(string(cdContent), "semantic-release") {
+		t.Errorf("expected CD workflow to contain semantic-release")
+	}
+}
+
+func TestGenerator_generateReleaseRCContent(t *testing.T) {
+	tests := []struct {
+		name     string
+		adl      *schema.ADL
+		expected []string
+	}{
+		{
+			name: "with SCM repository",
+			adl: &schema.ADL{
+				Spec: schema.Spec{
+					SCM: &schema.SCM{
+						Provider: "github",
+						URL:      "https://github.com/test/repo",
+					},
+				},
+			},
+			expected: []string{
+				"repositoryUrl: 'https://github.com/test/repo'",
+				"@semantic-release/github",
+				"@semantic-release/git",
+				"@semantic-release/changelog",
+			},
+		},
+		{
+			name: "without SCM repository",
+			adl:  &schema.ADL{},
+			expected: []string{
+				"repositoryUrl: 'https://github.com/your-org/your-repo'",
+				"@semantic-release/github",
+				"@semantic-release/git",
+				"@semantic-release/changelog",
+			},
+		},
+	}
+
+	gen := New(Config{})
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			content := gen.generateReleaseRCContent(tt.adl)
+
+			for _, expected := range tt.expected {
+				if !containsSubstring(content, expected) {
+					t.Errorf("generateReleaseRCContent() missing expected content: %q", expected)
+				}
+			}
+		})
+	}
+}
+
+func TestGenerator_generateCDWorkflowContent(t *testing.T) {
+	tests := []struct {
+		name     string
+		adl      *schema.ADL
+		language string
+		expected []string
+	}{
+		{
+			name: "Go language",
+			adl: &schema.ADL{
+				Metadata: schema.Metadata{
+					Name: "test-go-agent",
+				},
+				Spec: schema.Spec{
+					Language: &schema.Language{
+						Go: &schema.GoConfig{
+							Version: "1.24",
+						},
+					},
+				},
+			},
+			language: "go",
+			expected: []string{
+				"name: CD",
+				"workflow_dispatch",
+				"actions/setup-go@v5.5.0",
+				"go-version: 1.24",
+				"task test",
+				"task build",
+				"semantic-release",
+				"ghcr.io",
+				"docker/build-push-action@v5",
+			},
+		},
+		{
+			name: "Rust language",
+			adl: &schema.ADL{
+				Metadata: schema.Metadata{
+					Name: "test-rust-agent",
+				},
+				Spec: schema.Spec{
+					Language: &schema.Language{
+						Rust: &schema.RustConfig{
+							Version: "1.70",
+						},
+					},
+				},
+			},
+			language: "rust",
+			expected: []string{
+				"name: CD",
+				"workflow_dispatch",
+				"actions-rs/toolchain@v1",
+				"toolchain: 1.70",
+				"cargo",
+				"semantic-release",
+				"ghcr.io",
+			},
+		},
+	}
+
+	gen := New(Config{})
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			content := gen.generateCDWorkflowContent(tt.adl, tt.language)
+
+			for _, expected := range tt.expected {
+				if !containsSubstring(content, expected) {
+					t.Errorf("generateCDWorkflowContent() missing expected content: %q", expected)
+				}
+			}
+		})
+	}
+}
