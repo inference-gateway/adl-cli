@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.13.3](https://github.com/inference-gateway/adl-cli/compare/v0.13.2...v0.13.3) (2025-09-03)
+
+### 📚 Documentation
+
+* Update terminology from "A2A Framework" to "A2A" in README and configuration templates ([4c058c8](https://github.com/inference-gateway/adl-cli/commit/4c058c8de8f9dd329da62004e6ff54070e350d15))
+
 ## [0.13.2](https://github.com/inference-gateway/adl-cli/compare/v0.13.1...v0.13.2) (2025-09-03)
 
 ### ♻️ Improvements
