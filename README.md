@@ -914,4 +914,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-> 🤖 Powered by the [Inference Gateway framework](https://github.com/inference-gateway/)
+> 🤖 Powered by the [Inference Gateway ecosystem](https://github.com/inference-gateway/)
