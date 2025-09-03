@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.15.0](https://github.com/inference-gateway/adl-cli/compare/v0.14.6...v0.15.0) (2025-09-03)
+
+### ✨ Features
+
+* Implement CD scaffolding with semantic-release ([#35](https://github.com/inference-gateway/adl-cli/issues/35)) ([8c5df8d](https://github.com/inference-gateway/adl-cli/commit/8c5df8d09008e29f529aca307dcdc0c5cf7545b3)), closes [#34](https://github.com/inference-gateway/adl-cli/issues/34)
+
+### 📚 Documentation
+
+* Update AI provider list and installation instructions in README ([2b88445](https://github.com/inference-gateway/adl-cli/commit/2b884454536aaaf5f6e2f9136ae36cb761274271))
+* Update Go version requirement to 1.24 in README ([a1d8451](https://github.com/inference-gateway/adl-cli/commit/a1d8451980a8af9f5cd02f36f4543bd3a614beec))
+
 ## [0.14.6](https://github.com/inference-gateway/adl-cli/compare/v0.14.5...v0.14.6) (2025-09-03)
 
 ### ♻️ Improvements
