@@ -769,8 +769,31 @@ func (g *Generator) generateCD(adl *schema.ADL, outputDir string, ignoreChecker 
 
 // generateGitHubCDWorkflow generates GitHub CD workflow and semantic-release configuration
 func (g *Generator) generateGitHubCDWorkflow(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
+	// Create template engine
+	language := g.detectLanguage(adl)
+	template := g.detectTemplate(adl)
+	
+	registry, err := templates.NewRegistry(language)
+	if err != nil {
+		return fmt.Errorf("failed to create template registry: %w", err)
+	}
+	
+	templateEngine := templates.NewWithRegistry(template, registry)
+
+	ctx := templates.Context{
+		ADL: adl,
+		Metadata: schema.GeneratedMetadata{
+			GeneratedAt: time.Now(),
+			CLIVersion:  g.getVersion(),
+			Template:    g.config.Template,
+		},
+		Language:   language,
+		GenerateCI: g.config.GenerateCI,
+		GenerateCD: g.config.GenerateCD,
+	}
+
 	// Generate .releaserc.yaml
-	if err := g.generateReleaseRC(adl, outputDir, ignoreChecker); err != nil {
+	if err := g.generateReleaseRC(templateEngine, ctx, outputDir, ignoreChecker); err != nil {
 		return fmt.Errorf("failed to generate .releaserc.yaml: %w", err)
 	}
 
@@ -782,8 +805,10 @@ func (g *Generator) generateGitHubCDWorkflow(adl *schema.ADL, outputDir string, 
 		return nil
 	}
 
-	language := g.detectLanguage(adl)
-	workflowContent := g.generateCDWorkflowContent(adl, language)
+	workflowContent, err := templateEngine.ExecuteTemplate("ci/cd.yml", ctx)
+	if err != nil {
+		return fmt.Errorf("failed to execute CD workflow template: %w", err)
+	}
 
 	fullWorkflowPath := filepath.Join(outputDir, workflowPath)
 	if err := g.writeFile(fullWorkflowPath, workflowContent); err != nil {
@@ -798,7 +823,7 @@ func (g *Generator) generateGitHubCDWorkflow(adl *schema.ADL, outputDir string, 
 }
 
 // generateReleaseRC generates the .releaserc.yaml configuration file
-func (g *Generator) generateReleaseRC(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
+func (g *Generator) generateReleaseRC(templateEngine *templates.Engine, ctx templates.Context, outputDir string, ignoreChecker *IgnoreChecker) error {
 	releasercPath := ".releaserc.yaml"
 
 	if ignoreChecker.ShouldIgnore(releasercPath) {
@@ -806,9 +831,12 @@ func (g *Generator) generateReleaseRC(adl *schema.ADL, outputDir string, ignoreC
 		return nil
 	}
 
-	releasercContent := g.generateReleaseRCContent(adl)
-	fullReleasercPath := filepath.Join(outputDir, releasercPath)
+	releasercContent, err := templateEngine.ExecuteTemplate("config/releaserc.yaml", ctx)
+	if err != nil {
+		return fmt.Errorf("failed to execute releaserc template: %w", err)
+	}
 
+	fullReleasercPath := filepath.Join(outputDir, releasercPath)
 	if err := g.writeFile(fullReleasercPath, releasercContent); err != nil {
 		return fmt.Errorf("failed to write .releaserc.yaml: %w", err)
 	}
@@ -816,320 +844,7 @@ func (g *Generator) generateReleaseRC(adl *schema.ADL, outputDir string, ignoreC
 	return nil
 }
 
-// generateReleaseRCContent generates the content for .releaserc.yaml
-func (g *Generator) generateReleaseRCContent(adl *schema.ADL) string {
-	repositoryUrl := "https://github.com/your-org/your-repo"
-	if adl.Spec.SCM != nil && adl.Spec.SCM.URL != "" {
-		repositoryUrl = adl.Spec.SCM.URL
-	}
 
-	return fmt.Sprintf(`---
-branches:
-  - { name: main, prerelease: false, channel: latest }
-  - { name: 'rc/*', prerelease: rc, channel: rc }
-
-repositoryUrl: '%s'
-tagFormat: 'v$${version}'
-
-verifyConditions:
-  - '@semantic-release/github'
-  - '@semantic-release/git'
-
-plugins:
-  - - '@semantic-release/commit-analyzer'
-    - preset: 'conventionalcommits'
-      releaseRules:
-        - { type: 'feat', release: 'minor' }
-        - { type: 'impr', release: 'patch' }
-        - { type: 'refactor', release: 'patch' }
-        - { type: 'perf', release: 'patch' }
-        - { type: 'fix', release: 'patch' }
-        - { type: 'ci', release: 'patch' }
-        - { type: 'docs', release: 'patch' }
-        - { type: 'style', release: 'patch' }
-        - { type: 'test', release: 'patch' }
-        - { type: 'build', release: 'patch' }
-        - { type: 'security', release: 'patch' }
-        - { type: 'chore', release: 'patch', scope: '!release' }
-
-  - - '@semantic-release/release-notes-generator'
-    - preset: 'conventionalcommits'
-      presetConfig:
-        types:
-          - { type: 'feat', section: '✨ Features' }
-          - { type: 'impr', section: '🚀 Improvements' }
-          - { type: 'refactor', section: '♻️ Improvements' }
-          - { type: 'perf', section: '⚡️ Improvements' }
-          - { type: 'fix', section: '🐛 Bug Fixes' }
-          - { type: 'ci', section: '👷 CI' }
-          - { type: 'docs', section: '📚 Documentation' }
-          - { type: 'chore', section: '🔧 Miscellaneous' }
-          - { type: 'style', section: '🎨 Miscellaneous' }
-          - { type: 'test', section: '✅ Miscellaneous' }
-          - { type: 'build', section: '🔨 Miscellaneous' }
-          - { type: 'security', section: '🔒 Security' }
-
-  - - '@semantic-release/changelog'
-    - changelogFile: CHANGELOG.md
-      changelogTitle: "# Changelog\n\nAll notable changes to this project will be documented in this file."
-      verifyConditions: true
-
-  - - '@semantic-release/git'
-    - assets:
-        - CHANGELOG.md
-      message: "chore(release): 🔖 $${nextRelease.version} [skip ci]\n\n$${nextRelease.notes}"
-
-  - - '@semantic-release/github'
-    - assets:
-        - CHANGELOG.md
-      releasedLabels: ['released']
-      releaseNameTemplate: '🚀 Version $${nextRelease.version}'
-      successCommentCondition: 'false'
-      labels:
-        - 'release'
-        - "<%% nextRelease.channel === 'rc' ? 'rc' : '' %%>"
-`, repositoryUrl)
-}
-
-// generateCDWorkflowContent generates the GitHub Actions CD workflow content
-func (g *Generator) generateCDWorkflowContent(adl *schema.ADL, language string) string {
-	imageName := adl.Metadata.Name
-	if adl.Spec.SCM != nil && adl.Spec.SCM.URL != "" {
-		// Extract repo name from URL for image name
-		parts := strings.Split(strings.TrimSuffix(adl.Spec.SCM.URL, ".git"), "/")
-		if len(parts) > 0 {
-			imageName = parts[len(parts)-1]
-		}
-	}
-
-	var buildSteps string
-	var dockerBuildArgs string
-
-	switch language {
-	case "go":
-		goVersion := "1.24"
-		if adl.Spec.Language.Go != nil && adl.Spec.Language.Go.Version != "" {
-			goVersion = adl.Spec.Language.Go.Version
-		}
-		buildSteps = fmt.Sprintf(`    - name: Set up Go
-      uses: actions/setup-go@v5.5.0
-      with:
-        go-version: %s
-        cache: true
-
-    - name: Install Task
-      uses: arduino/setup-task@v2
-      with:
-        version: 3.x
-
-    - name: Download dependencies
-      run: go mod download
-
-    - name: Run tests
-      run: task test
-
-    - name: Build
-      run: task build`, goVersion)
-		dockerBuildArgs = ""
-
-	case "rust":
-		rustVersion := "1.70"
-		if adl.Spec.Language.Rust != nil && adl.Spec.Language.Rust.Version != "" {
-			rustVersion = adl.Spec.Language.Rust.Version
-		}
-		buildSteps = fmt.Sprintf(`    - name: Set up Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: %s
-        override: true
-        components: rustfmt, clippy
-
-    - name: Install Task
-      uses: arduino/setup-task@v2
-      with:
-        version: 3.x
-
-    - name: Cache cargo dependencies
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/
-        key: $${{ runner.os }}-cargo-$${{ hashFiles('**/Cargo.lock') }}
-
-    - name: Run tests
-      run: task test
-
-    - name: Build
-      run: task build`, rustVersion)
-		dockerBuildArgs = ""
-
-	case "typescript":
-		nodeVersion := "18"
-		if adl.Spec.Language.TypeScript != nil && adl.Spec.Language.TypeScript.NodeVersion != "" {
-			nodeVersion = adl.Spec.Language.TypeScript.NodeVersion
-		}
-		buildSteps = fmt.Sprintf(`    - name: Set up Node.js
-      uses: actions/setup-node@v4.1.0
-      with:
-        node-version: %s
-        cache: 'npm'
-
-    - name: Install Task
-      uses: arduino/setup-task@v2
-      with:
-        version: 3.x
-
-    - name: Install dependencies
-      run: npm ci
-
-    - name: Run tests
-      run: task test
-
-    - name: Build
-      run: task build`, nodeVersion)
-		dockerBuildArgs = ""
-
-	default:
-		buildSteps = `    - name: Install Task
-      uses: arduino/setup-task@v2
-      with:
-        version: 3.x
-
-    - name: Build
-      run: task build`
-		dockerBuildArgs = ""
-	}
-
-	return fmt.Sprintf(`---
-name: CD
-
-on:
-  workflow_dispatch:
-
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
-  packages: write
-
-jobs:
-  release:
-    name: Release
-    runs-on: ubuntu-24.04
-    outputs:
-      new_release_version: $${{ steps.semantic.outputs.new_release_version }}
-      new_release_published: $${{ steps.semantic.outputs.new_release_published }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4.2.2
-        with:
-          ref: $${{ github.ref }}
-          fetch-depth: 0
-          persist-credentials: false
-          token: $${{ secrets.GITHUB_TOKEN }}
-
-%s
-
-      - name: Set up Node.js for semantic-release
-        uses: actions/setup-node@v4.4.0
-        with:
-          node-version: 22
-
-      - name: Install semantic-release and plugins
-        run: |
-          npm install -g semantic-release@v24.2.7 \
-            conventional-changelog-cli \
-            conventional-changelog-conventionalcommits \
-            @semantic-release/changelog \
-            @semantic-release/git \
-            @semantic-release/github
-
-      - name: Create a release if needed
-        id: semantic
-        env:
-          CI: true
-          GITHUB_TOKEN: $${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Create first release if not exists - Initial Release Version 0.1.0
-          if ! gh release view v0.1.0 >/dev/null 2>&1; then
-            gh release create v0.1.0 --title "Initial Release" --notes "Initial Release" --target main
-          fi
-
-          # Run semantic-release in dry-run first to capture version
-          DRY_OUTPUT=$$(semantic-release --dry-run 2>&1 || true)
-
-          # Check if there are no changes
-          if $$(echo "$$DRY_OUTPUT" | grep -q "no new version is released"); then
-            echo "No new release needed"
-            echo "new_release_published=false" >> $$GITHUB_OUTPUT
-            exit 0
-          fi
-
-          # Extract version from dry run output
-          VERSION=$$(echo "$$DRY_OUTPUT" | grep -o "The next release version is [0-9]\\+\\.[0-9]\\+\\.[0-9]\\+\\(-rc\\.[0-9]\\+\\)\\?" | cut -d ' ' -f6)
-          if [ -z "$$VERSION" ]; then
-            echo "Error: Could not determine version"
-            echo "Output: $$DRY_OUTPUT"
-            exit 1
-          fi
-
-          echo "new_release_version=$$VERSION" >> $$GITHUB_OUTPUT
-
-          # Run actual release
-          if semantic-release; then
-            echo "Successfully released version $$VERSION"
-            echo "new_release_published=true" >> $$GITHUB_OUTPUT
-          else
-            echo "Release failed"
-            exit 1
-          fi
-
-  build_and_push_image:
-    name: Build and Push Container Image
-    runs-on: ubuntu-24.04
-    needs: release
-    if: needs.release.outputs.new_release_published == 'true'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4.2.2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: $${{ github.actor }}
-          password: $${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/$${{ github.repository }}/%s
-          tags: |
-            type=semver,pattern={{version}},value=v$${{ needs.release.outputs.new_release_version }}
-            type=semver,pattern={{major}}.{{minor}},value=v$${{ needs.release.outputs.new_release_version }}
-            type=semver,pattern={{major}},value=v$${{ needs.release.outputs.new_release_version }}
-            type=raw,value=latest
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: $${{ steps.meta.outputs.tags }}
-          labels: $${{ steps.meta.outputs.labels }}%s
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-`, buildSteps, imageName, dockerBuildArgs)
-}
 
 // generateGitLabCDWorkflow generates a GitLab CD workflow
 func (g *Generator) generateGitLabCDWorkflow(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
