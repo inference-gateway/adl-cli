@@ -1,7 +1,6 @@
 package generator
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -299,9 +298,8 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		}
 	}
 
-	if err := g.generateAgentJSON(adl, outputDir, ignoreChecker); err != nil {
-		return fmt.Errorf("failed to generate agent.json: %w", err)
-	}
+	// The agent.json is now generated via the template in the files map above
+	// No need for separate generateAgentJSON function
 
 	if err := g.generateADLIgnoreFile(outputDir, templateEngine.GetTemplate(), adl); err != nil {
 		return fmt.Errorf("failed to generate .adl-ignore file: %w", err)
@@ -351,105 +349,6 @@ func (g *Generator) writeFile(filePath, content string) error {
 	return nil
 }
 
-// generateAgentJSON generates the .well-known/agent.json file
-func (g *Generator) generateAgentJSON(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
-	if ignoreChecker.ShouldIgnore(".well-known/agent.json") {
-		fmt.Printf("🚫 Ignoring file (matches .adl-ignore): .well-known/agent.json\n")
-		return nil
-	}
-
-	agentCard := map[string]any{
-		"name":         adl.Metadata.Name,
-		"description":  adl.Metadata.Description,
-		"version":      adl.Metadata.Version,
-		"capabilities": adl.Spec.Capabilities,
-		"_generated": map[string]any{
-			"by":        "A2A CLI",
-			"version":   g.getVersion(),
-			"timestamp": time.Now().Format(time.RFC3339),
-			"warning":   "This file was automatically generated. DO NOT EDIT.",
-		},
-	}
-
-	if adl.Spec.Card != nil {
-		if adl.Spec.Card.ProtocolVersion != "" {
-			agentCard["protocolVersion"] = adl.Spec.Card.ProtocolVersion
-		} else {
-			agentCard["protocolVersion"] = "0.3.0"
-		}
-
-		if adl.Spec.Card.URL != "" {
-			agentCard["url"] = adl.Spec.Card.URL
-		}
-
-		if adl.Spec.Card.PreferredTransport != "" {
-			agentCard["preferredTransport"] = adl.Spec.Card.PreferredTransport
-		} else {
-			agentCard["preferredTransport"] = "JSONRPC"
-		}
-
-		if adl.Spec.Card.DocumentationURL != "" {
-			agentCard["documentationUrl"] = adl.Spec.Card.DocumentationURL
-		}
-
-		if adl.Spec.Card.IconURL != "" {
-			agentCard["iconUrl"] = adl.Spec.Card.IconURL
-		}
-
-		if len(adl.Spec.Card.DefaultInputModes) > 0 {
-			agentCard["defaultInputModes"] = adl.Spec.Card.DefaultInputModes
-		} else {
-			agentCard["defaultInputModes"] = []string{"text"}
-		}
-
-		if len(adl.Spec.Card.DefaultOutputModes) > 0 {
-			agentCard["defaultOutputModes"] = adl.Spec.Card.DefaultOutputModes
-		} else {
-			agentCard["defaultOutputModes"] = []string{"text"}
-		}
-	} else {
-		agentCard["protocolVersion"] = "0.3.0"
-		agentCard["preferredTransport"] = "JSONRPC"
-		agentCard["defaultInputModes"] = []string{"text"}
-		agentCard["defaultOutputModes"] = []string{"text"}
-	}
-
-	if len(adl.Spec.Skills) > 0 {
-		skills := make([]map[string]any, len(adl.Spec.Skills))
-		for i, skill := range adl.Spec.Skills {
-			skills[i] = map[string]any{
-				"id":          skill.ID,
-				"name":        skill.Name,
-				"description": skill.Description,
-				"tags":        skill.Tags,
-				"schema":      skill.Schema,
-			}
-			if len(skill.Examples) > 0 {
-				skills[i]["examples"] = skill.Examples
-			}
-			if len(skill.InputModes) > 0 {
-				skills[i]["inputModes"] = skill.InputModes
-			}
-			if len(skill.OutputModes) > 0 {
-				skills[i]["outputModes"] = skill.OutputModes
-			}
-		}
-		agentCard["skills"] = skills
-	}
-
-	jsonData, err := g.formatJSONWithIndentation(agentCard)
-	if err != nil {
-		return err
-	}
-
-	wellKnownDir := filepath.Join(outputDir, ".well-known")
-	if err := os.MkdirAll(wellKnownDir, 0755); err != nil {
-		return err
-	}
-
-	agentJSONPath := filepath.Join(wellKnownDir, "agent.json")
-	return g.writeFile(agentJSONPath, jsonData)
-}
 
 // getVersion returns the CLI version from config or default
 func (g *Generator) getVersion() string {
@@ -536,14 +435,6 @@ go.sum
 	return content
 }
 
-// formatJSONWithIndentation formats JSON with proper indentation for nested objects
-func (g *Generator) formatJSONWithIndentation(data any) (string, error) {
-	jsonBytes, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		return "", err
-	}
-	return string(jsonBytes), nil
-}
 
 // generateCI generates CI workflow configuration based on the programming language and SCM provider
 func (g *Generator) generateCI(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {

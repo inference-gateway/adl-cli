@@ -14,6 +14,7 @@ spec:
     preferredTransport: "JSONRPC"
     defaultInputModes: ["text", "voice"]
     defaultOutputModes: ["text", "audio"]
+    url: "https://my-agent.example.com:8443"
     documentationUrl: "https://github.com/company/go-agent/docs"
     iconUrl: "https://github.com/company/go-agent/icon.png"
   agent:
