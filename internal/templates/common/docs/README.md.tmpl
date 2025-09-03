@@ -132,6 +132,22 @@ task lint
 task fmt
 ```
 
+### Debugging
+
+Use the [A2A Debugger](https://github.com/inference-gateway/a2a-debugger) to test and debug your A2A agent during development. It provides a web interface for sending requests to your agent and inspecting responses, making it easier to troubleshoot issues and validate your implementation.
+
+```bash
+docker run --rm -it ghcr.io/inference-gateway/a2a-debugger:latest --set-url http://locahost:8080 tasks submit "Can you..<task description>"
+```
+
+```bash
+docker run --rm -it ghcr.io/inference-gateway/a2a-debugger:latest --set-url http://locahost:8080 tasks list
+```
+
+```bash
+docker run --rm -it ghcr.io/inference-gateway/a2a-debugger:latest --set-url http://locahost:8080 tasks get <task ID>
+```
+
 ## Deployment
 
 ### Kubernetes
