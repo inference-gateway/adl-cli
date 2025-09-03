@@ -4,11 +4,20 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/inference-gateway/adk/server"
+	server "github.com/inference-gateway/adk/server"
+	zap "go.uber.org/zap"
 )
 
+// {{ .Name | toPascalCase }}Skill struct holds the skill with logger
+type {{ .Name | toPascalCase }}Skill struct {
+	logger *zap.Logger
+}
+
 // New{{ .Name | toPascalCase }}Skill creates a new {{ .Name }} skill
-func New{{ .Name | toPascalCase }}Skill() server.Tool {
+func New{{ .Name | toPascalCase }}Skill(logger *zap.Logger) server.Tool {
+	skill := &{{ .Name | toPascalCase }}Skill{
+		logger: logger,
+	}
 	return server.NewBasicTool(
 		"{{ .Name }}",
 		"{{ .Description }}",

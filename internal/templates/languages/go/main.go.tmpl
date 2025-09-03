@@ -61,7 +61,7 @@ func main() {
 	{{- range .ADL.Spec.Skills }}
 
 	// Register {{ .Name }} skill
-	{{ .Name | toCamelCase }}Skill := skills.New{{ .Name | toPascalCase }}Skill()
+	{{ .Name | toCamelCase }}Skill := skills.New{{ .Name | toPascalCase }}Skill(logger)
 	toolBox.AddTool({{ .Name | toCamelCase }}Skill)
 	logger.Info("registered skill", zap.String("skill", "{{ .Name }}"), zap.String("description", "{{ .Description }}"))
 	{{- end }}
