@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.14.5](https://github.com/inference-gateway/adl-cli/compare/v0.14.4...v0.14.5) (2025-09-03)
+
+### 🐛 Bug Fixes
+
+* **template:** Add golangci-lint configuration for Go language support in manifest.toml.tmpl ([4e8ee24](https://github.com/inference-gateway/adl-cli/commit/4e8ee24542ed76a98810ba89c3257f644ebaa140))
+
 ## [0.14.4](https://github.com/inference-gateway/adl-cli/compare/v0.14.3...v0.14.4) (2025-09-03)
 
 ### ♻️ Improvements
