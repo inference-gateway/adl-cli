@@ -56,7 +56,7 @@ The ADL CLI helps you build production-ready A2A agents quickly by generating co
 - 🔧 **CI/CD Generation** - Automatic GitHub Actions workflows with semantic-release CD pipelines
 - 🏗️ **Sandbox Environments** - Flox and DevContainer support for isolated development
 - 🎣 **Post-Generation Hooks** - Customize build, format, and test commands after generation
-- 🤖 **Multi-Provider AI** - OpenAI, Anthropic, Azure, Ollama, and DeepSeek support
+- 🤖 **Multi-Provider AI** - OpenAI, Anthropic, DeepSeek, Ollama, Google, Mistral, and Groq support
 
 ## Installation
 
@@ -178,7 +178,7 @@ The init command supports extensive configuration options:
 
 **Agent Configuration:**
 - `--type` - Agent type (`ai-powered`/`minimal`)
-- `--provider` - AI provider (`openai`/`anthropic`/`azure`/`ollama`/`deepseek`)
+- `--provider` - AI provider (`openai`/`anthropic`/`deepseek`/`ollama`/`google`/`mistral`/`groq`)
 - `--model` - AI model name
 - `--system-prompt` - System prompt for the agent
 - `--max-tokens` - Maximum tokens (integer)
@@ -194,7 +194,7 @@ The init command supports extensive configuration options:
 - `--debug` - Enable debug mode
 
 **Language-Specific Options:**
-- `--language` - Programming language (`go`/`rust`/`typescript`)
+- `--language` - Programming language (`go`/`rust`, TypeScript support planned)
 
 **Go Options:**
 - `--go-module` - Go module path (e.g., `github.com/user/project`)
@@ -233,11 +233,11 @@ adl generate --file agent.yaml --output ./test-my-agent --ci
 | `--output`, `-o` | Output directory for generated code (default: ".") |
 | `--template`, `-t` | Template to use (default: "minimal") |
 | `--overwrite` | Overwrite existing files (respects .adl-ignore) |
-| `--ci` | Generate CI workflow configuration (GitHub Actions, GitLab CI) |
+| `--ci` | Generate CI workflow configuration (GitHub Actions) |
 | `--cd` | Generate CD pipeline configuration with semantic-release |
 
 **CI Generation Features:**
-- **Automatic Provider Detection**: Detects GitHub/GitLab from ADL `spec.scm.provider`
+- **Automatic Provider Detection**: Detects GitHub from ADL `spec.scm.provider` (GitLab support planned)
 - **Language-Specific Workflows**: Tailored CI configurations for Go, Rust, and TypeScript
 - **Version Integration**: Uses language versions from ADL configuration
 - **Task Integration**: Leverages generated Taskfile for consistent build processes
@@ -271,8 +271,8 @@ spec:
     pushNotifications: false
     stateTransitionHistory: false
   agent:
-    provider: openai
-    model: gpt-4o-mini
+    provider: ""  # Choose: openai, anthropic, deepseek, ollama, google, mistral, groq
+    model: ""     # Specify default model name for chosen provider
     systemPrompt: "You are a helpful weather assistant."
     maxTokens: 4096
     temperature: 0.7
@@ -305,7 +305,7 @@ The complete ADL schema includes:
 
 - **metadata**: Agent name, description, and version
 - **capabilities**: Streaming, notifications, state history
-- **agent**: AI provider configuration (OpenAI, Anthropic, Azure, Ollama, DeepSeek)
+- **agent**: AI provider configuration (OpenAI, Anthropic, DeepSeek, Ollama, Google, Mistral, Groq)
 - **skills**: Function definitions with complex JSON schemas and validation
 - **server**: HTTP server configuration with authentication support
 - **language**: Programming language-specific settings (Go, Rust, TypeScript)
@@ -453,9 +453,9 @@ All projects include these essential files regardless of language:
 - **`Dockerfile`** - Language-optimized container configuration  
 - **`k8s/deployment.yaml`** - Kubernetes deployment manifest
 - **`.adl-ignore`** - Protects user implementations from overwrite
-- **CI Workflows** - When using `--ci` flag, generates appropriate workflows:
+- **CI Workflows** - When using `--ci` flag, generates GitHub Actions workflows:
   - **GitHub Actions**: `.github/workflows/ci.yml`
-  - **GitLab CI**: `.gitlab-ci.yml` (planned)
+  - **GitLab CI**: `.gitlab-ci.yml` (planned, not yet implemented)
 - **CD Workflows** - When using `--cd` flag, generates continuous deployment:
   - **GitHub Actions**: `.github/workflows/cd.yml`
   - **Semantic Release**: `.releaserc.yaml`
@@ -608,7 +608,7 @@ Configure source control management for automatic CI/CD provider detection:
 ```yaml
 spec:
   scm:
-    provider: github  # or gitlab
+    provider: github  # gitlab support planned
     url: "https://github.com/company/my-agent"
 ```
 
@@ -619,57 +619,7 @@ spec:
 
 ### AI Provider Support
 
-The ADL CLI supports multiple AI providers with provider-specific optimizations:
-
-#### OpenAI
-```yaml
-spec:
-  agent:
-    provider: openai
-    model: gpt-4o-mini
-    maxTokens: 8192
-    temperature: 0.7
-```
-
-#### Anthropic  
-```yaml
-spec:
-  agent:
-    provider: anthropic
-    model: claude-3-haiku-20240307
-    maxTokens: 4096
-    temperature: 0.3
-```
-
-#### Azure OpenAI
-```yaml
-spec:
-  agent:
-    provider: azure
-    model: gpt-4o
-    maxTokens: 8192
-    temperature: 0.5
-```
-
-#### Ollama (Local LLMs)
-```yaml
-spec:
-  agent:
-    provider: ollama
-    model: llama3.1
-    maxTokens: 4096
-    temperature: 0.7
-```
-
-#### DeepSeek
-```yaml
-spec:
-  agent:
-    provider: deepseek
-    model: deepseek-chat
-    maxTokens: 8192
-    temperature: 0.3
-```
+The ADL CLI supports multiple AI providers including OpenAI, Anthropic, DeepSeek, Ollama (for local LLMs), Google AI, Mistral, and Groq. Each provider requires appropriate API keys to be configured as environment variables. See the ADL examples above for configuration details.
 
 
 ## Examples
@@ -928,14 +878,15 @@ hooks:
 
 ### Language Support
 
-The ADL CLI currently supports Go, with plans to expand to additional programming languages:
+The ADL CLI currently supports Go and Rust, with plans to expand to additional programming languages:
 
 #### ✅ Currently Supported
 - **Go** - Full support with templates for main.go, go.mod, and tools
 - **Rust** - Full support with templates for main.rs, Cargo.toml, and tools
 
 #### 🚧 Planned Support
-- **TypeScript/Node.js** - Complete A2A agent generation with Express.js framework
+- **TypeScript/Node.js** - Template structure exists but templates not yet implemented
+  - Complete A2A agent generation with Express.js framework planned
   - AI-powered agents with OpenAI/Anthropic integration
   - Enterprise features (auth, metrics, logging)
   - Docker and Kubernetes deployment configs
