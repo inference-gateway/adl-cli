@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.14.4](https://github.com/inference-gateway/adl-cli/compare/v0.14.3...v0.14.4) (2025-09-03)
+
+### ♻️ Improvements
+
+* **template:** Pass logger to skill initialization in main.go.tmpl ([fbcb8ef](https://github.com/inference-gateway/adl-cli/commit/fbcb8ef4bd0707e471eee42def4d2736605c86bd))
+
 ## [0.14.3](https://github.com/inference-gateway/adl-cli/compare/v0.14.2...v0.14.3) (2025-09-03)
 
 ### 🐛 Bug Fixes
