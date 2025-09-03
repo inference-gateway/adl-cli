@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.13.2](https://github.com/inference-gateway/adl-cli/compare/v0.13.1...v0.13.2) (2025-09-03)
+
+### ♻️ Improvements
+
+* Remove Docker deployment instructions from README - bad practice, you don't deploy with docker ([bc86a36](https://github.com/inference-gateway/adl-cli/commit/bc86a360ef7c63deeebaddc347ed095da4f18935))
+
+### 📚 Documentation
+
+* Add debugging section with A2A Debugger usage instructions to README ([86f4f71](https://github.com/inference-gateway/adl-cli/commit/86f4f71b5312123df01c59e174ca7efa1c9a0d4d))
+
 ## [0.13.1](https://github.com/inference-gateway/adl-cli/compare/v0.13.0...v0.13.1) (2025-09-03)
 
 ### 🐛 Bug Fixes
