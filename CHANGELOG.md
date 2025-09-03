@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.14.6](https://github.com/inference-gateway/adl-cli/compare/v0.14.5...v0.14.6) (2025-09-03)
+
+### ♻️ Improvements
+
+* **docs:** Add server timeout and health check logging configuration options to README ([ed104ce](https://github.com/inference-gateway/adl-cli/commit/ed104ceadac4fd92e0b36190d408c44bac1ff3e8))
+
 ## [0.14.5](https://github.com/inference-gateway/adl-cli/compare/v0.14.4...v0.14.5) (2025-09-03)
 
 ### 🐛 Bug Fixes
