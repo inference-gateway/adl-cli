@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.14.1](https://github.com/inference-gateway/adl-cli/compare/v0.14.0...v0.14.1) (2025-09-03)
+
+### 🐛 Bug Fixes
+
+* **tmpl:** Set default value for A2A_AGENT_CLIENT_SYSTEM_PROMPT in env.example.tmpl ([0991744](https://github.com/inference-gateway/adl-cli/commit/0991744fef1864e52ff37d6d14076e68dc37a295))
+
 ## [0.14.0](https://github.com/inference-gateway/adl-cli/compare/v0.13.3...v0.14.0) (2025-09-03)
 
 ### ✨ Features
