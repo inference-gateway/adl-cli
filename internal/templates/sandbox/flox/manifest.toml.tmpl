@@ -4,6 +4,11 @@ version = 1
 {{- if eq .Language "go" }}
 go.pkg-path = "go"
 go.version = "^{{ .ADL.Spec.Language.Go.Version }}"
+
+golangci-lint.pkg-path = "golangci-lint"
+golangci-lint.version = "^2.4.0"
+golangci-lint.pkg-group = "common"
+
 {{- else if eq .Language "rust" }}
 cargo.pkg-path = "cargo"
 cargo.pkg-group = "rust-toolchain"
