@@ -1,5 +1,10 @@
 FROM golang:1.24-alpine AS builder
 
+# Build arguments for version injection
+ARG VERSION="{{ .ADL.Metadata.Version }}"
+ARG AGENT_NAME="{{ .ADL.Metadata.Name }}"
+ARG AGENT_DESCRIPTION="{{ .ADL.Metadata.Description }}"
+
 WORKDIR /app
 
 # Install ca-certificates for HTTPS requests
@@ -14,8 +19,16 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+# Build the application with optimized LDD flags and version injection
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -a \
+    -installsuffix cgo \
+    -ldflags="-s -w -extldflags '-static' \
+        -X 'main.Version=${VERSION}' \
+        -X 'main.AgentName=${AGENT_NAME}' \
+        -X 'main.AgentDescription=${AGENT_DESCRIPTION}'" \
+    -trimpath \
+    -o main .
 
 # Final stage
 FROM alpine:latest

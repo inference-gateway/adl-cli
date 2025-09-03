@@ -150,6 +150,29 @@ docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest
 
 ## Deployment
 
+### Docker
+
+The Docker image can be built with custom version information using build arguments:
+
+```bash
+# Build with default values from ADL
+docker build -t {{ .ADL.Metadata.Name }} .
+
+# Build with custom version information
+docker build \
+  --build-arg VERSION=1.2.3 \
+  --build-arg AGENT_NAME="My Custom Agent" \
+  --build-arg AGENT_DESCRIPTION="Custom agent description" \
+  -t {{ .ADL.Metadata.Name }}:1.2.3 .
+```
+
+**Available Build Arguments:**
+- `VERSION` - Agent version (default: `{{ .ADL.Metadata.Version }}`)
+- `AGENT_NAME` - Agent name (default: `{{ .ADL.Metadata.Name }}`)
+- `AGENT_DESCRIPTION` - Agent description (default: `{{ .ADL.Metadata.Description }}`)
+
+These values are embedded into the binary at build time using linker flags, making them accessible at runtime without requiring environment variables.
+
 ### Kubernetes
 
 ```bash
