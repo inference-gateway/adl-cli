@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.14.3](https://github.com/inference-gateway/adl-cli/compare/v0.14.2...v0.14.3) (2025-09-03)
+
+### 🐛 Bug Fixes
+
+* **tmpl:** Add LLM client creation and error handling in main.go.tmpl ([a002e08](https://github.com/inference-gateway/adl-cli/commit/a002e0800ab509fd9b3dd1baf876bcb3322d2888))
+
 ## [0.14.2](https://github.com/inference-gateway/adl-cli/compare/v0.14.1...v0.14.2) (2025-09-03)
 
 ### ♻️ Improvements
