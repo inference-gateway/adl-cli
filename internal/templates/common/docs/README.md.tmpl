@@ -134,16 +134,6 @@ task fmt
 
 ## Deployment
 
-### Docker
-
-```bash
-docker build -t {{ .ADL.Metadata.Name }}:latest .
-docker run -p {{ .ADL.Spec.Server.Port | default 8080 }}:{{ .ADL.Spec.Server.Port | default 8080 }} \
-  -e A2A_AGENT_CLIENT_PROVIDER=openai \
-  -e A2A_AGENT_CLIENT_API_KEY=your-api-key \
-  {{ .ADL.Metadata.Name }}:latest
-```
-
 ### Kubernetes
 
 ```bash
