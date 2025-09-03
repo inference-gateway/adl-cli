@@ -791,12 +791,10 @@ func (g *Generator) generateGitHubCDWorkflow(adl *schema.ADL, outputDir string, 
 		GenerateCD: g.config.GenerateCD,
 	}
 
-	// Generate .releaserc.yaml
 	if err := g.generateReleaseRC(templateEngine, ctx, outputDir, ignoreChecker); err != nil {
 		return fmt.Errorf("failed to generate .releaserc.yaml: %w", err)
 	}
 
-	// Generate CD workflow
 	workflowPath := ".github/workflows/cd.yml"
 
 	if ignoreChecker.ShouldIgnore(workflowPath) {
