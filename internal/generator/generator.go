@@ -769,15 +769,14 @@ func (g *Generator) generateCD(adl *schema.ADL, outputDir string, ignoreChecker 
 
 // generateGitHubCDWorkflow generates GitHub CD workflow and semantic-release configuration
 func (g *Generator) generateGitHubCDWorkflow(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
-	// Create template engine
 	language := g.detectLanguage(adl)
 	template := g.detectTemplate(adl)
-	
+
 	registry, err := templates.NewRegistry(language)
 	if err != nil {
 		return fmt.Errorf("failed to create template registry: %w", err)
 	}
-	
+
 	templateEngine := templates.NewWithRegistry(template, registry)
 
 	ctx := templates.Context{
@@ -843,8 +842,6 @@ func (g *Generator) generateReleaseRC(templateEngine *templates.Engine, ctx temp
 
 	return nil
 }
-
-
 
 // generateGitLabCDWorkflow generates a GitLab CD workflow
 func (g *Generator) generateGitLabCDWorkflow(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
