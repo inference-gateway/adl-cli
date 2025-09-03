@@ -84,6 +84,10 @@ Configure the agent via environment variables (see `.env.example` for a complete
 | **Server** | `A2A_DEBUG` | Enable debug mode | `{{ .ADL.Spec.Server.Debug | default false }}` |
 | **Server** | `A2A_AGENT_URL` | Agent URL for internal references | `http://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}` |
 | **Server** | `A2A_STREAMING_STATUS_UPDATE_INTERVAL` | Streaming status update frequency | `1s` |
+| **Server** | `A2A_SERVER_READ_TIMEOUT` | HTTP server read timeout | `120s` |
+| **Server** | `A2A_SERVER_WRITE_TIMEOUT` | HTTP server write timeout | `120s` |
+| **Server** | `A2A_SERVER_IDLE_TIMEOUT` | HTTP server idle timeout | `120s` |
+| **Server** | `A2A_SERVER_DISABLE_HEALTHCHECK_LOG` | Disable logging for health check requests | `true` |
 | **Agent Metadata** | `A2A_AGENT_CARD_FILE_PATH` | Path to agent card JSON file | `.well-known/agent.json` |
 | **LLM Client** | `A2A_AGENT_CLIENT_PROVIDER` | LLM provider (`openai`, `anthropic`, `azure`, `ollama`, `deepseek`) | {{- if .ADL.Spec.Agent }}`{{ .ADL.Spec.Agent.Provider }}`{{- else }}`openai`{{- end }} |
 | **LLM Client** | `A2A_AGENT_CLIENT_MODEL` | Model to use | {{- if .ADL.Spec.Agent }}`{{ .ADL.Spec.Agent.Model }}`{{- else }}`gpt-4o-mini`{{- end }} |
