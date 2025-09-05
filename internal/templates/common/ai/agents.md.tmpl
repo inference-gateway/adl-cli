@@ -79,9 +79,6 @@ No skills defined - this agent provides basic A2A communication without speciali
 ## Server Configuration
 
 **Port**: {{ .ADL.Spec.Server.Port }}
-{{ if .ADL.Spec.Server.Host }}
-**Host**: {{ .ADL.Spec.Server.Host }}
-{{ end }}
 {{ if .ADL.Spec.Server.Debug }}
 **Debug Mode**: ✅ Enabled
 {{ else }}
@@ -121,9 +118,6 @@ See `.env.example` for required environment variables including:
 {{ end }}
 {{ end }}
 - `PORT` - Server port (default: {{ .ADL.Spec.Server.Port }})
-{{ if .ADL.Spec.Server.Host }}
-- `HOST` - Server host (default: {{ .ADL.Spec.Server.Host }})
-{{ end }}
 
 ### Development Environment
 {{ if .ADL.Spec.Sandbox }}
