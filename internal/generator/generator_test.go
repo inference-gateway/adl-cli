@@ -406,65 +406,143 @@ func TestGenerator_generateCD(t *testing.T) {
 		},
 	}
 
-	tmpDir, err := os.MkdirTemp("", "adl-cd-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
-		}
-	}()
-
-	gen := New(Config{
-		Template:   "minimal",
-		Overwrite:  true,
-		Version:    "test-version",
-		GenerateCD: true,
-	})
-
-	ignoreChecker, err := NewIgnoreChecker(tmpDir)
-	if err != nil {
-		t.Fatalf("Failed to create ignore checker: %v", err)
-	}
-
-	err = gen.generateCD(validADL, tmpDir, ignoreChecker)
-	if err != nil {
-		t.Fatalf("generateCD() error = %v", err)
-	}
-
-	releasercPath := filepath.Join(tmpDir, ".releaserc.yaml")
-	if _, err := os.Stat(releasercPath); os.IsNotExist(err) {
-		t.Errorf("expected .releaserc.yaml to be created")
-	}
-
-	cdWorkflowPath := filepath.Join(tmpDir, ".github/workflows/cd.yml")
-	if _, err := os.Stat(cdWorkflowPath); os.IsNotExist(err) {
-		t.Errorf("expected .github/workflows/cd.yml to be created")
+	githubAppADL := &schema.ADL{
+		APIVersion: "adl.dev/v1",
+		Kind:       "Agent",
+		Metadata: schema.Metadata{
+			Name:        "test-github-app-agent",
+			Description: "Test GitHub App agent",
+			Version:     "1.0.0",
+		},
+		Spec: schema.Spec{
+			Capabilities: &schema.Capabilities{
+				Streaming:              true,
+				PushNotifications:      false,
+				StateTransitionHistory: false,
+			},
+			Server: schema.Server{
+				Port:  8080,
+				Debug: false,
+			},
+			Language: &schema.Language{
+				Go: &schema.GoConfig{
+					Module:  "github.com/example/test-github-app-agent",
+					Version: "1.24",
+				},
+			},
+			SCM: &schema.SCM{
+				Provider:  "github",
+				URL:       "https://github.com/example/test-github-app-agent",
+				GithubApp: true,
+			},
+		},
 	}
 
-	releasercContent, err := os.ReadFile(releasercPath)
-	if err != nil {
-		t.Fatalf("failed to read .releaserc.yaml: %v", err)
-	}
-	if !containsSubstring(string(releasercContent), "https://github.com/example/test-cd-agent") {
-		t.Errorf("expected .releaserc.yaml to contain repository URL")
-	}
-	if !containsSubstring(string(releasercContent), "@semantic-release/github") {
-		t.Errorf("expected .releaserc.yaml to contain semantic-release plugins")
+	tests := []struct {
+		name               string
+		adl                *schema.ADL
+		expectGithubAppCD  bool
+		expectedTokenUsage string
+	}{
+		{
+			name:               "regular CD workflow",
+			adl:                validADL,
+			expectGithubAppCD:  false,
+			expectedTokenUsage: "secrets.GITHUB_TOKEN",
+		},
+		{
+			name:               "GitHub App CD workflow",
+			adl:                githubAppADL,
+			expectGithubAppCD:  true,
+			expectedTokenUsage: "steps.app-token.outputs.token",
+		},
 	}
 
-	cdContent, err := os.ReadFile(cdWorkflowPath)
-	if err != nil {
-		t.Fatalf("failed to read CD workflow: %v", err)
-	}
-	if !containsSubstring(string(cdContent), "workflow_dispatch") {
-		t.Errorf("expected CD workflow to contain workflow_dispatch trigger")
-	}
-	if !containsSubstring(string(cdContent), "ghcr.io") {
-		t.Errorf("expected CD workflow to contain GitHub Container Registry")
-	}
-	if !containsSubstring(string(cdContent), "semantic-release") {
-		t.Errorf("expected CD workflow to contain semantic-release")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tmpDir, err := os.MkdirTemp("", "adl-cd-test-*")
+			if err != nil {
+				t.Fatalf("Failed to create temp dir: %v", err)
+			}
+			defer func() {
+				if err := os.RemoveAll(tmpDir); err != nil {
+					t.Logf("Failed to remove temp dir: %v", err)
+				}
+			}()
+
+			gen := New(Config{
+				Template:   "minimal",
+				Overwrite:  true,
+				Version:    "test-version",
+				GenerateCD: true,
+			})
+
+			ignoreChecker, err := NewIgnoreChecker(tmpDir)
+			if err != nil {
+				t.Fatalf("Failed to create ignore checker: %v", err)
+			}
+
+			err = gen.generateCD(tt.adl, tmpDir, ignoreChecker)
+			if err != nil {
+				t.Fatalf("generateCD() error = %v", err)
+			}
+
+			releasercPath := filepath.Join(tmpDir, ".releaserc.yaml")
+			if _, err := os.Stat(releasercPath); os.IsNotExist(err) {
+				t.Errorf("expected .releaserc.yaml to be created")
+			}
+
+			cdWorkflowPath := filepath.Join(tmpDir, ".github/workflows/cd.yml")
+			if _, err := os.Stat(cdWorkflowPath); os.IsNotExist(err) {
+				t.Errorf("expected .github/workflows/cd.yml to be created")
+			}
+
+			releasercContent, err := os.ReadFile(releasercPath)
+			if err != nil {
+				t.Fatalf("failed to read .releaserc.yaml: %v", err)
+			}
+			if !containsSubstring(string(releasercContent), tt.adl.Spec.SCM.URL) {
+				t.Errorf("expected .releaserc.yaml to contain repository URL")
+			}
+			if !containsSubstring(string(releasercContent), "@semantic-release/github") {
+				t.Errorf("expected .releaserc.yaml to contain semantic-release plugins")
+			}
+
+			cdContent, err := os.ReadFile(cdWorkflowPath)
+			if err != nil {
+				t.Fatalf("failed to read CD workflow: %v", err)
+			}
+			if !containsSubstring(string(cdContent), "workflow_dispatch") {
+				t.Errorf("expected CD workflow to contain workflow_dispatch trigger")
+			}
+			if !containsSubstring(string(cdContent), "ghcr.io") {
+				t.Errorf("expected CD workflow to contain GitHub Container Registry")
+			}
+			if !containsSubstring(string(cdContent), "semantic-release") {
+				t.Errorf("expected CD workflow to contain semantic-release")
+			}
+			if !containsSubstring(string(cdContent), tt.expectedTokenUsage) {
+				t.Errorf("expected CD workflow to contain token usage: %s", tt.expectedTokenUsage)
+			}
+
+			if tt.expectGithubAppCD {
+				if !containsSubstring(string(cdContent), "actions/create-github-app-token") {
+					t.Errorf("expected GitHub App CD workflow to contain github-app-token action")
+				}
+				if !containsSubstring(string(cdContent), "BOT_GH_APP_ID") {
+					t.Errorf("expected GitHub App CD workflow to contain BOT_GH_APP_ID secret")
+				}
+				if !containsSubstring(string(cdContent), "BOT_GH_APP_PRIVATE_KEY") {
+					t.Errorf("expected GitHub App CD workflow to contain BOT_GH_APP_PRIVATE_KEY secret")
+				}
+				if !containsSubstring(string(cdContent), "Get GitHub App User ID") {
+					t.Errorf("expected GitHub App CD workflow to contain user ID step")
+				}
+			} else {
+				if containsSubstring(string(cdContent), "actions/create-github-app-token") {
+					t.Errorf("expected regular CD workflow not to contain github-app-token action")
+				}
+			}
+		})
 	}
 }
