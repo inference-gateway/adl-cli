@@ -43,6 +43,44 @@ func TestInitCommand(t *testing.T) {
 	}
 }
 
+func TestInitCommandIncludesSCMDefaults(t *testing.T) {
+	tempDir := t.TempDir()
+	outputPath := filepath.Join(tempDir, "test-output")
+
+	cmd := initCmd
+	if err := cmd.Flags().Set("defaults", "true"); err != nil {
+		t.Fatal(err)
+	}
+	if err := cmd.Flags().Set("path", outputPath); err != nil {
+		t.Fatal(err)
+	}
+
+	err := runInit(cmd, []string{"test-agent"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	adlPath := filepath.Join(outputPath, "agent.yaml")
+	content, err := os.ReadFile(adlPath)
+	if err != nil {
+		t.Fatalf("failed to read ADL file: %v", err)
+	}
+
+	contentStr := string(content)
+	
+	if !strings.Contains(contentStr, "scm:") {
+		t.Errorf("ADL file missing SCM configuration")
+	}
+	if !strings.Contains(contentStr, "provider: github") {
+		t.Errorf("ADL file missing SCM provider default")
+	}
+	if !strings.Contains(contentStr, "github_app: true") {
+		t.Errorf("ADL file missing SCM github_app default")
+	}
+	
+	t.Logf("Generated ADL content:\n%s", contentStr)
+}
+
 func TestInitDoesNotGenerateCode(t *testing.T) {
 	tempDir := t.TempDir()
 

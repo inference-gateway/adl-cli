@@ -186,6 +186,15 @@ type adlData struct {
 			PushNotifications      bool `yaml:"pushNotifications"`
 			StateTransitionHistory bool `yaml:"stateTransitionHistory"`
 		} `yaml:"capabilities,omitempty"`
+		Card *struct {
+			ProtocolVersion    string   `yaml:"protocolVersion,omitempty"`
+			URL                string   `yaml:"url,omitempty"`
+			PreferredTransport string   `yaml:"preferredTransport,omitempty"`
+			DefaultInputModes  []string `yaml:"defaultInputModes,omitempty"`
+			DefaultOutputModes []string `yaml:"defaultOutputModes,omitempty"`
+			DocumentationURL   string   `yaml:"documentationUrl,omitempty"`
+			IconURL            string   `yaml:"iconUrl,omitempty"`
+		} `yaml:"card,omitempty"`
 		Agent *struct {
 			Provider     string  `yaml:"provider"`
 			Model        string  `yaml:"model"`
@@ -203,6 +212,9 @@ type adlData struct {
 		Server struct {
 			Port  int  `yaml:"port"`
 			Debug bool `yaml:"debug"`
+			Auth  *struct {
+				Enabled bool `yaml:"enabled"`
+			} `yaml:"auth,omitempty"`
 		} `yaml:"server"`
 		Language *struct {
 			Go *struct {
@@ -219,6 +231,11 @@ type adlData struct {
 				Edition     string `yaml:"edition"`
 			} `yaml:"rust,omitempty"`
 		} `yaml:"language,omitempty"`
+		SCM *struct {
+			Provider  string `yaml:"provider"`
+			URL       string `yaml:"url,omitempty"`
+			GithubApp bool   `yaml:"github_app,omitempty"`
+		} `yaml:"scm,omitempty"`
 		Sandbox *struct {
 			Flox *struct {
 				Enabled bool `yaml:"enabled"`
@@ -230,6 +247,9 @@ type adlData struct {
 		Deployment *struct {
 			Type string `yaml:"type,omitempty"`
 		} `yaml:"deployment,omitempty"`
+		Hooks *struct {
+			Post []string `yaml:"post,omitempty"`
+		} `yaml:"hooks,omitempty"`
 	} `yaml:"spec"`
 }
 
@@ -368,6 +388,55 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 		adl.Spec.Server.Port = 8080
 	}
 	adl.Spec.Server.Debug = conditionalPromptBool(useDefaults, "Enable debug mode", false)
+	
+	authEnabled := conditionalPromptBool(useDefaults, "Enable server authentication", false)
+	if authEnabled {
+		adl.Spec.Server.Auth = &struct {
+			Enabled bool `yaml:"enabled"`
+		}{
+			Enabled: true,
+		}
+	}
+
+	fmt.Println("\n🎴 Agent Card Configuration")
+	fmt.Println("---------------------------")
+	
+	addCard := conditionalPromptBool(useDefaults, "Configure agent card (protocol, transport, modes)", false)
+	if addCard {
+		adl.Spec.Card = &struct {
+			ProtocolVersion    string   `yaml:"protocolVersion,omitempty"`
+			URL                string   `yaml:"url,omitempty"`
+			PreferredTransport string   `yaml:"preferredTransport,omitempty"`
+			DefaultInputModes  []string `yaml:"defaultInputModes,omitempty"`
+			DefaultOutputModes []string `yaml:"defaultOutputModes,omitempty"`
+			DocumentationURL   string   `yaml:"documentationUrl,omitempty"`
+			IconURL            string   `yaml:"iconUrl,omitempty"`
+		}{}
+		
+		adl.Spec.Card.ProtocolVersion = conditionalPrompt(useDefaults, "Protocol version", "0.3.0")
+		adl.Spec.Card.PreferredTransport = conditionalPrompt(useDefaults, "Preferred transport", "JSONRPC")
+		
+		defaultInputModes := conditionalPrompt(useDefaults, "Default input modes (comma-separated)", "text,voice")
+		if defaultInputModes != "" {
+			modes := strings.Split(defaultInputModes, ",")
+			for i, mode := range modes {
+				modes[i] = strings.TrimSpace(mode)
+			}
+			adl.Spec.Card.DefaultInputModes = modes
+		}
+		
+		defaultOutputModes := conditionalPrompt(useDefaults, "Default output modes (comma-separated)", "text,audio")
+		if defaultOutputModes != "" {
+			modes := strings.Split(defaultOutputModes, ",")
+			for i, mode := range modes {
+				modes[i] = strings.TrimSpace(mode)
+			}
+			adl.Spec.Card.DefaultOutputModes = modes
+		}
+		
+		cardURL := conditionalPrompt(useDefaults, "Agent service URL", fmt.Sprintf("https://%s.example.com:%d", adl.Metadata.Name, adl.Spec.Server.Port))
+		adl.Spec.Card.URL = cardURL
+	}
 
 	fmt.Println("\n💻 Language Configuration")
 	fmt.Println("-------------------------")
@@ -473,6 +542,34 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 			Type string `yaml:"type,omitempty"`
 		}{
 			Type: deploymentType,
+		}
+	}
+
+	fmt.Println("\n📋 Source Control Management")
+	fmt.Println("-----------------------------")
+
+	scmProvider := conditionalPrompt(useDefaults, "SCM provider", "github")
+	if scmProvider != "" {
+		adl.Spec.SCM = &struct {
+			Provider  string `yaml:"provider"`
+			URL       string `yaml:"url,omitempty"`
+			GithubApp bool   `yaml:"github_app,omitempty"`
+		}{
+			Provider: scmProvider,
+		}
+
+		if scmProvider == "github" {
+			owner, repo := parseGitRemote()
+			var defaultURL string
+			if owner != "" && repo != "" {
+				defaultURL = fmt.Sprintf("https://github.com/%s/%s", owner, repo)
+			} else {
+				defaultURL = fmt.Sprintf("https://github.com/example/%s", adl.Metadata.Name)
+			}
+			
+			scmURL := conditionalPrompt(useDefaults, "Repository URL", defaultURL)
+			adl.Spec.SCM.URL = scmURL
+			adl.Spec.SCM.GithubApp = conditionalPromptBool(useDefaults, "Enable GitHub App integration", true)
 		}
 	}
 
