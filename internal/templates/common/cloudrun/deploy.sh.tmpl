@@ -1,0 +1,44 @@
+# Cloud Run deployment script for {{ .ADL.Metadata.Name }}
+# This script uses gcloud CLI for direct deployment without Kubernetes/Knative dependencies
+
+#!/bin/bash
+set -e
+
+# Configuration
+SERVICE_NAME="{{ .ADL.Metadata.Name }}"
+IMAGE_NAME="gcr.io/PROJECT_ID/{{ .ADL.Metadata.Name }}:{{ .ADL.Metadata.Version | default "latest" }}"
+PORT="{{ .ADL.Spec.Server.Port | default 8080 }}"
+REGION="${REGION:-us-central1}"
+PROJECT_ID="${PROJECT_ID}"
+
+# Build and push the Docker image
+echo "Building and pushing Docker image..."
+if command -v docker &> /dev/null; then
+  echo "Using Docker to build and push image..."
+  docker build -t "$IMAGE_NAME" .
+  docker push "$IMAGE_NAME"
+else
+  echo "Using Cloud Build to build and push image..."
+  gcloud builds submit --tag "$IMAGE_NAME"
+fi
+
+# Deploy to Cloud Run using gcloud
+echo "Deploying to Cloud Run..."
+gcloud run deploy "$SERVICE_NAME" \
+  --image "$IMAGE_NAME" \
+  --platform managed \
+  --region "$REGION" \
+  --port "$PORT" \
+  --allow-unauthenticated \
+  --set-env-vars "PORT=$PORT,ENV=production{{ if .ADL.Spec.Server.Debug }},DEBUG=true{{ end }}" \
+  --cpu 1 \
+  --memory 512Mi \
+  --min-instances 0 \
+  --max-instances 10 \
+  --concurrency 1000 \
+  --timeout 3600 \
+  --service-account "{{ .ADL.Metadata.Name }}@PROJECT_ID.iam.gserviceaccount.com" \
+  --execution-environment gen2
+
+echo "Deployment completed successfully!"
+echo "Service URL: $(gcloud run services describe $SERVICE_NAME --region=$REGION --format='value(status.url)')"

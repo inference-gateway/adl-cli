@@ -74,9 +74,7 @@ tasks:
   deploy:
     desc: Deploy to Google Cloud Run
     cmd: |
-      # Build and push Docker image
-      gcloud builds submit --tag gcr.io/$PROJECT_ID/{{`{{.APP_NAME}}`}}:{{`{{.VERSION}}`}}
-      # Deploy to Cloud Run
-      gcloud run services replace cloudrun/service.yaml --region=$REGION
+      chmod +x cloudrun/deploy.sh
+      ./cloudrun/deploy.sh
 {{- end }}
 {{- end }}

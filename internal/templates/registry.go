@@ -154,7 +154,7 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		case "kubernetes":
 			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"
 		case "cloudrun":
-			files["cloudrun/service.yaml"] = "cloudrun/service.yaml"
+			files["cloudrun/deploy.sh"] = "cloudrun/deploy.sh"
 		}
 	}
 
@@ -188,7 +188,7 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		case "kubernetes":
 			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"
 		case "cloudrun":
-			files["cloudrun/service.yaml"] = "cloudrun/service.yaml"
+			files["cloudrun/deploy.sh"] = "cloudrun/deploy.sh"
 		}
 	}
 
@@ -227,7 +227,7 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		case "kubernetes":
 			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"
 		case "cloudrun":
-			files["cloudrun/service.yaml"] = "cloudrun/service.yaml"
+			files["cloudrun/deploy.sh"] = "cloudrun/deploy.sh"
 		}
 	}
 
