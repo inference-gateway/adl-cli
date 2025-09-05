@@ -18,7 +18,7 @@ The codebase is generated using ADL CLI {{ .Metadata.CLIVersion }} and follows a
 ### Key Components
 
 - **Main Entry Point**: `main.go` - Configures and starts the A2A server with:
-  - {{ if .ADL.Spec.Agent.Provider }}{{ title .ADL.Spec.Agent.Provider }}-compatible{{ else }}OpenAI-compatible{{ end }} LLM client configuration
+  - OpenAI-compatible LLM client configuration
   - Agent builder with system prompt from `agent.yaml`
   - A2A server with streaming and background task handlers
   - Graceful shutdown handling
