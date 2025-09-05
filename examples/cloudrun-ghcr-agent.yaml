@@ -4,13 +4,11 @@ metadata:
   name: ghcr-example
   description: Example A2A agent using GitHub Container Registry
   version: "1.0.0"
-
 spec:
   capabilities:
     streaming: true
     pushNotifications: false
     stateTransitionHistory: true
-
   agent:
     provider: openai
     model: gpt-4o
@@ -19,7 +17,6 @@ spec:
       Your container is pre-built and stored in GHCR.
     maxTokens: 4000
     temperature: 0.7
-
   skills:
     - id: process
       name: process
@@ -32,20 +29,16 @@ spec:
             type: string
             description: The data to process
         required: ["data"]
-
   server:
     port: 8080
     debug: false
-
   language:
     go:
       module: github.com/example/ghcr-example
       version: "1.21"
-
   scm:
     provider: github
     url: "https://github.com/example/ghcr-example"
-
   deployment:
     type: cloudrun
     cloudrun:
@@ -69,7 +62,6 @@ spec:
       environment:
         LOG_LEVEL: debug
         CACHE_ENABLED: "true"
-
   sandbox:
     flox:
       enabled: true
