@@ -92,6 +92,7 @@ type Context struct {
 	Language   string
 	GenerateCI bool
 	GenerateCD bool
+	EnableAI   bool
 }
 
 // New creates a new template engine

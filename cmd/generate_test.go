@@ -230,6 +230,100 @@ spec:
 	}
 }
 
+func TestGenerateWithAI(t *testing.T) {
+	tempDir := t.TempDir()
+	outputPath := filepath.Join(tempDir, "test-ai-output")
+
+	adlContent := `apiVersion: adl.dev/v1
+kind: Agent
+metadata:
+  name: test-ai-agent
+  description: Test AI agent with sandbox environments
+  version: 1.0.0
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  server:
+    port: 8080
+    debug: false
+  language:
+    go:
+      module: github.com/test/ai-agent
+      version: "1.24"
+  sandbox:
+    flox:
+      enabled: true
+    devcontainer:
+      enabled: true
+`
+	adlPath := filepath.Join(tempDir, "agent.yaml")
+	if err := os.WriteFile(adlPath, []byte(adlContent), 0644); err != nil {
+		t.Fatalf("failed to write ADL file: %v", err)
+	}
+
+	originalADLFile := adlFile
+	originalOutputDir := outputDir
+	originalEnableAI := enableAI
+	defer func() {
+		adlFile = originalADLFile
+		outputDir = originalOutputDir
+		enableAI = originalEnableAI
+	}()
+
+	adlFile = adlPath
+	outputDir = outputPath
+	enableAI = true
+
+	err := runGenerate(generateCmd, []string{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	claudeMdPath := filepath.Join(outputPath, "CLAUDE.md")
+	if _, err := os.Stat(claudeMdPath); os.IsNotExist(err) {
+		t.Errorf("expected CLAUDE.md to be generated when --ai flag is enabled")
+	}
+
+	claudeMdContent, err := os.ReadFile(claudeMdPath)
+	if err != nil {
+		t.Fatalf("failed to read CLAUDE.md: %v", err)
+	}
+	if !containsString(string(claudeMdContent), "test-ai-agent") {
+		t.Errorf("expected CLAUDE.md to contain agent name")
+	}
+	if !containsString(string(claudeMdContent), "Test AI agent with sandbox environments") {
+		t.Errorf("expected CLAUDE.md to contain agent description")
+	}
+
+	devcontainerPath := filepath.Join(outputPath, ".devcontainer/devcontainer.json")
+	if _, err := os.Stat(devcontainerPath); os.IsNotExist(err) {
+		t.Errorf("expected .devcontainer/devcontainer.json to be generated")
+	}
+
+	devcontainerContent, err := os.ReadFile(devcontainerPath)
+	if err != nil {
+		t.Fatalf("failed to read devcontainer.json: %v", err)
+	}
+	if !containsString(string(devcontainerContent), "anthropic.claude-code") {
+		t.Errorf("expected devcontainer.json to contain claude-code extension when --ai flag is enabled")
+	}
+
+	floxManifestPath := filepath.Join(outputPath, ".flox/env/manifest.toml")
+	if _, err := os.Stat(floxManifestPath); os.IsNotExist(err) {
+		t.Errorf("expected .flox/env/manifest.toml to be generated")
+	}
+
+	floxContent, err := os.ReadFile(floxManifestPath)
+	if err != nil {
+		t.Fatalf("failed to read manifest.toml: %v", err)
+	}
+	if !containsString(string(floxContent), "claude-code.pkg-path") {
+		t.Errorf("expected manifest.toml to contain claude-code package when --ai flag is enabled")
+	}
+}
+
 func containsString(content, substr string) bool {
 	for i := 0; i <= len(content)-len(substr); i++ {
 		if content[i:i+len(substr)] == substr {

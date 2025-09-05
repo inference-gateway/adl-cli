@@ -209,6 +209,7 @@ task dev -- generate --file examples/go-agent.yaml --output ./test-go-agent
 - `--template` - Template to use (default: minimal)
 - `--overwrite` - Overwrite existing files
 - `--ci` - Generate CI workflow configuration
+- `--ai` - Generate AI assistant instructions (CLAUDE.md) and add claude-code to sandbox environments
 
 ### Validate Command
 `adl validate [file]` - Validate ADL file against schema

@@ -14,6 +14,7 @@ import (
 type Registry struct {
 	templates map[string]string
 	language  string
+	enableAI  bool
 }
 
 // Embed template files at compile time
@@ -21,11 +22,26 @@ type Registry struct {
 //go:embed languages/*/*.tmpl common/*/*.tmpl sandbox/*/*.tmpl
 var templateFS embed.FS
 
+// RegistryOptions holds options for creating a new registry
+type RegistryOptions struct {
+	Language string
+	EnableAI bool
+}
+
 // NewRegistry creates a new template registry for the specified language
 func NewRegistry(language string) (*Registry, error) {
+	return NewRegistryWithOptions(RegistryOptions{
+		Language: language,
+		EnableAI: false,
+	})
+}
+
+// NewRegistryWithOptions creates a new template registry with options
+func NewRegistryWithOptions(opts RegistryOptions) (*Registry, error) {
 	r := &Registry{
 		templates: make(map[string]string),
-		language:  language,
+		language:  opts.Language,
+		enableAI:  opts.EnableAI,
 	}
 
 	if err := r.loadTemplates(); err != nil {
@@ -146,6 +162,7 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 	}
 
 	r.addSandboxFiles(adl, files)
+	r.addAIFiles(files)
 
 	return files
 }
@@ -181,6 +198,7 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 	}
 
 	r.addSandboxFiles(adl, files)
+	r.addAIFiles(files)
 
 	return files
 }
@@ -213,8 +231,17 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 	}
 
 	r.addSandboxFiles(adl, files)
+	r.addAIFiles(files)
 
 	return files
+}
+
+// addAIFiles adds AI-related files to the file mapping when EnableAI is true
+func (r *Registry) addAIFiles(files map[string]string) {
+	if r.enableAI {
+		files["CLAUDE.md"] = "ai/claude.md"
+		files["AGENTS.md"] = "ai/agents.md"
+	}
 }
 
 // addSandboxFiles adds sandbox-related files to the file mapping

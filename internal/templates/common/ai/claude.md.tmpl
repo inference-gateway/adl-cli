@@ -1,0 +1,170 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+This is a {{ .ADL.Metadata.Name }} A2A (Agent-to-Agent) server generated from ADL (Agent Definition Language). The project is designed to implement agent-to-agent communication capabilities with the following core functionality:
+
+{{ .ADL.Metadata.Description }}
+
+## Core Architecture
+
+### Generated Components
+{{ if eq .Language "go" }}
+- **Main Server**: `main.go` - HTTP server entry point with {{.ADL.Spec.Server.Port}} port
+- **Agent Configuration**: `.well-known/agent.json` - Agent metadata and capabilities
+{{ if .ADL.Spec.Skills }}
+- **Skills**: Business logic components in `skills/` directory:
+  {{ range .ADL.Spec.Skills }}
+  - `skills/{{ .Name }}.go` - {{ .Description }}{{ end }}
+{{ end }}
+{{ else if eq .Language "rust" }}
+- **Main Server**: `src/main.rs` - HTTP server entry point with {{.ADL.Spec.Server.Port}} port  
+- **Agent Configuration**: `.well-known/agent.json` - Agent metadata and capabilities
+{{ if .ADL.Spec.Skills }}
+- **Skills**: Business logic components in `src/skills/` directory:
+  {{ range .ADL.Spec.Skills }}
+  - `src/skills/{{ .Name }}.rs` - {{ .Description }}{{ end }}
+{{ end }}
+{{ else if eq .Language "typescript" }}
+- **Main Server**: `src/index.ts` - HTTP server entry point with {{.ADL.Spec.Server.Port}} port
+- **Agent Configuration**: `.well-known/agent.json` - Agent metadata and capabilities
+{{ if .ADL.Spec.Skills }}
+- **Skills**: Business logic components in `src/skills/` directory:
+  {{ range .ADL.Spec.Skills }}
+  - `src/skills/{{ .Name }}.ts` - {{ .Description }}{{ end }}
+{{ end }}
+{{ end }}
+
+### Key Features
+{{ if .ADL.Spec.Capabilities.Streaming }}
+- **Streaming Support**: Real-time response streaming enabled
+{{ end }}
+{{ if .ADL.Spec.Capabilities.PushNotifications }}
+- **Push Notifications**: Server-sent events for real-time updates
+{{ end }}
+{{ if .ADL.Spec.Capabilities.StateTransitionHistory }}
+- **State History**: Tracks agent state transitions over time
+{{ end }}
+{{ if .ADL.Spec.Skills }}
+- **Skills**: {{ len .ADL.Spec.Skills }} integrated skills:
+  {{ range .ADL.Spec.Skills }}
+  - {{ .Name }}: {{ .Description }}{{ end }}
+{{ end }}
+
+## Development Guidelines
+
+### Code Patterns and Conventions
+{{ if eq .Language "go" }}
+- Use standard Go project layout with clear separation of concerns
+- Implement proper error handling with context using `fmt.Errorf("context: %w", err)`  
+- Follow Go naming conventions (PascalCase for exported, camelCase for internal)
+- Use interfaces for testability and dependency injection
+- Structure handler functions to be easily testable
+- Use table-driven tests for comprehensive test coverage
+{{ else if eq .Language "rust" }}
+- Follow Rust project conventions with clear module separation
+- Use proper error handling with `Result` types and error chaining
+- Follow Rust naming conventions (snake_case for functions/variables, PascalCase for types)
+- Use traits for abstraction and testability  
+- Structure handler functions to be easily testable
+- Use comprehensive unit tests with clear test cases
+{{ else if eq .Language "typescript" }}
+- Follow TypeScript best practices with proper typing
+- Use proper error handling with try-catch and custom error types
+- Follow camelCase naming convention for variables and functions
+- Use interfaces for contract definition and testability
+- Structure handler functions to be easily testable
+- Use comprehensive unit tests with Jest or similar testing framework
+{{ end }}
+
+### Skills Implementation
+
+The TODO placeholders in the skills files should be replaced with actual business logic. Each skill represents a specific capability or function of your agent:
+
+{{ if .ADL.Spec.Skills }}
+{{ range .ADL.Spec.Skills }}
+#### {{ .Name }}
+- **Description**: {{ .Description }}
+- **Input Schema**: Defined in the skill file
+- **Implementation**: Replace TODO placeholder with your business logic
+- **Testing**: Add comprehensive unit tests for this skill
+
+{{ end }}
+{{ else }}
+No skills defined - this is a minimal agent template.
+{{ end }}
+
+### Agent Integration
+
+{{ if .ADL.Spec.Agent }}
+{{ if .ADL.Spec.Agent.Provider }}
+This agent uses **{{ .ADL.Spec.Agent.Provider }}** as the AI provider{{ if .ADL.Spec.Agent.Model }} with model **{{ .ADL.Spec.Agent.Model }}**{{ end }}.
+{{ end }}
+
+{{ if .ADL.Spec.Agent.SystemPrompt }}
+**System Prompt**: {{ .ADL.Spec.Agent.SystemPrompt }}
+{{ end }}
+
+Key configuration:
+{{ if .ADL.Spec.Agent.MaxTokens }}
+- Max Tokens: {{ .ADL.Spec.Agent.MaxTokens }}
+{{ end }}
+{{ if .ADL.Spec.Agent.Temperature }}
+- Temperature: {{ .ADL.Spec.Agent.Temperature }}
+{{ end }}
+{{ end }}
+
+### Testing Strategy
+
+- **Unit Tests**: Test each skill and handler function in isolation
+- **Integration Tests**: Test the complete agent workflow end-to-end
+- **API Tests**: Validate all HTTP endpoints and their responses
+- **Agent Tests**: Test AI provider integration and responses
+
+{{ if eq .Language "go" }}
+Run tests with: `task test` or `go test ./...`
+{{ else if eq .Language "rust" }}
+Run tests with: `task test` or `cargo test`
+{{ else if eq .Language "typescript" }}
+Run tests with: `task test` or `npm test`
+{{ end }}
+
+### Development Workflow
+
+1. **Implement Skills**: Start by implementing the TODO placeholders in skill files
+2. **Add Tests**: Write comprehensive tests for each skill
+3. **Configure Agent**: Update agent configuration as needed
+4. **Test Integration**: Run full integration tests
+{{ if eq .Language "go" }}
+5. **Build & Run**: Use `task build` and `task run` commands
+{{ else if eq .Language "rust" }}
+5. **Build & Run**: Use `task build` and `task run` commands  
+{{ else if eq .Language "typescript" }}
+5. **Build & Run**: Use `task build` and `task run` commands
+{{ end }}
+
+### Environment Setup
+
+{{ if .ADL.Spec.Sandbox }}
+{{ if .ADL.Spec.Sandbox.Flox }}
+This project includes **Flox** environment configuration for reproducible development.
+{{ end }}
+{{ if .ADL.Spec.Sandbox.DevContainer }}
+This project includes **DevContainer** configuration for VS Code development.
+{{ end }}
+{{ end }}
+
+Required environment variables are documented in `.env.example`.
+
+## Important Reminders
+
+- Focus on implementing the business logic in TODO placeholders
+- Follow the established code patterns and conventions  
+- Write comprehensive tests for all functionality
+- Ensure proper error handling throughout
+- Keep the agent's core purpose and capabilities in mind while implementing
+- The generated scaffolding provides structure - implement the specific agent behavior
+
+Remember: This agent is designed to {{ lower .ADL.Metadata.Description }}. Keep this core purpose in focus while implementing features.
