@@ -111,9 +111,10 @@ type Language struct {
 
 // SCM contains source control management configuration
 type SCM struct {
-	Provider  string `yaml:"provider" json:"provider"`
-	URL       string `yaml:"url,omitempty" json:"url,omitempty"`
-	GithubApp bool   `yaml:"github_app,omitempty" json:"github_app,omitempty"`
+	Provider       string `yaml:"provider" json:"provider"`
+	URL            string `yaml:"url,omitempty" json:"url,omitempty"`
+	GithubApp      bool   `yaml:"github_app,omitempty" json:"github_app,omitempty"`
+	IssueTemplates bool   `yaml:"issue_templates,omitempty" json:"issue_templates,omitempty"`
 }
 
 // SandboxConfig for sandbox environment settings

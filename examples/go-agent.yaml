@@ -105,6 +105,7 @@ spec:
     provider: github
     url: "https://github.com/company/go-agent"
     github_app: true
+    issue_templates: true
   sandbox:
     flox:
       enabled: true

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/inference-gateway/adl-cli/internal/schema"
+	"github.com/inference-gateway/adl-cli/internal/templates"
 )
 
 func TestGenerator_Generate(t *testing.T) {
@@ -549,9 +550,9 @@ func TestGenerator_generateCD(t *testing.T) {
 
 func TestGenerator_buildGenerateCommand(t *testing.T) {
 	tests := []struct {
-		name           string
-		config         Config
-		expectedCmd    string
+		name        string
+		config      Config
+		expectedCmd string
 	}{
 		{
 			name: "minimal config",
@@ -580,12 +581,12 @@ func TestGenerator_buildGenerateCommand(t *testing.T) {
 		{
 			name: "config reproducing the issue scenario",
 			config: Config{
-				ADLFile:            "agent.yaml",
-				OutputDir:          ".",
-				Overwrite:          true,
-				GenerateCI:         true,
-				GenerateCD:         true,
-				EnableFlox:         true,
+				ADLFile:    "agent.yaml",
+				OutputDir:  ".",
+				Overwrite:  true,
+				GenerateCI: true,
+				GenerateCD: true,
+				EnableFlox: true,
 			},
 			expectedCmd: "adl generate --file agent.yaml --output . --overwrite --ci --cd --flox",
 		},
@@ -606,6 +607,126 @@ func TestGenerator_buildGenerateCommand(t *testing.T) {
 			cmd := g.buildGenerateCommand()
 			if cmd != tt.expectedCmd {
 				t.Errorf("buildGenerateCommand() = %q, expected %q", cmd, tt.expectedCmd)
+			}
+		})
+	}
+}
+
+func TestGenerator_IssueTemplates(t *testing.T) {
+	adlWithIssueTemplates := &schema.ADL{
+		APIVersion: "adl.dev/v1",
+		Kind:       "Agent",
+		Metadata: schema.Metadata{
+			Name:        "test-agent",
+			Description: "Test agent",
+			Version:     "1.0.0",
+		},
+		Spec: schema.Spec{
+			Capabilities: &schema.Capabilities{
+				Streaming:              true,
+				PushNotifications:      false,
+				StateTransitionHistory: false,
+			},
+			Server: schema.Server{
+				Port:  8080,
+				Debug: false,
+			},
+			Language: &schema.Language{
+				Go: &schema.GoConfig{
+					Module:  "github.com/example/test-agent",
+					Version: "1.24",
+				},
+			},
+			SCM: &schema.SCM{
+				Provider:       "github",
+				URL:            "https://github.com/example/test-agent",
+				IssueTemplates: true,
+			},
+		},
+	}
+
+	adlWithoutIssueTemplates := &schema.ADL{
+		APIVersion: "adl.dev/v1",
+		Kind:       "Agent",
+		Metadata: schema.Metadata{
+			Name:        "test-agent-no-templates",
+			Description: "Test agent without issue templates",
+			Version:     "1.0.0",
+		},
+		Spec: schema.Spec{
+			Capabilities: &schema.Capabilities{
+				Streaming:              true,
+				PushNotifications:      false,
+				StateTransitionHistory: false,
+			},
+			Server: schema.Server{
+				Port:  8080,
+				Debug: false,
+			},
+			Language: &schema.Language{
+				Go: &schema.GoConfig{
+					Module:  "github.com/example/test-agent-no-templates",
+					Version: "1.24",
+				},
+			},
+			SCM: &schema.SCM{
+				Provider:       "github",
+				URL:            "https://github.com/example/test-agent-no-templates",
+				IssueTemplates: false,
+			},
+		},
+	}
+
+	tests := []struct {
+		name            string
+		adl             *schema.ADL
+		expectTemplates bool
+		expectedFiles   []string
+	}{
+		{
+			name:            "with issue templates enabled",
+			adl:             adlWithIssueTemplates,
+			expectTemplates: true,
+			expectedFiles: []string{
+				".github/ISSUE_TEMPLATE/bug_report.md",
+				".github/ISSUE_TEMPLATE/feature_request.md",
+				".github/ISSUE_TEMPLATE/refactor_request.md",
+			},
+		},
+		{
+			name:            "with issue templates disabled",
+			adl:             adlWithoutIssueTemplates,
+			expectTemplates: false,
+			expectedFiles:   []string{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Test the registry file mapping logic
+			registry, err := templates.NewRegistry("go")
+			if err != nil {
+				t.Fatalf("Failed to create template registry: %v", err)
+			}
+
+			files := registry.GetFiles(tt.adl)
+
+			for _, expectedFile := range tt.expectedFiles {
+				if _, found := files[expectedFile]; !found {
+					t.Errorf("Expected file %s not found in generated files when issue templates are enabled", expectedFile)
+				}
+			}
+
+			if !tt.expectTemplates {
+				for _, templateFile := range []string{
+					".github/ISSUE_TEMPLATE/bug_report.md",
+					".github/ISSUE_TEMPLATE/feature_request.md",
+					".github/ISSUE_TEMPLATE/refactor_request.md",
+				} {
+					if _, found := files[templateFile]; found {
+						t.Errorf("Unexpected file %s found in generated files when issue templates are disabled", templateFile)
+					}
+				}
 			}
 		})
 	}
