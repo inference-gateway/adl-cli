@@ -379,26 +379,22 @@ func (g *Generator) buildGenerateCommand() string {
 	
 	parts = append(parts, "adl", "generate")
 	
-	// Add file flag - use relative path
 	if g.config.ADLFile != "" {
 		parts = append(parts, "--file", g.config.ADLFile)
 	} else {
 		parts = append(parts, "--file", "agent.yaml")
 	}
 	
-	// Add output flag - use relative path
 	if g.config.OutputDir != "" {
 		parts = append(parts, "--output", g.config.OutputDir)
 	} else {
 		parts = append(parts, "--output", ".")
 	}
 	
-	// Add template flag if not default
 	if g.config.Template != "" && g.config.Template != "minimal" {
 		parts = append(parts, "--template", g.config.Template)
 	}
 	
-	// Add boolean flags
 	if g.config.Overwrite {
 		parts = append(parts, "--overwrite")
 	}

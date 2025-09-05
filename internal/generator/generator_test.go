@@ -594,7 +594,7 @@ func TestGenerator_buildGenerateCommand(t *testing.T) {
 			config: Config{
 				ADLFile:   "agent.yaml",
 				OutputDir: ".",
-				Template:  "minimal",  // Default template should not be included
+				Template:  "minimal",
 			},
 			expectedCmd: "adl generate --file agent.yaml --output .",
 		},
