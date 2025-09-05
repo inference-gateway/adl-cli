@@ -27,6 +27,7 @@ var (
 	deploymentType     string
 	enableFlox         bool
 	enableDevContainer bool
+	enableAI           bool
 )
 
 func init() {
@@ -41,6 +42,7 @@ func init() {
 	generateCmd.Flags().StringVar(&deploymentType, "deployment", "", "Deployment type (kubernetes, defaults to empty for no deployment)")
 	generateCmd.Flags().BoolVar(&enableFlox, "flox", false, "Enable Flox environment")
 	generateCmd.Flags().BoolVar(&enableDevContainer, "devcontainer", false, "Enable DevContainer environment")
+	generateCmd.Flags().BoolVar(&enableAI, "ai", false, "Generate AI assistant instructions (CLAUDE.md) and add claude-code to sandbox environments")
 }
 
 func runGenerate(cmd *cobra.Command, args []string) error {
@@ -67,6 +69,7 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		DeploymentType:     deploymentType,
 		EnableFlox:         enableFlox,
 		EnableDevContainer: enableDevContainer,
+		EnableAI:           enableAI,
 	})
 
 	fmt.Printf("Generating A2A agent from '%s' to '%s'\n", absADLFile, absOutputDir)
@@ -87,6 +90,9 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	}
 	if enableDevContainer {
 		fmt.Printf("DevContainer environment: enabled\n")
+	}
+	if enableAI {
+		fmt.Printf("AI assistant instructions: enabled\n")
 	}
 
 	if err := gen.Generate(absADLFile, absOutputDir); err != nil {
