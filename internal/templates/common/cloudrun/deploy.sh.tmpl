@@ -52,3 +52,16 @@ gcloud run deploy "$SERVICE_NAME" \
 
 echo "Deployment completed successfully!"
 echo "Service URL: $(gcloud run services describe $SERVICE_NAME --region=$REGION --format='value(status.url)')"
+
+# Display deployment configuration summary
+echo ""
+echo "=== Deployment Configuration ==="
+echo "Service: $SERVICE_NAME"
+echo "Image: $IMAGE_NAME"
+echo "Region: $REGION"
+echo "CPU: $CPU"
+echo "Memory: $MEMORY"
+echo "Min/Max Instances: $MIN_INSTANCES/$MAX_INSTANCES"
+echo "Concurrency: $CONCURRENCY"
+echo "Timeout: ${TIMEOUT}s"
+echo "Service Account: $SERVICE_ACCOUNT"

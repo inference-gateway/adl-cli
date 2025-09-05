@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: Agent
+metadata:
+  name: cloudrun-example
+  description: Example A2A agent configured for Cloud Run deployment
+  version: "1.0.0"
+
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: true
+
+  agent:
+    provider: openai
+    model: gpt-4o
+    systemPrompt: |
+      You are a helpful A2A agent deployed on Google Cloud Run.
+      You can process requests and provide responses efficiently.
+    maxTokens: 4000
+    temperature: 0.7
+
+  skills:
+    - id: greet
+      name: greet
+      description: Greets the user with a personalized message
+      tags: ["greeting", "interaction"]
+      examples:
+        - "Hello there!"
+        - "Hi, how can I help you today?"
+      schema:
+        type: object
+        properties:
+          name:
+            type: string
+            description: The name of the person to greet
+        required: ["name"]
+
+  server:
+    port: 8080
+    debug: false
+
+  language:
+    go:
+      module: github.com/example/cloudrun-example
+      version: "1.21"
+
+  scm:
+    provider: github
+    url: "https://github.com/example/cloudrun-example"
+    issue_templates: true
+
+  deployment:
+    type: cloudrun
+    cloudrun:
+      image:
+        registry: gcr.io
+        repository: cloudrun-example
+        tag: v1.0.0
+        useCloudBuild: true
+      resources:
+        cpu: "1"
+        memory: 512Mi
+      scaling:
+        minInstances: 0
+        maxInstances: 100
+        concurrency: 1000
+      service:
+        timeout: 3600
+        allowUnauthenticated: true
+        serviceAccount: cloudrun-example@PROJECT_ID.iam.gserviceaccount.com
+        executionEnvironment: gen2
+      environment:
+        LOG_LEVEL: info
+        ENVIRONMENT: production
+
+  sandbox:
+    devcontainer:
+      enabled: true

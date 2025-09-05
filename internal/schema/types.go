@@ -135,7 +135,46 @@ type DevContainerConfig struct {
 
 // DeploymentConfig for deployment platform settings
 type DeploymentConfig struct {
-	Type string `yaml:"type,omitempty" json:"type,omitempty"`
+	Type     string            `yaml:"type,omitempty" json:"type,omitempty"`
+	CloudRun *CloudRunConfig  `yaml:"cloudrun,omitempty" json:"cloudrun,omitempty"`
+}
+
+// CloudRunConfig for Google Cloud Run specific deployment settings
+type CloudRunConfig struct {
+	Image        *ImageConfig        `yaml:"image,omitempty" json:"image,omitempty"`
+	Resources    *ResourcesConfig    `yaml:"resources,omitempty" json:"resources,omitempty"`
+	Scaling      *ScalingConfig      `yaml:"scaling,omitempty" json:"scaling,omitempty"`
+	Service      *ServiceConfig      `yaml:"service,omitempty" json:"service,omitempty"`
+	Environment  map[string]string   `yaml:"environment,omitempty" json:"environment,omitempty"`
+}
+
+// ImageConfig for container image settings
+type ImageConfig struct {
+	Registry    string `yaml:"registry,omitempty" json:"registry,omitempty"`
+	Repository  string `yaml:"repository,omitempty" json:"repository,omitempty"`
+	Tag         string `yaml:"tag,omitempty" json:"tag,omitempty"`
+	UseCloudBuild bool `yaml:"useCloudBuild,omitempty" json:"useCloudBuild,omitempty"`
+}
+
+// ResourcesConfig for CloudRun resource allocation
+type ResourcesConfig struct {
+	CPU    string `yaml:"cpu,omitempty" json:"cpu,omitempty"`
+	Memory string `yaml:"memory,omitempty" json:"memory,omitempty"`
+}
+
+// ScalingConfig for CloudRun scaling settings
+type ScalingConfig struct {
+	MinInstances int `yaml:"minInstances,omitempty" json:"minInstances,omitempty"`
+	MaxInstances int `yaml:"maxInstances,omitempty" json:"maxInstances,omitempty"`
+	Concurrency  int `yaml:"concurrency,omitempty" json:"concurrency,omitempty"`
+}
+
+// ServiceConfig for CloudRun service settings
+type ServiceConfig struct {
+	Timeout                int    `yaml:"timeout,omitempty" json:"timeout,omitempty"`
+	AllowUnauthenticated  bool   `yaml:"allowUnauthenticated,omitempty" json:"allowUnauthenticated,omitempty"`
+	ServiceAccount        string `yaml:"serviceAccount,omitempty" json:"serviceAccount,omitempty"`
+	ExecutionEnvironment  string `yaml:"executionEnvironment,omitempty" json:"executionEnvironment,omitempty"`
 }
 
 // Hooks contains lifecycle hooks for the generation process
