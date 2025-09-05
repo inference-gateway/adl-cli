@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-{{ .ADL.Metadata.Name }} is an A2A (Agent-to-Agent) server implementing the [A2A Protocol](https://github.com/inference-gateway/adk) for agent-to-agent communication. The project is automatically generated from ADL (Agent Definition Language) specifications defined in `agent.yaml`.
+{{ .ADL.Metadata.Name }} is an A2A (Agent-to-Agent) server implementing the [A2A Protocol](https://github.com/inference-gateway/adk) for agent-to-agent communication. {{ .ADL.Metadata.Description }}. The project is automatically generated from ADL (Agent Definition Language) specifications defined in `agent.yaml`.
 
 ## Core Architecture
 
@@ -65,8 +65,8 @@ docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest
 ## LLM Provider Configuration
 
 The agent uses OpenAI-compatible LLM client. Configure with:
-- `A2A_AGENT_CLIENT_PROVIDER`: {{- if .ADL.Spec.Agent.Provider }} `{{ .ADL.Spec.Agent.Provider }}`{{ else }} `openai`, `anthropic`, `azure`, `ollama`, `deepseek`{{ end }}
-- `A2A_AGENT_CLIENT_MODEL`: {{- if .ADL.Spec.Agent.Model }} `{{ .ADL.Spec.Agent.Model }}`{{ else }} Model identifier{{ end }}
+- `A2A_AGENT_CLIENT_PROVIDER`: {{- if and .ADL.Spec.Agent .ADL.Spec.Agent.Provider }} `{{ .ADL.Spec.Agent.Provider }}`{{ else }} `openai`, `anthropic`, `azure`, `ollama`, `deepseek`{{ end }}
+- `A2A_AGENT_CLIENT_MODEL`: {{- if and .ADL.Spec.Agent .ADL.Spec.Agent.Model }} `{{ .ADL.Spec.Agent.Model }}`{{ else }} Model identifier{{ end }}
 - `A2A_AGENT_CLIENT_API_KEY`: Provider API key
 - `A2A_AGENT_CLIENT_BASE_URL`: Custom endpoint (optional)
 
@@ -124,9 +124,7 @@ The project includes Flox environment configuration (`.flox/env/manifest.toml`) 
 - golangci-lint (linter)
 - go-task (Task runner)
 - Docker
-{{- if .ADL.Spec.Sandbox.ClaudeCode }}
 - Claude Code CLI
-{{- end }}
 
 Activate with: `flox activate` (if Flox is installed)
 {{- else if .ADL.Spec.Sandbox.DevContainer }}
