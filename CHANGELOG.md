@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.17.0](https://github.com/inference-gateway/adl-cli/compare/v0.16.0...v0.17.0) (2025-09-05)
+
+### ✨ Features
+
+* **issue-templates:** Add GitHub issue templates generation support ([#51](https://github.com/inference-gateway/adl-cli/issues/51)) ([ff79602](https://github.com/inference-gateway/adl-cli/commit/ff79602573ff7bf1ee173c6f09fd42021ae5d4a7)), closes [#47](https://github.com/inference-gateway/adl-cli/issues/47)
+
+### 🐛 Bug Fixes
+
+* **templates:** Only include skills import when skills are defined ([#48](https://github.com/inference-gateway/adl-cli/issues/48)) ([1974df0](https://github.com/inference-gateway/adl-cli/commit/1974df006616de43a77a4e1efa9528ff909520d6)), closes [#46](https://github.com/inference-gateway/adl-cli/issues/46)
+* **templates:** Preserve original generate command flags in Taskfile.yml ([#50](https://github.com/inference-gateway/adl-cli/issues/50)) ([1da3d8b](https://github.com/inference-gateway/adl-cli/commit/1da3d8b66a43214fafff3ef6ef4b2ba6735e278a)), closes [#49](https://github.com/inference-gateway/adl-cli/issues/49)
+
 ## [0.16.0](https://github.com/inference-gateway/adl-cli/compare/v0.15.0...v0.16.0) (2025-09-05)
 
 ### ✨ Features
