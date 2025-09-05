@@ -558,7 +558,13 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 			scmURL := conditionalPrompt(useDefaults, "Repository URL", defaultURL)
 			adl.Spec.SCM.URL = scmURL
 			adl.Spec.SCM.GithubApp = conditionalPromptBool(useDefaults, "Enable GitHub App integration", true)
-			adl.Spec.SCM.IssueTemplates = conditionalPromptBool(useDefaults, "Enable GitHub issue templates", true)
+
+			if useDefaults {
+				adl.Spec.SCM.IssueTemplates = true
+				fmt.Printf("Enable issue templates [y/n] [y]: y\n")
+			} else {
+				adl.Spec.SCM.IssueTemplates = promptBool("Enable issue templates", true)
+			}
 		}
 	}
 
