@@ -546,3 +546,67 @@ func TestGenerator_generateCD(t *testing.T) {
 		})
 	}
 }
+
+func TestGenerator_buildGenerateCommand(t *testing.T) {
+	tests := []struct {
+		name           string
+		config         Config
+		expectedCmd    string
+	}{
+		{
+			name: "minimal config",
+			config: Config{
+				ADLFile:   "agent.yaml",
+				OutputDir: ".",
+			},
+			expectedCmd: "adl generate --file agent.yaml --output .",
+		},
+		{
+			name: "config with all flags",
+			config: Config{
+				ADLFile:            "my-agent.yaml",
+				OutputDir:          "./output",
+				Template:           "custom",
+				Overwrite:          true,
+				GenerateCI:         true,
+				GenerateCD:         true,
+				DeploymentType:     "kubernetes",
+				EnableFlox:         true,
+				EnableDevContainer: true,
+				EnableAI:           true,
+			},
+			expectedCmd: "adl generate --file my-agent.yaml --output ./output --template custom --overwrite --ci --cd --deployment kubernetes --flox --devcontainer --ai",
+		},
+		{
+			name: "config reproducing the issue scenario",
+			config: Config{
+				ADLFile:            "agent.yaml",
+				OutputDir:          ".",
+				Overwrite:          true,
+				GenerateCI:         true,
+				GenerateCD:         true,
+				EnableFlox:         true,
+			},
+			expectedCmd: "adl generate --file agent.yaml --output . --overwrite --ci --cd --flox",
+		},
+		{
+			name: "config with default template (should not include template flag)",
+			config: Config{
+				ADLFile:   "agent.yaml",
+				OutputDir: ".",
+				Template:  "minimal",
+			},
+			expectedCmd: "adl generate --file agent.yaml --output .",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := New(tt.config)
+			cmd := g.buildGenerateCommand()
+			if cmd != tt.expectedCmd {
+				t.Errorf("buildGenerateCommand() = %q, expected %q", cmd, tt.expectedCmd)
+			}
+		})
+	}
+}
