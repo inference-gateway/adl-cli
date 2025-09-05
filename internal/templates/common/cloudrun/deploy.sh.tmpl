@@ -41,14 +41,14 @@ gcloud run deploy "$SERVICE_NAME" \
   --port "$PORT" \
   --allow-unauthenticated \
   --set-env-vars "PORT=$PORT,ENV=production{{ if .ADL.Spec.Server.Debug }},DEBUG=true{{ end }}" \
-  --cpu 1 \
-  --memory 512Mi \
-  --min-instances 0 \
-  --max-instances 10 \
-  --concurrency 1000 \
-  --timeout 3600 \
-  --service-account "{{ .ADL.Metadata.Name }}@${PROJECT_ID}.iam.gserviceaccount.com" \
-  --execution-environment gen2
+  --cpu "{{ .ADL.Spec.Deployment.CloudRun.Resources.CPU | default "1" }}" \
+  --memory "{{ .ADL.Spec.Deployment.CloudRun.Resources.Memory | default "512Mi" }}" \
+  --min-instances {{ .ADL.Spec.Deployment.CloudRun.Scaling.MinInstances | default 0 }} \
+  --max-instances {{ .ADL.Spec.Deployment.CloudRun.Scaling.MaxInstances | default 10 }} \
+  --concurrency {{ .ADL.Spec.Deployment.CloudRun.Scaling.Concurrency | default 1000 }} \
+  --timeout {{ .ADL.Spec.Deployment.CloudRun.Service.Timeout | default 3600 }} \
+  --service-account "{{ .ADL.Spec.Deployment.CloudRun.Service.ServiceAccount | default (printf "%s@${PROJECT_ID}.iam.gserviceaccount.com" .ADL.Metadata.Name) }}" \
+  --execution-environment {{ .ADL.Spec.Deployment.CloudRun.Service.ExecutionEnvironment | default "gen2" }}
 
 echo "Deployment completed successfully!"
 echo "Service URL: $(gcloud run services describe $SERVICE_NAME --region=$REGION --format='value(status.url)')"
@@ -59,9 +59,9 @@ echo "=== Deployment Configuration ==="
 echo "Service: $SERVICE_NAME"
 echo "Image: $IMAGE_NAME"
 echo "Region: $REGION"
-echo "CPU: $CPU"
-echo "Memory: $MEMORY"
-echo "Min/Max Instances: $MIN_INSTANCES/$MAX_INSTANCES"
-echo "Concurrency: $CONCURRENCY"
-echo "Timeout: ${TIMEOUT}s"
-echo "Service Account: $SERVICE_ACCOUNT"
+echo "CPU: {{ .ADL.Spec.Deployment.CloudRun.Resources.CPU | default "1" }}"
+echo "Memory: {{ .ADL.Spec.Deployment.CloudRun.Resources.Memory | default "512Mi" }}"
+echo "Min/Max Instances: {{ .ADL.Spec.Deployment.CloudRun.Scaling.MinInstances | default 0 }}/{{ .ADL.Spec.Deployment.CloudRun.Scaling.MaxInstances | default 10 }}"
+echo "Concurrency: {{ .ADL.Spec.Deployment.CloudRun.Scaling.Concurrency | default 1000 }}"
+echo "Timeout: {{ .ADL.Spec.Deployment.CloudRun.Service.Timeout | default 3600 }}s"
+echo "Service Account: {{ .ADL.Spec.Deployment.CloudRun.Service.ServiceAccount | default (printf "%s@${PROJECT_ID}.iam.gserviceaccount.com" .ADL.Metadata.Name) }}"
