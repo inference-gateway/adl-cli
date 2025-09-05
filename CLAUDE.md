@@ -31,7 +31,7 @@ ADL files define agents with:
 - **Tools**: Function definitions with JSON schemas  
 - **Server**: HTTP server configuration with optional authentication
 - **Language**: Programming language settings (Go, Rust, TypeScript)
-- **SCM**: Source control management configuration (GitHub, etc.)
+- **SCM**: Source control management configuration (GitHub, etc.) with issue templates support
 - **Sandbox**: Environment configuration with extensible structure supporting multiple environments (Flox, DevContainer)
 
 ## Development Commands
@@ -213,3 +213,41 @@ task dev -- generate --file examples/go-agent.yaml --output ./test-go-agent
 
 ### Validate Command
 `adl validate [file]` - Validate ADL file against schema
+
+## GitHub Issue Templates
+
+The ADL CLI supports automatic generation of GitHub issue templates to help track bugs, feature requests, and refactoring tasks for agents.
+
+### Configuration
+
+Issue templates are enabled through the `scm.issue_templates` field in the ADL file:
+
+```yaml
+spec:
+  scm:
+    provider: github
+    url: "https://github.com/company/my-agent"
+    issue_templates: true  # Enable issue template generation
+```
+
+### Generated Templates
+
+When `issue_templates` is set to `true`, the generator creates three issue template files in `.github/ISSUE_TEMPLATE/`:
+
+- **`bug_report.md`** - For reporting bugs and issues
+- **`feature_request.md`** - For requesting new features 
+- **`refactor_request.md`** - For requesting code improvements and refactoring
+
+### Template Features
+
+- Templates include ADL-specific context (agent name, version)
+- Follow GitHub issue template format with frontmatter
+- Include structured sections for consistent issue reporting
+- Support for severity/priority classification
+- Include environment information and log collection sections
+
+### Usage
+
+1. Set `issue_templates: true` in your ADL file's SCM section
+2. Run `adl generate` to create the templates
+3. Issue templates will be available in the GitHub repository for contributors to use

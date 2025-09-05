@@ -19,7 +19,7 @@ type Registry struct {
 
 // Embed template files at compile time
 //
-//go:embed languages/*/*.tmpl common/*/*.tmpl sandbox/*/*.tmpl
+//go:embed languages/*/*.tmpl common/*/*.tmpl common/github/*.tmpl sandbox/*/*.tmpl
 var templateFS embed.FS
 
 // RegistryOptions holds options for creating a new registry
@@ -162,6 +162,7 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 
 	r.addSandboxFiles(adl, files)
 	r.addAIFiles(files)
+	r.addIssueTemplateFiles(adl, files)
 
 	return files
 }
@@ -197,6 +198,7 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 
 	r.addSandboxFiles(adl, files)
 	r.addAIFiles(files)
+	r.addIssueTemplateFiles(adl, files)
 
 	return files
 }
@@ -229,6 +231,7 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 
 	r.addSandboxFiles(adl, files)
 	r.addAIFiles(files)
+	r.addIssueTemplateFiles(adl, files)
 
 	return files
 }
@@ -266,6 +269,17 @@ func (r *Registry) ListTemplates() []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+// addIssueTemplateFiles adds GitHub issue template files when enabled
+func (r *Registry) addIssueTemplateFiles(adl *schema.ADL, files map[string]string) {
+	if adl.Spec.SCM != nil && adl.Spec.SCM.IssueTemplates {
+		if adl.Spec.SCM.Provider == "github" || adl.Spec.SCM.Provider == "" {
+			files[".github/ISSUE_TEMPLATE/bug_report.md"] = "github/bug_report.md"
+			files[".github/ISSUE_TEMPLATE/feature_request.md"] = "github/feature_request.md"
+			files[".github/ISSUE_TEMPLATE/refactor_request.md"] = "github/refactor_request.md"
+		}
+	}
 }
 
 // DetectLanguageFromADL detects the programming language from ADL
