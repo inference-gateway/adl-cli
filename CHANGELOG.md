@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.18.0](https://github.com/inference-gateway/adl-cli/compare/v0.17.0...v0.18.0) (2025-09-05)
+
+### ✨ Features
+
+* **deployment:** Add CloudRun deployment support to ADL CLI ([#55](https://github.com/inference-gateway/adl-cli/issues/55)) ([5d3f549](https://github.com/inference-gateway/adl-cli/commit/5d3f5498849e4705104698bb6ec67187a5de8a47)), closes [#52](https://github.com/inference-gateway/adl-cli/issues/52)
+
+### ♻️ Improvements
+
+* **templates:** Simplify GitHub issue templates for better flexibility ([#57](https://github.com/inference-gateway/adl-cli/issues/57)) ([025b6bd](https://github.com/inference-gateway/adl-cli/commit/025b6bd798da00a81b3dcd4f62e3183424098a21)), closes [#56](https://github.com/inference-gateway/adl-cli/issues/56)
+* **templates:** Use GitHub repository name variable in CD workflow ([#54](https://github.com/inference-gateway/adl-cli/issues/54)) ([f493c63](https://github.com/inference-gateway/adl-cli/commit/f493c63ffafa504ad0afff7310f5600f532fb84c)), closes [#53](https://github.com/inference-gateway/adl-cli/issues/53)
+
 ## [0.17.0](https://github.com/inference-gateway/adl-cli/compare/v0.16.0...v0.17.0) (2025-09-05)
 
 ### ✨ Features
