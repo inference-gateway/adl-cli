@@ -26,7 +26,7 @@ jobs:
           private-key: ${{`{{ secrets.BOT_GH_APP_PRIVATE_KEY }}`}}
           owner: ${{`{{ github.repository_owner }}`}}
           repositories: |
-            {{ .ADL.Metadata.Name }}
+            ${{`{{ github.event.repository.name }}`}}
 
       - name: Get GitHub App User ID
         id: get-user-id
@@ -224,7 +224,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{`{{ github.repository_owner }}`}}/{{ .ADL.Metadata.Name }}
+          images: ghcr.io/${{`{{ github.repository_owner }}`}}/${{`{{ github.event.repository.name }}`}}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
