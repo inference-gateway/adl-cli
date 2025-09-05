@@ -631,12 +631,38 @@ spec:
   scm:
     provider: github  # gitlab support planned
     url: "https://github.com/company/my-agent"
+    github_app: false  # optional: enable GitHub App for CD
 ```
 
 **Features:**
 - **Automatic CI Detection** - Generates appropriate workflows based on SCM provider
 - **Repository Integration** - Links generated projects to source control
 - **Workflow Optimization** - SCM-specific optimizations and best practices
+- **GitHub App Support** - Enhanced security for enterprise CD pipelines
+
+#### GitHub App Integration
+
+For enterprise environments, you can enable GitHub App-based CD deployment for enhanced security:
+
+```yaml
+spec:
+  scm:
+    provider: github
+    url: "https://github.com/company/my-agent"
+    github_app: true
+```
+
+**GitHub App CD Benefits:**
+- **Enhanced Security** - App tokens are automatically revoked after pipeline execution
+- **Enterprise Compliance** - Keeps main branch protected from direct pushes
+- **Bot Identity** - Release operations performed by dedicated bot account
+- **Audit Trail** - Clear attribution of automated actions
+
+**Required GitHub Secrets:**
+- `BOT_GH_APP_ID` - Your GitHub App ID
+- `BOT_GH_APP_PRIVATE_KEY` - Your GitHub App private key
+
+When `github_app: true` is set, the generated CD pipeline will use GitHub App authentication instead of the default `GITHUB_TOKEN`, providing better security isolation for release management.
 
 ### AI Provider Support
 
@@ -650,12 +676,22 @@ The CLI includes example ADL files in the `examples/` directory:
 ```bash
 # Validate examples
 adl validate examples/go-agent.yaml
-adl validate examples/rust-agent.yaml
+adl validate examples/rust-agent.yaml  
+adl validate examples/github-app-agent.yaml
 
 # Generate from examples
 adl generate --file examples/go-agent.yaml --output ./test-go-agent
 adl generate --file examples/rust-agent.yaml --output ./test-rust-agent
+adl generate --file examples/github-app-agent.yaml --output ./test-github-app-agent --cd
+
+# Generate with CI/CD pipeline
+adl generate --file examples/github-app-agent.yaml --output ./enterprise-agent --ci --cd
 ```
+
+**Example ADL Files:**
+- `go-agent.yaml` - Basic Go agent with multiple skills and capabilities
+- `rust-agent.yaml` - Rust agent with enterprise features
+- `github-app-agent.yaml` - Enterprise agent with GitHub App CD integration
 
 ## Template System & Architecture
 

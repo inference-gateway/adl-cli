@@ -807,7 +807,9 @@ func (g *Generator) generateGitHubCDWorkflow(adl *schema.ADL, outputDir string, 
 		return nil
 	}
 
-	workflowContent, err := templateEngine.ExecuteTemplate("ci/cd.yml", ctx)
+	templateKey := "cd/cd.yaml"
+
+	workflowContent, err := templateEngine.ExecuteTemplate(templateKey, ctx)
 	if err != nil {
 		return fmt.Errorf("failed to execute CD workflow template: %w", err)
 	}

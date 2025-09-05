@@ -94,6 +94,7 @@ spec:
   scm:
     provider: github
     url: "https://github.com/company/rust-agent"
+    github_app: true
   sandbox:
     flox:
       enabled: false

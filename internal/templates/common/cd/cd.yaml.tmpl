@@ -18,13 +18,41 @@ jobs:
       new_release_version: ${{`{{ steps.semantic.outputs.new_release_version }}`}}
       new_release_published: ${{`{{ steps.semantic.outputs.new_release_published }}`}}
     steps:
+{{- if and .ADL.Spec.SCM .ADL.Spec.SCM.GithubApp }}
+      - uses: actions/create-github-app-token@v2.1.1
+        id: app-token
+        with:
+          app-id: ${{`{{ secrets.BOT_GH_APP_ID }}`}}
+          private-key: ${{`{{ secrets.BOT_GH_APP_PRIVATE_KEY }}`}}
+          owner: ${{`{{ github.repository_owner }}`}}
+          repositories: |
+            {{ .ADL.Metadata.Name }}
+
+      - name: Get GitHub App User ID
+        id: get-user-id
+        run: echo "user-id=$(gh api "/users/${{`{{ steps.app-token.outputs.app-slug }}`}}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{`{{ steps.app-token.outputs.token }}`}}
+
+      - name: Set up Git
+        run: |
+          git config --global user.name '${{`{{ steps.app-token.outputs.app-slug }}`}}[bot]'
+          git config --global user.email '${{`{{ steps.get-user-id.outputs.user-id }}`}}+${{`{{ steps.app-token.outputs.app-slug }}`}}[bot]@users.noreply.github.com'
+          git config --global commit.gpgsign false
+          git config --global commit.signoff true
+
+{{- end }}
       - name: Checkout code
         uses: actions/checkout@v4.2.2
         with:
           ref: ${{`{{ github.ref }}`}}
           fetch-depth: 0
           persist-credentials: false
+{{- if and .ADL.Spec.SCM .ADL.Spec.SCM.GithubApp }}
+          token: ${{`{{ steps.app-token.outputs.token }}`}}
+{{- else }}
           token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
+{{- end }}
 
 {{- if eq .Language "go" }}
       - name: Set up Go
@@ -123,7 +151,11 @@ jobs:
         id: semantic
         env:
           CI: true
+{{- if and .ADL.Spec.SCM .ADL.Spec.SCM.GithubApp }}
+          GITHUB_TOKEN: ${{`{{ steps.app-token.outputs.token }}`}}
+{{- else }}
           GITHUB_TOKEN: ${{`{{ secrets.GITHUB_TOKEN }}`}}
+{{- end }}
         run: |
           # Create first release if not exists - Initial Release Version 0.1.0
           if ! gh release view v0.1.0 >/dev/null 2>&1; then
