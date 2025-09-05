@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.18.1](https://github.com/inference-gateway/adl-cli/compare/v0.18.0...v0.18.1) (2025-09-05)
+
+### ♻️ Improvements
+
+* **docs:** Update deployment section ([7056f94](https://github.com/inference-gateway/adl-cli/commit/7056f942ff95adbab6d3d153b30c0e6a28fb1707))
+* **templates:** Clean up feature request template ([bfb1c31](https://github.com/inference-gateway/adl-cli/commit/bfb1c3112aacb1b0055eb77eecf2918bddf3f2c1))
+* **templates:** Refactor request template cleanup ([791e432](https://github.com/inference-gateway/adl-cli/commit/791e43289dc59d3770da6e6486ffa1a0516daa8c))
+
+### 📚 Documentation
+
+* Update bug_report template with placeholders ([a766f3e](https://github.com/inference-gateway/adl-cli/commit/a766f3e47e4df9af896bb77acb595cee307d20a9))
+
 ## [0.18.0](https://github.com/inference-gateway/adl-cli/compare/v0.17.0...v0.18.0) (2025-09-05)
 
 ### ✨ Features
