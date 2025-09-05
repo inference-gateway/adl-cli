@@ -223,6 +223,9 @@ adl generate --file agent.yaml --output ./test-my-agent --overwrite
 
 # Generate with CI workflow configuration
 adl generate --file agent.yaml --output ./test-my-agent --ci
+
+# Generate with AI assistant instructions and claude-code integration
+adl generate --file agent.yaml --output ./test-my-agent --ai
 ```
 
 #### Generate Flags
@@ -235,6 +238,7 @@ adl generate --file agent.yaml --output ./test-my-agent --ci
 | `--overwrite` | Overwrite existing files (respects .adl-ignore) |
 | `--ci` | Generate CI workflow configuration (GitHub Actions) |
 | `--cd` | Generate CD pipeline configuration with semantic-release |
+| `--ai` | Generate AI assistant instructions (CLAUDE.md) and add claude-code to sandbox environments |
 
 **CI Generation Features:**
 - **Automatic Provider Detection**: Detects GitHub from ADL `spec.scm.provider` (GitLab support planned)
@@ -250,6 +254,19 @@ adl generate --file agent.yaml --output ./test-my-agent --ci
 - **Manual Dispatch**: CD workflow triggered manually via GitHub Actions
 - **Changelog Generation**: Automatic CHANGELOG.md generation with release notes
 - **GitHub Releases**: Creates GitHub releases with appropriate tagging
+
+**AI Integration Features:**
+The `--ai` flag enables enhanced development experience with AI assistant capabilities:
+
+- **CLAUDE.md Generation**: Creates comprehensive AI assistant instructions tailored to your agent
+  - Project-specific guidelines based on your ADL configuration
+  - Language-specific development patterns and best practices
+  - Skills implementation guidance with TODO placeholders context
+  - Testing strategies and development workflow recommendations
+- **Claude Code Integration**: Automatically adds claude-code to sandbox environments
+  - DevContainer integration for seamless AI-assisted development
+  - Flox environment integration with claude-code tooling
+  - Enhanced development experience with AI pair programming capabilities
 
 
 ## Agent Definition Language (ADL)
@@ -417,6 +434,7 @@ my-go-agent/
 ├── .gitignore                 # Standard Git ignore patterns
 ├── .gitattributes             # Git attributes configuration
 ├── .editorconfig              # Editor configuration
+├── CLAUDE.md                  # AI assistant instructions (generated with --ai flag)
 └── README.md                  # Project documentation with setup instructions
 ```
 
@@ -441,6 +459,7 @@ my-rust-agent/
 ├── .releaserc.yaml            # Semantic-release configuration (with --cd flag)
 ├── k8s/
 │   └── deployment.yaml        # Kubernetes deployment
+├── CLAUDE.md                  # AI assistant instructions (generated with --ai flag)
 └── README.md                  # Documentation
 ```
 
@@ -462,6 +481,8 @@ All projects include these essential files regardless of language:
 - **Development Environment** - Based on `sandbox` configuration:
   - **Flox**: `.flox/` directory with environment configuration when `sandbox.flox.enabled: true`
   - **DevContainer**: `.devcontainer/devcontainer.json` when `sandbox.devcontainer.enabled: true`
+- **AI Assistant Instructions** - When using `--ai` flag:
+  - **CLAUDE.md**: Comprehensive AI assistant instructions tailored to your agent configuration
 
 ### CI Integration
 
