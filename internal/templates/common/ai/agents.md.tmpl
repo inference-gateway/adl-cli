@@ -105,13 +105,8 @@ The agent exposes the following HTTP endpoints:
 ## Environment Setup
 
 ### Required Environment Variables
-{{ if eq .Language "go" }}
-See `.env.example` for required environment variables including:
-{{ else if eq .Language "rust" }}
-See `.env.example` for required environment variables including:
-{{ else if eq .Language "typescript" }}
-See `.env.example` for required environment variables including:
-{{ end }}
+
+Key environment variables you'll need to configure:
 {{ if .ADL.Spec.Agent }}
 {{ if .ADL.Spec.Agent.Provider }}
 - `{{ upper .ADL.Spec.Agent.Provider }}_API_KEY` - API key for {{ .ADL.Spec.Agent.Provider }}
