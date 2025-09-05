@@ -268,9 +268,9 @@ The ADL CLI supports generating deployment configurations for multiple platforms
 
 #### Google Cloud Run
 - **Flag**: `--deployment cloudrun`
-- **Generated Files**: `cloudrun/service.yaml`
+- **Generated Files**: `cloudrun/deploy.sh`
 - **Requirements**: Google Cloud SDK (gcloud) installed and authenticated
-- **Deploy Command**: `task deploy`
+- **Deploy Command**: `task deploy` or `./cloudrun/deploy.sh`
 
 ### Deployment Workflow
 
@@ -290,6 +290,56 @@ When using the `--cd` flag with deployment configuration:
 - `GCP_SA_KEY`: Google Cloud service account key (GitHub Actions secret)
 - `GCP_PROJECT_ID`: Google Cloud project ID (GitHub Actions secret)
 - `GCP_REGION`: Google Cloud region for deployment (GitHub Actions secret)
+
+### CloudRun Deployment Features
+
+The ADL CLI supports comprehensive CloudRun deployment configuration through the ADL file's `deployment` section:
+
+#### Container Registry Support
+- **Google Container Registry (GCR)**: Uses Cloud Build for automatic image building
+- **GitHub Container Registry (GHCR)**: Uses pre-built images, skips Cloud Build
+- **Custom Registries**: Supports other container registries with appropriate configuration
+
+#### Configurable Resources
+- **CPU**: Configurable CPU allocation (0.1 to 8 cores)
+- **Memory**: Memory limits from 128Mi to 32Gi
+- **Scaling**: Min/max instances and concurrency settings
+- **Timeout**: Request timeout configuration
+- **Service Account**: Custom GCP service account assignment
+- **Environment Variables**: Custom environment variable injection
+
+#### Generated Deployment Script
+The generated `cloudrun/deploy.sh` script provides:
+- Environment variable validation (PROJECT_ID, REGION)
+- Conditional container building (Docker vs Cloud Build)
+- Direct gcloud deployment with all configured options
+- Deployment configuration summary display
+- Service URL retrieval after successful deployment
+
+#### ADL Configuration Example
+```yaml
+spec:
+  deployment:
+    type: cloudrun
+    cloudrun:
+      image:
+        registry: ghcr.io  # or gcr.io
+        repository: myorg/agent
+        useCloudBuild: false  # Skip for external registries
+      resources:
+        cpu: "2"
+        memory: 1Gi
+      scaling:
+        minInstances: 1
+        maxInstances: 100
+        concurrency: 1000
+      service:
+        timeout: 3600
+        serviceAccount: my-agent@PROJECT_ID.iam.gserviceaccount.com
+        executionEnvironment: gen2
+      environment:
+        LOG_LEVEL: info
+```
 
 ### Usage Examples
 
