@@ -258,7 +258,7 @@ adl generate --file agent.yaml --output ./test-my-agent --ai
 **AI Integration Features:**
 The `--ai` flag enables enhanced development experience with AI assistant capabilities:
 
-- **CLAUDE.md Generation**: Creates comprehensive AI assistant instructions tailored to your agent
+- **CLAUDE.md Generation**: Creates AI assistant instructions tailored to your agent
   - Project-specific guidelines based on your ADL configuration
   - Language-specific development patterns and best practices
   - Skills implementation guidance with TODO placeholders context
@@ -266,7 +266,7 @@ The `--ai` flag enables enhanced development experience with AI assistant capabi
 - **Claude Code Integration**: Automatically adds claude-code to sandbox environments
   - DevContainer integration for seamless AI-assisted development
   - Flox environment integration with claude-code tooling
-  - Enhanced development experience with AI pair programming capabilities
+  - Improved development experience with AI pair programming capabilities
 
 
 ## Agent Definition Language (ADL)
@@ -482,7 +482,7 @@ All projects include these essential files regardless of language:
   - **Flox**: `.flox/` directory with environment configuration when `sandbox.flox.enabled: true`
   - **DevContainer**: `.devcontainer/devcontainer.json` when `sandbox.devcontainer.enabled: true`
 - **AI Assistant Instructions** - When using `--ai` flag:
-  - **CLAUDE.md**: Comprehensive AI assistant instructions tailored to your agent configuration
+  - **CLAUDE.md**: AI assistant instructions tailored to your agent configuration
 
 ### CI Integration
 
