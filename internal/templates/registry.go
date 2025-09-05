@@ -240,6 +240,7 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 func (r *Registry) addAIFiles(files map[string]string) {
 	if r.enableAI {
 		files["CLAUDE.md"] = "ai/claude.md"
+		files["AGENTS.md"] = "ai/agents.md"
 	}
 }
 
