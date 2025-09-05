@@ -6,10 +6,20 @@ set -e
 
 # Configuration
 SERVICE_NAME="{{ .ADL.Metadata.Name }}"
-IMAGE_NAME="gcr.io/PROJECT_ID/{{ .ADL.Metadata.Name }}:{{ .ADL.Metadata.Version | default "latest" }}"
+IMAGE_NAME="gcr.io/${PROJECT_ID}/{{ .ADL.Metadata.Name }}:${VERSION:-{{ .ADL.Metadata.Version | default "latest" }}}"
 PORT="{{ .ADL.Spec.Server.Port | default 8080 }}"
 REGION="${REGION:-us-central1}"
-PROJECT_ID="${PROJECT_ID}"
+
+# Validate required environment variables
+if [ -z "$PROJECT_ID" ]; then
+  echo "Error: PROJECT_ID environment variable is required"
+  exit 1
+fi
+
+if [ -z "$REGION" ]; then
+  echo "Error: REGION environment variable is required"
+  exit 1
+fi
 
 # Build and push the Docker image
 echo "Building and pushing Docker image..."
@@ -37,7 +47,7 @@ gcloud run deploy "$SERVICE_NAME" \
   --max-instances 10 \
   --concurrency 1000 \
   --timeout 3600 \
-  --service-account "{{ .ADL.Metadata.Name }}@PROJECT_ID.iam.gserviceaccount.com" \
+  --service-account "{{ .ADL.Metadata.Name }}@${PROJECT_ID}.iam.gserviceaccount.com" \
   --execution-environment gen2
 
 echo "Deployment completed successfully!"
