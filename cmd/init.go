@@ -281,7 +281,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 			Temperature  float64 `yaml:"temperature,omitempty"`
 		}{}
 
-		provider := conditionalPromptChoice(useDefaults, "AI Provider", []string{"openai", "anthropic", "azure", "ollama", "deepseek"}, "")
+		provider := conditionalPromptChoice(useDefaults, "AI Provider", []string{"openai", "anthropic", "ollama", "deepseek", "mistral", "cloudflare", "cohere", "groq"}, "")
 		adl.Spec.Agent.Provider = provider
 
 		adl.Spec.Agent.Model = conditionalPrompt(useDefaults, "Model", "")
