@@ -11,8 +11,10 @@ import (
 	config "github.com/inference-gateway/adk/server/config"
 	envconfig "github.com/sethvargo/go-envconfig"
 	zap "go.uber.org/zap"
+{{- if .ADL.Spec.Skills }}
 
 	skills "{{ .ADL.Spec.Language.Go.Module }}/skills"
+{{- end }}
 )
 
 // Config represents the application configuration
