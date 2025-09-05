@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.16.0](https://github.com/inference-gateway/adl-cli/compare/v0.15.0...v0.16.0) (2025-09-05)
+
+### ✨ Features
+
+* **cd:** Add GitHub App support for CD execution ([#41](https://github.com/inference-gateway/adl-cli/issues/41)) ([855d8ea](https://github.com/inference-gateway/adl-cli/commit/855d8ea25f32f8466a03996403cf6725e25f7e1c)), closes [#37](https://github.com/inference-gateway/adl-cli/issues/37)
+* **generate:** Add --ai flag to generate AI assistant instructions ([#38](https://github.com/inference-gateway/adl-cli/issues/38)) ([ee5fa01](https://github.com/inference-gateway/adl-cli/commit/ee5fa01ffa99e2d226f75c4cee32e000a18176df)), closes [#11](https://github.com/inference-gateway/adl-cli/issues/11)
+
+### ♻️ Improvements
+
+* Delete .env.example template ([#42](https://github.com/inference-gateway/adl-cli/issues/42)) ([436efdd](https://github.com/inference-gateway/adl-cli/commit/436efdd2b622f91aff66464c8245a3be24b1c01d))
+* **init:** Make default AI provider and model vendor-neutral ([#45](https://github.com/inference-gateway/adl-cli/issues/45)) ([149e057](https://github.com/inference-gateway/adl-cli/commit/149e0575164054aaa2f4ded17ba663ece97a4b5a))
+
+### 🐛 Bug Fixes
+
+* **init:** Add default SCM configuration when using --defaults flag ([#44](https://github.com/inference-gateway/adl-cli/issues/44)) ([01ce420](https://github.com/inference-gateway/adl-cli/commit/01ce420c9ef7db7de352290aceaf3827142c1e09)), closes [#43](https://github.com/inference-gateway/adl-cli/issues/43)
+* **templates:** Remove double escaping of GITHUB_OUTPUT in CD template ([#40](https://github.com/inference-gateway/adl-cli/issues/40)) ([4997dd3](https://github.com/inference-gateway/adl-cli/commit/4997dd3164fb2682fb3885b780c0421c46f6a274)), closes [#36](https://github.com/inference-gateway/adl-cli/issues/36)
+
 ## [0.15.0](https://github.com/inference-gateway/adl-cli/compare/v0.14.6...v0.15.0) (2025-09-03)
 
 ### ✨ Features
