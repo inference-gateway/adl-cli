@@ -209,6 +209,8 @@ task dev -- generate --file examples/go-agent.yaml --output ./test-go-agent
 - `--template` - Template to use (default: minimal)
 - `--overwrite` - Overwrite existing files
 - `--ci` - Generate CI workflow configuration
+- `--cd` - Generate CD pipeline configuration with semantic-release
+- `--deployment` - Deployment type (kubernetes, cloudrun, defaults to empty for no deployment)
 - `--ai` - Generate AI assistant instructions (CLAUDE.md) and add claude-code to sandbox environments
 
 ### Validate Command
@@ -251,3 +253,103 @@ When `issue_templates` is set to `true`, the generator creates three issue templ
 1. Set `issue_templates: true` in your ADL file's SCM section
 2. Run `adl generate` to create the templates
 3. Issue templates will be available in the GitHub repository for contributors to use
+
+## Deployment Configuration
+
+The ADL CLI supports generating deployment configurations for multiple platforms, making it easy to deploy A2A agents to various environments.
+
+### Supported Deployment Types
+
+#### Kubernetes
+- **Flag**: `--deployment kubernetes`
+- **Generated Files**: `k8s/deployment.yaml`
+- **Requirements**: kubectl configured with cluster access
+- **Deploy Command**: `task deploy` or `kubectl apply -f k8s/`
+
+#### Google Cloud Run
+- **Flag**: `--deployment cloudrun`
+- **Generated Files**: `cloudrun/deploy.sh`
+- **Requirements**: Google Cloud SDK (gcloud) installed and authenticated
+- **Deploy Command**: `task deploy` or `./cloudrun/deploy.sh`
+
+### Deployment Workflow
+
+When using the `--cd` flag with deployment configuration:
+
+1. **CI/CD Integration**: Deployment is automatically added to the CD workflow
+2. **Container Building**: Docker images are built and pushed to the appropriate registry
+3. **Automated Deployment**: Services are deployed automatically after successful releases
+4. **Environment Variables**: Required secrets and environment variables are documented
+
+### Required Environment Variables
+
+#### For Kubernetes Deployment
+- `KUBECONFIG`: Kubernetes cluster configuration (GitHub Actions secret)
+
+#### For Cloud Run Deployment  
+- `GCP_SA_KEY`: Google Cloud service account key (GitHub Actions secret)
+- `GCP_PROJECT_ID`: Google Cloud project ID (GitHub Actions secret)
+- `GCP_REGION`: Google Cloud region for deployment (GitHub Actions secret)
+
+### CloudRun Deployment Features
+
+The ADL CLI supports CloudRun deployment configuration through the ADL file's `deployment` section:
+
+#### Container Registry Support
+- **Google Container Registry (GCR)**: Uses Cloud Build for automatic image building
+- **GitHub Container Registry (GHCR)**: Uses pre-built images, skips Cloud Build
+- **Custom Registries**: Supports other container registries with appropriate configuration
+
+#### Configurable Resources
+- **CPU**: Configurable CPU allocation (0.1 to 8 cores)
+- **Memory**: Memory limits from 128Mi to 32Gi
+- **Scaling**: Min/max instances and concurrency settings
+- **Timeout**: Request timeout configuration
+- **Service Account**: Custom GCP service account assignment
+- **Environment Variables**: Custom environment variable injection
+
+#### Generated Deployment Script
+The generated `cloudrun/deploy.sh` script provides:
+- Environment variable validation (PROJECT_ID, REGION)
+- Conditional container building (Docker vs Cloud Build)
+- Direct gcloud deployment with all configured options
+- Deployment configuration summary display
+- Service URL retrieval after successful deployment
+
+#### ADL Configuration Example
+```yaml
+spec:
+  deployment:
+    type: cloudrun
+    cloudrun:
+      image:
+        registry: ghcr.io  # or gcr.io
+        repository: myorg/agent
+        useCloudBuild: false  # Skip for external registries
+      resources:
+        cpu: "2"
+        memory: 1Gi
+      scaling:
+        minInstances: 1
+        maxInstances: 100
+        concurrency: 1000
+      service:
+        timeout: 3600
+        serviceAccount: my-agent@PROJECT_ID.iam.gserviceaccount.com
+        executionEnvironment: gen2
+      environment:
+        LOG_LEVEL: info
+```
+
+### Usage Examples
+
+```bash
+# Generate with Kubernetes deployment
+adl generate --file agent.yaml --deployment kubernetes --cd
+
+# Generate with Cloud Run deployment  
+adl generate --file agent.yaml --deployment cloudrun --cd
+
+# Deploy manually after generation
+task deploy
+```

@@ -227,6 +227,12 @@ adl generate --file agent.yaml --output ./test-my-agent --ci
 
 # Generate with AI assistant instructions and claude-code integration
 adl generate --file agent.yaml --output ./test-my-agent --ai
+
+# Generate with CloudRun deployment configuration
+adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun
+
+# Generate with CloudRun deployment and CD pipeline
+adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun --cd
 ```
 
 #### Generate Flags
@@ -239,6 +245,7 @@ adl generate --file agent.yaml --output ./test-my-agent --ai
 | `--overwrite` | Overwrite existing files (respects .adl-ignore) |
 | `--ci` | Generate CI workflow configuration (GitHub Actions) |
 | `--cd` | Generate CD pipeline configuration with semantic-release |
+| `--deployment` | Generate deployment configuration (`kubernetes`, `cloudrun`) |
 | `--ai` | Generate AI assistant instructions (CLAUDE.md) and add claude-code to sandbox environments |
 
 **CI Generation Features:**
@@ -255,6 +262,7 @@ adl generate --file agent.yaml --output ./test-my-agent --ai
 - **Manual Dispatch**: CD workflow triggered manually via GitHub Actions
 - **Changelog Generation**: Automatic CHANGELOG.md generation with release notes
 - **GitHub Releases**: Creates GitHub releases with appropriate tagging
+- **Deployment Integration**: Supports automatic deployment to Kubernetes and Cloud Run after successful releases
 
 **AI Integration Features:**
 The `--ai` flag enables enhanced development experience with AI assistant capabilities:
@@ -269,6 +277,18 @@ The `--ai` flag enables enhanced development experience with AI assistant capabi
   - Flox environment integration with claude-code tooling
   - Improved development experience with AI pair programming capabilities
 
+**Deployment Generation Features:**
+The `--deployment` flag generates platform-specific deployment configurations:
+
+- **CloudRun Deployment**: Creates `cloudrun/deploy.sh` with gcloud deployment script
+  - Supports both Google Container Registry (GCR) and GitHub Container Registry (GHCR)
+  - Configurable resources (CPU, memory), scaling (min/max instances), and service options
+  - Uses direct gcloud commands for truly serverless deployment (no Kubernetes required)
+  - Automatic container building with Docker or Cloud Build integration
+- **Kubernetes Deployment**: Creates `k8s/deployment.yaml` with standard Kubernetes manifests
+  - Production-ready configurations with resource limits and health checks
+  - ConfigMap and Secret integration for environment variables
+  - Service and Ingress configurations for load balancing
 
 ## Agent Definition Language (ADL)
 
@@ -329,6 +349,7 @@ The complete ADL schema includes:
 - **language**: Programming language-specific settings (Go, Rust, TypeScript)
 - **scm**: Source control management configuration (GitHub, GitLab) 
 - **sandbox**: Development environment configuration (Flox, DevContainer)
+- **deployment**: Platform-specific deployment configuration (Kubernetes, Cloud Run)
 
 ### Complete ADL Example
 
@@ -399,6 +420,29 @@ spec:
   scm:
     provider: github
     url: "https://github.com/company/advanced-agent"
+  deployment:
+    type: cloudrun
+    cloudrun:
+      image:
+        registry: gcr.io
+        repository: advanced-agent
+        tag: latest
+        useCloudBuild: true
+      resources:
+        cpu: "2"
+        memory: 1Gi
+      scaling:
+        minInstances: 1
+        maxInstances: 100
+        concurrency: 1000
+      service:
+        timeout: 3600
+        allowUnauthenticated: false
+        serviceAccount: advanced-agent@PROJECT_ID.iam.gserviceaccount.com
+        executionEnvironment: gen2
+      environment:
+        LOG_LEVEL: info
+        ENVIRONMENT: production
   sandbox:
     flox:
       enabled: true
@@ -432,6 +476,8 @@ my-go-agent/
 ├── .releaserc.yaml            # Semantic-release configuration (with --cd flag)
 ├── k8s/
 │   └── deployment.yaml        # Kubernetes deployment manifest
+├── cloudrun/
+│   └── deploy.sh              # CloudRun deployment script (with --deployment cloudrun)
 ├── .flox/                     # Generated when sandbox: flox
 │   ├── env/manifest.toml
 │   ├── env.json
@@ -465,6 +511,8 @@ my-rust-agent/
 ├── .releaserc.yaml            # Semantic-release configuration (with --cd flag)
 ├── k8s/
 │   └── deployment.yaml        # Kubernetes deployment
+├── cloudrun/
+│   └── deploy.sh              # CloudRun deployment script (with --deployment cloudrun)
 ├── CLAUDE.md                  # AI assistant instructions (generated with --ai flag)
 └── README.md                  # Documentation
 ```
@@ -477,6 +525,7 @@ All projects include these essential files regardless of language:
 - **`Taskfile.yml`** - Unified task runner configuration for build, test, lint, run
 - **`Dockerfile`** - Language-optimized container configuration  
 - **`k8s/deployment.yaml`** - Kubernetes deployment manifest
+- **`cloudrun/deploy.sh`** - CloudRun deployment script (when using `--deployment cloudrun`)
 - **`.adl-ignore`** - Protects user implementations from overwrite
 - **CI Workflows** - When using `--ci` flag, generates GitHub Actions workflows:
   - **GitHub Actions**: `.github/workflows/ci.yml`
@@ -552,6 +601,127 @@ gh workflow run cd.yml
 ghcr.io/your-org/your-agent:latest
 ghcr.io/your-org/your-agent:v1.0.0
 ghcr.io/your-org/your-agent:1.0
+```
+
+## CloudRun Deployment
+
+The ADL CLI provides native support for deploying A2A agents to Google Cloud Run, offering a truly serverless deployment experience without Kubernetes complexity.
+
+### CloudRun Configuration
+
+Configure CloudRun deployment in your ADL file:
+
+```yaml
+spec:
+  deployment:
+    type: cloudrun
+    cloudrun:
+      image:
+        registry: gcr.io        # gcr.io or ghcr.io
+        repository: my-agent    # Repository name
+        tag: latest            # Image tag
+        useCloudBuild: true    # Use Cloud Build or local Docker
+      resources:
+        cpu: "2"               # CPU allocation (0.1 to 8)
+        memory: 1Gi           # Memory limit (128Mi to 32Gi)
+      scaling:
+        minInstances: 0        # Minimum instances (0 to 1000)
+        maxInstances: 100     # Maximum instances (1 to 1000)
+        concurrency: 1000     # Max concurrent requests per instance
+      service:
+        timeout: 3600         # Request timeout in seconds
+        allowUnauthenticated: true    # Allow public access
+        serviceAccount: my-agent@PROJECT_ID.iam.gserviceaccount.com
+        executionEnvironment: gen2    # gen1 or gen2
+      environment:            # Custom environment variables
+        LOG_LEVEL: info
+        ENVIRONMENT: production
+```
+
+### Container Registry Options
+
+**Google Container Registry (GCR):**
+```yaml
+image:
+  registry: gcr.io
+  repository: my-project/my-agent
+  useCloudBuild: true        # Automatically build and push
+```
+
+**GitHub Container Registry (GHCR):**
+```yaml
+image:
+  registry: ghcr.io
+  repository: myorg/my-agent
+  useCloudBuild: false       # Skip Cloud Build, use pre-built image
+```
+
+### Generated Deployment Script
+
+When using `--deployment cloudrun`, the ADL CLI generates a deployment script (`cloudrun/deploy.sh`) that:
+
+- **Validates Environment**: Checks for required `PROJECT_ID` and `REGION` variables
+- **Container Building**: Uses Docker locally or Cloud Build based on configuration
+- **Direct gcloud Deployment**: Uses `gcloud run deploy` for serverless deployment
+- **Configuration Summary**: Displays all deployment settings for verification
+
+### CloudRun Deployment Workflow
+
+```bash
+# 1. Generate project with CloudRun deployment
+adl generate --file agent.yaml --output ./my-agent --deployment cloudrun
+
+# 2. Set required environment variables
+export PROJECT_ID="my-gcp-project"
+export REGION="us-central1"
+
+# 3. Deploy to CloudRun
+cd my-agent
+./cloudrun/deploy.sh
+
+# Or use the generated Taskfile
+task deploy
+```
+
+### CloudRun with CI/CD
+
+Generate CloudRun deployment with continuous deployment:
+
+```bash
+adl generate --file agent.yaml --deployment cloudrun --cd
+```
+
+This creates:
+- **CD Workflow**: Automatically deploys to CloudRun after releases
+- **Environment Integration**: Uses GitHub secrets for GCP authentication
+- **Multi-Environment Support**: Deploy to different regions/projects
+
+**Required GitHub Secrets:**
+- `GCP_SA_KEY`: Service account key JSON
+- `GCP_PROJECT_ID`: Google Cloud project ID
+- `GCP_REGION`: Deployment region (e.g., us-central1)
+
+### CloudRun Benefits
+
+- **Truly Serverless**: No Kubernetes clusters or infrastructure management
+- **Auto-Scaling**: Scale to zero when idle, scale up automatically under load
+- **Pay-per-Use**: Only pay for actual request processing time
+- **Global Edge**: Deploy to multiple regions with traffic management
+- **Integrated Monitoring**: Built-in logging, metrics, and tracing
+- **Custom Domains**: HTTPS support with automatic SSL certificates
+
+### Example ADL Files
+
+The CLI includes CloudRun example files:
+
+```bash
+# Validate CloudRun examples
+adl validate examples/cloudrun-agent.yaml
+adl validate examples/cloudrun-ghcr-agent.yaml
+
+# Generate CloudRun projects
+adl generate --file examples/cloudrun-agent.yaml --output ./cloudrun-test
+adl generate --file examples/cloudrun-ghcr-agent.yaml --output ./ghcr-test
 ```
 
 ## Sandbox Environments
@@ -710,20 +880,27 @@ The CLI includes example ADL files in the `examples/` directory:
 adl validate examples/go-agent.yaml
 adl validate examples/rust-agent.yaml  
 adl validate examples/github-app-agent.yaml
+adl validate examples/cloudrun-agent.yaml
+adl validate examples/cloudrun-ghcr-agent.yaml
 
 # Generate from examples
 adl generate --file examples/go-agent.yaml --output ./test-go-agent
 adl generate --file examples/rust-agent.yaml --output ./test-rust-agent
 adl generate --file examples/github-app-agent.yaml --output ./test-github-app-agent --cd
+adl generate --file examples/cloudrun-agent.yaml --output ./test-cloudrun-agent --deployment cloudrun
+adl generate --file examples/cloudrun-ghcr-agent.yaml --output ./test-ghcr-agent --deployment cloudrun
 
 # Generate with CI/CD pipeline
 adl generate --file examples/github-app-agent.yaml --output ./enterprise-agent --ci --cd
+adl generate --file examples/cloudrun-agent.yaml --output ./cloudrun-enterprise --deployment cloudrun --cd
 ```
 
 **Example ADL Files:**
 - `go-agent.yaml` - Basic Go agent with multiple skills and capabilities
 - `rust-agent.yaml` - Rust agent with enterprise features
 - `github-app-agent.yaml` - Enterprise agent with GitHub App CD integration
+- `cloudrun-agent.yaml` - CloudRun deployment with Google Container Registry
+- `cloudrun-ghcr-agent.yaml` - CloudRun deployment with GitHub Container Registry
 
 ## Template System & Architecture
 

@@ -177,11 +177,63 @@ docker build \
 
 These values are embedded into the binary at build time using linker flags, making them accessible at runtime without requiring environment variables.
 
+{{- if .ADL.Spec.Deployment }}
+{{- if eq .ADL.Spec.Deployment.Type "kubernetes" }}
+### Kubernetes
+
+```bash
+# Deploy to Kubernetes cluster
+kubectl apply -f k8s/
+
+# Or use the task command
+task deploy
+```
+
+**Requirements:**
+- kubectl configured with cluster access
+- Kubernetes cluster with appropriate permissions
+
+{{- else if eq .ADL.Spec.Deployment.Type "cloudrun" }}
+### Google Cloud Run
+
+```bash
+# Deploy to Cloud Run (requires gcloud CLI)
+gcloud builds submit --tag gcr.io/$PROJECT_ID/{{ .ADL.Metadata.Name }}:{{ .ADL.Metadata.Version }}
+gcloud run services replace cloudrun/service.yaml --region=$REGION
+
+# Or use the task command
+task deploy
+```
+
+**Requirements:**
+- Google Cloud SDK (gcloud) installed and authenticated
+- Google Cloud project with Cloud Run and Container Registry APIs enabled
+- Set environment variables: `PROJECT_ID` and `REGION`
+
+**Setup:**
+```bash
+# Set your project ID and region
+export PROJECT_ID=your-gcp-project-id
+export REGION=us-central1
+
+# Authenticate with Google Cloud
+gcloud auth login
+gcloud config set project $PROJECT_ID
+```
+
+{{- else }}
+### Platform Deployment
+
+Platform-specific deployment instructions will be generated based on your deployment configuration.
+
+{{- end }}
+{{- else }}
 ### Kubernetes
 
 ```bash
 kubectl apply -f k8s/
 ```
+{{- end }}
 
 ## License
 
