@@ -807,7 +807,6 @@ func (g *Generator) generateGitHubCDWorkflow(adl *schema.ADL, outputDir string, 
 		return nil
 	}
 
-	// Use unified CD template with conditional GitHub App support
 	templateKey := "cd/cd.yaml"
 
 	workflowContent, err := templateEngine.ExecuteTemplate(templateKey, ctx)
