@@ -22,7 +22,7 @@ This project adheres to a code of conduct. By participating, you are expected to
 
 ### Prerequisites
 
-- Go 1.21 or later
+- Go 1.24 or later
 - Git
 - [Task](https://taskfile.dev/) (recommended for development tasks)
 - Docker (for testing container builds)
