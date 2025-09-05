@@ -36,6 +36,11 @@ git.pkg-group = "common"
 
 docker.pkg-path = "docker"
 docker.pkg-group = "common"
+{{- if .EnableAI }}
+
+claude-code.pkg-path = "claude-code"
+claude-code.pkg-group = "common"
+{{- end }}
 
 [hook]
 on-activate = '''

@@ -28,6 +28,7 @@ type Config struct {
 	DeploymentType     string
 	EnableFlox         bool
 	EnableDevContainer bool
+	EnableAI           bool
 }
 
 // New creates a new generator
@@ -79,7 +80,10 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 
 	language := templates.DetectLanguageFromADL(adl)
 
-	registry, err := templates.NewRegistry(language)
+	registry, err := templates.NewRegistryWithOptions(templates.RegistryOptions{
+		Language: language,
+		EnableAI: g.config.EnableAI,
+	})
 	if err != nil {
 		return fmt.Errorf("failed to create template registry: %w", err)
 	}
@@ -223,6 +227,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		Language:   templates.DetectLanguageFromADL(adl),
 		GenerateCI: g.config.GenerateCI,
 		GenerateCD: g.config.GenerateCD,
+		EnableAI:   g.config.EnableAI,
 	}
 
 	ignoreChecker, err := NewIgnoreChecker(outputDir)

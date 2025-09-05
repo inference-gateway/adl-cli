@@ -22,7 +22,8 @@
         "ms-vscode.vscode-typescript-next",
         {{- end }}
         "ms-azuretools.vscode-docker",
-        "redhat.vscode-yaml"
+        "redhat.vscode-yaml"{{- if .EnableAI }},
+        "anthropic.claude-code"{{- end }}
       ],
       "settings": {
         {{- if eq .Language "go" }}
