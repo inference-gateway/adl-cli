@@ -87,12 +87,13 @@ func toCamelCase(s string) string {
 
 // Context provides data for template execution
 type Context struct {
-	ADL        *schema.ADL
-	Metadata   schema.GeneratedMetadata
-	Language   string
-	GenerateCI bool
-	GenerateCD bool
-	EnableAI   bool
+	ADL             *schema.ADL
+	Metadata        schema.GeneratedMetadata
+	Language        string
+	GenerateCI      bool
+	GenerateCD      bool
+	EnableAI        bool
+	GenerateCommand string
 }
 
 // New creates a new template engine

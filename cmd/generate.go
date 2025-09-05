@@ -70,6 +70,8 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		EnableFlox:         enableFlox,
 		EnableDevContainer: enableDevContainer,
 		EnableAI:           enableAI,
+		ADLFile:            adlFile,
+		OutputDir:          outputDir,
 	})
 
 	fmt.Printf("Generating A2A agent from '%s' to '%s'\n", absADLFile, absOutputDir)

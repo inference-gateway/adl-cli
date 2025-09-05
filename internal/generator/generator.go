@@ -29,6 +29,8 @@ type Config struct {
 	EnableFlox         bool
 	EnableDevContainer bool
 	EnableAI           bool
+	ADLFile            string
+	OutputDir          string
 }
 
 // New creates a new generator
@@ -224,10 +226,11 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 			CLIVersion:  g.getVersion(),
 			Template:    g.config.Template,
 		},
-		Language:   templates.DetectLanguageFromADL(adl),
-		GenerateCI: g.config.GenerateCI,
-		GenerateCD: g.config.GenerateCD,
-		EnableAI:   g.config.EnableAI,
+		Language:        templates.DetectLanguageFromADL(adl),
+		GenerateCI:      g.config.GenerateCI,
+		GenerateCD:      g.config.GenerateCD,
+		EnableAI:        g.config.EnableAI,
+		GenerateCommand: g.buildGenerateCommand(),
 	}
 
 	ignoreChecker, err := NewIgnoreChecker(outputDir)
@@ -368,6 +371,63 @@ func (g *Generator) getVersion() string {
 		return g.config.Version
 	}
 	return "dev"
+}
+
+// buildGenerateCommand constructs the original adl generate command from the config
+func (g *Generator) buildGenerateCommand() string {
+	var parts []string
+	
+	parts = append(parts, "adl", "generate")
+	
+	// Add file flag - use relative path
+	if g.config.ADLFile != "" {
+		parts = append(parts, "--file", g.config.ADLFile)
+	} else {
+		parts = append(parts, "--file", "agent.yaml")
+	}
+	
+	// Add output flag - use relative path
+	if g.config.OutputDir != "" {
+		parts = append(parts, "--output", g.config.OutputDir)
+	} else {
+		parts = append(parts, "--output", ".")
+	}
+	
+	// Add template flag if not default
+	if g.config.Template != "" && g.config.Template != "minimal" {
+		parts = append(parts, "--template", g.config.Template)
+	}
+	
+	// Add boolean flags
+	if g.config.Overwrite {
+		parts = append(parts, "--overwrite")
+	}
+	
+	if g.config.GenerateCI {
+		parts = append(parts, "--ci")
+	}
+	
+	if g.config.GenerateCD {
+		parts = append(parts, "--cd")
+	}
+	
+	if g.config.DeploymentType != "" {
+		parts = append(parts, "--deployment", g.config.DeploymentType)
+	}
+	
+	if g.config.EnableFlox {
+		parts = append(parts, "--flox")
+	}
+	
+	if g.config.EnableDevContainer {
+		parts = append(parts, "--devcontainer")
+	}
+	
+	if g.config.EnableAI {
+		parts = append(parts, "--ai")
+	}
+	
+	return strings.Join(parts, " ")
 }
 
 // generateADLIgnoreFile creates a .adl-ignore file with files that contain TODOs
@@ -791,9 +851,11 @@ func (g *Generator) generateGitHubCDWorkflow(adl *schema.ADL, outputDir string, 
 			CLIVersion:  g.getVersion(),
 			Template:    g.config.Template,
 		},
-		Language:   language,
-		GenerateCI: g.config.GenerateCI,
-		GenerateCD: g.config.GenerateCD,
+		Language:        language,
+		GenerateCI:      g.config.GenerateCI,
+		GenerateCD:      g.config.GenerateCD,
+		EnableAI:        g.config.EnableAI,
+		GenerateCommand: g.buildGenerateCommand(),
 	}
 
 	if err := g.generateReleaseRC(templateEngine, ctx, outputDir, ignoreChecker); err != nil {
