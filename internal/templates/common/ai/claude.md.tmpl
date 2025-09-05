@@ -64,7 +64,7 @@ docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest
 
 ## LLM Provider Configuration
 
-The agent uses {{ if .ADL.Spec.Agent.Provider }}{{ title .ADL.Spec.Agent.Provider }}-compatible{{ else }}OpenAI-compatible{{ end }} LLM clients. Configure with:
+The agent uses OpenAI-compatible LLM client. Configure with:
 - `A2A_AGENT_CLIENT_PROVIDER`: {{- if .ADL.Spec.Agent.Provider }} `{{ .ADL.Spec.Agent.Provider }}`{{ else }} `openai`, `anthropic`, `azure`, `ollama`, `deepseek`{{ end }}
 - `A2A_AGENT_CLIENT_MODEL`: {{- if .ADL.Spec.Agent.Model }} `{{ .ADL.Spec.Agent.Model }}`{{ else }} Model identifier{{ end }}
 - `A2A_AGENT_CLIENT_API_KEY`: Provider API key
