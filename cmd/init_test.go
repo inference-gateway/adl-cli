@@ -79,8 +79,58 @@ func TestInitCommandIncludesSCMDefaults(t *testing.T) {
 	if !strings.Contains(contentStr, "github_app: true") {
 		t.Errorf("ADL file missing SCM github_app default")
 	}
+	if !strings.Contains(contentStr, "issue_templates: true") {
+		t.Errorf("ADL file missing SCM issue_templates default")
+	}
 	
 	t.Logf("Generated ADL content:\n%s", contentStr)
+}
+
+func TestInitIssueTemplatesDefault(t *testing.T) {
+	tempDir := t.TempDir()
+	outputPath := filepath.Join(tempDir, "test-output")
+
+	cmd := initCmd
+	if err := cmd.Flags().Set("defaults", "true"); err != nil {
+		t.Fatal(err)
+	}
+	if err := cmd.Flags().Set("path", outputPath); err != nil {
+		t.Fatal(err)
+	}
+
+	err := runInit(cmd, []string{"test-agent"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	adlPath := filepath.Join(outputPath, "agent.yaml")
+	content, err := os.ReadFile(adlPath)
+	if err != nil {
+		t.Fatalf("failed to read ADL file: %v", err)
+	}
+
+	var adl adlData
+	if err := yaml.Unmarshal(content, &adl); err != nil {
+		t.Fatalf("failed to parse ADL YAML: %v", err)
+	}
+
+	if adl.Spec.SCM == nil {
+		t.Fatalf("expected SCM configuration to be present")
+	}
+	if adl.Spec.SCM.Provider != "github" {
+		t.Errorf("expected SCM provider to be 'github', got: %s", adl.Spec.SCM.Provider)
+	}
+	if !adl.Spec.SCM.IssueTemplates {
+		t.Errorf("expected IssueTemplates to be true by default")
+	}
+	if !adl.Spec.SCM.GithubApp {
+		t.Errorf("expected GithubApp to be true by default")
+	}
+
+	contentStr := string(content)
+	if !strings.Contains(contentStr, "issue_templates: true") {
+		t.Errorf("ADL file should contain 'issue_templates: true'")
+	}
 }
 
 func TestInitDoesNotGenerateCode(t *testing.T) {
