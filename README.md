@@ -658,7 +658,7 @@ image:
 
 ### Generated Deployment Script
 
-When using `--deployment cloudrun`, the ADL CLI generates a comprehensive deployment script (`cloudrun/deploy.sh`) that:
+When using `--deployment cloudrun`, the ADL CLI generates a deployment script (`cloudrun/deploy.sh`) that:
 
 - **Validates Environment**: Checks for required `PROJECT_ID` and `REGION` variables
 - **Container Building**: Uses Docker locally or Cloud Build based on configuration

@@ -293,7 +293,7 @@ When using the `--cd` flag with deployment configuration:
 
 ### CloudRun Deployment Features
 
-The ADL CLI supports comprehensive CloudRun deployment configuration through the ADL file's `deployment` section:
+The ADL CLI supports CloudRun deployment configuration through the ADL file's `deployment` section:
 
 #### Container Registry Support
 - **Google Container Registry (GCR)**: Uses Cloud Build for automatic image building
