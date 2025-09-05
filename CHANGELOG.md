@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.18.2](https://github.com/inference-gateway/adl-cli/compare/v0.18.1...v0.18.2) (2025-09-05)
+
+### ♻️ Improvements
+
+* Revise project overview and development guidelines in CLAUDE.md ([#58](https://github.com/inference-gateway/adl-cli/issues/58)) ([55ef0db](https://github.com/inference-gateway/adl-cli/commit/55ef0db945efc9f81339d0779fd6065a37dd085f))
+
+### 📚 Documentation
+
+* Update Go version requirement to 1.24 in contributing guide ([fe0c38a](https://github.com/inference-gateway/adl-cli/commit/fe0c38a66af3a071d94a737a906966202a4a8e32))
+
 ## [0.18.1](https://github.com/inference-gateway/adl-cli/compare/v0.18.0...v0.18.1) (2025-09-05)
 
 ### ♻️ Improvements
