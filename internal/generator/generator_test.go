@@ -703,7 +703,6 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Test the registry file mapping logic
 			registry, err := templates.NewRegistry("go")
 			if err != nil {
 				t.Fatalf("Failed to create template registry: %v", err)
