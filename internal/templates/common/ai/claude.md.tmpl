@@ -4,21 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-n8n-agent is an A2A (Agent-to-Agent) server implementing the [A2A Protocol](https://github.com/inference-gateway/adk) for agent-to-agent communication. The project is automatically generated from ADL (Agent Definition Language) specifications defined in `agent.yaml`.
+{{ .ADL.Metadata.Name }} is an A2A (Agent-to-Agent) server implementing the [A2A Protocol](https://github.com/inference-gateway/adk) for agent-to-agent communication. The project is automatically generated from ADL (Agent Definition Language) specifications defined in `agent.yaml`.
 
 ## Core Architecture
 
 ### ADL-Generated Structure
 
-The codebase is generated using ADL CLI v0.18.1 and follows a strict generation pattern:
+The codebase is generated using ADL CLI {{ .Metadata.CLIVersion }} and follows a strict generation pattern:
 - **Generated Files**: Marked with `DO NOT EDIT` headers - manual changes will be overwritten
 - **Configuration Source**: `agent.yaml` - defines agent capabilities, skills, and metadata
 - **Server Implementation**: Built on the ADK (Agent Development Kit) framework from `github.com/inference-gateway/adk`
 
 ### Key Components
 
-- **Main Entry Point**: `main.go:35-114` - Configures and starts the A2A server with:
-  - OpenAI-compatible LLM client configuration
+- **Main Entry Point**: `main.go` - Configures and starts the A2A server with:
+  - {{ if .ADL.Spec.Agent.Provider }}{{ title .ADL.Spec.Agent.Provider }}-compatible{{ else }}OpenAI-compatible{{ end }} LLM client configuration
   - Agent builder with system prompt from `agent.yaml`
   - A2A server with streaming and background task handlers
   - Graceful shutdown handling
@@ -44,7 +44,7 @@ task lint         # Run golangci-lint
 task fmt          # Format code with go fmt
 
 # Build
-task build        # Creates bin/n8n-agent
+task build        # Creates bin/{{ .ADL.Metadata.Name }}
 task docker:build # Build Docker image
 
 # Clean build artifacts
@@ -64,9 +64,9 @@ docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest
 
 ## LLM Provider Configuration
 
-The agent uses OpenAI-compatible LLM clients. Configure with:
-- `A2A_AGENT_CLIENT_PROVIDER`: `openai`, `anthropic`, `azure`, `ollama`, `deepseek`
-- `A2A_AGENT_CLIENT_MODEL`: Model identifier
+The agent uses {{ if .ADL.Spec.Agent.Provider }}{{ title .ADL.Spec.Agent.Provider }}-compatible{{ else }}OpenAI-compatible{{ end }} LLM clients. Configure with:
+- `A2A_AGENT_CLIENT_PROVIDER`: {{- if .ADL.Spec.Agent.Provider }} `{{ .ADL.Spec.Agent.Provider }}`{{ else }} `openai`, `anthropic`, `azure`, `ollama`, `deepseek`{{ end }}
+- `A2A_AGENT_CLIENT_MODEL`: {{- if .ADL.Spec.Agent.Model }} `{{ .ADL.Spec.Agent.Model }}`{{ else }} Model identifier{{ end }}
 - `A2A_AGENT_CLIENT_API_KEY`: Provider API key
 - `A2A_AGENT_CLIENT_BASE_URL`: Custom endpoint (optional)
 
@@ -74,16 +74,29 @@ The agent uses OpenAI-compatible LLM clients. Configure with:
 
 ### Skills Implementation
 
+{{- if .ADL.Spec.Skills }}
+The following skills are currently defined:
+{{- range .ADL.Spec.Skills }}
+- **{{ .Name }}**: {{ .Description }}
+{{- end }}
+
+To modify skills:
+1. Update `agent.yaml` with skill definitions
+2. Run `task generate` to regenerate the codebase
+3. Implement skill logic in generated skill files (look for TODO placeholders)
+4. Write tests for each skill
+{{- else }}
 Currently no skills are defined. To add skills:
 1. Update `agent.yaml` with skill definitions
 2. Run `task generate` to regenerate the codebase
 3. Implement skill logic in generated skill files (look for TODO placeholders)
 4. Write tests for each skill
+{{- end }}
 
 ### Modifying Agent Behavior
 
-- **System Prompt**: Edit in `agent.yaml` line 15, then regenerate
-- **Capabilities**: Modify in `agent.yaml` lines 8-11 (streaming, pushNotifications, stateTransitionHistory)
+- **System Prompt**: Edit in `agent.yaml`, then regenerate
+- **Capabilities**: Modify in `agent.yaml` (streaming, pushNotifications, stateTransitionHistory)
 - **Server Configuration**: Update environment variables or `agent.yaml` server section
 
 ## Testing Strategy
@@ -96,26 +109,58 @@ When implementing tests:
 
 ## Environment Management
 
+{{- if .ADL.Spec.Sandbox }}
+{{- if .ADL.Spec.Sandbox.Flox }}
 The project includes Flox environment configuration (`.flox/env/manifest.toml`) providing:
-- Go 1.24
-- golangci-lint 2.4.0
+{{- if .ADL.Spec.Language.Go }}
+- Go {{ .ADL.Spec.Language.Go.Version | default "latest" }}
+{{- else if .ADL.Spec.Language.Rust }}
+- Rust {{ .ADL.Spec.Language.Rust.Version | default "latest" }}
+{{- else if .ADL.Spec.Language.TypeScript }}
+- Node.js {{ .ADL.Spec.Language.TypeScript.NodeVersion | default "latest" }}
+{{- else }}
+- Development runtime
+{{- end }}
+- golangci-lint (linter)
 - go-task (Task runner)
 - Docker
+{{- if .ADL.Spec.Sandbox.ClaudeCode }}
 - Claude Code CLI
+{{- end }}
 
 Activate with: `flox activate` (if Flox is installed)
+{{- else if .ADL.Spec.Sandbox.DevContainer }}
+The project includes DevContainer configuration providing a consistent development environment.
+
+Open in DevContainer-compatible editor (VS Code, GitHub Codespaces) for automatic setup.
+{{- end }}
+{{- else }}
+Standard development environment required. Install:
+{{- if .ADL.Spec.Language.Go }}
+- Go {{ .ADL.Spec.Language.Go.Version | default "1.21+" }}
+{{- else if .ADL.Spec.Language.Rust }}
+- Rust {{ .ADL.Spec.Language.Rust.Version | default "1.70+" }}
+{{- else if .ADL.Spec.Language.TypeScript }}
+- Node.js {{ .ADL.Spec.Language.TypeScript.NodeVersion | default "18+" }}
+{{- else }}
+- Development runtime as needed
+{{- end }}
+- Task runner (`go install github.com/go-task/task/v3/cmd/task@latest`)
+{{- end }}
 
 ## Important Constraints
 
 - **Generated Files**: Never manually edit files with "DO NOT EDIT" headers
 - **Configuration Changes**: Always modify `agent.yaml` and regenerate
-- **ADL Version**: Ensure ADL CLI v0.18.1 or compatible version for regeneration
-- **Port Configuration**: Default 8080, configurable via `A2A_PORT` or `A2A_SERVER_PORT`
+- **ADL Version**: Ensure ADL CLI {{ .Metadata.CLIVersion }} or compatible version for regeneration
+- **Port Configuration**: Default {{ .ADL.Spec.Server.Port | default "8080" }}, configurable via `A2A_PORT` or `A2A_SERVER_PORT`
 
 ## Debugging Tips
 
-- Enable debug mode: `A2A_DEBUG=true`
+- Enable debug mode: `A2A_DEBUG=true`{{ if .ADL.Spec.Server.Debug }} (currently enabled in agent.yaml){{ end }}
 - Check health: `GET /health`
 - View agent metadata: `GET /.well-known/agent.json`
+{{- if .ADL.Spec.Capabilities.Streaming }}
 - Monitor streaming updates: Set `A2A_STREAMING_STATUS_UPDATE_INTERVAL`
+{{- end }}
 - Use A2A Debugger container for interactive testing
