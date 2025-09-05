@@ -39,7 +39,7 @@ func init() {
 	generateCmd.Flags().BoolVar(&overwrite, "overwrite", false, "Overwrite existing files")
 	generateCmd.Flags().BoolVar(&generateCI, "ci", false, "Generate CI workflow configuration")
 	generateCmd.Flags().BoolVar(&generateCD, "cd", false, "Generate CD pipeline configuration with semantic-release")
-	generateCmd.Flags().StringVar(&deploymentType, "deployment", "", "Deployment type (kubernetes, defaults to empty for no deployment)")
+	generateCmd.Flags().StringVar(&deploymentType, "deployment", "", "Deployment type (kubernetes, cloudrun, defaults to empty for no deployment)")
 	generateCmd.Flags().BoolVar(&enableFlox, "flox", false, "Enable Flox environment")
 	generateCmd.Flags().BoolVar(&enableDevContainer, "devcontainer", false, "Enable DevContainer environment")
 	generateCmd.Flags().BoolVar(&enableAI, "ai", false, "Generate AI assistant instructions (CLAUDE.md) and add claude-code to sandbox environments")

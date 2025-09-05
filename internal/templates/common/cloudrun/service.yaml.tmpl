@@ -1,0 +1,64 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: {{ .ADL.Metadata.Name }}
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/execution-environment: gen2
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: "10"
+        autoscaling.knative.dev/minScale: "0"
+        run.googleapis.com/cpu-throttling: "true"
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      serviceAccountName: {{ .ADL.Metadata.Name }}-service-account
+      containerConcurrency: 1000
+      timeoutSeconds: 3600
+      containers:
+      - name: {{ .ADL.Metadata.Name }}
+        image: gcr.io/PROJECT_ID/{{ .ADL.Metadata.Name }}:{{ .ADL.Metadata.Version | default "latest" }}
+        ports:
+        - name: http1
+          containerPort: {{ .ADL.Spec.Server.Port | default 8080 }}
+        env:
+        - name: PORT
+          value: "{{ .ADL.Spec.Server.Port | default 8080 }}"
+        - name: ENV
+          value: "production"
+        {{- if .ADL.Spec.Server.Debug }}
+        - name: DEBUG
+          value: "true"
+        {{- end }}
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        startupProbe:
+          httpGet:
+            path: /health
+            port: {{ .ADL.Spec.Server.Port | default 8080 }}
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .ADL.Spec.Server.Port | default 8080 }}
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .ADL.Metadata.Name }}-service-account
+  annotations:
+    iam.gke.io/gcp-service-account: {{ .ADL.Metadata.Name }}@PROJECT_ID.iam.gserviceaccount.com

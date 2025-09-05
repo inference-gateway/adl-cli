@@ -209,6 +209,8 @@ task dev -- generate --file examples/go-agent.yaml --output ./test-go-agent
 - `--template` - Template to use (default: minimal)
 - `--overwrite` - Overwrite existing files
 - `--ci` - Generate CI workflow configuration
+- `--cd` - Generate CD pipeline configuration with semantic-release
+- `--deployment` - Deployment type (kubernetes, cloudrun, defaults to empty for no deployment)
 - `--ai` - Generate AI assistant instructions (CLAUDE.md) and add claude-code to sandbox environments
 
 ### Validate Command
@@ -251,3 +253,53 @@ When `issue_templates` is set to `true`, the generator creates three issue templ
 1. Set `issue_templates: true` in your ADL file's SCM section
 2. Run `adl generate` to create the templates
 3. Issue templates will be available in the GitHub repository for contributors to use
+
+## Deployment Configuration
+
+The ADL CLI supports generating deployment configurations for multiple platforms, making it easy to deploy A2A agents to various environments.
+
+### Supported Deployment Types
+
+#### Kubernetes
+- **Flag**: `--deployment kubernetes`
+- **Generated Files**: `k8s/deployment.yaml`
+- **Requirements**: kubectl configured with cluster access
+- **Deploy Command**: `task deploy` or `kubectl apply -f k8s/`
+
+#### Google Cloud Run
+- **Flag**: `--deployment cloudrun`
+- **Generated Files**: `cloudrun/service.yaml`
+- **Requirements**: Google Cloud SDK (gcloud) installed and authenticated
+- **Deploy Command**: `task deploy`
+
+### Deployment Workflow
+
+When using the `--cd` flag with deployment configuration:
+
+1. **CI/CD Integration**: Deployment is automatically added to the CD workflow
+2. **Container Building**: Docker images are built and pushed to the appropriate registry
+3. **Automated Deployment**: Services are deployed automatically after successful releases
+4. **Environment Variables**: Required secrets and environment variables are documented
+
+### Required Environment Variables
+
+#### For Kubernetes Deployment
+- `KUBECONFIG`: Kubernetes cluster configuration (GitHub Actions secret)
+
+#### For Cloud Run Deployment  
+- `GCP_SA_KEY`: Google Cloud service account key (GitHub Actions secret)
+- `GCP_PROJECT_ID`: Google Cloud project ID (GitHub Actions secret)
+- `GCP_REGION`: Google Cloud region for deployment (GitHub Actions secret)
+
+### Usage Examples
+
+```bash
+# Generate with Kubernetes deployment
+adl generate --file agent.yaml --deployment kubernetes --cd
+
+# Generate with Cloud Run deployment  
+adl generate --file agent.yaml --deployment cloudrun --cd
+
+# Deploy manually after generation
+task deploy
+```

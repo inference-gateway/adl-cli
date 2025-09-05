@@ -242,3 +242,49 @@ jobs:
           labels: ${{`{{ steps.meta.outputs.labels }}`}}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+{{- if .ADL.Spec.Deployment }}
+  deploy:
+    name: Deploy Application
+    runs-on: ubuntu-24.04
+    needs: [release, build_and_push_image]
+    if: needs.release.outputs.new_release_published == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+        with:
+          ref: ${{`{{ github.ref }}`}}
+          fetch-depth: 0
+
+{{- if eq .ADL.Spec.Deployment.Type "kubernetes" }}
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+        
+      - name: Deploy to Kubernetes
+        run: |
+          echo "Deploying to Kubernetes cluster..."
+          # Replace image tag with the released version
+          sed -i 's|:latest|:${{`{{ needs.release.outputs.new_release_version }}`}}|g' k8s/deployment.yaml
+          kubectl apply -f k8s/
+        env:
+          KUBECONFIG: ${{`{{ secrets.KUBECONFIG }}`}}
+
+{{- else if eq .ADL.Spec.Deployment.Type "cloudrun" }}
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{`{{ secrets.GCP_SA_KEY }}`}}
+          project_id: ${{`{{ secrets.GCP_PROJECT_ID }}`}}
+          export_default_credentials: true
+
+      - name: Deploy to Cloud Run
+        run: |
+          # Replace PROJECT_ID placeholder in the service configuration
+          sed -i 's/PROJECT_ID/${{`{{ secrets.GCP_PROJECT_ID }}`}}/g' cloudrun/service.yaml
+          # Replace image tag with the released version
+          sed -i 's/:latest/:${{`{{ needs.release.outputs.new_release_version }}`}}/g' cloudrun/service.yaml
+          # Deploy the service
+          gcloud run services replace cloudrun/service.yaml --region=${{`{{ secrets.GCP_REGION }}`}}
+          echo "Application deployed to Cloud Run successfully!"
+{{- end }}
+{{- end }}
