@@ -31,6 +31,7 @@
 - [Generated Project Structure](#generated-project-structure)
 - [Sandbox Environments](#sandbox-environments)
 - [Enterprise Features](#enterprise-features)
+- [GitHub Issue Templates](#github-issue-templates)
 - [Examples](#examples)
 - [Template System & Architecture](#template-system--architecture)
 - [Customizing Generation with .adl-ignore](#customizing-generation-with-adl-ignore)
@@ -420,9 +421,14 @@ my-go-agent/
 ├── .adl-ignore                # Files to protect from regeneration
 ├── .well-known/
 │   └── agent.json             # Agent capabilities (auto-generated)
-├── .github/workflows/         # Generated when using --ci flag
-│   ├── ci.yml                 # GitHub Actions CI workflow
-│   └── cd.yml                 # GitHub Actions CD workflow (with --cd flag)
+├── .github/                   # GitHub-specific configurations
+│   ├── workflows/             # Generated when using --ci flag
+│   │   ├── ci.yml             # GitHub Actions CI workflow
+│   │   └── cd.yml             # GitHub Actions CD workflow (with --cd flag)
+│   └── ISSUE_TEMPLATE/        # Generated when issue_templates: true
+│       ├── bug_report.md      # Bug report template
+│       ├── feature_request.md # Feature request template
+│       └── refactor_request.md # Refactoring request template
 ├── .releaserc.yaml            # Semantic-release configuration (with --cd flag)
 ├── k8s/
 │   └── deployment.yaml        # Kubernetes deployment manifest
@@ -632,6 +638,7 @@ spec:
     provider: github  # gitlab support planned
     url: "https://github.com/company/my-agent"
     github_app: false  # optional: enable GitHub App for CD
+    issue_templates: true  # optional: generate GitHub issue templates
 ```
 
 **Features:**
@@ -639,6 +646,7 @@ spec:
 - **Repository Integration** - Links generated projects to source control
 - **Workflow Optimization** - SCM-specific optimizations and best practices
 - **GitHub App Support** - Enhanced security for enterprise CD pipelines
+- **Issue Templates** - Generate GitHub issue templates for standardized bug reports and feature requests
 
 #### GitHub App Integration
 
@@ -668,6 +676,30 @@ When `github_app: true` is set, the generated CD pipeline will use GitHub App au
 
 The ADL CLI supports multiple AI providers including OpenAI, Anthropic, DeepSeek, Ollama (for local LLMs), Google AI, Mistral, and Groq. Each provider requires appropriate API keys to be configured as environment variables. See the ADL examples above for configuration details.
 
+## GitHub Issue Templates
+
+The ADL CLI can automatically generate GitHub issue templates for your agent projects, providing standardized forms for bug reports, feature requests, and refactoring tasks:
+
+```yaml
+spec:
+  scm:
+    provider: github
+    url: "https://github.com/company/my-agent"
+    issue_templates: true  # Enable issue template generation
+```
+
+When `issue_templates: true` is set, the following templates are generated in `.github/ISSUE_TEMPLATE/`:
+
+- **`bug_report.md`** - Structured bug reporting with severity levels, reproduction steps, and environment details
+- **`feature_request.md`** - Feature proposals with use case descriptions and acceptance criteria
+- **`refactor_request.md`** - Code improvement requests with motivation and impact analysis
+
+**Issue Template Features:**
+- **Agent Context** - Templates include agent name and version from your ADL metadata
+- **Structured Sections** - Consistent formatting for better issue triage and tracking
+- **GitHub Integration** - Automatic labels and assignees configured in frontmatter
+- **Severity Levels** - Priority classification for bug reports (critical, high, medium, low)
+- **Environment Info** - Sections for capturing logs, system details, and configurations
 
 ## Examples
 
