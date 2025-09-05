@@ -261,24 +261,10 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 			Temperature  float64 `yaml:"temperature,omitempty"`
 		}{}
 
-		provider := conditionalPromptChoice(useDefaults, "AI Provider", []string{"openai", "anthropic", "azure", "ollama", "deepseek"}, "openai")
+		provider := conditionalPromptChoice(useDefaults, "AI Provider", []string{"openai", "anthropic", "azure", "ollama", "deepseek"}, "")
 		adl.Spec.Agent.Provider = provider
 
-		var defaultModel string
-		switch provider {
-		case "openai":
-			defaultModel = "gpt-4o-mini"
-		case "anthropic":
-			defaultModel = "claude-3-haiku-20240307"
-		case "azure":
-			defaultModel = "gpt-4o"
-		case "ollama":
-			defaultModel = "llama3.1"
-		case "deepseek":
-			defaultModel = "deepseek-chat"
-		}
-
-		adl.Spec.Agent.Model = conditionalPrompt(useDefaults, "Model", defaultModel)
+		adl.Spec.Agent.Model = conditionalPrompt(useDefaults, "Model", "")
 
 		systemPrompt := conditionalPrompt(useDefaults, "System prompt", "You are a helpful AI assistant.")
 		adl.Spec.Agent.SystemPrompt = systemPrompt
