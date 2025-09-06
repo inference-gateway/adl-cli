@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.2](https://github.com/inference-gateway/adl-cli/compare/v0.19.1...v0.19.2) (2025-09-06)
+
+### ♻️ Improvements
+
+* **generator:** Convert skill filenames to snake_case and use explicit .adl-ignore paths ([#66](https://github.com/inference-gateway/adl-cli/issues/66)) ([52a2e9d](https://github.com/inference-gateway/adl-cli/commit/52a2e9dd052ca57efe5ea2e22224e49525019dee))
+
 ## [0.19.1](https://github.com/inference-gateway/adl-cli/compare/v0.19.0...v0.19.1) (2025-09-06)
 
 ### 🐛 Bug Fixes
