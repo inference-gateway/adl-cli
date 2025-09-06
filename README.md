@@ -35,6 +35,7 @@
 - [Examples](#examples)
 - [Template System & Architecture](#template-system--architecture)
 - [Customizing Generation with .adl-ignore](#customizing-generation-with-adl-ignore)
+- [Configurable Acronyms](#configurable-acronyms)
 - [Post-Generation Hooks](#post-generation-hooks)
 - [Development](#development)
 - [Roadmap](#roadmap)
@@ -335,6 +336,7 @@ spec:
     go:
       module: "github.com/example/weather-agent"
       version: "1.24"
+    acronyms: ["api", "json", "xml"] # Optional: Custom acronyms for better code generation
 ```
 
 ### ADL Schema
@@ -346,7 +348,7 @@ The complete ADL schema includes:
 - **agent**: AI provider configuration (OpenAI, Anthropic, DeepSeek, Ollama, Google, Mistral, Groq)
 - **skills**: Function definitions with complex JSON schemas and validation
 - **server**: HTTP server configuration with authentication support
-- **language**: Programming language-specific settings (Go, Rust, TypeScript)
+- **language**: Programming language-specific settings (Go, Rust, TypeScript) and configurable acronyms
 - **scm**: Source control management configuration (GitHub, GitLab) 
 - **sandbox**: Development environment configuration (Flox, DevContainer)
 - **deployment**: Platform-specific deployment configuration (Kubernetes, Cloud Run)
@@ -1051,6 +1053,44 @@ task examples:generate
 4. Add tests for new functionality
 5. Run `task ci` to ensure everything passes
 6. Submit a pull request
+
+## Configurable Acronyms
+
+The ADL CLI includes support for configurable acronyms to improve code generation readability. This feature helps generate more readable function and struct names by properly capitalizing acronyms in generated code.
+
+### How It Works
+
+Define custom acronyms in your ADL file's `spec.language.acronyms` field. These acronyms will be properly capitalized when generating identifiers in your code.
+
+### Configuration
+
+```yaml
+spec:
+  language:
+    go:
+      module: "github.com/company/my-agent"
+      version: "1.24"
+    acronyms: ["n8n", "xml", "mqtt", "iot", "uuid"]
+```
+
+### Generated Code Examples
+
+**Without custom acronyms:**
+- `get_n8n_docs` → `GetN8nDocsSkill` 
+- `process_xml_data` → `ProcessXmlDataSkill`
+
+**With custom acronyms:**
+- `get_n8n_docs` → `GetN8NDocsSkill`
+- `process_xml_data` → `ProcessXMLDataSkill`
+
+### Default Acronyms
+
+The following acronyms are recognized by default:
+- **Common**: id, api, url, uri, json, xml, sql, html, css, js, ui, uuid
+- **Network**: http, https, tcp, udp, ip, dns, tls, ssl  
+- **Tech**: cpu, gpu, ram, io, os, db
+
+Your custom acronyms extend these defaults and take precedence over them.
 
 ## Post-Generation Hooks
 

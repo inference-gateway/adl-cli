@@ -30,7 +30,7 @@ ADL files define agents with:
 - **Agent**: AI provider configuration (OpenAI, Anthropic, Azure, Ollama, DeepSeek, etc.)
 - **Tools**: Function definitions with JSON schemas  
 - **Server**: HTTP server configuration with optional authentication
-- **Language**: Programming language settings (Go, Rust, TypeScript)
+- **Language**: Programming language settings (Go, Rust, TypeScript) with configurable acronyms for code generation
 - **SCM**: Source control management configuration (GitHub, etc.) with issue templates support
 - **Sandbox**: Environment configuration with extensible structure supporting multiple environments (Flox, DevContainer)
 
@@ -125,6 +125,45 @@ task docker:build
 - Generator tests in `internal/generator/generator_test.go`
 - Schema validation tests in `internal/schema/validator_test.go`
 - Example ADL files serve as integration tests
+
+## Configurable Acronyms
+
+The ADL CLI supports configurable acronyms for improved code generation readability. This feature allows developers to define custom acronyms that will be properly capitalized in generated code.
+
+### How It Works
+
+Acronyms are configured in the `spec.language.acronyms` field as an array of strings. When generating code, these acronyms will be treated as single words and rendered in all uppercase letters.
+
+### Example Configuration
+
+```yaml
+spec:
+  language:
+    go:
+      module: "github.com/company/my-agent"
+      version: "1.24"
+    acronyms: ["n8n", "xml", "mqtt", "iot"]
+```
+
+### Generated Code Examples
+
+With the above configuration:
+- `get_n8n_docs` → `GetN8NDocs` (not `GetN8nDocs`)
+- `process_xml_data` → `ProcessXMLData` (not `ProcessXmlData`) 
+- `send_mqtt_message` → `SendMQTTMessage` (not `SendMqttMessage`)
+
+### Default Acronyms
+
+The following acronyms are included by default:
+- **Common**: id, api, url, uri, json, xml, sql, html, css, js, ui, uuid
+- **Network**: http, https, tcp, udp, ip, dns, tls, ssl
+- **Tech**: cpu, gpu, ram, io, os, db
+
+Custom acronyms extend these defaults. If you specify an acronym that already exists in the defaults, your custom definition takes precedence.
+
+### Template Integration
+
+The acronym functionality integrates seamlessly with existing templates through the `toPascalCase` and `toCamelCase` template functions, ensuring consistent naming across all generated code.
 
 ## Language Support Architecture
 

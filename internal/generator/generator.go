@@ -265,7 +265,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 				}
 
 				if foundSkill != nil {
-					content, err = templateEngine.ExecuteToolTemplate(templateKey, foundSkill)
+					content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, foundSkill, ctx)
 					if err != nil {
 						return fmt.Errorf("failed to execute template %s for skill %s: %w", templateKey, toolName, err)
 					}

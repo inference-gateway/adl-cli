@@ -107,6 +107,7 @@ type Language struct {
 	Go         *GoConfig         `yaml:"go,omitempty" json:"go,omitempty"`
 	TypeScript *TypeScriptConfig `yaml:"typescript,omitempty" json:"typescript,omitempty"`
 	Rust       *RustConfig       `yaml:"rust,omitempty" json:"rust,omitempty"`
+	Acronyms   []string          `yaml:"acronyms,omitempty" json:"acronyms,omitempty"`
 }
 
 // SCM contains source control management configuration

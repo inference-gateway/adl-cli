@@ -19,9 +19,9 @@ type Engine struct {
 	registry     *Registry
 }
 
-// toPascalCase converts snake_case to PascalCase with special handling for acronyms
-func toPascalCase(s string) string {
-	acronyms := map[string]string{
+// getDefaultAcronyms returns the default acronyms map
+func getDefaultAcronyms() map[string]string {
+	return map[string]string{
 		"id":    "ID",
 		"api":   "API",
 		"url":   "URL",
@@ -49,7 +49,23 @@ func toPascalCase(s string) string {
 		"os":    "OS",
 		"db":    "DB",
 	}
+}
 
+// buildAcronymsMap builds the acronyms map from default + custom acronyms
+func buildAcronymsMap(customAcronyms []string) map[string]string {
+	acronyms := getDefaultAcronyms()
+	
+	for _, acronym := range customAcronyms {
+		lowerAcronym := strings.ToLower(acronym)
+		upperAcronym := strings.ToUpper(acronym)
+		acronyms[lowerAcronym] = upperAcronym
+	}
+	
+	return acronyms
+}
+
+// toPascalCaseWithAcronyms converts snake_case to PascalCase with custom acronyms
+func toPascalCaseWithAcronyms(s string, acronyms map[string]string) string {
 	s = strings.ReplaceAll(s, "-", "_")
 	words := strings.Split(s, "_")
 	result := make([]string, len(words))
@@ -75,6 +91,11 @@ func toPascalCase(s string) string {
 	return strings.Join(result, "")
 }
 
+// toPascalCase converts snake_case to PascalCase with default acronyms (backward compatibility)
+func toPascalCase(s string) string {
+	return toPascalCaseWithAcronyms(s, getDefaultAcronyms())
+}
+
 // toCamelCase converts snake_case to camelCase with special handling for acronyms
 func toCamelCase(s string) string {
 	pascalCase := toPascalCase(s)
@@ -95,6 +116,7 @@ type Context struct {
 	GenerateCD      bool
 	EnableAI        bool
 	GenerateCommand string
+	customAcronyms  map[string]string // internal field for template functions
 }
 
 // New creates a new template engine
@@ -188,9 +210,48 @@ func customFuncMap() template.FuncMap {
 	return funcMap
 }
 
+// customFuncMapWithAcronyms returns a function map with context-aware acronym functions
+func customFuncMapWithAcronyms(acronyms map[string]string) template.FuncMap {
+	funcMap := sprig.TxtFuncMap()
+	
+	// Context-aware functions that use custom acronyms
+	funcMap["toPascalCase"] = func(s string) string {
+		return toPascalCaseWithAcronyms(s, acronyms)
+	}
+	funcMap["toCamelCase"] = func(s string) string {
+		pascalCase := toPascalCaseWithAcronyms(s, acronyms)
+		if len(pascalCase) == 0 {
+			return pascalCase
+		}
+		runes := []rune(pascalCase)
+		runes[0] = unicode.ToLower(runes[0])
+		return string(runes)
+	}
+	
+	funcMap["toJson"] = toJson
+	funcMap["toGoMap"] = toGoMap
+	return funcMap
+}
+
+// prepareContext prepares the context with custom acronyms
+func (e *Engine) prepareContext(ctx Context) Context {
+	// Build custom acronyms map from ADL configuration
+	var customAcronyms []string
+	if ctx.ADL != nil && ctx.ADL.Spec.Language != nil && ctx.ADL.Spec.Language.Acronyms != nil {
+		customAcronyms = ctx.ADL.Spec.Language.Acronyms
+	}
+	
+	ctx.customAcronyms = buildAcronymsMap(customAcronyms)
+	return ctx
+}
+
 // Execute executes a template with the given context
 func (e *Engine) Execute(templateContent string, ctx Context) (string, error) {
-	tmpl, err := template.New("template").Funcs(customFuncMap()).Parse(templateContent)
+	// Prepare context with custom acronyms
+	ctx = e.prepareContext(ctx)
+	
+	// Use context-aware function map
+	tmpl, err := template.New("template").Funcs(customFuncMapWithAcronyms(ctx.customAcronyms)).Parse(templateContent)
 	if err != nil {
 		return "", err
 	}
@@ -273,7 +334,43 @@ func (e *Engine) ExecuteToolTemplate(templateKey string, skillData any) (string,
 		return "", fmt.Errorf("failed to get template %s: %w", templateKey, err)
 	}
 
+	// For now, use default function map for tool templates since we don't have ADL context
+	// This could be enhanced later to pass ADL context through skillData
 	tmpl, err := template.New("template").Funcs(customFuncMap()).Parse(templateContent)
+	if err != nil {
+		return "", err
+	}
+
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, skillData); err != nil {
+		return "", err
+	}
+
+	result := buf.String()
+
+	if result != "" && !strings.HasSuffix(result, "\n") {
+		result += "\n"
+	}
+
+	return result, nil
+}
+
+// ExecuteToolTemplateWithContext executes a skill template with ADL context for custom acronyms
+func (e *Engine) ExecuteToolTemplateWithContext(templateKey string, skillData any, ctx Context) (string, error) {
+	if e.registry == nil {
+		return "", fmt.Errorf("no registry configured")
+	}
+
+	templateContent, err := e.registry.GetTemplate(templateKey)
+	if err != nil {
+		return "", fmt.Errorf("failed to get template %s: %w", templateKey, err)
+	}
+
+	// Prepare context with custom acronyms
+	ctx = e.prepareContext(ctx)
+	
+	// Use context-aware function map with custom acronyms
+	tmpl, err := template.New("template").Funcs(customFuncMapWithAcronyms(ctx.customAcronyms)).Parse(templateContent)
 	if err != nil {
 		return "", err
 	}
