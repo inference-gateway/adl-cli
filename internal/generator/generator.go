@@ -298,7 +298,6 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 			fileType = "taskfile"
 		}
 
-		// Skip adding "DO NOT EDIT" headers to skill files - they are user-editable scaffolding
 		isSkillFile := (templateKey == "skill.go" || templateKey == "skill.rs" || templateKey == "skill.ts") || 
 			(strings.Contains(fileName, "/skills/") && (ext == ".go" || ext == ".rs" || ext == ".ts"))
 
