@@ -50,6 +50,7 @@ func toPascalCase(s string) string {
 		"db":    "DB",
 	}
 
+	s = strings.ReplaceAll(s, "-", "_")
 	words := strings.Split(s, "_")
 	result := make([]string, len(words))
 
