@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.3](https://github.com/inference-gateway/adl-cli/compare/v0.19.2...v0.19.3) (2025-09-06)
+
+### ♻️ Improvements
+
+* **templates:** Fix logger injection and syntax error in Go skill template ([#68](https://github.com/inference-gateway/adl-cli/issues/68)) ([96e4695](https://github.com/inference-gateway/adl-cli/commit/96e46951cb0a462fabc35dbf922a51e312b04a38)), closes [#67](https://github.com/inference-gateway/adl-cli/issues/67)
+
 ## [0.19.2](https://github.com/inference-gateway/adl-cli/compare/v0.19.1...v0.19.2) (2025-09-06)
 
 ### ♻️ Improvements
