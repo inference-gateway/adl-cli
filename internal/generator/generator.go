@@ -258,7 +258,8 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 
 				var foundSkill *schema.Skill
 				for _, skill := range adl.Spec.Skills {
-					if skill.Name == toolName {
+					snakeCaseSkillID := strings.ReplaceAll(skill.ID, "-", "_")
+					if snakeCaseSkillID == toolName {
 						foundSkill = &skill
 						break
 					}
@@ -442,16 +443,19 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 	case "minimal":
 		switch language {
 		case "go":
-			filesToIgnore = []string{
-				"skills/*",
+			for _, skill := range adl.Spec.Skills {
+				snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
+				filesToIgnore = append(filesToIgnore, fmt.Sprintf("skills/%s.go", snakeCaseName))
 			}
 		case "rust":
-			filesToIgnore = []string{
-				"src/skills/*",
+			for _, skill := range adl.Spec.Skills {
+				snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
+				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/skills/%s.rs", snakeCaseName))
 			}
 		case "typescript":
-			filesToIgnore = []string{
-				"src/skills/*",
+			for _, skill := range adl.Spec.Skills {
+				snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
+				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/skills/%s.ts", snakeCaseName))
 			}
 		}
 	}

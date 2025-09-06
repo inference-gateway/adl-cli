@@ -134,9 +134,9 @@ spec:
 		t.Errorf("expected skills directory to be generated")
 	}
 
-	testSkillPath := filepath.Join(skillsDir, "test_skill.go")
+	testSkillPath := filepath.Join(skillsDir, "test_skill_id.go")
 	if _, err := os.Stat(testSkillPath); os.IsNotExist(err) {
-		t.Errorf("expected test_skill.go to be generated")
+		t.Errorf("expected test_skill_id.go to be generated")
 	}
 }
 
