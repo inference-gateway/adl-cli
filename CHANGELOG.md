@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.4](https://github.com/inference-gateway/adl-cli/compare/v0.19.3...v0.19.4) (2025-09-06)
+
+### 🐛 Bug Fixes
+
+* **Skills:** Skip "DO NOT EDIT" headers for skill files ([#70](https://github.com/inference-gateway/adl-cli/issues/70)) ([2a9d2a5](https://github.com/inference-gateway/adl-cli/commit/2a9d2a55aa580fd7174e351ed740969fb7c91571)), closes [#69](https://github.com/inference-gateway/adl-cli/issues/69)
+
 ## [0.19.3](https://github.com/inference-gateway/adl-cli/compare/v0.19.2...v0.19.3) (2025-09-06)
 
 ### ♻️ Improvements
