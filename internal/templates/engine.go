@@ -107,6 +107,11 @@ func toCamelCase(s string) string {
 	return string(runes)
 }
 
+// toSnakeCase converts dash-case to snake_case
+func toSnakeCase(s string) string {
+	return strings.ReplaceAll(s, "-", "_")
+}
+
 // Context provides data for template execution
 type Context struct {
 	ADL             *schema.ADL
@@ -205,6 +210,7 @@ func customFuncMap() template.FuncMap {
 	funcMap := sprig.TxtFuncMap()
 	funcMap["toPascalCase"] = toPascalCase
 	funcMap["toCamelCase"] = toCamelCase
+	funcMap["toSnakeCase"] = toSnakeCase
 	funcMap["toJson"] = toJson
 	funcMap["toGoMap"] = toGoMap
 	return funcMap
@@ -227,6 +233,7 @@ func customFuncMapWithAcronyms(acronyms map[string]string) template.FuncMap {
 		return string(runes)
 	}
 	
+	funcMap["toSnakeCase"] = toSnakeCase
 	funcMap["toJson"] = toJson
 	funcMap["toGoMap"] = toGoMap
 	return funcMap
