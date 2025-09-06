@@ -33,6 +33,8 @@ func New{{ .Name | toPascalCase }}Skill(logger *zap.Logger) server.Tool {
 					"{{ $k }}": []string{ {{- range $i, $e := $v }}{{ if $i }}, {{ end }}"{{ $e }}"{{ end -}} },
 					{{- else if eq $k "properties" }}
 					"{{ $k }}": {{ $v | toGoMap }},
+					{{- else if eq $k "items" }}
+					"{{ $k }}": {{ $v | toGoMap }},
 					{{- else }}
 					"{{ $k }}": {{ $v | toJson }},
 					{{- end }}
@@ -44,14 +46,18 @@ func New{{ .Name | toPascalCase }}Skill(logger *zap.Logger) server.Tool {
 			"required": []string{ {{- range $i, $field := .Schema.required }}{{ if $i }}, {{ end }}"{{ $field }}"{{ end -}} },
 			{{- end }}
 		},
-		{{ .Name | toPascalCase }}Handler,
+		skill.{{ .Name | toPascalCase }}Handler,
 	)
 }
 
 // {{ .Name | toPascalCase }}Handler handles the {{ .Name }} skill execution
-func {{ .Name | toPascalCase }}Handler(ctx context.Context, args map[string]any) (string, error) {
+func (s *{{ .Name | toPascalCase }}Skill) {{ .Name | toPascalCase }}Handler(ctx context.Context, args map[string]any) (string, error) {
 	// TODO: Implement {{ .Name }} logic
 	// {{ .Description }}
+
+	// Log the incoming request
+	s.logger.Info("Processing {{ .Name }} request",
+		zap.Any("args", args))
 	
 	// Extract parameters from args
 	{{- range $key, $value := .Schema.properties }}
