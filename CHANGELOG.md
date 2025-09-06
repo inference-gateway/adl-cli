@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.1](https://github.com/inference-gateway/adl-cli/compare/v0.19.0...v0.19.1) (2025-09-06)
+
+### 🐛 Bug Fixes
+
+* Replace non-existent .Type fields in agents.md template ([#64](https://github.com/inference-gateway/adl-cli/issues/64)) ([6f73bdc](https://github.com/inference-gateway/adl-cli/commit/6f73bdc3faf85182d7f04672760012ff1b0c6173))
+
 ## [0.19.0](https://github.com/inference-gateway/adl-cli/compare/v0.18.2...v0.19.0) (2025-09-06)
 
 ### ✨ Features
