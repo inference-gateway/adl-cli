@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.0](https://github.com/inference-gateway/adl-cli/compare/v0.18.2...v0.19.0) (2025-09-06)
+
+### ✨ Features
+
+* **acronyms:** Add configurable acronyms for improved code generation ([#62](https://github.com/inference-gateway/adl-cli/issues/62)) ([2964c5f](https://github.com/inference-gateway/adl-cli/commit/2964c5f9cd73dc93187605145d55c766f5a6895b))
+
+### 🐛 Bug Fixes
+
+* **templates:** Handle dashes in skill names for Go identifier generation ([#60](https://github.com/inference-gateway/adl-cli/issues/60)) ([44cc232](https://github.com/inference-gateway/adl-cli/commit/44cc23280e960333f63d678b7d38ebd6d2d43715)), closes [#59](https://github.com/inference-gateway/adl-cli/issues/59)
+
 ## [0.18.2](https://github.com/inference-gateway/adl-cli/compare/v0.18.1...v0.18.2) (2025-09-05)
 
 ### ♻️ Improvements
