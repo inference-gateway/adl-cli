@@ -50,7 +50,6 @@ func toPascalCase(s string) string {
 		"db":    "DB",
 	}
 
-	// Split on both underscores and dashes to handle snake_case and dash-case
 	s = strings.ReplaceAll(s, "-", "_")
 	words := strings.Split(s, "_")
 	result := make([]string, len(words))
