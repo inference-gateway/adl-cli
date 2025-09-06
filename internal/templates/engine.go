@@ -116,7 +116,7 @@ type Context struct {
 	GenerateCD      bool
 	EnableAI        bool
 	GenerateCommand string
-	customAcronyms  map[string]string // internal field for template functions
+	customAcronyms  map[string]string
 }
 
 // New creates a new template engine
@@ -214,7 +214,6 @@ func customFuncMap() template.FuncMap {
 func customFuncMapWithAcronyms(acronyms map[string]string) template.FuncMap {
 	funcMap := sprig.TxtFuncMap()
 	
-	// Context-aware functions that use custom acronyms
 	funcMap["toPascalCase"] = func(s string) string {
 		return toPascalCaseWithAcronyms(s, acronyms)
 	}
@@ -235,7 +234,6 @@ func customFuncMapWithAcronyms(acronyms map[string]string) template.FuncMap {
 
 // prepareContext prepares the context with custom acronyms
 func (e *Engine) prepareContext(ctx Context) Context {
-	// Build custom acronyms map from ADL configuration
 	var customAcronyms []string
 	if ctx.ADL != nil && ctx.ADL.Spec.Language != nil && ctx.ADL.Spec.Language.Acronyms != nil {
 		customAcronyms = ctx.ADL.Spec.Language.Acronyms
@@ -247,10 +245,8 @@ func (e *Engine) prepareContext(ctx Context) Context {
 
 // Execute executes a template with the given context
 func (e *Engine) Execute(templateContent string, ctx Context) (string, error) {
-	// Prepare context with custom acronyms
 	ctx = e.prepareContext(ctx)
 	
-	// Use context-aware function map
 	tmpl, err := template.New("template").Funcs(customFuncMapWithAcronyms(ctx.customAcronyms)).Parse(templateContent)
 	if err != nil {
 		return "", err
@@ -334,8 +330,6 @@ func (e *Engine) ExecuteToolTemplate(templateKey string, skillData any) (string,
 		return "", fmt.Errorf("failed to get template %s: %w", templateKey, err)
 	}
 
-	// For now, use default function map for tool templates since we don't have ADL context
-	// This could be enhanced later to pass ADL context through skillData
 	tmpl, err := template.New("template").Funcs(customFuncMap()).Parse(templateContent)
 	if err != nil {
 		return "", err
@@ -366,10 +360,8 @@ func (e *Engine) ExecuteToolTemplateWithContext(templateKey string, skillData an
 		return "", fmt.Errorf("failed to get template %s: %w", templateKey, err)
 	}
 
-	// Prepare context with custom acronyms
 	ctx = e.prepareContext(ctx)
 	
-	// Use context-aware function map with custom acronyms
 	tmpl, err := template.New("template").Funcs(customFuncMapWithAcronyms(ctx.customAcronyms)).Parse(templateContent)
 	if err != nil {
 		return "", err

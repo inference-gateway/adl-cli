@@ -183,7 +183,7 @@ func TestBuildAcronymsMap(t *testing.T) {
 			name:           "override default acronym",
 			customAcronyms: []string{"id"},
 			expectedKeys:   []string{"id"},
-			expectedValues: []string{"ID"}, // Should still be ID (overridden but same result)
+			expectedValues: []string{"ID"},
 		},
 	}
 
@@ -255,7 +255,6 @@ func TestEngine_PrepareContext(t *testing.T) {
 			
 			preparedCtx := engine.prepareContext(ctx)
 			
-			// Check if all expected acronyms are present
 			for key, expectedValue := range tt.expected {
 				if value, exists := preparedCtx.customAcronyms[key]; !exists {
 					t.Errorf("prepareContext() missing acronym %q", key)
@@ -343,7 +342,6 @@ func TestEngine_Execute_WithCustomAcronyms(t *testing.T) {
 func TestGetDefaultAcronyms(t *testing.T) {
 	acronyms := getDefaultAcronyms()
 	
-	// Test some expected default acronyms
 	expectedDefaults := map[string]string{
 		"id":   "ID",
 		"api":  "API",
@@ -361,7 +359,6 @@ func TestGetDefaultAcronyms(t *testing.T) {
 		}
 	}
 	
-	// Ensure we have a reasonable number of default acronyms
 	if len(acronyms) < 10 {
 		t.Errorf("getDefaultAcronyms() returned %d acronyms, expected at least 10", len(acronyms))
 	}
