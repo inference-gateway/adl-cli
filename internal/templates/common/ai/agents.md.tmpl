@@ -67,7 +67,7 @@ This agent provides {{ len .ADL.Spec.Skills }} skills:
 {{ range .ADL.Spec.Skills }}
 ### {{ .Name }}
 - **Description**: {{ .Description }}
-- **Type**: {{ .Type }}
+{{ if .Tags }}- **Tags**: {{ join ", " .Tags }}{{ end }}
 - **Input Schema**: Defined in agent configuration
 - **Output Schema**: Defined in agent configuration
 
@@ -86,8 +86,11 @@ No skills defined - this agent provides basic A2A communication without speciali
 {{ end }}
 
 {{ if .ADL.Spec.Server.Auth }}
+{{ if .ADL.Spec.Server.Auth.Enabled }}
 **Authentication**: ✅ Required
-- Type: {{ .ADL.Spec.Server.Auth.Type }}
+{{ else }}
+**Authentication**: ❌ Not required
+{{ end }}
 {{ else }}
 **Authentication**: ❌ Not required
 {{ end }}
