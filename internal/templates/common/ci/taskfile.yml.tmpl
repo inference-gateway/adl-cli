@@ -67,10 +67,12 @@ tasks:
 
 {{- if .ADL.Spec.Deployment }}
 {{- if eq .ADL.Spec.Deployment.Type "kubernetes" }}
+
   deploy:
     desc: Deploy to Kubernetes
     cmd: kubectl apply -f k8s/
 {{- else if eq .ADL.Spec.Deployment.Type "cloudrun" }}
+
   deploy:
     desc: Deploy to Google Cloud Run
     cmd: |

@@ -244,6 +244,7 @@ jobs:
           cache-to: type=gha,mode=max
 
 {{- if .ADL.Spec.Deployment }}
+
   deploy:
     name: Deploy Application
     runs-on: ubuntu-24.04
