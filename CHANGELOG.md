@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.12](https://github.com/inference-gateway/adl-cli/compare/v0.19.11...v0.19.12) (2025-09-12)
+
+### 📚 Documentation
+
+* Update README and gitattributes to reflect changes in CloudRun deployment task ([d070236](https://github.com/inference-gateway/adl-cli/commit/d0702360a93c5f334f8ad9eac6003c9d2421eb54))
+
+### 🔧 Miscellaneous
+
+* Delete .github/workflows/claude-code-review.yml ([e1d1a15](https://github.com/inference-gateway/adl-cli/commit/e1d1a1583653641391174bc57546939c585e4a5b))
+
 ## [0.19.11](https://github.com/inference-gateway/adl-cli/compare/v0.19.10...v0.19.11) (2025-09-12)
 
 ### ♻️ Improvements
