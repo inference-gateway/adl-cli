@@ -595,7 +595,7 @@ func (g *Generator) generateGitHubActionsWorkflow(adl *schema.ADL, outputDir str
 		GenerateCommand: g.buildGenerateCommand(),
 	}
 
-	templateKey := fmt.Sprintf("ci/ci.%s.yaml", language)
+	templateKey := fmt.Sprintf("github/workflows/ci.%s.yaml", language)
 	workflowContent, err := templates.NewWithRegistry("", templateEngine).ExecuteTemplate(templateKey, ctx)
 	if err != nil {
 		return fmt.Errorf("failed to execute CI workflow template: %w", err)
@@ -741,7 +741,7 @@ func (g *Generator) generateGitHubCDWorkflow(adl *schema.ADL, outputDir string, 
 		return nil
 	}
 
-	templateKey := "cd/cd.yaml"
+	templateKey := "github/workflows/cd.yaml"
 
 	workflowContent, err := templateEngine.ExecuteTemplate(templateKey, ctx)
 	if err != nil {

@@ -19,7 +19,7 @@ type Registry struct {
 
 // Embed template files at compile time
 //
-//go:embed languages/*/*.tmpl common/*/*.tmpl common/github/*.tmpl common/ci/*.tmpl sandbox/*/*.tmpl
+//go:embed languages/*/*.tmpl common/*/*.tmpl common/github/*/*.tmpl sandbox/*/*.tmpl
 var templateFS embed.FS
 
 // RegistryOptions holds options for creating a new registry
@@ -141,7 +141,7 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		"main.go":                "main.go",
 		"go.mod":                 "go.mod",
 		".well-known/agent.json": "config/agent.json",
-		"Taskfile.yml":           "ci/taskfile.yml",
+		"Taskfile.yml":           "taskfile/taskfile.yml",
 		"Dockerfile":             "docker/dockerfile.go",
 		".gitignore":             "config/gitignore",
 		".gitattributes":         "config/gitattributes",
@@ -176,7 +176,7 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		"src/main.rs":            "main.rs",
 		"Cargo.toml":             "Cargo.toml",
 		".well-known/agent.json": "config/agent.json",
-		"Taskfile.yml":           "ci/taskfile.yml",
+		"Taskfile.yml":           "taskfile/taskfile.yml",
 		"Dockerfile":             "docker/dockerfile.rust",
 		".gitignore":             "config/gitignore",
 		".gitattributes":         "config/gitattributes",
@@ -216,7 +216,7 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		"package.json":           "package.json",
 		"tsconfig.json":          "tsconfig.json",
 		".well-known/agent.json": "config/agent.json",
-		"Taskfile.yml":           "ci/taskfile.yml",
+		"Taskfile.yml":           "taskfile/taskfile.yml",
 		"Dockerfile":             "docker/dockerfile.ts",
 		".gitignore":             "config/gitignore",
 		".gitattributes":         "config/gitattributes",
