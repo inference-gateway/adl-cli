@@ -19,7 +19,7 @@ type Registry struct {
 
 // Embed template files at compile time
 //
-//go:embed languages/*/*.tmpl common/*/*.tmpl common/github/*.tmpl common/cloudrun/*.tmpl sandbox/*/*.tmpl
+//go:embed languages/*/*.tmpl common/*/*.tmpl common/github/*.tmpl common/cloudrun/*.tmpl common/ci/*.tmpl sandbox/*/*.tmpl
 var templateFS embed.FS
 
 // RegistryOptions holds options for creating a new registry

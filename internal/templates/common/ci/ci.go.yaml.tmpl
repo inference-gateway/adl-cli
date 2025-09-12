@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    
+    steps:
+    - uses: actions/checkout@v4.2.2
+    
+    - name: Set up Go
+      uses: actions/setup-go@v5.5.0
+      with:
+        go-version: {{ if and .ADL.Spec.Language.Go .ADL.Spec.Language.Go.Version }}{{ .ADL.Spec.Language.Go.Version }}{{ else }}1.24{{ end }}
+        cache: true
+
+    - name: Install golangci-lint
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v2.1.6
+
+    - name: Install Task
+      uses: arduino/setup-task@v2
+      with:
+        version: 3.x
+    
+    - name: Download dependencies
+      run: go mod download
+    
+    - name: Format check
+      run: task fmt
+    
+    - name: Lint
+      run: task lint
+    
+    - name: Run tests
+      run: task test
+    
+    - name: Build
+      run: task build

@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    
+    steps:
+    - uses: actions/checkout@v4.2.2
+    
+    - name: Set up Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: {{ if and .ADL.Spec.Language.Rust .ADL.Spec.Language.Rust.Version }}{{ .ADL.Spec.Language.Rust.Version }}{{ else }}1.70{{ end }}
+        override: true
+        components: rustfmt, clippy
+
+    - name: Install Task
+      uses: arduino/setup-task@v2
+      with:
+        version: 3.x
+    
+    - name: Cache cargo dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{`{{ runner.os }}`}}-cargo-${{`{{ hashFiles('**/Cargo.lock') }}`}}
+    
+    - name: Check formatting
+      run: task fmt
+    
+    - name: Lint
+      run: task lint
+    
+    - name: Run tests
+      run: task test
+    
+    - name: Build
+      run: task build

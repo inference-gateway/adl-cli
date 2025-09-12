@@ -298,7 +298,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 			fileType = "taskfile"
 		}
 
-		isSkillFile := (templateKey == "skill.go" || templateKey == "skill.rs" || templateKey == "skill.ts") || 
+		isSkillFile := (templateKey == "skill.go" || templateKey == "skill.rs" || templateKey == "skill.ts") ||
 			(strings.Contains(fileName, "/skills/") && (ext == ".go" || ext == ".rs" || ext == ".ts"))
 
 		if fileType != "" && !isSkillFile {
@@ -380,53 +380,53 @@ func (g *Generator) getVersion() string {
 // buildGenerateCommand constructs the original adl generate command from the config
 func (g *Generator) buildGenerateCommand() string {
 	var parts []string
-	
+
 	parts = append(parts, "adl", "generate")
-	
+
 	if g.config.ADLFile != "" {
 		parts = append(parts, "--file", g.config.ADLFile)
 	} else {
 		parts = append(parts, "--file", "agent.yaml")
 	}
-	
+
 	if g.config.OutputDir != "" {
 		parts = append(parts, "--output", g.config.OutputDir)
 	} else {
 		parts = append(parts, "--output", ".")
 	}
-	
+
 	if g.config.Template != "" && g.config.Template != "minimal" {
 		parts = append(parts, "--template", g.config.Template)
 	}
-	
+
 	if g.config.Overwrite {
 		parts = append(parts, "--overwrite")
 	}
-	
+
 	if g.config.GenerateCI {
 		parts = append(parts, "--ci")
 	}
-	
+
 	if g.config.GenerateCD {
 		parts = append(parts, "--cd")
 	}
-	
+
 	if g.config.DeploymentType != "" {
 		parts = append(parts, "--deployment", g.config.DeploymentType)
 	}
-	
+
 	if g.config.EnableFlox {
 		parts = append(parts, "--flox")
 	}
-	
+
 	if g.config.EnableDevContainer {
 		parts = append(parts, "--devcontainer")
 	}
-	
+
 	if g.config.EnableAI {
 		parts = append(parts, "--ai")
 	}
-	
+
 	return strings.Join(parts, " ")
 }
 
@@ -547,7 +547,7 @@ func (g *Generator) detectSCMProvider(adl *schema.ADL) string {
 	return "github"
 }
 
-// generateGitHubActionsWorkflow generates a GitHub Actions workflow for projects
+// generateGitHubActionsWorkflow generates a GitHub Actions workflow for projects using templates
 func (g *Generator) generateGitHubActionsWorkflow(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
 	workflowPath := ".github/workflows/ci.yml"
 
@@ -557,18 +557,35 @@ func (g *Generator) generateGitHubActionsWorkflow(adl *schema.ADL, outputDir str
 	}
 
 	language := g.detectLanguage(adl)
-	var workflowContent string
-
-	switch language {
-	case "go":
-		workflowContent = g.generateGoWorkflowContent(adl)
-	case "typescript":
-		workflowContent = g.generateTypeScriptWorkflowContent(adl)
-	case "rust":
-		workflowContent = g.generateRustWorkflowContent(adl)
-	default:
-		return fmt.Errorf("GitHub Actions generation not supported for language: %s", language)
+	templateEngine, err := templates.NewRegistry(language)
+	if err != nil {
+		return fmt.Errorf("failed to create template registry: %w", err)
 	}
+
+	ctx := templates.Context{
+		ADL: adl,
+		Metadata: schema.GeneratedMetadata{
+			CLIVersion:  g.config.Version,
+			GeneratedAt: time.Now(),
+			ADLFile:     g.config.ADLFile,
+			Template:    g.config.Template,
+		},
+		Language:        language,
+		GenerateCI:      g.config.GenerateCI,
+		GenerateCD:      g.config.GenerateCD,
+		EnableAI:        g.config.EnableAI,
+		GenerateCommand: g.buildGenerateCommand(),
+	}
+
+	templateKey := fmt.Sprintf("ci/ci.%s.yaml", language)
+	workflowContent, err := templates.NewWithRegistry("", templateEngine).ExecuteTemplate(templateKey, ctx)
+	if err != nil {
+		return fmt.Errorf("failed to execute CI workflow template: %w", err)
+	}
+
+	// Add header to the workflow content
+	header := templates.GetGeneratedFileHeader("yaml", ctx.Metadata.CLIVersion, ctx.Metadata.GeneratedAt)
+	workflowContent = header + workflowContent
 
 	fullWorkflowPath := filepath.Join(outputDir, workflowPath)
 	if err := g.writeFile(fullWorkflowPath, workflowContent); err != nil {
@@ -579,172 +596,6 @@ func (g *Generator) generateGitHubActionsWorkflow(adl *schema.ADL, outputDir str
 	fmt.Printf("📁 GitHub Actions workflow: %s\n", workflowPath)
 
 	return nil
-}
-
-// generateGoWorkflowContent generates the GitHub Actions workflow content for Go projects
-func (g *Generator) generateGoWorkflowContent(adl *schema.ADL) string {
-	goVersion := "1.24"
-	if adl.Spec.Language.Go != nil && adl.Spec.Language.Go.Version != "" {
-		goVersion = adl.Spec.Language.Go.Version
-	}
-
-	return fmt.Sprintf(`name: CI
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  test:
-    runs-on: ubuntu-24.04
-    
-    steps:
-    - uses: actions/checkout@v4.2.2
-    
-    - name: Set up Go
-      uses: actions/setup-go@v5.5.0
-      with:
-        go-version: %s
-        cache: true
-
-    - name: Install golangci-lint
-      run: |
-        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v2.1.6
-
-    - name: Install Task
-      uses: arduino/setup-task@v2
-      with:
-        version: 3.x
-    
-    - name: Download dependencies
-      run: go mod download
-    
-    - name: Format check
-      run: task fmt
-    
-    - name: Lint
-      run: task lint
-    
-    - name: Run tests
-      run: task test
-    
-    - name: Build
-      run: task build
-`, goVersion)
-}
-
-// generateTypeScriptWorkflowContent generates the GitHub Actions workflow content for TypeScript projects
-func (g *Generator) generateTypeScriptWorkflowContent(adl *schema.ADL) string {
-	nodeVersion := "18"
-	if adl.Spec.Language.TypeScript != nil && adl.Spec.Language.TypeScript.NodeVersion != "" {
-		nodeVersion = adl.Spec.Language.TypeScript.NodeVersion
-	}
-
-	return fmt.Sprintf(`name: CI
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  test:
-    runs-on: ubuntu-24.04
-    
-    steps:
-    - uses: actions/checkout@v4.2.2
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v4.1.0
-      with:
-        node-version: %s
-        cache: 'npm'
-    
-    - name: Install Task
-      uses: arduino/setup-task@v2
-      with:
-        version: 3.x
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Lint
-      run: task lint
-    
-    - name: Run tests
-      run: task test
-    
-    - name: Build
-      run: task build
-`, nodeVersion)
-}
-
-// generateRustWorkflowContent generates the GitHub Actions workflow content for Rust projects
-func (g *Generator) generateRustWorkflowContent(adl *schema.ADL) string {
-	rustVersion := "1.70"
-	if adl.Spec.Language.Rust != nil && adl.Spec.Language.Rust.Version != "" {
-		rustVersion = adl.Spec.Language.Rust.Version
-	}
-
-	return fmt.Sprintf(`name: CI
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  test:
-    runs-on: ubuntu-24.04
-    
-    steps:
-    - uses: actions/checkout@v4.2.2
-    
-    - name: Set up Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: %s
-        override: true
-        components: rustfmt, clippy
-
-    - name: Install Task
-      uses: arduino/setup-task@v2
-      with:
-        version: 3.x
-    
-    - name: Cache cargo dependencies
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-    
-    - name: Format check
-      run: task fmt
-    
-    - name: Lint
-      run: task lint
-    
-    - name: Run tests
-      run: task test
-    
-    - name: Build
-      run: task build
-`, rustVersion)
 }
 
 // runPostGenerationSteps runs language-specific post-generation steps
@@ -879,6 +730,10 @@ func (g *Generator) generateGitHubCDWorkflow(adl *schema.ADL, outputDir string, 
 		return fmt.Errorf("failed to execute CD workflow template: %w", err)
 	}
 
+	// Add header to the CD workflow content
+	header := templates.GetGeneratedFileHeader("yaml", ctx.Metadata.CLIVersion, ctx.Metadata.GeneratedAt)
+	workflowContent = header + workflowContent
+
 	fullWorkflowPath := filepath.Join(outputDir, workflowPath)
 	if err := g.writeFile(fullWorkflowPath, workflowContent); err != nil {
 		return fmt.Errorf("failed to write GitHub CD workflow: %w", err)
@@ -904,6 +759,10 @@ func (g *Generator) generateReleaseRC(templateEngine *templates.Engine, ctx temp
 	if err != nil {
 		return fmt.Errorf("failed to execute releaserc template: %w", err)
 	}
+
+	// Add header to the .releaserc.yaml content
+	header := templates.GetGeneratedFileHeader("yaml", ctx.Metadata.CLIVersion, ctx.Metadata.GeneratedAt)
+	releasercContent = header + releasercContent
 
 	fullReleasercPath := filepath.Join(outputDir, releasercPath)
 	if err := g.writeFile(fullReleasercPath, releasercContent); err != nil {
