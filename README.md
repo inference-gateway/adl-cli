@@ -281,7 +281,7 @@ The `--ai` flag enables enhanced development experience with AI assistant capabi
 **Deployment Generation Features:**
 The `--deployment` flag generates platform-specific deployment configurations:
 
-- **CloudRun Deployment**: Creates `cloudrun/deploy.sh` with gcloud deployment script
+- **CloudRun Deployment**: Creates a `deploy` task in the root `Taskfile.yml` for gcloud deployment
   - Supports both Google Container Registry (GCR) and GitHub Container Registry (GHCR)
   - Configurable resources (CPU, memory), scaling (min/max instances), and service options
   - Uses direct gcloud commands for truly serverless deployment (no Kubernetes required)
@@ -527,7 +527,7 @@ All projects include these essential files regardless of language:
 - **`Taskfile.yml`** - Unified task runner configuration for build, test, lint, run
 - **`Dockerfile`** - Language-optimized container configuration  
 - **`k8s/deployment.yaml`** - Kubernetes deployment manifest
-- **`cloudrun/deploy.sh`** - CloudRun deployment script (when using `--deployment cloudrun`)
+- **`deploy` task in `Taskfile.yml`** - CloudRun deployment task (when using `--deployment cloudrun`)
 - **`.adl-ignore`** - Protects user implementations from overwrite
 - **CI Workflows** - When using `--ci` flag, generates GitHub Actions workflows:
   - **GitHub Actions**: `.github/workflows/ci.yml`
@@ -660,7 +660,7 @@ image:
 
 ### Generated Deployment Script
 
-When using `--deployment cloudrun`, the ADL CLI generates a deployment script (`cloudrun/deploy.sh`) that:
+When using `--deployment cloudrun`, the ADL CLI generates a `deploy` task in the `Taskfile.yml` that:
 
 - **Validates Environment**: Checks for required `PROJECT_ID` and `REGION` variables
 - **Container Building**: Uses Docker locally or Cloud Build based on configuration
@@ -679,9 +679,6 @@ export REGION="us-central1"
 
 # 3. Deploy to CloudRun
 cd my-agent
-./cloudrun/deploy.sh
-
-# Or use the generated Taskfile
 task deploy
 ```
 
