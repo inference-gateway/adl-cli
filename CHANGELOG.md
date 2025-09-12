@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.9](https://github.com/inference-gateway/adl-cli/compare/v0.19.8...v0.19.9) (2025-09-12)
+
+### ♻️ Improvements
+
+* **templates:** Add spacing when deploy job is needed ([e9e62a0](https://github.com/inference-gateway/adl-cli/commit/e9e62a0a4d1fecc8d7cce19a2a8529d596bfcdcd))
+
 ## [0.19.8](https://github.com/inference-gateway/adl-cli/compare/v0.19.7...v0.19.8) (2025-09-12)
 
 ### 🐛 Bug Fixes
