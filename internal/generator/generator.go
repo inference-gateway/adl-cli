@@ -56,9 +56,27 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 			adl.Spec.Deployment = &schema.DeploymentConfig{}
 		}
 		adl.Spec.Deployment.Type = g.config.DeploymentType
+
+		if g.config.DeploymentType == "cloudrun" && adl.Spec.Deployment.CloudRun == nil {
+			adl.Spec.Deployment.CloudRun = &schema.CloudRunConfig{
+				Resources: &schema.ResourcesConfig{
+					CPU:    "1",
+					Memory: "512Mi",
+				},
+				Scaling: &schema.ScalingConfig{
+					MinInstances: 0,
+					MaxInstances: 10,
+					Concurrency:  1000,
+				},
+				Service: &schema.ServiceConfig{
+					Timeout:              3600,
+					AllowUnauthenticated: true,
+					ExecutionEnvironment: "gen2",
+				},
+			}
+		}
 	}
 
-	// Apply sandbox configuration from CLI flags if not already set in ADL
 	if g.config.EnableFlox || g.config.EnableDevContainer {
 		if adl.Spec.Sandbox == nil {
 			adl.Spec.Sandbox = &schema.SandboxConfig{}

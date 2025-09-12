@@ -75,8 +75,83 @@ tasks:
 
   deploy:
     desc: Deploy to Google Cloud Run
-    cmd: |
-      chmod +x cloudrun/deploy.sh
-      ./cloudrun/deploy.sh
+    deps:
+      - docker:build
+    env:
+      SERVICE_NAME: "{{ .ADL.Metadata.Name }}"
+      PORT: "{{ .ADL.Spec.Server.Port | default 8080 }}"
+    cmds:
+      - |
+        if [ -z "$PROJECT_ID" ]; then
+          echo "Error: PROJECT_ID environment variable is required"
+          exit 1
+        fi
+        if [ -z "$REGION" ]; then
+          echo "Error: REGION environment variable is required" 
+          exit 1
+        fi
+      - |
+        echo "Pushing image to gcr.io/${PROJECT_ID}/${SERVICE_NAME}:{{ .ADL.Metadata.Version }}"
+        docker tag ${SERVICE_NAME}:{{ .ADL.Metadata.Version }} gcr.io/${PROJECT_ID}/${SERVICE_NAME}:{{ .ADL.Metadata.Version }}
+        docker push gcr.io/${PROJECT_ID}/${SERVICE_NAME}:{{ .ADL.Metadata.Version }}
+      - |
+        echo "Deploying to Cloud Run..."
+        gcloud run deploy ${SERVICE_NAME} \
+          --image gcr.io/${PROJECT_ID}/${SERVICE_NAME}:{{ .ADL.Metadata.Version }} \
+          --platform managed \
+          --region ${REGION} \
+          --port ${PORT} \
+          --allow-unauthenticated \
+          --set-env-vars "A2A_SERVER_PORT=${PORT},ENV=production{{ if .ADL.Spec.Server.Debug }},DEBUG=true{{ end }}" \
+          --cpu "{{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Resources.CPU | default "1" }}{{ else }}1{{ end }}" \
+          --memory "{{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Resources.Memory | default "512Mi" }}{{ else }}512Mi{{ end }}" \
+          --min-instances {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Scaling.MinInstances | default 0 }}{{ else }}0{{ end }} \
+          --max-instances {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Scaling.MaxInstances | default 10 }}{{ else }}10{{ end }} \
+          --concurrency {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Scaling.Concurrency | default 1000 }}{{ else }}1000{{ end }} \
+          --timeout {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Service.Timeout | default 3600 }}{{ else }}3600{{ end }} \
+          --service-account "{{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Service.ServiceAccount | default (printf "%s@${PROJECT_ID}.iam.gserviceaccount.com" .ADL.Metadata.Name) }}{{ else }}{{ .ADL.Metadata.Name }}@${PROJECT_ID}.iam.gserviceaccount.com{{ end }}" \
+          --execution-environment {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Service.ExecutionEnvironment | default "gen2" }}{{ else }}gen2{{ end }}
+      - |
+        echo "Deployment completed successfully!"
+        echo "Service URL: $(gcloud run services describe ${SERVICE_NAME} --region=${REGION} --format='value(status.url)')"
+
+  deploy:cloud-build:
+    desc: Deploy to Google Cloud Run using Cloud Build
+    env:
+      SERVICE_NAME: "{{ .ADL.Metadata.Name }}"
+      PORT: "{{ .ADL.Spec.Server.Port | default 8080 }}"
+    cmds:
+      - |
+        if [ -z "$PROJECT_ID" ]; then
+          echo "Error: PROJECT_ID environment variable is required"
+          exit 1
+        fi
+        if [ -z "$REGION" ]; then
+          echo "Error: REGION environment variable is required"
+          exit 1
+        fi
+      - |
+        echo "Building and pushing image using Cloud Build..."
+        gcloud builds submit --tag gcr.io/${PROJECT_ID}/${SERVICE_NAME}:{{ .ADL.Metadata.Version }}
+      - |
+        echo "Deploying to Cloud Run..."
+        gcloud run deploy ${SERVICE_NAME} \
+          --image gcr.io/${PROJECT_ID}/${SERVICE_NAME}:{{ .ADL.Metadata.Version }} \
+          --platform managed \
+          --region ${REGION} \
+          --port ${PORT} \
+          --allow-unauthenticated \
+          --set-env-vars "A2A_SERVER_PORT=${PORT},ENV=production{{ if .ADL.Spec.Server.Debug }},DEBUG=true{{ end }}" \
+          --cpu "{{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Resources.CPU | default "1" }}{{ else }}1{{ end }}" \
+          --memory "{{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Resources.Memory | default "512Mi" }}{{ else }}512Mi{{ end }}" \
+          --min-instances {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Scaling.MinInstances | default 0 }}{{ else }}0{{ end }} \
+          --max-instances {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Scaling.MaxInstances | default 10 }}{{ else }}10{{ end }} \
+          --concurrency {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Scaling.Concurrency | default 1000 }}{{ else }}1000{{ end }} \
+          --timeout {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Service.Timeout | default 3600 }}{{ else }}3600{{ end }} \
+          --service-account "{{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Service.ServiceAccount | default (printf "%s@${PROJECT_ID}.iam.gserviceaccount.com" .ADL.Metadata.Name) }}{{ else }}{{ .ADL.Metadata.Name }}@${PROJECT_ID}.iam.gserviceaccount.com{{ end }}" \
+          --execution-environment {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Service.ExecutionEnvironment | default "gen2" }}{{ else }}gen2{{ end }}
+      - |
+        echo "Deployment completed successfully!"
+        echo "Service URL: $(gcloud run services describe ${SERVICE_NAME} --region=${REGION} --format='value(status.url)')"
 {{- end }}
 {{- end }}

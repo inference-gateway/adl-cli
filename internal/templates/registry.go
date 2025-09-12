@@ -19,7 +19,7 @@ type Registry struct {
 
 // Embed template files at compile time
 //
-//go:embed languages/*/*.tmpl common/*/*.tmpl common/github/*.tmpl common/cloudrun/*.tmpl common/ci/*.tmpl sandbox/*/*.tmpl
+//go:embed languages/*/*.tmpl common/*/*.tmpl common/github/*.tmpl common/ci/*.tmpl sandbox/*/*.tmpl
 var templateFS embed.FS
 
 // RegistryOptions holds options for creating a new registry
@@ -154,7 +154,7 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		case "kubernetes":
 			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"
 		case "cloudrun":
-			files["cloudrun/deploy.sh"] = "cloudrun/deploy.sh"
+			// CloudRun deployment is handled via Taskfile
 		}
 	}
 
@@ -189,7 +189,7 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		case "kubernetes":
 			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"
 		case "cloudrun":
-			files["cloudrun/deploy.sh"] = "cloudrun/deploy.sh"
+			// CloudRun deployment is handled via Taskfile
 		}
 	}
 
@@ -229,7 +229,7 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		case "kubernetes":
 			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"
 		case "cloudrun":
-			files["cloudrun/deploy.sh"] = "cloudrun/deploy.sh"
+			// CloudRun deployment is handled via Taskfile
 		}
 	}
 
