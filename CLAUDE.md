@@ -2,393 +2,239 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## Commands
 
-The ADL CLI is a command-line tool for generating production-ready A2A (Agent-to-Agent) servers from YAML-based Agent Definition Language (ADL) files. It creates complete project scaffolding with business logic placeholders, allowing developers to focus on implementing agent functionality.
+### Development
+- `task build` - Build the ADL CLI binary to `bin/adl`
+- `task test` - Run all tests
+- `task test:coverage` - Run tests with coverage report
+- `task lint` - Run golangci-lint (must be installed)
+- `task fmt` - Format all Go code
+- `task vet` - Run go vet for static analysis
+- `task mod` - Download dependencies and tidy go.mod
+- `task ci` - Run complete CI pipeline: fmt, lint, test, build
 
-## Key Architecture Components
+### Testing
+- `go test -v ./...` - Run all tests with verbose output
+- `go test -v ./cmd -run TestInit` - Run specific test
+- `go test -v ./internal/generator` - Test specific package
+- `task examples:test` - Validate all example ADL files
+- `task examples:generate` - Generate projects from all examples
+
+### Development Workflow
+- `task dev -- init my-agent` - Run ADL CLI in development mode
+- `task dev -- generate --file agent.yaml --output ./test` - Generate project
+- `task dev -- validate examples/go-agent.yaml` - Validate ADL file
+
+## Architecture
 
 ### Core Components
-- **CLI Commands**: Located in `cmd/` directory with Cobra-based command structure
-- **Generator**: `internal/generator/generator.go` - Main generation logic for creating projects from ADL files
-- **Schema**: `internal/schema/types.go` - Go structs representing ADL YAML structure
-- **Templates**: `internal/templates/` - Template engine and language-specific templates (Go templates with Sprig functions)
-- **Validation**: `internal/schema/validator.go` - ADL file validation against JSON schema
+
+The ADL CLI follows a command-based architecture using Cobra framework:
+
+```
+main.go                       # Entry point, sets version
+├── cmd/                      # CLI commands
+│   ├── root.go              # Root command setup
+│   ├── init.go              # Interactive ADL manifest creation
+│   ├── generate.go          # Project generation from ADL
+│   └── validate.go          # ADL schema validation
+└── internal/                 # Core business logic
+    ├── generator/            # Code generation engine
+    │   ├── generator.go      # Main generation logic
+    │   └── ignore.go         # .adl-ignore handling
+    ├── schema/               # ADL schema definitions
+    │   ├── types.go          # ADL type definitions
+    │   └── validator.go      # Schema validation logic
+    ├── prompt/               # Interactive prompt utilities
+    │   └── prompt.go         # User input handling
+    └── templates/            # Template system
+        ├── engine.go         # Template rendering engine
+        ├── registry.go       # Template registration
+        ├── headers.go        # File header generation
+        ├── common/           # Universal templates
+        ├── languages/        # Language-specific templates
+        │   ├── go/          # Go project templates
+        │   ├── rust/        # Rust project templates
+        │   └── typescript/  # TypeScript templates (planned)
+        └── sandbox/          # Development environment templates
+            ├── flox/        # Flox environment configs
+            └── devcontainer/ # DevContainer configs
+```
 
 ### Template System
-- **Registry**: `internal/templates/registry.go` - Manages template loading and language-specific file mapping
-- **Engine**: `internal/templates/engine.go` - Template execution with Sprig functions and auto-generated headers
-- **Templates**: Language-specific templates in `internal/templates/languages/` (Go, Rust, TypeScript)
-- **Common Templates**: Shared templates in `internal/templates/common/` (CI, Docker, docs, etc.)
-- **Sandbox Templates**: Environment-specific templates in `internal/templates/sandbox/`
-- **Context**: Template receives ADL data and metadata for rendering
 
-### ADL Structure
-ADL files define agents with:
-- **Metadata**: Name, description, version
-- **Capabilities**: Streaming, notifications, state history
-- **Agent**: AI provider configuration (OpenAI, Anthropic, Azure, Ollama, DeepSeek, etc.)
-- **Tools**: Function definitions with JSON schemas  
-- **Server**: HTTP server configuration with optional authentication
-- **Language**: Programming language settings (Go, Rust, TypeScript) with configurable acronyms for code generation
-- **SCM**: Source control management configuration (GitHub, etc.) with issue templates support
-- **Sandbox**: Environment configuration with extensible structure supporting multiple environments (Flox, DevContainer)
+The template system uses Go's `text/template` with Sprig functions:
 
-## Development Commands
+1. **Template Registry** (`internal/templates/registry.go`):
+   - Maps ADL configurations to template files
+   - Handles language detection and file mapping
+   - Supports conditional generation based on flags
 
-### Build and Development
-```bash
-# Build the CLI
-task build
+2. **Template Engine** (`internal/templates/engine.go`):
+   - Renders templates with ADL context
+   - Manages file headers with metadata
+   - Handles post-generation hooks
 
-# Install to GOPATH/bin
-task install
+3. **Template Context**:
+   - ADL configuration (complete spec)
+   - Generation metadata (timestamp, version)
+   - Language-specific helpers
 
-# Run in development mode
-task dev
+### Generation Flow
 
-# Clean build artifacts
-task clean
-```
+1. **Validation Phase**:
+   - Parse and validate ADL YAML against schema
+   - Check for required fields and constraints
+   - Validate skill schemas and configurations
 
-### Testing and Quality
-```bash
-# Run tests
-task test
+2. **Template Selection**:
+   - Detect target language from ADL spec
+   - Build file mapping for selected language
+   - Include conditional files (CI, deployment, etc.)
 
-# Run tests with coverage
-task test:coverage
+3. **Generation Phase**:
+   - Create output directory structure
+   - Render templates with ADL context
+   - Handle .adl-ignore for file protection
+   - Execute post-generation hooks
 
-# Format code
-task fmt
+4. **Post-Processing**:
+   - Run language-specific formatters
+   - Execute custom hooks from ADL
+   - Generate .adl-ignore for skill files
 
-# Run linter (golangci-lint)
-task lint
+### Key Interfaces
 
-# Full CI pipeline (fmt, lint, test, build)
-task ci
-```
-
-### Example Testing
-```bash
-# Validate all example ADL files
-task examples:test
-
-# Generate all example projects
-task examples:generate
-```
-
-### Release
-```bash
-# Build release binaries for multiple platforms
-task release
-
-# Build Docker image
-task docker:build
-```
-
-## Code Patterns and Conventions
-
-### Go Code Style
-- Use table-driven testing for all tests
-- Prefer early returns to avoid deep nesting
-- Use switch statements over if-else chains for multiple conditions
-- Always use lowercase log messages
-- Code to interfaces for easier mocking in tests
-- Each test case should have isolated mock dependencies
-- Always ensure a new line at the end of files
-- Always use conventional commit messages for clarity (example: `feat: Add new agent type`, `fix: Resolve validation issue`)
-
-### Template Development
-- Templates use Go's text/template with Sprig functions
-- Template files are embedded using `//go:embed` in `internal/templates/registry.go`
-- Language-specific templates in `internal/templates/languages/[lang]/` directories
-- Common templates shared across languages in `internal/templates/common/`
-- Sandbox environment templates in `internal/templates/sandbox/`
-- Context provides ADL data and generation metadata
-- Generated files get automatic headers with generation info
-
-### Error Handling
-- Wrap errors with context using `fmt.Errorf("context: %w", err)`
-- Validate ADL structure early in generation process
-- Provide clear error messages for validation failures
+- `schema.ADL` - Root ADL configuration structure
+- `generator.Generator` - Main generation interface
+- `templates.Engine` - Template rendering interface
+- `prompt.Prompter` - Interactive input interface
 
 ## Testing Strategy
 
-### Required Testing
-- Always run `task lint` before committing
-- Always run `task test` to ensure all tests pass
-- Test both success and error cases
-- Use isolated mocks for each test case
+### Unit Tests
+- Table-driven tests for all packages
+- Mock interfaces for external dependencies
+- Isolated test cases with dedicated mocks
+- Coverage target: >80%
 
-### Test Organization
-- Generator tests in `internal/generator/generator_test.go`
-- Schema validation tests in `internal/schema/validator_test.go`
-- Example ADL files serve as integration tests
+### Integration Tests
+- End-to-end generation tests
+- ADL validation against examples
+- Template rendering verification
+- CI/CD generation validation
 
-## Configurable Acronyms
-
-The ADL CLI supports configurable acronyms for improved code generation readability. This feature allows developers to define custom acronyms that will be properly capitalized in generated code.
-
-### How It Works
-
-Acronyms are configured in the `spec.language.acronyms` field as an array of strings. When generating code, these acronyms will be treated as single words and rendered in all uppercase letters.
-
-### Example Configuration
-
-```yaml
-spec:
-  language:
-    go:
-      module: "github.com/company/my-agent"
-      version: "1.24"
-    acronyms: ["n8n", "xml", "mqtt", "iot"]
+### Test Patterns
+```go
+// Table-driven test example
+func TestGenerateProject(t *testing.T) {
+    tests := []struct {
+        name    string
+        adl     *schema.ADL
+        flags   GenerateFlags
+        wantErr bool
+    }{
+        // Test cases here
+    }
+    
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            // Test implementation
+        })
+    }
+}
 ```
 
-### Generated Code Examples
+## Code Style Guidelines
 
-With the above configuration:
-- `get_n8n_docs` → `GetN8NDocs` (not `GetN8nDocs`)
-- `process_xml_data` → `ProcessXMLData` (not `ProcessXmlData`) 
-- `send_mqtt_message` → `SendMQTTMessage` (not `SendMqttMessage`)
+### Go Conventions
+- Use early returns to reduce nesting
+- Prefer switch over if-else chains
+- Table-driven tests for comprehensive coverage
+- Lowercase log messages for consistency
+- Code to interfaces for testability
+- Type safety over dynamic typing
 
-### Default Acronyms
+### Error Handling
+- Wrap errors with context using `fmt.Errorf`
+- Return errors early
+- Log errors at appropriate levels
+- Provide actionable error messages
 
-The following acronyms are included by default:
-- **Common**: id, api, url, uri, json, xml, sql, html, css, js, ui, uuid
-- **Network**: http, https, tcp, udp, ip, dns, tls, ssl
-- **Tech**: cpu, gpu, ram, io, os, db
+### Testing
+- Each test case with isolated dependencies
+- Mock external services and file systems
+- Use test fixtures in `testdata/` directories
+- Clean up test artifacts
 
-Custom acronyms extend these defaults. If you specify an acronym that already exists in the defaults, your custom definition takes precedence.
+## Common Tasks
 
-### Template Integration
+### Adding a New Language
 
-The acronym functionality integrates seamlessly with existing templates through the `toPascalCase` and `toCamelCase` template functions, ensuring consistent naming across all generated code.
+1. Create language directory: `internal/templates/languages/<lang>/`
+2. Add language detection in `internal/generator/generator.go`
+3. Create file mapping in `internal/templates/registry.go`
+4. Add language-specific templates
+5. Update ADL schema for language config
+6. Add example ADL file
+7. Write integration tests
 
-## Language Support Architecture
+### Adding a New Command
 
-### Current Support
-- **Go**: Full support with templates for main.go, go.mod, and tools
-- **Rust**: Full support with templates for main.rs, Cargo.toml, and tools
-- **TypeScript**: Planned support (template structure exists but templates not yet implemented)
+1. Create command file in `cmd/<command>.go`
+2. Register with root command in `cmd/root.go`
+3. Add command logic and flags
+4. Write unit tests in `cmd/<command>_test.go`
+5. Update README documentation
 
-### Language Detection
-The generator detects target language from ADL `spec.language` section using `DetectLanguageFromADL()` function and validates exactly one language is specified. Defaults to Go if no language is specified.
+### Modifying Templates
 
-### Adding New Languages
-1. Update `internal/schema/types.go` with new language config struct
-2. Add templates in `internal/templates/languages/[language]/` directory
-3. Update `internal/templates/registry.go` to handle file mappings for new language
-4. Add language detection logic in registry's `DetectLanguageFromADL()` function
-5. Create example ADL files in `examples/`
+1. Locate template in `internal/templates/`
+2. Update template syntax (Go text/template)
+3. Test with example ADL files
+4. Verify generated output
+5. Update integration tests if needed
 
-## Common Development Tasks
+## CI/CD Pipeline
 
-### Running CLI During Development
-```bash
-# After building
-./bin/adl generate --file examples/go-agent.yaml --output ./test-go-agent
+### GitHub Actions Workflows
 
-# Using task dev
-task dev -- generate --file examples/go-agent.yaml --output ./test-go-agent
-```
+- **ci.yml**: Runs on PR and main branch
+  - Go 1.24 setup with caching
+  - golangci-lint v2.1.6
+  - Module tidying and dirty check
+  - Full test suite
 
-### Testing Generation
-```bash
-# Generate from example
-./bin/adl generate --file examples/rust-agent.yaml --output ./test-rust-agent
+- **release.yml**: Manual dispatch for releases
+  - Semantic versioning with conventional commits
+  - GitHub App authentication for releases
+  - Multi-platform binary builds via goreleaser
+  - Docker image publishing
 
-# Validate ADL file
-./bin/adl validate examples/rust-agent.yaml
-```
+### Release Process
 
-### Debugging Generation Issues
-- Check ADL validation errors first (detailed in `internal/generator/generator.go:validateADL`)
-- Template execution errors include context about which template failed
-- Generated files include headers showing generation metadata
+1. Trigger release workflow manually
+2. Semantic-release analyzes commits
+3. Version bump based on commit types
+4. Build binaries for multiple platforms
+5. Create GitHub release with artifacts
+6. Update install script with new version
 
-## CLI Command Structure
+## Debugging Tips
 
-### Init Command
-`adl init [project-name]` - Interactive ADL manifest creation with wizard
+- Use `task dev` for quick iteration
+- Add debug logging with `log.Printf`
+- Test templates with minimal ADL files
+- Use `--overwrite` flag for regeneration
+- Check `.adl-ignore` for protected files
+- Validate ADL with `adl validate` first
 
-#### Init Command Options
-- `--defaults` - Use default values for all prompts
-- `--path` - Project directory path
-- `--name` - Agent name
-- `--description` - Agent description
-- `--version` - Agent version
-- `--type` - Agent type (ai-powered/minimal)
-- `--provider` - AI provider (openai/anthropic/azure/ollama/deepseek)
-- `--model` - AI model
-- `--system-prompt` - System prompt
-- `--max-tokens` - Maximum tokens
-- `--temperature` - Temperature (0.0-2.0)
-- `--streaming` - Enable streaming
-- `--notifications` - Enable push notifications
-- `--history` - Enable state transition history
-- `--port` - Server port
-- `--debug` - Enable debug mode
-- `--language` - Programming language (go/rust/typescript)
-- `--go-module` - Go module path
-- `--go-version` - Go version
-- `--rust-package-name` - Rust package name
-- `--rust-version` - Rust version
-- `--rust-edition` - Rust edition
-- `--typescript-name` - TypeScript package name
-- `--flox` - Enable Flox environment
-- `--devcontainer` - Enable DevContainer environment
+## Important Notes
 
-### Generate Command
-`adl generate` - Generate project from ADL file (main command)
-
-#### Generate Command Options
-- `--file` - ADL file path (default: agent.yaml)
-- `--output` - Output directory (default: current directory)
-- `--template` - Template to use (default: minimal)
-- `--overwrite` - Overwrite existing files
-- `--ci` - Generate CI workflow configuration
-- `--cd` - Generate CD pipeline configuration with semantic-release
-- `--deployment` - Deployment type (kubernetes, cloudrun, defaults to empty for no deployment)
-- `--ai` - Generate AI assistant instructions (CLAUDE.md) and add claude-code to sandbox environments
-
-### Validate Command
-`adl validate [file]` - Validate ADL file against schema
-
-## GitHub Issue Templates
-
-The ADL CLI supports automatic generation of GitHub issue templates to help track bugs, feature requests, and refactoring tasks for agents.
-
-### Configuration
-
-Issue templates are enabled through the `scm.issue_templates` field in the ADL file:
-
-```yaml
-spec:
-  scm:
-    provider: github
-    url: "https://github.com/company/my-agent"
-    issue_templates: true  # Enable issue template generation
-```
-
-### Generated Templates
-
-When `issue_templates` is set to `true`, the generator creates three issue template files in `.github/ISSUE_TEMPLATE/`:
-
-- **`bug_report.md`** - For reporting bugs and issues
-- **`feature_request.md`** - For requesting new features 
-- **`refactor_request.md`** - For requesting code improvements and refactoring
-
-### Template Features
-
-- Templates include ADL-specific context (agent name, version)
-- Follow GitHub issue template format with frontmatter
-- Include structured sections for consistent issue reporting
-- Support for severity/priority classification
-- Include environment information and log collection sections
-
-### Usage
-
-1. Set `issue_templates: true` in your ADL file's SCM section
-2. Run `adl generate` to create the templates
-3. Issue templates will be available in the GitHub repository for contributors to use
-
-## Deployment Configuration
-
-The ADL CLI supports generating deployment configurations for multiple platforms, making it easy to deploy A2A agents to various environments.
-
-### Supported Deployment Types
-
-#### Kubernetes
-- **Flag**: `--deployment kubernetes`
-- **Generated Files**: `k8s/deployment.yaml`
-- **Requirements**: kubectl configured with cluster access
-- **Deploy Command**: `task deploy` or `kubectl apply -f k8s/`
-
-#### Google Cloud Run
-- **Flag**: `--deployment cloudrun`
-- **Generated Files**: `cloudrun/deploy.sh`
-- **Requirements**: Google Cloud SDK (gcloud) installed and authenticated
-- **Deploy Command**: `task deploy` or `./cloudrun/deploy.sh`
-
-### Deployment Workflow
-
-When using the `--cd` flag with deployment configuration:
-
-1. **CI/CD Integration**: Deployment is automatically added to the CD workflow
-2. **Container Building**: Docker images are built and pushed to the appropriate registry
-3. **Automated Deployment**: Services are deployed automatically after successful releases
-4. **Environment Variables**: Required secrets and environment variables are documented
-
-### Required Environment Variables
-
-#### For Kubernetes Deployment
-- `KUBECONFIG`: Kubernetes cluster configuration (GitHub Actions secret)
-
-#### For Cloud Run Deployment  
-- `GCP_SA_KEY`: Google Cloud service account key (GitHub Actions secret)
-- `GCP_PROJECT_ID`: Google Cloud project ID (GitHub Actions secret)
-- `GCP_REGION`: Google Cloud region for deployment (GitHub Actions secret)
-
-### CloudRun Deployment Features
-
-The ADL CLI supports CloudRun deployment configuration through the ADL file's `deployment` section:
-
-#### Container Registry Support
-- **Google Container Registry (GCR)**: Uses Cloud Build for automatic image building
-- **GitHub Container Registry (GHCR)**: Uses pre-built images, skips Cloud Build
-- **Custom Registries**: Supports other container registries with appropriate configuration
-
-#### Configurable Resources
-- **CPU**: Configurable CPU allocation (0.1 to 8 cores)
-- **Memory**: Memory limits from 128Mi to 32Gi
-- **Scaling**: Min/max instances and concurrency settings
-- **Timeout**: Request timeout configuration
-- **Service Account**: Custom GCP service account assignment
-- **Environment Variables**: Custom environment variable injection
-
-#### Generated Deployment Script
-The generated `cloudrun/deploy.sh` script provides:
-- Environment variable validation (PROJECT_ID, REGION)
-- Conditional container building (Docker vs Cloud Build)
-- Direct gcloud deployment with all configured options
-- Deployment configuration summary display
-- Service URL retrieval after successful deployment
-
-#### ADL Configuration Example
-```yaml
-spec:
-  deployment:
-    type: cloudrun
-    cloudrun:
-      image:
-        registry: ghcr.io  # or gcr.io
-        repository: myorg/agent
-        useCloudBuild: false  # Skip for external registries
-      resources:
-        cpu: "2"
-        memory: 1Gi
-      scaling:
-        minInstances: 1
-        maxInstances: 100
-        concurrency: 1000
-      service:
-        timeout: 3600
-        serviceAccount: my-agent@PROJECT_ID.iam.gserviceaccount.com
-        executionEnvironment: gen2
-      environment:
-        LOG_LEVEL: info
-```
-
-### Usage Examples
-
-```bash
-# Generate with Kubernetes deployment
-adl generate --file agent.yaml --deployment kubernetes --cd
-
-# Generate with Cloud Run deployment  
-adl generate --file agent.yaml --deployment cloudrun --cd
-
-# Deploy manually after generation
-task deploy
-```
+- Go 1.24 required (uses new Go features)
+- Templates use Sprig v3 functions
+- ADL schema version: `adl.dev/v1`
+- Supports Go, Rust, TypeScript (planned)
+- CI/CD generation for GitHub Actions
+- Deployment support for Kubernetes and CloudRun

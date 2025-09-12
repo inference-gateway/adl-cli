@@ -1,0 +1,40 @@
+---
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    
+    steps:
+    - uses: actions/checkout@v4.2.2
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4.1.0
+      with:
+        node-version: {{ if and .ADL.Spec.Language.TypeScript .ADL.Spec.Language.TypeScript.NodeVersion }}{{ .ADL.Spec.Language.TypeScript.NodeVersion }}{{ else }}18{{ end }}
+        cache: 'npm'
+    
+    - name: Install Task
+      uses: arduino/setup-task@v2
+      with:
+        version: 3.x
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Lint
+      run: task lint
+    
+    - name: Run tests
+      run: task test
+    
+    - name: Build
+      run: task build
