@@ -260,6 +260,7 @@ jobs:
           fetch-depth: 0
 
 {{- if eq .ADL.Spec.Deployment.Type "kubernetes" }}
+
       - name: Set up kubectl
         uses: azure/setup-kubectl@v4
         
@@ -273,6 +274,7 @@ jobs:
           KUBECONFIG: ${{`{{ secrets.KUBECONFIG }}`}}
 
 {{- else if eq .ADL.Spec.Deployment.Type "cloudrun" }}
+
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
