@@ -326,7 +326,7 @@ When using the `--cd` flag with deployment configuration:
 - `KUBECONFIG`: Kubernetes cluster configuration (GitHub Actions secret)
 
 #### For Cloud Run Deployment  
-- `GCP_SA_KEY`: Google Cloud service account key (GitHub Actions secret)
+- `GCP_CREDENTIALS`: Google Cloud service account credentials JSON (GitHub Actions secret)
 - `GCP_PROJECT_ID`: Google Cloud project ID (GitHub Actions secret)
 - `GCP_REGION`: Google Cloud region for deployment (GitHub Actions secret)
 
