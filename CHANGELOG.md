@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.11](https://github.com/inference-gateway/adl-cli/compare/v0.19.10...v0.19.11) (2025-09-12)
+
+### ♻️ Improvements
+
+* **headers:** Add DO NOT EDIT headers to generated CI/CD workflow files ([#72](https://github.com/inference-gateway/adl-cli/issues/72)) ([5db9169](https://github.com/inference-gateway/adl-cli/commit/5db91691963ec8213b4e30e8676c22994ca95b7d)), closes [#71](https://github.com/inference-gateway/adl-cli/issues/71)
+
 ## [0.19.10](https://github.com/inference-gateway/adl-cli/compare/v0.19.9...v0.19.10) (2025-09-12)
 
 ### 🐛 Bug Fixes
