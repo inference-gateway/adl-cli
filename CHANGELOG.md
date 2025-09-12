@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.10](https://github.com/inference-gateway/adl-cli/compare/v0.19.9...v0.19.10) (2025-09-12)
+
+### 🐛 Bug Fixes
+
+* **cd.yaml.tmpl:** Add missing spacing when CloudRun or Kubernetes deployment is chosen with cd flag enabled ([5de56a6](https://github.com/inference-gateway/adl-cli/commit/5de56a648b11714a8f3091fcf9f50e8b33e05d86))
+* **cd.yaml.tmpl:** Adjust spacing for better readability in the checkout step ([61f007c](https://github.com/inference-gateway/adl-cli/commit/61f007cdd6bca6a7e2828789dc0718d9be1ee55b))
+
 ## [0.19.9](https://github.com/inference-gateway/adl-cli/compare/v0.19.8...v0.19.9) (2025-09-12)
 
 ### ♻️ Improvements
