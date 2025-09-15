@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.14](https://github.com/inference-gateway/adl-cli/compare/v0.19.13...v0.19.14) (2025-09-15)
+
+### ♻️ Improvements
+
+* Update adk dependency version to v0.10.1 - remove default configuration values ([#73](https://github.com/inference-gateway/adl-cli/issues/73)) ([e142508](https://github.com/inference-gateway/adl-cli/commit/e14250807e5e4f830aeb73c9196cdf7fa8b30a68))
+
 ## [0.19.13](https://github.com/inference-gateway/adl-cli/compare/v0.19.12...v0.19.13) (2025-09-15)
 
 ### 🐛 Bug Fixes
