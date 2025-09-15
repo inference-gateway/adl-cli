@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.13](https://github.com/inference-gateway/adl-cli/compare/v0.19.12...v0.19.13) (2025-09-15)
+
+### 🐛 Bug Fixes
+
+* **agent:** Add MaxChatCompletionIterations to agent configuration ([ee8f54a](https://github.com/inference-gateway/adl-cli/commit/ee8f54a1c3c42cca42244e178bb2029c1c838e3e))
+
 ## [0.19.12](https://github.com/inference-gateway/adl-cli/compare/v0.19.11...v0.19.12) (2025-09-12)
 
 ### 📚 Documentation
