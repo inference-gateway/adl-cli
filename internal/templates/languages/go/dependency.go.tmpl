@@ -2,6 +2,8 @@ package {{ .ID }}
 
 import (
 	"context"
+	
+	config "{{ .GoModule }}/config"
 )
 
 // {{ .Name }} represents the {{ .ID }} dependency interface
@@ -17,7 +19,8 @@ type {{ .ID }}Impl struct {
 }
 
 // New{{ .Name }} creates a new instance of {{ .Name }}
-func New{{ .Name }}(ctx context.Context) ({{ .Name }}, error) {
+func New{{ .Name }}(ctx context.Context, cfg *config.Config) ({{ .Name }}, error) {
 	// TODO: Implement constructor logic for {{ .ID }}
+	// You can use cfg for configuration settings
 	return &{{ .ID }}Impl{}, nil
 }

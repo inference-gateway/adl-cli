@@ -294,6 +294,10 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 							"Name": titleCase(foundDependency),
 							"ID":   foundDependency,
 						}
+
+						if adl.Spec.Language.Go != nil {
+							depContext["GoModule"] = adl.Spec.Language.Go.Module
+						}
 						content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, depContext, ctx)
 						if err != nil {
 							return fmt.Errorf("failed to execute template %s for dependency %s: %w", templateKey, dependencyName, err)

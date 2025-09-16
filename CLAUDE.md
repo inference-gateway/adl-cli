@@ -33,32 +33,34 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The ADL CLI supports dependency injection to improve testability and maintainability of skills:
 
 #### Configuration
-Dependencies are defined at the spec level and injected into specific skills:
+Dependencies are defined at the spec level and injected into specific skills. The `logger` dependency is built-in and doesn't need to be declared in the dependencies list:
 
 ```yaml
 spec:
   dependencies:
-    - logger
-    - database
+    - database  # Custom dependencies only
   skills:
     - id: query_database
       name: query_database
       inject:
-        - logger
-        - database
+        - logger    # Built-in, always available
+        - database  # Must be declared in dependencies
 ```
 
 #### Implementation
-- **Dependency Packages**: Each dependency creates a package in `internal/` (e.g., `internal/logger/`)
+- **Built-in Logger**: `logger` dependency is automatically available as `*zap.Logger` without declaration
+- **Custom Dependencies**: User-defined dependencies create packages in `internal/` (e.g., `internal/database/`)
 - **Constructor Functions**: Skills receive injected dependencies as constructor parameters
-- **Interface-Based**: Dependencies use interfaces for better testability
+- **Interface-Based**: Custom dependencies use interfaces for better testability
+- **Configuration Package**: Application configuration is centralized in `config/config.go`
 - **Validation**: Build-time validation ensures injected dependencies are defined in spec
 
 #### Benefits
 - Improved testability through dependency mocking
 - Better separation of concerns
-- Centralized dependency management
+- Centralized dependency and configuration management
 - Type-safe dependency contracts
+- Simplified logging with direct zap.Logger integration
 
 ### Core Components
 
@@ -77,7 +79,7 @@ main.go                       # Entry point, sets version
     │   └── ignore.go         # .adl-ignore handling
     ├── schema/               # ADL schema definitions
     │   ├── types.go          # ADL type definitions
-    │   └── validator.go      # Schema validation logic
+    │   └── validator.go      # Schema validation
     ├── prompt/               # Interactive prompt utilities
     │   └── prompt.go         # User input handling
     └── templates/            # Template system
@@ -119,15 +121,16 @@ The template system uses Go's `text/template` with Sprig functions:
    - Parse and validate ADL YAML against schema
    - Check for required fields and constraints
    - Validate skill schemas and configurations
+   - Verify dependency injection references (built-in logger support)
 
 2. **Template Selection**:
    - Detect target language from ADL spec
-   - Build file mapping for selected language
+   - Build file mapping for selected language including config package
    - Include conditional files (CI, deployment, etc.)
 
 3. **Generation Phase**:
    - Create output directory structure
-   - Render templates with ADL context
+   - Render templates with ADL context and dependency information
    - Handle .adl-ignore for file protection
    - Execute post-generation hooks
 

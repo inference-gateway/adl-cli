@@ -140,6 +140,7 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 	files := map[string]string{
 		"main.go":                "main.go",
 		"go.mod":                 "go.mod",
+		"config/config.go":       "config.go",
 		".well-known/agent.json": "config/agent.json",
 		"Taskfile.yml":           "taskfile/taskfile.yml",
 		"Dockerfile":             "docker/dockerfile.go",
@@ -162,6 +163,8 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
 		files[fmt.Sprintf("skills/%s.go", snakeCaseName)] = "skill.go"
 	}
+
+	files["internal/logger/logger.go"] = "logger.go"
 
 	for _, dependency := range adl.Spec.Dependencies {
 		snakeCaseName := strings.ReplaceAll(dependency, "-", "_")

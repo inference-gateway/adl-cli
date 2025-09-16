@@ -454,24 +454,23 @@ spec:
 
 ## Dependency Injection
 
-The ADL CLI supports dependency injection to improve testability and separation of concerns in your agent skills. This feature allows you to define reusable dependencies and inject them into specific skills that need them.
+The ADL CLI supports dependency injection to improve testability and separation of concerns in your agent skills. The system includes a built-in logger dependency that's automatically available, plus support for custom dependencies.
 
 ### Basic Dependency Injection
 
-Define dependencies at the spec level and inject them into skills:
+Define custom dependencies at the spec level and inject them into skills. The `logger` dependency is built-in and doesn't need to be declared:
 
 ```yaml
 spec:
   dependencies:
-    - logger
-    - database
+    - database  # Custom dependencies only
   skills:
     - id: query_database
       name: query_database
       description: "Query the company database"
       inject:
-        - logger
-        - database
+        - logger    # Built-in, always available
+        - database  # Must be declared in dependencies
       schema:
         type: object
         properties:
@@ -483,16 +482,19 @@ spec:
 
 ### How It Works
 
-1. **Define Dependencies**: List all available dependencies in `spec.dependencies`
-2. **Inject into Skills**: Specify which dependencies each skill needs in the `inject` array  
-3. **Code Generation**: The CLI generates constructor functions and dependency packages
-4. **Validation**: Ensures injected dependencies are defined in the spec
+1. **Built-in Logger**: `logger` dependency is automatically available as `*zap.Logger`
+2. **Define Custom Dependencies**: List additional dependencies in `spec.dependencies`
+3. **Inject into Skills**: Specify which dependencies each skill needs in the `inject` array  
+4. **Code Generation**: The CLI generates constructor functions and dependency packages
+5. **Validation**: Ensures injected dependencies are defined in the spec
 
 ### Generated Code Structure
 
 The dependency injection system generates:
 
-- **Dependency Packages**: Each dependency creates a package in `internal/` (e.g., `internal/logger/`, `internal/database/`)
+- **Built-in Logger**: Automatically available as `*zap.Logger` without declaration
+- **Configuration Package**: Centralized application configuration in `config/config.go`
+- **Custom Dependency Packages**: Each custom dependency creates a package in `internal/` (e.g., `internal/database/`)
 - **Constructor Functions**: Skills receive injected dependencies as constructor arguments
 - **Validation**: Build-time checks that dependencies are properly defined
 
@@ -501,17 +503,20 @@ The dependency injection system generates:
 - **Improved Testability**: Skills can be tested with mock dependencies
 - **Better Separation of Concerns**: Clear boundaries between business logic and dependencies
 - **Maintainable Code**: Dependencies are centrally defined and managed
-- **Type Safety**: Interface-based dependency contracts
+- **Type Safety**: Interface-based dependency contracts for custom dependencies
+- **Simplified Logging**: Direct integration with zap.Logger for consistent logging
 
 ### Example Generated Structure
 
 ```
 my-agent/
+├── config/
+│   └── config.go          # Centralized configuration
 ├── internal/
 │   ├── logger/
-│   │   └── logger.go      # Logger implementation package
+│   │   └── logger.go      # Built-in logger factory
 │   └── database/
-│       └── database.go    # Database implementation package
+│       └── database.go    # Custom dependency package
 └── skills/
     └── query_database.go  # Skill with injected dependencies
 ```
@@ -525,6 +530,11 @@ The ADL CLI generates project scaffolding tailored to your chosen language:
 my-go-agent/
 ├── main.go                    # Main server setup
 ├── go.mod                     # Go module definition
+├── config/
+│   └── config.go              # Centralized application configuration
+├── internal/
+│   └── logger/
+│       └── logger.go          # Built-in logger factory
 ├── skills/                    # Skill implementations directory
 │   ├── query_database.go      # Individual skill files (TODO placeholders)
 │   └── send_notification.go

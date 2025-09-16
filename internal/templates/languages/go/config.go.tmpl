@@ -1,0 +1,14 @@
+package config
+
+import (
+	serverConfig "github.com/inference-gateway/adk/server/config"
+)
+
+// Config represents the application configuration
+type Config struct {
+	// Core application settings
+	Environment string `env:"ENVIRONMENT"`
+	
+	// A2A configuration (all A2A_ prefixed vars)
+	A2A serverConfig.Config `env:",prefix=A2A_"`
+}

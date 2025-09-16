@@ -6,20 +6,28 @@ import (
 
 	server "github.com/inference-gateway/adk/server"
 {{- range $depID := .Inject }}
+{{- if eq $depID "logger" }}
+	"go.uber.org/zap"
+{{- else }}
 	{{ $depID | toCamelCase }} "{{ $.GoModule }}/internal/{{ $depID | toSnakeCase }}"
+{{- end }}
 {{- end }}
 )
 
 // {{ .Name | toPascalCase }}Skill struct holds the skill with dependencies
 type {{ .Name | toPascalCase }}Skill struct {
 {{- range $depID := .Inject }}
+{{- if eq $depID "logger" }}
+	{{ $depID | toCamelCase }} *zap.Logger
+{{- else }}
 {{- $dep := index $.DependencyMap $depID }}
 	{{ $depID | toCamelCase }} {{ $depID | toCamelCase }}.{{ $dep.Name }}
+{{- end }}
 {{- end }}
 }
 
 // New{{ .Name | toPascalCase }}Skill creates a new {{ .Name }} skill
-func New{{ .Name | toPascalCase }}Skill({{ range $index, $depID := .Inject }}{{ if $index }}, {{ end }}{{- $dep := index $.DependencyMap $depID }}{{ $depID | toCamelCase }} {{ $depID | toCamelCase }}.{{ $dep.Name }}{{ end }}) server.Tool {
+func New{{ .Name | toPascalCase }}Skill({{ range $index, $depID := .Inject }}{{ if $index }}, {{ end }}{{- if eq $depID "logger" }}{{ $depID | toCamelCase }} *zap.Logger{{- else }}{{- $dep := index $.DependencyMap $depID }}{{ $depID | toCamelCase }} {{ $depID | toCamelCase }}.{{ $dep.Name }}{{- end }}{{ end }}) server.Tool {
 	skill := &{{ .Name | toPascalCase }}Skill{
 {{- range $depID := .Inject }}
 		{{ $depID | toCamelCase }}: {{ $depID | toCamelCase }},

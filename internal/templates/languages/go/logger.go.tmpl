@@ -5,84 +5,30 @@ import (
 	
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	
+	"{{ .ADL.Spec.Language.Go.Module }}/config"
 )
 
-// Logger represents the logger dependency interface
-type Logger interface {
-	Debug(msg string, fields ...zap.Field)
-	Info(msg string, fields ...zap.Field)
-	Warn(msg string, fields ...zap.Field)
-	Error(msg string, fields ...zap.Field)
-	Fatal(msg string, fields ...zap.Field)
-	With(fields ...zap.Field) Logger
-}
-
-// loggerImpl is the implementation of Logger using Zap
-type loggerImpl struct {
-	zap *zap.Logger
-}
-
-// NewLogger creates a new instance of Logger with Zap
-func NewLogger(ctx context.Context) (Logger, error) {
-	// Check environment to determine log level and format
-	// You can customize this based on your environment variables
-	config := zap.NewProductionConfig()
+// NewLogger creates a new zap.Logger instance
+func NewLogger(ctx context.Context, cfg *config.Config) (*zap.Logger, error) {
+	var zapConfig zap.Config
 	
-	// Customize the configuration as needed
-	config.EncoderConfig.TimeKey = "timestamp"
-	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	config.EncoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+	if cfg.Environment == "development" {
+		zapConfig = zap.NewDevelopmentConfig()
+		zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	} else {
+		zapConfig = zap.NewProductionConfig()
+		zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+	}
 	
-	zapLogger, err := config.Build()
+	zapConfig.EncoderConfig.TimeKey = "timestamp"
+	zapConfig.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	
+	zapLogger, err := zapConfig.Build()
 	if err != nil {
 		return nil, err
 	}
 	
-	return &loggerImpl{
-		zap: zapLogger,
-	}, nil
+	return zapLogger, nil
 }
 
-// NewDevelopmentLogger creates a new instance of Logger with Zap in development mode
-func NewDevelopmentLogger(ctx context.Context) (Logger, error) {
-	zapLogger, err := zap.NewDevelopment()
-	if err != nil {
-		return nil, err
-	}
-	
-	return &loggerImpl{
-		zap: zapLogger,
-	}, nil
-}
-
-// Debug logs a debug message
-func (l *loggerImpl) Debug(msg string, fields ...zap.Field) {
-	l.zap.Debug(msg, fields...)
-}
-
-// Info logs an info message
-func (l *loggerImpl) Info(msg string, fields ...zap.Field) {
-	l.zap.Info(msg, fields...)
-}
-
-// Warn logs a warning message
-func (l *loggerImpl) Warn(msg string, fields ...zap.Field) {
-	l.zap.Warn(msg, fields...)
-}
-
-// Error logs an error message
-func (l *loggerImpl) Error(msg string, fields ...zap.Field) {
-	l.zap.Error(msg, fields...)
-}
-
-// Fatal logs a fatal message and terminates the program
-func (l *loggerImpl) Fatal(msg string, fields ...zap.Field) {
-	l.zap.Fatal(msg, fields...)
-}
-
-// With creates a child logger with additional fields
-func (l *loggerImpl) With(fields ...zap.Field) Logger {
-	return &loggerImpl{
-		zap: l.zap.With(fields...),
-	}
-}

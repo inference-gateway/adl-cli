@@ -73,13 +73,13 @@ func (v *Validator) ValidateFile(filePath string) error {
 
 // validateDependencyReferences checks that all injected dependencies are defined in the spec
 func (v *Validator) validateDependencyReferences(adl *ADL) error {
-	// Create a map of defined dependencies for fast lookup
 	definedDeps := make(map[string]bool)
 	for _, dep := range adl.Spec.Dependencies {
 		definedDeps[dep] = true
 	}
 
-	// Check each skill's injected dependencies
+	definedDeps["logger"] = true
+
 	for _, skill := range adl.Spec.Skills {
 		for _, injectedDep := range skill.Inject {
 			if !definedDeps[injectedDep] {

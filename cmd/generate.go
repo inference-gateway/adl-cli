@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/inference-gateway/adl-cli/internal/generator"
+	"github.com/inference-gateway/adl-cli/internal/schema"
 	"github.com/spf13/cobra"
 )
 
@@ -58,6 +59,12 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	absOutputDir, err := filepath.Abs(outputDir)
 	if err != nil {
 		return fmt.Errorf("failed to resolve output directory path: %w", err)
+	}
+
+	// Validate ADL file before generation
+	validator := schema.NewValidator()
+	if err := validator.ValidateFile(adlFile); err != nil {
+		return fmt.Errorf("ADL validation failed: %w", err)
 	}
 
 	gen := generator.New(generator.Config{

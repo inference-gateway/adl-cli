@@ -8,14 +8,17 @@ import (
 	"syscall"
 
 	server "github.com/inference-gateway/adk/server"
-	config "github.com/inference-gateway/adk/server/config"
 	envconfig "github.com/sethvargo/go-envconfig"
 	zap "go.uber.org/zap"
-{{- if .ADL.Spec.Skills }}
 
+	config "{{ .ADL.Spec.Language.Go.Module }}/config"
+{{- if .ADL.Spec.Skills }}
 	skills "{{ .ADL.Spec.Language.Go.Module }}/skills"
 {{- end }}
+
+	logger "{{ .ADL.Spec.Language.Go.Module }}/internal/logger"
 {{- range $dep := .ADL.Spec.Dependencies }}
+{{- if ne $dep "logger" }}
 {{- $depUsed := false }}
 {{- range $.ADL.Spec.Skills }}
 {{- range .Inject }}
@@ -25,20 +28,12 @@ import (
 {{- end }}
 {{- end }}
 {{- if $depUsed }}
-
 	{{ $dep | toCamelCase }} "{{ $.ADL.Spec.Language.Go.Module }}/internal/{{ $dep | toSnakeCase }}"
+{{- end }}
 {{- end }}
 {{- end }}
 )
 
-// Config represents the application configuration
-type Config struct {
-	// Core application settings
-	Environment string `env:"ENVIRONMENT"`
-	
-	// A2A configuration (all A2A_ prefixed vars)
-	A2A config.Config `env:",prefix=A2A_"`
-}
 
 var (
 	Version          = "{{ .ADL.Metadata.Version }}"
@@ -49,28 +44,18 @@ var (
 func main() {
 	ctx := context.Background()
 
-	var cfg Config
+	var cfg config.Config
 	if err := envconfig.Process(ctx, &cfg); err != nil {
 		log.Fatal("failed to load config:", err)
 	}
 
-	var l *zap.Logger
-	var err error
-	if cfg.A2A.Debug || cfg.Environment == "dev" || cfg.Environment == "development" {
-		l, err = zap.NewDevelopment()
-	} else {
-		l, err = zap.NewProduction()
-	}
+	// Initialize logger
+	l, err := logger.NewLogger(ctx, &cfg)
 	if err != nil {
 		log.Fatal("failed to initialize logger:", err)
 	}
-	defer l.Sync()
 
-	l.Info("starting {{ .ADL.Metadata.Name }} agent", 
-		zap.String("version", Version),
-		zap.String("environment", cfg.Environment),
-	)
-	l.Debug("loaded configuration", zap.Any("config", cfg))
+	l.Info("starting " + AgentName + " agent (version: " + Version + ", environment: " + cfg.Environment + ")")
 
 	toolBox := server.NewDefaultToolBox()
 
@@ -80,16 +65,19 @@ func main() {
 	{{- range $.ADL.Spec.Skills }}
 	{{- range .Inject }}
 	{{- if eq . $dep }}
+	{{- if ne $dep "logger" }}
 	{{- $anyDepUsed = true }}
+	{{- end }}
 	{{- end }}
 	{{- end }}
 	{{- end }}
 	{{- end }}
 	{{- if $anyDepUsed }}
 	
-	// Initialize dependencies
+	// Initialize other dependencies
 	{{- end }}
 	{{- range $dep := .ADL.Spec.Dependencies }}
+	{{- if ne $dep "logger" }}
 	{{- $depUsed := false }}
 	{{- range $.ADL.Spec.Skills }}
 	{{- range .Inject }}
@@ -99,21 +87,9 @@ func main() {
 	{{- end }}
 	{{- end }}
 	{{- if $depUsed }}
-	{{- if eq $dep "logger" }}
-	// Logger dependency uses development mode based on environment
-	var loggerDep logger.Logger
-	if cfg.A2A.Debug || cfg.Environment == "dev" || cfg.Environment == "development" {
-		loggerDep, err = logger.NewDevelopmentLogger(ctx)
-	} else {
-		loggerDep, err = logger.NewLogger(ctx)
-	}
+	{{ $dep | toCamelCase }}Dep, err := {{ $dep | toCamelCase }}.New{{ $dep | title }}(ctx, &cfg)
 	if err != nil {
-		l.Fatal("failed to initialize logger dependency", zap.Error(err))
-	}
-	{{- else }}
-	{{ $dep | toCamelCase }}Dep, err := {{ $dep | toCamelCase }}.New{{ $dep | title }}(ctx)
-	if err != nil {
-		l.Fatal("failed to initialize {{ $dep }} dependency", zap.Error(err))
+		l.Fatal("failed to initialize {{ $dep }} dependency: " + err.Error())
 	}
 	{{- end }}
 	{{- end }}
@@ -123,9 +99,9 @@ func main() {
 	{{- range .ADL.Spec.Skills }}
 
 	// Register {{ .Name }} skill
-	{{ .Name | toCamelCase }}Skill := skills.New{{ .Name | toPascalCase }}Skill({{ range $index, $dep := .Inject }}{{ if $index }}, {{ end }}{{ $dep | toCamelCase }}Dep{{ end }})
+	{{ .Name | toCamelCase }}Skill := skills.New{{ .Name | toPascalCase }}Skill({{ range $index, $dep := .Inject }}{{ if $index }}, {{ end }}{{ if eq $dep "logger" }}l{{ else }}{{ $dep | toCamelCase }}Dep{{ end }}{{ end }})
 	toolBox.AddTool({{ .Name | toCamelCase }}Skill)
-	l.Info("registered skill", zap.String("skill", "{{ .Name }}"), zap.String("description", "{{ .Description }}"))
+	l.Info("registered skill: {{ .Name }} ({{ .Description }})")
 	{{- end }}
 
 	llmClient, err := server.NewOpenAICompatibleLLMClient(&cfg.A2A.AgentConfig, l)
@@ -160,9 +136,7 @@ func main() {
 	}
 
 	go func() {
-		l.Info("starting A2A server", 
-			zap.String("port", cfg.A2A.ServerConfig.Port),
-		)
+		l.Info("starting A2A server", zap.String("port", cfg.A2A.ServerConfig.Port))
 		if err := a2aServer.Start(ctx); err != nil {
 			l.Fatal("server failed to start", zap.Error(err))
 		}
@@ -170,8 +144,7 @@ func main() {
 
 	l.Info("{{ .ADL.Metadata.Name }} agent running successfully", 
 		zap.String("port", cfg.A2A.ServerConfig.Port),
-		zap.String("environment", cfg.Environment),
-	)
+		zap.String("environment", cfg.Environment))
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
