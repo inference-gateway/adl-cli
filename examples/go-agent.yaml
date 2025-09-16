@@ -26,11 +26,46 @@ spec:
       Log all interactions for audit purposes.
     maxTokens: 8192
     temperature: 0.3
+  config:
+    database:
+      connectionString: "postgresql://user:pass@localhost:5432/company_db"
+      maxConnections: "10"
+      timeout: "30s"
+      sslMode: "require"
+    notifications:
+      slackWebhook: "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+      emailApiKey: "your-sendgrid-api-key"
+      retryAttempts: "3"
+      defaultTimeout: "10s"
+    reporting:
+      outputPath: "/tmp/reports"
+      templateDir: "/app/templates"
+      maxFileSizeMB: "50"
+      retention: "30d"
+  dependencies:
+    database:
+      type: service
+      interface: DatabaseService
+      factory: NewDatabaseService
+      description: PostgreSQL database service for company data queries
+    notifications:
+      type: service
+      interface: NotificationService
+      factory: NewNotificationService
+      description: Multi-channel notification service for alerts and communications
+    reporting:
+      type: service
+      interface: ReportingService
+      factory: NewReportingService
+      description: Business report generation service with multiple output formats
   skills:
     - id: query_database
       name: query_database
       description: "Query the company database with proper authentication"
       tags: ["database", "query", "data"]
+      inject:
+        - logger
+        - database
       schema:
         type: object
         properties:
@@ -49,6 +84,9 @@ spec:
       name: send_notification
       description: "Send notifications to users or teams"
       tags: ["notification", "communication", "alert"]
+      inject:
+        - logger
+        - notifications
       schema:
         type: object
         properties:
@@ -71,6 +109,10 @@ spec:
       name: generate_report
       description: "Generate business reports based on data analysis"
       tags: ["report", "analytics", "business"]
+      inject:
+        - logger
+        - database
+        - reporting
       schema:
         type: object
         properties:

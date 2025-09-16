@@ -55,7 +55,8 @@ The ADL CLI helps you build production-ready A2A agents quickly by generating co
 - 🛠️ **Smart Ignore** - Protect your implementations with .adl-ignore files
 - ✅ **Validation** - Built-in ADL schema validation
 - 🛠️ **Interactive Setup** - Guided project initialization with extensive CLI options
-- 🔗 **Dependency Injection** - Improved testability through dependency injection for skills
+- 🔗 **Structured Dependencies** - Type-safe dependency injection with interfaces and factory functions
+- ⚙️ **Configuration Management** - Automatic environment variable mapping with proper naming conventions
 - 🔧 **CI/CD Generation** - Automatic GitHub Actions workflows with semantic-release CD pipelines
 - 🏗️ **Sandbox Environments** - Flox and DevContainer support for isolated development
 - 🎣 **Post-Generation Hooks** - Customize build, format, and test commands after generation
@@ -346,7 +347,8 @@ The complete ADL schema includes:
 
 - **metadata**: Agent name, description, and version
 - **capabilities**: Streaming, notifications, state history
-- **dependencies**: Service dependencies available for injection into skills
+- **config**: Structured configuration sections with environment variable mapping
+- **dependencies**: Service dependencies with interfaces, factories, and type definitions
 - **agent**: AI provider configuration (OpenAI, Anthropic, DeepSeek, Ollama, Google, Mistral, Groq)  
 - **skills**: Function definitions with complex JSON schemas, validation, and dependency injection support
 - **server**: HTTP server configuration with authentication support
@@ -377,9 +379,32 @@ spec:
       Always prioritize security and compliance.
     maxTokens: 8192
     temperature: 0.3
+  config:
+    database:
+      connectionString: "postgresql://user:pass@localhost:5432/db"
+      maxConnections: "10"
+      timeout: "30s"
+    notifications:
+      slackWebhook: "https://hooks.slack.com/services/..."
+      emailApiKey: "your-email-api-key"
+      retryAttempts: "3"
+  dependencies:
+    database:
+      type: service
+      interface: DatabaseService
+      factory: NewDatabaseService
+      description: PostgreSQL database service for persistent storage
+    notifications:
+      type: service
+      interface: NotificationService
+      factory: NewNotificationService
+      description: Multi-channel notification service
   skills:
     - name: query_database
       description: "Execute database queries with validation"
+      inject:
+        - logger
+        - database
       schema:
         type: object
         properties:
@@ -396,6 +421,9 @@ spec:
         required: [query, table]
     - name: send_notification
       description: "Send multi-channel notifications"
+      inject:
+        - logger
+        - notifications
       schema:
         type: object
         properties:
@@ -452,74 +480,184 @@ spec:
       enabled: true
 ```
 
-## Dependency Injection
+## Dependency Injection & Configuration Management
 
-The ADL CLI supports dependency injection to improve testability and separation of concerns in your agent skills. The system includes a built-in logger dependency that's automatically available, plus support for custom dependencies.
+The ADL CLI provides a sophisticated dependency injection system with structured configuration management. This system improves testability, separation of concerns, and provides type-safe configuration with environment variable mapping.
 
-### Basic Dependency Injection
+### Structured Dependency System
 
-Define custom dependencies at the spec level and inject them into skills. The `logger` dependency is built-in and doesn't need to be declared:
+Define dependencies with explicit types, interfaces, and factory functions. The system supports both built-in dependencies (like logger) and custom service dependencies:
 
 ```yaml
 spec:
+  config:
+    googleCalendar:
+      scopes: "https://www.googleapis.com/auth/calendar"
+      credentialsPath: "/secrets/credentials.json"
+    cache:
+      ttl: "3600"
+      maxEntries: "1000"
   dependencies:
-    - database  # Custom dependencies only
+    googleCalendar:
+      type: service
+      interface: CalendarService
+      factory: NewCalendarService
+      description: Google Calendar API service for managing calendar events
+    cache:
+      type: service
+      interface: CacheRepository
+      factory: NewCacheRepository
+      description: High-performance caching layer for API responses
   skills:
-    - id: query_database
-      name: query_database
-      description: "Query the company database"
+    - name: create_event
+      description: "Create a new calendar event"
       inject:
-        - logger    # Built-in, always available
-        - database  # Must be declared in dependencies
+        - logger          # Built-in, always available
+        - googleCalendar  # Custom dependency
+        - cache          # Custom dependency
       schema:
         type: object
         properties:
-          query:
+          title:
             type: string
-            description: "SQL query to execute"
-        required: [query]
+            description: "Event title"
+          start:
+            type: string
+            description: "Start time (ISO 8601)"
+        required: [title, start]
 ```
 
-### How It Works
+### Configuration Management
 
-1. **Built-in Logger**: `logger` dependency is automatically available as `*zap.Logger`
-2. **Define Custom Dependencies**: List additional dependencies in `spec.dependencies`
-3. **Inject into Skills**: Specify which dependencies each skill needs in the `inject` array  
-4. **Code Generation**: The CLI generates constructor functions and dependency packages
-5. **Validation**: Ensures injected dependencies are defined in the spec
+The configuration system generates type-safe structs with automatic environment variable mapping:
 
-### Generated Code Structure
+**Generated Configuration (`config/config.go`):**
+```go
+type Config struct {
+    // Core application settings
+    Environment string `env:"ENVIRONMENT"`
+    
+    // A2A configuration
+    A2A serverConfig.Config `env:",prefix=A2A_"`
+    
+    // Custom configuration sections
+    Cache          CacheConfig          `env:",prefix=CACHE_"`
+    GoogleCalendar GoogleCalendarConfig `env:",prefix=GOOGLE_CALENDAR_"`
+}
+
+type GoogleCalendarConfig struct {
+    CredentialsPath string `env:"CREDENTIALS_PATH"`
+    Scopes          string `env:"SCOPES"`
+}
+
+type CacheConfig struct {
+    MaxEntries string `env:"MAX_ENTRIES"`
+    Ttl        string `env:"TTL"`
+}
+```
+
+**Environment Variables:**
+- `GOOGLE_CALENDAR_CREDENTIALS_PATH="/secrets/google-creds.json"`
+- `GOOGLE_CALENDAR_SCOPES="https://www.googleapis.com/auth/calendar"`
+- `CACHE_MAX_ENTRIES="1000"`
+- `CACHE_TTL="3600"`
+
+### Dependency Architecture
 
 The dependency injection system generates:
 
-- **Built-in Logger**: Automatically available as `*zap.Logger` without declaration
-- **Configuration Package**: Centralized application configuration in `config/config.go`
-- **Custom Dependency Packages**: Each custom dependency creates a package in `internal/` (e.g., `internal/database/`)
-- **Constructor Functions**: Skills receive injected dependencies as constructor arguments
-- **Validation**: Build-time checks that dependencies are properly defined
+1. **Built-in Logger**: Automatically available as `*zap.Logger` without declaration
+2. **Type-Safe Configuration**: Structured config with environment variable mapping
+3. **Service Interfaces**: Custom dependency packages with interface definitions
+4. **Factory Functions**: Constructor functions that receive logger and configuration
+5. **Automatic Registration**: Dependencies are automatically wired into skills
+6. **File Protection**: Generated dependency files are automatically added to `.adl-ignore`
 
-### Benefits
-
-- **Improved Testability**: Skills can be tested with mock dependencies
-- **Better Separation of Concerns**: Clear boundaries between business logic and dependencies
-- **Maintainable Code**: Dependencies are centrally defined and managed
-- **Type Safety**: Interface-based dependency contracts for custom dependencies
-- **Simplified Logging**: Direct integration with zap.Logger for consistent logging
-
-### Example Generated Structure
+### Generated Structure
 
 ```
 my-agent/
 ├── config/
-│   └── config.go          # Centralized configuration
+│   └── config.go                    # Type-safe configuration with env mapping
 ├── internal/
 │   ├── logger/
-│   │   └── logger.go      # Built-in logger factory
-│   └── database/
-│       └── database.go    # Custom dependency package
-└── skills/
-    └── query_database.go  # Skill with injected dependencies
+│   │   └── logger.go               # Built-in logger factory
+│   ├── googleCalendar/
+│   │   └── googleCalendar.go       # Calendar service with interface
+│   └── cache/
+│       └── cache.go                # Cache service with interface
+├── skills/
+│   ├── create_event.go             # Skills with injected dependencies
+│   └── list_events.go
+└── .adl-ignore                     # Protects custom implementations
 ```
+
+### Generated Dependency Code
+
+Each dependency generates a package with interface and factory:
+
+**Example `internal/googleCalendar/googleCalendar.go`:**
+```go
+type CalendarService interface {
+    // TODO: Define your CalendarService interface methods
+    CreateEvent(ctx context.Context, event *Event) error
+    ListEvents(ctx context.Context, query *Query) ([]*Event, error)
+}
+
+type calendarService struct {
+    logger *zap.Logger
+    config *config.Config
+}
+
+func NewCalendarService(logger *zap.Logger, cfg *config.Config) (CalendarService, error) {
+    // TODO: Implement CalendarService initialization
+    return &calendarService{
+        logger: logger,
+        config: cfg,
+    }, nil
+}
+```
+
+### Skill Integration
+
+Skills automatically receive injected dependencies as constructor parameters:
+
+**Example `skills/create_event.go`:**
+```go
+type CreateEventSkill struct {
+    logger    *zap.Logger
+    calendar  googleCalendar.CalendarService
+    cache     cache.CacheRepository
+}
+
+func NewCreateEventSkill(logger *zap.Logger, calendar googleCalendar.CalendarService, cache cache.CacheRepository) *CreateEventSkill {
+    return &CreateEventSkill{
+        logger:   logger,
+        calendar: calendar,
+        cache:    cache,
+    }
+}
+```
+
+### Benefits
+
+- **Type Safety**: Structured configuration with compile-time validation
+- **Environment Variables**: Automatic mapping with proper naming conventions
+- **Interface-Based Design**: Testable dependencies with clear contracts
+- **Separation of Concerns**: Configuration separate from dependency definitions
+- **Language Agnostic**: Works across Go, Rust, and planned TypeScript support
+- **Hot Reload**: Configuration changes via environment variables
+- **Security**: No secrets in code, environment-based configuration
+- **Scalability**: Easy to add new dependencies and configuration sections
+
+### Best Practices
+
+1. **Configuration**: Use environment variables for secrets and environment-specific values
+2. **Interfaces**: Define clear interfaces for testability and modularity
+3. **Factory Functions**: Initialize dependencies with proper error handling
+4. **Logging**: Use the injected logger for consistent log formatting
+5. **Testing**: Create mock implementations of dependency interfaces
+6. **Documentation**: Document interface methods and configuration options
 
 ## Generated Project Structure
 
