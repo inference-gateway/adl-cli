@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.5](https://github.com/inference-gateway/adl-cli/compare/v0.20.4...v0.20.5) (2025-09-16)
+
+### ♻️ Improvements
+
+* Improve dependency handling and configuration structure in ADL spec ([339b1ba](https://github.com/inference-gateway/adl-cli/commit/339b1ba05e39357351b0ca8944fb20eb20310add))
+
 ## [0.20.4](https://github.com/inference-gateway/adl-cli/compare/v0.20.3...v0.20.4) (2025-09-16)
 
 ### 🐛 Bug Fixes
