@@ -205,6 +205,16 @@ func convertToGoMapLiteral(v interface{}) string {
 	}
 }
 
+// findDependencyByID finds a dependency by name in the dependencies slice
+func findDependencyByID(id string, deps []string) int {
+	for i, dep := range deps {
+		if dep == id {
+			return i
+		}
+	}
+	return -1
+}
+
 // customFuncMap returns a function map with Sprig functions plus custom functions
 func customFuncMap() template.FuncMap {
 	funcMap := sprig.TxtFuncMap()
@@ -213,6 +223,7 @@ func customFuncMap() template.FuncMap {
 	funcMap["toSnakeCase"] = toSnakeCase
 	funcMap["toJson"] = toJson
 	funcMap["toGoMap"] = toGoMap
+	funcMap["findDependencyByID"] = findDependencyByID
 	return funcMap
 }
 
@@ -236,6 +247,7 @@ func customFuncMapWithAcronyms(acronyms map[string]string) template.FuncMap {
 	funcMap["toSnakeCase"] = toSnakeCase
 	funcMap["toJson"] = toJson
 	funcMap["toGoMap"] = toGoMap
+	funcMap["findDependencyByID"] = findDependencyByID
 	return funcMap
 }
 

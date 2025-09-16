@@ -268,7 +268,42 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		var content string
 		var err error
 
-		if (templateKey == "skill.go" || templateKey == "skill.rs" || templateKey == "skill.ts") && strings.Contains(fileName, "/") {
+		if templateKey == "dependency.go" && strings.Contains(fileName, "internal/") && !strings.Contains(fileName, "internal/dependencies/") {
+			parts := strings.Split(fileName, "/")
+			if len(parts) >= 3 {
+				dependencyFileName := parts[len(parts)-1]
+				dependencyName := strings.TrimSuffix(dependencyFileName, filepath.Ext(dependencyFileName))
+
+				var foundDependency string
+				for _, dep := range adl.Spec.Dependencies {
+					snakeCaseDependencyID := strings.ReplaceAll(dep, "-", "_")
+					if snakeCaseDependencyID == dependencyName {
+						foundDependency = dep
+						break
+					}
+				}
+
+				if foundDependency != "" {
+					if foundDependency == "logger" {
+						content, err = templateEngine.ExecuteToolTemplate("logger.go", ctx)
+						if err != nil {
+							return fmt.Errorf("failed to execute logger template: %w", err)
+						}
+					} else {
+						depContext := map[string]interface{}{
+							"Name": titleCase(foundDependency),
+							"ID":   foundDependency,
+						}
+						content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, depContext, ctx)
+						if err != nil {
+							return fmt.Errorf("failed to execute template %s for dependency %s: %w", templateKey, dependencyName, err)
+						}
+					}
+				} else {
+					return fmt.Errorf("dependency %s not found in ADL spec", dependencyName)
+				}
+			}
+		} else if (templateKey == "skill.go" || templateKey == "skill.rs" || templateKey == "skill.ts") && strings.Contains(fileName, "/") {
 			parts := strings.Split(fileName, "/")
 			if len(parts) >= 2 {
 				toolFileName := parts[len(parts)-1]
@@ -284,7 +319,33 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 				}
 
 				if foundSkill != nil {
-					content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, foundSkill, ctx)
+					skillContext := map[string]interface{}{
+						"ID":             foundSkill.ID,
+						"Name":           foundSkill.Name,
+						"Description":    foundSkill.Description,
+						"Tags":           foundSkill.Tags,
+						"Examples":       foundSkill.Examples,
+						"InputModes":     foundSkill.InputModes,
+						"OutputModes":    foundSkill.OutputModes,
+						"Schema":         foundSkill.Schema,
+						"Implementation": foundSkill.Implementation,
+						"Inject":         foundSkill.Inject,
+					}
+
+					if adl.Spec.Language.Go != nil {
+						skillContext["GoModule"] = adl.Spec.Language.Go.Module
+					}
+
+					dependencyMap := make(map[string]interface{})
+					for _, dep := range adl.Spec.Dependencies {
+						dependencyMap[dep] = map[string]interface{}{
+							"ID":   dep,
+							"Name": titleCase(dep),
+						}
+					}
+					skillContext["DependencyMap"] = dependencyMap
+
+					content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, skillContext, ctx)
 					if err != nil {
 						return fmt.Errorf("failed to execute template %s for skill %s: %w", templateKey, toolName, err)
 					}
@@ -292,6 +353,8 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 					return fmt.Errorf("skill %s not found in ADL spec", toolName)
 				}
 			}
+		} else if templateKey == "dependency.go" {
+			return fmt.Errorf("dependency template reached fallback case - this should not happen")
 		} else {
 			content, err = templateEngine.ExecuteTemplate(templateKey, ctx)
 			if err != nil {
@@ -795,4 +858,12 @@ func (g *Generator) generateGitLabCDWorkflow(adl *schema.ADL, outputDir string, 
 	fmt.Printf("⚠️  GitLab CD generation is not yet implemented\n")
 	fmt.Printf("This is a planned feature - contributions welcome!\n")
 	return nil
+}
+
+// titleCase converts a string to title case (first letter uppercase)
+func titleCase(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
 }

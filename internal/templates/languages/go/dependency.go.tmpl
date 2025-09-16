@@ -1,0 +1,23 @@
+package {{ .ID }}
+
+import (
+	"context"
+)
+
+// {{ .Name }} represents the {{ .ID }} dependency interface
+type {{ .Name }} interface {
+	// TODO: Define the methods for {{ .ID }} dependency
+	// Example:
+	// SomeMethod(ctx context.Context, param string) error
+}
+
+// {{ .ID }}Impl is the implementation of {{ .Name }}
+type {{ .ID }}Impl struct {
+	// TODO: Add fields needed for this dependency
+}
+
+// New{{ .Name }} creates a new instance of {{ .Name }}
+func New{{ .Name }}(ctx context.Context) ({{ .Name }}, error) {
+	// TODO: Implement constructor logic for {{ .ID }}
+	return &{{ .ID }}Impl{}, nil
+}

@@ -5,18 +5,25 @@ import (
 	"fmt"
 
 	server "github.com/inference-gateway/adk/server"
-	zap "go.uber.org/zap"
+{{- range $depID := .Inject }}
+	{{ $depID | toCamelCase }} "{{ $.GoModule }}/internal/{{ $depID | toSnakeCase }}"
+{{- end }}
 )
 
-// {{ .Name | toPascalCase }}Skill struct holds the skill with logger
+// {{ .Name | toPascalCase }}Skill struct holds the skill with dependencies
 type {{ .Name | toPascalCase }}Skill struct {
-	logger *zap.Logger
+{{- range $depID := .Inject }}
+{{- $dep := index $.DependencyMap $depID }}
+	{{ $depID | toCamelCase }} {{ $depID | toCamelCase }}.{{ $dep.Name }}
+{{- end }}
 }
 
 // New{{ .Name | toPascalCase }}Skill creates a new {{ .Name }} skill
-func New{{ .Name | toPascalCase }}Skill(logger *zap.Logger) server.Tool {
+func New{{ .Name | toPascalCase }}Skill({{ range $index, $depID := .Inject }}{{ if $index }}, {{ end }}{{- $dep := index $.DependencyMap $depID }}{{ $depID | toCamelCase }} {{ $depID | toCamelCase }}.{{ $dep.Name }}{{ end }}) server.Tool {
 	skill := &{{ .Name | toPascalCase }}Skill{
-		logger: logger,
+{{- range $depID := .Inject }}
+		{{ $depID | toCamelCase }}: {{ $depID | toCamelCase }},
+{{- end }}
 	}
 	return server.NewBasicTool(
 		"{{ .Name }}",
@@ -55,9 +62,10 @@ func (s *{{ .Name | toPascalCase }}Skill) {{ .Name | toPascalCase }}Handler(ctx 
 	// TODO: Implement {{ .Name }} logic
 	// {{ .Description }}
 
-	// Log the incoming request
-	s.logger.Info("Processing {{ .Name }} request",
-		zap.Any("args", args))
+	// Example of using dependencies:
+	{{- range $depID := .Inject }}
+	// s.{{ $depID | toCamelCase }}.SomeMethod(ctx, ...)
+	{{- end }}
 	
 	// Extract parameters from args
 	{{- range $key, $value := .Schema.properties }}

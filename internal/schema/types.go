@@ -19,16 +19,17 @@ type Metadata struct {
 
 // Spec contains the agent specification
 type Spec struct {
-	Capabilities *Capabilities     `yaml:"capabilities,omitempty" json:"capabilities,omitempty"`
-	Card         *Card             `yaml:"card,omitempty" json:"card,omitempty"`
-	Agent        *Agent            `yaml:"agent,omitempty" json:"agent,omitempty"`
-	Skills       []Skill           `yaml:"skills,omitempty" json:"skills,omitempty"`
-	Server       Server            `yaml:"server" json:"server"`
-	Language     *Language         `yaml:"language,omitempty" json:"language,omitempty"`
-	SCM          *SCM              `yaml:"scm,omitempty" json:"scm,omitempty"`
-	Sandbox      *SandboxConfig    `yaml:"sandbox,omitempty" json:"sandbox,omitempty"`
-	Deployment   *DeploymentConfig `yaml:"deployment,omitempty" json:"deployment,omitempty"`
-	Hooks        *Hooks            `yaml:"hooks,omitempty" json:"hooks,omitempty"`
+	Capabilities  *Capabilities     `yaml:"capabilities,omitempty" json:"capabilities,omitempty"`
+	Card          *Card             `yaml:"card,omitempty" json:"card,omitempty"`
+	Agent         *Agent            `yaml:"agent,omitempty" json:"agent,omitempty"`
+	Dependencies  []string          `yaml:"dependencies,omitempty" json:"dependencies,omitempty"`
+	Skills        []Skill           `yaml:"skills,omitempty" json:"skills,omitempty"`
+	Server        Server            `yaml:"server" json:"server"`
+	Language      *Language         `yaml:"language,omitempty" json:"language,omitempty"`
+	SCM           *SCM              `yaml:"scm,omitempty" json:"scm,omitempty"`
+	Sandbox       *SandboxConfig    `yaml:"sandbox,omitempty" json:"sandbox,omitempty"`
+	Deployment    *DeploymentConfig `yaml:"deployment,omitempty" json:"deployment,omitempty"`
+	Hooks         *Hooks            `yaml:"hooks,omitempty" json:"hooks,omitempty"`
 }
 
 // Card represents the agent card configuration
@@ -58,6 +59,7 @@ type Agent struct {
 	Temperature  float64 `yaml:"temperature" json:"temperature"`
 }
 
+
 // Skill represents a distinct capability or function that an agent can perform
 type Skill struct {
 	ID             string         `yaml:"id" json:"id"`
@@ -69,6 +71,7 @@ type Skill struct {
 	OutputModes    []string       `yaml:"outputModes,omitempty" json:"outputModes,omitempty"`
 	Schema         map[string]any `yaml:"schema" json:"schema"`
 	Implementation string         `yaml:"implementation,omitempty" json:"implementation,omitempty"`
+	Inject         []string       `yaml:"inject,omitempty" json:"inject,omitempty"`
 }
 
 // Server configuration

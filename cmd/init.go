@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/inference-gateway/adl-cli/internal/prompt"
 	"github.com/spf13/cobra"
@@ -202,12 +203,14 @@ type adlData struct {
 			MaxTokens    int     `yaml:"maxTokens,omitempty"`
 			Temperature  float64 `yaml:"temperature,omitempty"`
 		} `yaml:"agent,omitempty"`
+		Dependencies []string `yaml:"dependencies,omitempty"`
 		Skills []struct {
 			ID          string         `yaml:"id"`
 			Name        string         `yaml:"name"`
 			Description string         `yaml:"description"`
 			Tags        []string       `yaml:"tags"`
 			Schema      map[string]any `yaml:"schema"`
+			Inject      []string       `yaml:"inject,omitempty"`
 		} `yaml:"skills,omitempty"`
 		Server struct {
 			Port  int  `yaml:"port"`
@@ -315,6 +318,55 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 	adl.Spec.Capabilities.PushNotifications = conditionalPromptBool(useDefaults, "Enable push notifications", false)
 	adl.Spec.Capabilities.StateTransitionHistory = conditionalPromptBool(useDefaults, "Enable state transition history", false)
 
+	fmt.Println("\n🔌 Dependencies")
+	fmt.Println("---------------")
+	addDependencies := conditionalPromptBool(useDefaults, "Add dependencies for dependency injection", useDefaults)
+
+	if addDependencies {
+		if useDefaults {
+			// Add default logger dependency
+			adl.Spec.Dependencies = append(adl.Spec.Dependencies, "logger")
+			fmt.Printf("Add dependencies for dependency injection [y/n] [n]: y\n")
+			fmt.Printf("Dependency name (e.g., 'logger', 'database') []: logger\n")
+			fmt.Printf("✅ Added default logger dependency\n")
+		}
+		
+		if !useDefaults {
+			for {
+				dependency := promptString("Dependency name (e.g., 'logger', 'database', 'cache', empty to finish)", "")
+				if dependency == "" {
+					break
+				}
+
+				// Validate dependency name
+				if !isValidIdentifier(dependency) {
+					fmt.Printf("⚠️  Invalid dependency name. Use only letters, numbers, and underscores, starting with a letter or underscore.\n")
+					continue
+				}
+
+				// Check for duplicates
+				duplicate := false
+				for _, existing := range adl.Spec.Dependencies {
+					if existing == dependency {
+						fmt.Printf("⚠️  Dependency '%s' already exists\n", dependency)
+						duplicate = true
+						break
+					}
+				}
+				
+				if !duplicate {
+					adl.Spec.Dependencies = append(adl.Spec.Dependencies, dependency)
+					fmt.Printf("✅ Added dependency: %s\n", dependency)
+					fmt.Printf("💡 You will need to implement this in internal/%s package with a New%s function\n", dependency, titleCase(dependency))
+				}
+
+				if !promptBool("Add another dependency", false) {
+					break
+				}
+			}
+		}
+	}
+
 	fmt.Println("\n🔧 Skills")
 	fmt.Println("---------")
 	addSkills := conditionalPromptBool(useDefaults, "Add skills to your agent", false)
@@ -327,6 +379,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 				Description string         `yaml:"description"`
 				Tags        []string       `yaml:"tags"`
 				Schema      map[string]any `yaml:"schema"`
+				Inject      []string       `yaml:"inject,omitempty"`
 			}{}
 
 			skill.Name = promptString("Skill name (e.g., 'get_weather')", "")
@@ -356,6 +409,53 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 					},
 				},
 				"required": []string{"input"},
+			}
+
+			// Allow selecting dependencies for this skill
+			if len(adl.Spec.Dependencies) > 0 {
+				fmt.Printf("\nAvailable dependencies for skill '%s':\n", skill.Name)
+				for i, dep := range adl.Spec.Dependencies {
+					fmt.Printf("  %d. %s\n", i+1, dep)
+				}
+				
+				addSkillDeps := promptBool("Inject dependencies into this skill", false)
+				if addSkillDeps {
+					for {
+						depChoice := promptString("Enter dependency name (or empty to finish)", "")
+						if depChoice == "" {
+							break
+						}
+						
+						// Validate dependency exists
+						found := false
+						for _, dep := range adl.Spec.Dependencies {
+							if dep == depChoice {
+								found = true
+								break
+							}
+						}
+						
+						if found {
+							// Check if already added
+							alreadyAdded := false
+							for _, existing := range skill.Inject {
+								if existing == depChoice {
+									alreadyAdded = true
+									break
+								}
+							}
+							
+							if !alreadyAdded {
+								skill.Inject = append(skill.Inject, depChoice)
+								fmt.Printf("✅ Added dependency: %s\n", depChoice)
+							} else {
+								fmt.Printf("⚠️  Dependency %s already added\n", depChoice)
+							}
+						} else {
+							fmt.Printf("⚠️  Dependency '%s' not found\n", depChoice)
+						}
+					}
+				}
 			}
 
 			adl.Spec.Skills = append(adl.Spec.Skills, skill)
@@ -755,4 +855,32 @@ func readADLFile(filePath string) (*adlData, error) {
 	}
 
 	return &adl, nil
+}
+
+// isValidIdentifier checks if a string is a valid identifier (letters, numbers, underscore, starting with letter/underscore)
+func isValidIdentifier(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+	
+	first := rune(s[0])
+	if !unicode.IsLetter(first) && first != '_' {
+		return false
+	}
+	
+	for _, r := range s[1:] {
+		if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '_' {
+			return false
+		}
+	}
+	
+	return true
+}
+
+// titleCase converts a string to title case (first letter uppercase)
+func titleCase(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
 }
