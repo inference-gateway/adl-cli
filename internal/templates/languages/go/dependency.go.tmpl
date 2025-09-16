@@ -1,26 +1,27 @@
 package {{ .ID }}
 
 import (
-	"context"
-	
 	config "{{ .GoModule }}/config"
+	zap "go.uber.org/zap"
 )
 
-// {{ .Name }} represents the {{ .ID }} dependency interface
-type {{ .Name }} interface {
+// {{ .Interface }} represents the {{ .ID }} dependency interface
+// {{ .Description }}
+type {{ .Interface }} interface {
 	// TODO: Define the methods for {{ .ID }} dependency
 	// Example:
 	// SomeMethod(ctx context.Context, param string) error
 }
 
-// {{ .ID }}Impl is the implementation of {{ .Name }}
+// {{ .ID }}Impl is the implementation of {{ .Interface }}
 type {{ .ID }}Impl struct {
 	// TODO: Add fields needed for this dependency
 }
 
-// New{{ .Name }} creates a new instance of {{ .Name }}
-func New{{ .Name }}(ctx context.Context, cfg *config.Config) ({{ .Name }}, error) {
+// {{ .Factory }} creates a new instance of {{ .Interface }}
+func {{ .Factory }}(logger *zap.Logger, cfg *config.Config) ({{ .Interface }}, error) {
 	// TODO: Implement constructor logic for {{ .ID }}
-	// You can use cfg for configuration settings
+	// You can use logger for logging and cfg for configuration settings
+	logger.Info("initializing {{ .ID }} dependency")
 	return &{{ .ID }}Impl{}, nil
 }

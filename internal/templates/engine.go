@@ -54,18 +54,22 @@ func getDefaultAcronyms() map[string]string {
 // buildAcronymsMap builds the acronyms map from default + custom acronyms
 func buildAcronymsMap(customAcronyms []string) map[string]string {
 	acronyms := getDefaultAcronyms()
-	
+
 	for _, acronym := range customAcronyms {
 		lowerAcronym := strings.ToLower(acronym)
 		upperAcronym := strings.ToUpper(acronym)
 		acronyms[lowerAcronym] = upperAcronym
 	}
-	
+
 	return acronyms
 }
 
-// toPascalCaseWithAcronyms converts snake_case to PascalCase with custom acronyms
+// toPascalCaseWithAcronyms converts snake_case, dash-case, or camelCase to PascalCase with custom acronyms
 func toPascalCaseWithAcronyms(s string, acronyms map[string]string) string {
+	if !strings.Contains(s, "_") && !strings.Contains(s, "-") {
+		s = camelToSnakeCase(s)
+	}
+
 	s = strings.ReplaceAll(s, "-", "_")
 	words := strings.Split(s, "_")
 	result := make([]string, len(words))
@@ -91,7 +95,7 @@ func toPascalCaseWithAcronyms(s string, acronyms map[string]string) string {
 	return strings.Join(result, "")
 }
 
-// toPascalCase converts snake_case to PascalCase with default acronyms (backward compatibility)
+// toPascalCase converts snake_case, dash-case, or camelCase to PascalCase with default acronyms (backward compatibility)
 func toPascalCase(s string) string {
 	return toPascalCaseWithAcronyms(s, getDefaultAcronyms())
 }
@@ -107,9 +111,32 @@ func toCamelCase(s string) string {
 	return string(runes)
 }
 
+// camelToSnakeCase converts camelCase to snake_case
+func camelToSnakeCase(s string) string {
+	var result strings.Builder
+	for i, r := range s {
+		if i > 0 && unicode.IsUpper(r) {
+			result.WriteRune('_')
+		}
+		result.WriteRune(unicode.ToLower(r))
+	}
+	return result.String()
+}
+
 // toSnakeCase converts dash-case to snake_case
 func toSnakeCase(s string) string {
 	return strings.ReplaceAll(s, "-", "_")
+}
+
+// toUpperSnakeCase converts camelCase, dash-case, or snake_case to UPPER_SNAKE_CASE
+func toUpperSnakeCase(s string) string {
+	if !strings.Contains(s, "_") && !strings.Contains(s, "-") {
+		s = camelToSnakeCase(s)
+	}
+
+	s = strings.ReplaceAll(s, "-", "_")
+
+	return strings.ToUpper(s)
 }
 
 // Context provides data for template execution
@@ -221,6 +248,8 @@ func customFuncMap() template.FuncMap {
 	funcMap["toPascalCase"] = toPascalCase
 	funcMap["toCamelCase"] = toCamelCase
 	funcMap["toSnakeCase"] = toSnakeCase
+	funcMap["toUpperCase"] = strings.ToUpper
+	funcMap["toUpperSnakeCase"] = toUpperSnakeCase
 	funcMap["toJson"] = toJson
 	funcMap["toGoMap"] = toGoMap
 	funcMap["findDependencyByID"] = findDependencyByID
@@ -230,7 +259,7 @@ func customFuncMap() template.FuncMap {
 // customFuncMapWithAcronyms returns a function map with context-aware acronym functions
 func customFuncMapWithAcronyms(acronyms map[string]string) template.FuncMap {
 	funcMap := sprig.TxtFuncMap()
-	
+
 	funcMap["toPascalCase"] = func(s string) string {
 		return toPascalCaseWithAcronyms(s, acronyms)
 	}
@@ -243,8 +272,10 @@ func customFuncMapWithAcronyms(acronyms map[string]string) template.FuncMap {
 		runes[0] = unicode.ToLower(runes[0])
 		return string(runes)
 	}
-	
+
 	funcMap["toSnakeCase"] = toSnakeCase
+	funcMap["toUpperCase"] = strings.ToUpper
+	funcMap["toUpperSnakeCase"] = toUpperSnakeCase
 	funcMap["toJson"] = toJson
 	funcMap["toGoMap"] = toGoMap
 	funcMap["findDependencyByID"] = findDependencyByID
@@ -257,7 +288,7 @@ func (e *Engine) prepareContext(ctx Context) Context {
 	if ctx.ADL != nil && ctx.ADL.Spec.Acronyms != nil {
 		customAcronyms = ctx.ADL.Spec.Acronyms
 	}
-	
+
 	ctx.customAcronyms = buildAcronymsMap(customAcronyms)
 	return ctx
 }
@@ -265,7 +296,7 @@ func (e *Engine) prepareContext(ctx Context) Context {
 // Execute executes a template with the given context
 func (e *Engine) Execute(templateContent string, ctx Context) (string, error) {
 	ctx = e.prepareContext(ctx)
-	
+
 	tmpl, err := template.New("template").Funcs(customFuncMapWithAcronyms(ctx.customAcronyms)).Parse(templateContent)
 	if err != nil {
 		return "", err
@@ -380,7 +411,7 @@ func (e *Engine) ExecuteToolTemplateWithContext(templateKey string, skillData an
 	}
 
 	ctx = e.prepareContext(ctx)
-	
+
 	tmpl, err := template.New("template").Funcs(customFuncMapWithAcronyms(ctx.customAcronyms)).Parse(templateContent)
 	if err != nil {
 		return "", err

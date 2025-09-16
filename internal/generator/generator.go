@@ -275,10 +275,10 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 				dependencyName := strings.TrimSuffix(dependencyFileName, filepath.Ext(dependencyFileName))
 
 				var foundDependency string
-				for _, dep := range adl.Spec.Dependencies {
-					snakeCaseDependencyID := strings.ReplaceAll(dep, "-", "_")
+				for depName := range adl.Spec.Dependencies {
+					snakeCaseDependencyID := strings.ReplaceAll(depName, "-", "_")
 					if snakeCaseDependencyID == dependencyName {
-						foundDependency = dep
+						foundDependency = depName
 						break
 					}
 				}
@@ -290,9 +290,15 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 							return fmt.Errorf("failed to execute logger template: %w", err)
 						}
 					} else {
+						dep := adl.Spec.Dependencies[foundDependency]
 						depContext := map[string]interface{}{
-							"Name": titleCase(foundDependency),
-							"ID":   foundDependency,
+							"Name":        dep.Interface,
+							"ID":          foundDependency,
+							"Interface":   dep.Interface,
+							"Factory":     dep.Factory,
+							"Type":        dep.Type,
+							"Description": dep.Description,
+							"Config":      adl.Spec.Config,
 						}
 
 						if adl.Spec.Language.Go != nil {
@@ -341,10 +347,14 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 					}
 
 					dependencyMap := make(map[string]interface{})
-					for _, dep := range adl.Spec.Dependencies {
-						dependencyMap[dep] = map[string]interface{}{
-							"ID":   dep,
-							"Name": titleCase(dep),
+					for depName, dep := range adl.Spec.Dependencies {
+						dependencyMap[depName] = map[string]interface{}{
+							"ID":   depName,
+							"Name": titleCase(depName),
+							"Type": dep.Type,
+							"Interface": dep.Interface,
+							"Factory": dep.Factory,
+							"Description": dep.Description,
 						}
 					}
 					skillContext["DependencyMap"] = dependencyMap
@@ -535,15 +545,30 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 				snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
 				filesToIgnore = append(filesToIgnore, fmt.Sprintf("skills/%s.go", snakeCaseName))
 			}
+
+			for depName := range adl.Spec.Dependencies {
+				snakeCaseName := strings.ReplaceAll(depName, "-", "_")
+				filesToIgnore = append(filesToIgnore, fmt.Sprintf("internal/%s/%s.go", snakeCaseName, snakeCaseName))
+			}
 		case "rust":
 			for _, skill := range adl.Spec.Skills {
 				snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
 				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/skills/%s.rs", snakeCaseName))
 			}
+
+			for depName := range adl.Spec.Dependencies {
+				snakeCaseName := strings.ReplaceAll(depName, "-", "_")
+				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/dependencies/%s.rs", snakeCaseName))
+			}
 		case "typescript":
 			for _, skill := range adl.Spec.Skills {
 				snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
 				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/skills/%s.ts", snakeCaseName))
+			}
+
+			for depName := range adl.Spec.Dependencies {
+				snakeCaseName := strings.ReplaceAll(depName, "-", "_")
+				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/dependencies/%s.ts", snakeCaseName))
 			}
 		}
 	}

@@ -19,18 +19,19 @@ type Metadata struct {
 
 // Spec contains the agent specification
 type Spec struct {
-	Capabilities  *Capabilities     `yaml:"capabilities,omitempty" json:"capabilities,omitempty"`
-	Card          *Card             `yaml:"card,omitempty" json:"card,omitempty"`
-	Agent         *Agent            `yaml:"agent,omitempty" json:"agent,omitempty"`
-	Dependencies  []string          `yaml:"dependencies,omitempty" json:"dependencies,omitempty"`
-	Skills        []Skill           `yaml:"skills,omitempty" json:"skills,omitempty"`
-	Server        Server            `yaml:"server" json:"server"`
-	Language      *Language         `yaml:"language,omitempty" json:"language,omitempty"`
-	Acronyms      []string          `yaml:"acronyms,omitempty" json:"acronyms,omitempty"`
-	SCM           *SCM              `yaml:"scm,omitempty" json:"scm,omitempty"`
-	Sandbox       *SandboxConfig    `yaml:"sandbox,omitempty" json:"sandbox,omitempty"`
-	Deployment    *DeploymentConfig `yaml:"deployment,omitempty" json:"deployment,omitempty"`
-	Hooks         *Hooks            `yaml:"hooks,omitempty" json:"hooks,omitempty"`
+	Capabilities  *Capabilities             `yaml:"capabilities,omitempty" json:"capabilities,omitempty"`
+	Card          *Card                     `yaml:"card,omitempty" json:"card,omitempty"`
+	Agent         *Agent                    `yaml:"agent,omitempty" json:"agent,omitempty"`
+	Config        map[string]map[string]any `yaml:"config,omitempty" json:"config,omitempty"`
+	Dependencies  map[string]Dependency     `yaml:"dependencies,omitempty" json:"dependencies,omitempty"`
+	Skills        []Skill                   `yaml:"skills,omitempty" json:"skills,omitempty"`
+	Server        Server                    `yaml:"server" json:"server"`
+	Language      *Language                 `yaml:"language,omitempty" json:"language,omitempty"`
+	Acronyms      []string                  `yaml:"acronyms,omitempty" json:"acronyms,omitempty"`
+	SCM           *SCM                      `yaml:"scm,omitempty" json:"scm,omitempty"`
+	Sandbox       *SandboxConfig            `yaml:"sandbox,omitempty" json:"sandbox,omitempty"`
+	Deployment    *DeploymentConfig         `yaml:"deployment,omitempty" json:"deployment,omitempty"`
+	Hooks         *Hooks                    `yaml:"hooks,omitempty" json:"hooks,omitempty"`
 }
 
 // Card represents the agent card configuration
@@ -58,6 +59,14 @@ type Agent struct {
 	SystemPrompt string  `yaml:"systemPrompt" json:"systemPrompt"`
 	MaxTokens    int     `yaml:"maxTokens" json:"maxTokens"`
 	Temperature  float64 `yaml:"temperature" json:"temperature"`
+}
+
+// Dependency represents a service dependency
+type Dependency struct {
+	Type        string `yaml:"type" json:"type"`
+	Interface   string `yaml:"interface" json:"interface"`
+	Factory     string `yaml:"factory" json:"factory"`
+	Description string `yaml:"description" json:"description"`
 }
 
 

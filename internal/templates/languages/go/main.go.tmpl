@@ -17,19 +17,17 @@ import (
 {{- end }}
 
 	logger "{{ .ADL.Spec.Language.Go.Module }}/internal/logger"
-{{- range $dep := .ADL.Spec.Dependencies }}
-{{- if ne $dep "logger" }}
+{{- range $depName, $dep := .ADL.Spec.Dependencies }}
 {{- $depUsed := false }}
 {{- range $.ADL.Spec.Skills }}
 {{- range .Inject }}
-{{- if eq . $dep }}
+{{- if eq . $depName }}
 {{- $depUsed = true }}
 {{- end }}
 {{- end }}
 {{- end }}
 {{- if $depUsed }}
-	{{ $dep | toCamelCase }} "{{ $.ADL.Spec.Language.Go.Module }}/internal/{{ $dep | toSnakeCase }}"
-{{- end }}
+	{{ $depName | toCamelCase }} "{{ $.ADL.Spec.Language.Go.Module }}/internal/{{ $depName | toSnakeCase }}"
 {{- end }}
 {{- end }}
 )
@@ -61,37 +59,33 @@ func main() {
 
 	{{- if .ADL.Spec.Dependencies }}
 	{{- $anyDepUsed := false }}
-	{{- range $dep := .ADL.Spec.Dependencies }}
+	{{- range $depName, $dep := .ADL.Spec.Dependencies }}
 	{{- range $.ADL.Spec.Skills }}
 	{{- range .Inject }}
-	{{- if eq . $dep }}
-	{{- if ne $dep "logger" }}
+	{{- if eq . $depName }}
 	{{- $anyDepUsed = true }}
-	{{- end }}
 	{{- end }}
 	{{- end }}
 	{{- end }}
 	{{- end }}
 	{{- if $anyDepUsed }}
 	
-	// Initialize other dependencies
+	// Initialize dependencies
 	{{- end }}
-	{{- range $dep := .ADL.Spec.Dependencies }}
-	{{- if ne $dep "logger" }}
+	{{- range $depName, $dep := .ADL.Spec.Dependencies }}
 	{{- $depUsed := false }}
 	{{- range $.ADL.Spec.Skills }}
 	{{- range .Inject }}
-	{{- if eq . $dep }}
+	{{- if eq . $depName }}
 	{{- $depUsed = true }}
 	{{- end }}
 	{{- end }}
 	{{- end }}
 	{{- if $depUsed }}
-	{{ $dep | toCamelCase }}Dep, err := {{ $dep | toCamelCase }}.New{{ $dep | title }}(ctx, &cfg)
+	{{ $depName | toCamelCase }}Dep, err := {{ $depName | toCamelCase }}.{{ $dep.Factory }}(l, &cfg)
 	if err != nil {
-		l.Fatal("failed to initialize {{ $dep }} dependency: " + err.Error())
+		l.Fatal("failed to initialize {{ $depName }} dependency", zap.Error(err))
 	}
-	{{- end }}
 	{{- end }}
 	{{- end }}
 	{{- end }}

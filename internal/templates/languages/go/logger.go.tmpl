@@ -3,10 +3,10 @@ package logger
 import (
 	"context"
 	
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
+	zap "go.uber.org/zap"
+	zapcore "go.uber.org/zap/zapcore"
 	
-	"{{ .ADL.Spec.Language.Go.Module }}/config"
+	config "{{ .ADL.Spec.Language.Go.Module }}/config"
 )
 
 // NewLogger creates a new zap.Logger instance

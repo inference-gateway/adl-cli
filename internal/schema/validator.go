@@ -74,8 +74,8 @@ func (v *Validator) ValidateFile(filePath string) error {
 // validateDependencyReferences checks that all injected dependencies are defined in the spec
 func (v *Validator) validateDependencyReferences(adl *ADL) error {
 	definedDeps := make(map[string]bool)
-	for _, dep := range adl.Spec.Dependencies {
-		definedDeps[dep] = true
+	for depName := range adl.Spec.Dependencies {
+		definedDeps[depName] = true
 	}
 
 	definedDeps["logger"] = true
@@ -197,11 +197,35 @@ const adlSchema = `{
             }
           }
         },
+        "config": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
         "dependencies": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["type", "interface", "factory", "description"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["service", "repository", "client", "middleware"]
+              },
+              "interface": {
+                "type": "string",
+                "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+              },
+              "factory": {
+                "type": "string",
+                "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
           }
         },
         "acronyms": {
