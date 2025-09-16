@@ -167,6 +167,73 @@ const adlSchema = `{
             }
           }
         },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "description", "type", "methods"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "methods": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["name"],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "parameters": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": ["name", "type"],
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "returns": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": ["type"],
+                        "properties": {
+                          "type": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "config": {
+                "type": "object"
+              }
+            }
+          }
+        },
         "skills": {
           "type": "array",
           "items": {
@@ -255,6 +322,12 @@ const adlSchema = `{
               },
               "implementation": {
                 "type": "string"
+              },
+              "dependencies": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             }
           }

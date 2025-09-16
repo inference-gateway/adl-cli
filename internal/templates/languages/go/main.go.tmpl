@@ -15,6 +15,10 @@ import (
 
 	skills "{{ .ADL.Spec.Language.Go.Module }}/skills"
 {{- end }}
+{{- if .ADL.Spec.Dependencies }}
+
+	deps "{{ .ADL.Spec.Language.Go.Module }}/internal/dependencies"
+{{- end }}
 )
 
 // Config represents the application configuration
@@ -60,10 +64,20 @@ func main() {
 
 	toolBox := server.NewDefaultToolBox()
 
+	{{- if .ADL.Spec.Dependencies }}
+	
+	// Initialize dependencies
+	{{- range .ADL.Spec.Dependencies }}
+	var {{ .ID | toCamelCase }} deps.{{ .Name | toPascalCase }}
+	// TODO: Initialize {{ .Name }} dependency implementation
+	// {{ .Description }}
+	{{- end }}
+	{{- end }}
+
 	{{- range .ADL.Spec.Skills }}
 
 	// Register {{ .Name }} skill
-	{{ .Name | toCamelCase }}Skill := skills.New{{ .Name | toPascalCase }}Skill(logger)
+	{{ .Name | toCamelCase }}Skill := skills.New{{ .Name | toPascalCase }}Skill(logger{{ range .Dependencies }}, {{ . | toCamelCase }}{{ end }})
 	toolBox.AddTool({{ .Name | toCamelCase }}Skill)
 	logger.Info("registered skill", zap.String("skill", "{{ .Name }}"), zap.String("description", "{{ .Description }}"))
 	{{- end }}

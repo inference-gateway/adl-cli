@@ -268,7 +268,32 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		var content string
 		var err error
 
-		if (templateKey == "skill.go" || templateKey == "skill.rs" || templateKey == "skill.ts") && strings.Contains(fileName, "/") {
+		if templateKey == "dependency.go" && strings.Contains(fileName, "internal/dependencies/") {
+			// Handle dependency file generation
+			parts := strings.Split(fileName, "/")
+			if len(parts) >= 3 {
+				dependencyFileName := parts[len(parts)-1]
+				dependencyName := strings.TrimSuffix(dependencyFileName, filepath.Ext(dependencyFileName))
+
+				var foundDependency *schema.Dependency
+				for _, dep := range adl.Spec.Dependencies {
+					snakeCaseDependencyID := strings.ReplaceAll(dep.ID, "-", "_")
+					if snakeCaseDependencyID == dependencyName {
+						foundDependency = &dep
+						break
+					}
+				}
+
+				if foundDependency != nil {
+					content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, foundDependency, ctx)
+					if err != nil {
+						return fmt.Errorf("failed to execute template %s for dependency %s: %w", templateKey, dependencyName, err)
+					}
+				} else {
+					return fmt.Errorf("dependency %s not found in ADL spec", dependencyName)
+				}
+			}
+		} else if (templateKey == "skill.go" || templateKey == "skill.rs" || templateKey == "skill.ts") && strings.Contains(fileName, "/") {
 			parts := strings.Split(fileName, "/")
 			if len(parts) >= 2 {
 				toolFileName := parts[len(parts)-1]
@@ -284,7 +309,40 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 				}
 
 				if foundSkill != nil {
-					content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, foundSkill, ctx)
+					// Create an enhanced skill context with dependencies map and go module
+					skillContext := map[string]interface{}{
+						"ID":            foundSkill.ID,
+						"Name":          foundSkill.Name,
+						"Description":   foundSkill.Description,
+						"Tags":          foundSkill.Tags,
+						"Examples":      foundSkill.Examples,
+						"InputModes":    foundSkill.InputModes,
+						"OutputModes":   foundSkill.OutputModes,
+						"Schema":        foundSkill.Schema,
+						"Implementation": foundSkill.Implementation,
+						"Dependencies":  foundSkill.Dependencies,
+					}
+					
+					// Add Go module if this is a Go project
+					if adl.Spec.Language.Go != nil {
+						skillContext["GoModule"] = adl.Spec.Language.Go.Module
+					}
+					
+					// Create dependency map for easy lookup in template
+					dependencyMap := make(map[string]interface{})
+					for _, dep := range adl.Spec.Dependencies {
+						dependencyMap[dep.ID] = map[string]interface{}{
+							"ID":          dep.ID,
+							"Name":        dep.Name,
+							"Description": dep.Description,
+							"Type":        dep.Type,
+							"Methods":     dep.Methods,
+							"Config":      dep.Config,
+						}
+					}
+					skillContext["DependencyMap"] = dependencyMap
+					
+					content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, skillContext, ctx)
 					if err != nil {
 						return fmt.Errorf("failed to execute template %s for skill %s: %w", templateKey, toolName, err)
 					}
@@ -292,6 +350,9 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 					return fmt.Errorf("skill %s not found in ADL spec", toolName)
 				}
 			}
+		} else if templateKey == "dependency.go" {
+			// This shouldn't happen if the filename matching worked above
+			return fmt.Errorf("dependency template reached fallback case - this should not happen")
 		} else {
 			content, err = templateEngine.ExecuteTemplate(templateKey, ctx)
 			if err != nil {

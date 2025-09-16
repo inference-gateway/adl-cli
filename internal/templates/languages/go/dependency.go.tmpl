@@ -1,0 +1,29 @@
+package dependencies
+
+import (
+	"context"
+	{{- $needsTime := false }}
+	{{- range .Methods }}
+	{{- range .Parameters }}
+	{{- if or (eq .Type "time.Time") (contains .Type "Time") }}
+	{{- $needsTime = true }}
+	{{- end }}
+	{{- end }}
+	{{- range .Returns }}
+	{{- if or (eq .Type "time.Time") (contains .Type "Time") }}
+	{{- $needsTime = true }}
+	{{- end }}
+	{{- end }}
+	{{- end }}
+	{{- if $needsTime }}
+	"time"
+	{{- end }}
+)
+
+// {{ .Name | toPascalCase }} {{ .Description }}
+type {{ .Name | toPascalCase }} interface {
+	{{- range .Methods }}
+	// {{ .Name | toPascalCase }}{{ if .Description }} {{ .Description }}{{ end }}
+	{{ .Name | toPascalCase }}(ctx context.Context{{- if .Parameters }}{{- range .Parameters }}, {{ .Name }} {{ .Type }}{{ end }}{{ end }}) ({{- if .Returns }}{{- range $i, $ret := .Returns }}{{ if $i }}, {{ end }}{{ if ne $ret.Type "" }}{{ $ret.Type }}{{ else }}interface{}{{ end }}{{ end }}, error{{ else }}error{{ end }})
+	{{- end }}
+}
