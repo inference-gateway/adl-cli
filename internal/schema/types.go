@@ -22,7 +22,7 @@ type Spec struct {
 	Capabilities  *Capabilities     `yaml:"capabilities,omitempty" json:"capabilities,omitempty"`
 	Card          *Card             `yaml:"card,omitempty" json:"card,omitempty"`
 	Agent         *Agent            `yaml:"agent,omitempty" json:"agent,omitempty"`
-	Dependencies  []Dependency      `yaml:"dependencies,omitempty" json:"dependencies,omitempty"`
+	Dependencies  []string          `yaml:"dependencies,omitempty" json:"dependencies,omitempty"`
 	Skills        []Skill           `yaml:"skills,omitempty" json:"skills,omitempty"`
 	Server        Server            `yaml:"server" json:"server"`
 	Language      *Language         `yaml:"language,omitempty" json:"language,omitempty"`
@@ -59,34 +59,6 @@ type Agent struct {
 	Temperature  float64 `yaml:"temperature" json:"temperature"`
 }
 
-// Dependency represents a service or component that can be injected into skills
-type Dependency struct {
-	ID          string                 `yaml:"id" json:"id"`
-	Name        string                 `yaml:"name" json:"name"`
-	Description string                 `yaml:"description" json:"description"`
-	Type        string                 `yaml:"type" json:"type"`
-	Methods     []DependencyMethod     `yaml:"methods" json:"methods"`
-	Config      map[string]interface{} `yaml:"config,omitempty" json:"config,omitempty"`
-}
-
-// DependencyMethod represents a method signature for a dependency interface
-type DependencyMethod struct {
-	Name        string                 `yaml:"name" json:"name"`
-	Description string                 `yaml:"description,omitempty" json:"description,omitempty"`
-	Parameters  []DependencyParameter  `yaml:"parameters,omitempty" json:"parameters,omitempty"`
-	Returns     []DependencyReturn     `yaml:"returns,omitempty" json:"returns,omitempty"`
-}
-
-// DependencyParameter represents a method parameter
-type DependencyParameter struct {
-	Name string `yaml:"name" json:"name"`
-	Type string `yaml:"type" json:"type"`
-}
-
-// DependencyReturn represents a method return value
-type DependencyReturn struct {
-	Type string `yaml:"type" json:"type"`
-}
 
 // Skill represents a distinct capability or function that an agent can perform
 type Skill struct {
@@ -99,7 +71,7 @@ type Skill struct {
 	OutputModes    []string       `yaml:"outputModes,omitempty" json:"outputModes,omitempty"`
 	Schema         map[string]any `yaml:"schema" json:"schema"`
 	Implementation string         `yaml:"implementation,omitempty" json:"implementation,omitempty"`
-	Dependencies   []string       `yaml:"dependencies,omitempty" json:"dependencies,omitempty"`
+	Inject         []string       `yaml:"inject,omitempty" json:"inject,omitempty"`
 }
 
 // Server configuration

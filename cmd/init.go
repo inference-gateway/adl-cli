@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/inference-gateway/adl-cli/internal/prompt"
 	"github.com/spf13/cobra"
@@ -202,30 +203,14 @@ type adlData struct {
 			MaxTokens    int     `yaml:"maxTokens,omitempty"`
 			Temperature  float64 `yaml:"temperature,omitempty"`
 		} `yaml:"agent,omitempty"`
-		Dependencies []struct {
-			ID          string `yaml:"id"`
-			Name        string `yaml:"name"`
-			Description string `yaml:"description"`
-			Type        string `yaml:"type"`
-			Methods     []struct {
-				Name        string `yaml:"name"`
-				Description string `yaml:"description,omitempty"`
-				Parameters  []struct {
-					Name string `yaml:"name"`
-					Type string `yaml:"type"`
-				} `yaml:"parameters,omitempty"`
-				Returns []struct {
-					Type string `yaml:"type"`
-				} `yaml:"returns,omitempty"`
-			} `yaml:"methods"`
-		} `yaml:"dependencies,omitempty"`
+		Dependencies []string `yaml:"dependencies,omitempty"`
 		Skills []struct {
-			ID           string   `yaml:"id"`
-			Name         string   `yaml:"name"`
-			Description  string   `yaml:"description"`
-			Tags         []string `yaml:"tags"`
-			Schema       map[string]any `yaml:"schema"`
-			Dependencies []string `yaml:"dependencies,omitempty"`
+			ID          string         `yaml:"id"`
+			Name        string         `yaml:"name"`
+			Description string         `yaml:"description"`
+			Tags        []string       `yaml:"tags"`
+			Schema      map[string]any `yaml:"schema"`
+			Inject      []string       `yaml:"inject,omitempty"`
 		} `yaml:"skills,omitempty"`
 		Server struct {
 			Port  int  `yaml:"port"`
@@ -339,152 +324,45 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 
 	if addDependencies {
 		if useDefaults {
-			// Add a default logger dependency
-			defaultDep := struct {
-				ID          string `yaml:"id"`
-				Name        string `yaml:"name"`
-				Description string `yaml:"description"`
-				Type        string `yaml:"type"`
-				Methods     []struct {
-					Name        string `yaml:"name"`
-					Description string `yaml:"description,omitempty"`
-					Parameters  []struct {
-						Name string `yaml:"name"`
-						Type string `yaml:"type"`
-					} `yaml:"parameters,omitempty"`
-					Returns []struct {
-						Type string `yaml:"type"`
-					} `yaml:"returns,omitempty"`
-				} `yaml:"methods"`
-			}{
-				ID:          "logger",
-				Name:        "Logger",
-				Description: "Logging service for structured logging",
-				Type:        "service",
-				Methods: []struct {
-					Name        string `yaml:"name"`
-					Description string `yaml:"description,omitempty"`
-					Parameters  []struct {
-						Name string `yaml:"name"`
-						Type string `yaml:"type"`
-					} `yaml:"parameters,omitempty"`
-					Returns []struct {
-						Type string `yaml:"type"`
-					} `yaml:"returns,omitempty"`
-				}{
-					{
-						Name:        "Info",
-						Description: "Log an info message",
-						Parameters: []struct {
-							Name string `yaml:"name"`
-							Type string `yaml:"type"`
-						}{
-							{Name: "message", Type: "string"},
-						},
-						Returns: []struct {
-							Type string `yaml:"type"`
-						}{
-							{Type: ""},
-						},
-					},
-				},
-			}
-			adl.Spec.Dependencies = append(adl.Spec.Dependencies, defaultDep)
+			// Add default logger dependency
+			adl.Spec.Dependencies = append(adl.Spec.Dependencies, "logger")
 			fmt.Printf("Add dependencies for dependency injection [y/n] [n]: y\n")
-			fmt.Printf("Dependency name (e.g., 'CalendarService') []: Logger\n")
-			fmt.Printf("✅ Added default Logger dependency\n")
+			fmt.Printf("Dependency name (e.g., 'logger', 'database') []: logger\n")
+			fmt.Printf("✅ Added default logger dependency\n")
 		}
 		
 		if !useDefaults {
 			for {
-			dependency := struct {
-				ID          string `yaml:"id"`
-				Name        string `yaml:"name"`
-				Description string `yaml:"description"`
-				Type        string `yaml:"type"`
-				Methods     []struct {
-					Name        string `yaml:"name"`
-					Description string `yaml:"description,omitempty"`
-					Parameters  []struct {
-						Name string `yaml:"name"`
-						Type string `yaml:"type"`
-					} `yaml:"parameters,omitempty"`
-					Returns []struct {
-						Type string `yaml:"type"`
-					} `yaml:"returns,omitempty"`
-				} `yaml:"methods"`
-			}{}
-
-			dependency.Name = promptString("Dependency name (e.g., 'CalendarService')", "")
-			if dependency.Name == "" {
-				break
-			}
-			dependency.ID = strings.ToLower(strings.ReplaceAll(dependency.Name, " ", "_"))
-
-			dependency.Description = promptString("Dependency description", "Service for managing calendar operations")
-			dependency.Type = promptString("Dependency type (e.g., 'service', 'client', 'repository')", "service")
-
-			// Add at least one method
-			fmt.Println("\nDefine interface methods for this dependency:")
-			for {
-				method := struct {
-					Name        string `yaml:"name"`
-					Description string `yaml:"description,omitempty"`
-					Parameters  []struct {
-						Name string `yaml:"name"`
-						Type string `yaml:"type"`
-					} `yaml:"parameters,omitempty"`
-					Returns []struct {
-						Type string `yaml:"type"`
-					} `yaml:"returns,omitempty"`
-				}{}
-
-				method.Name = promptString("Method name (e.g., 'CreateEvent', empty to finish)", "")
-				if method.Name == "" {
+				dependency := promptString("Dependency name (e.g., 'logger', 'database', 'cache', empty to finish)", "")
+				if dependency == "" {
 					break
 				}
 
-				method.Description = promptString("Method description (optional)", "")
+				// Validate dependency name
+				if !isValidIdentifier(dependency) {
+					fmt.Printf("⚠️  Invalid dependency name. Use only letters, numbers, and underscores, starting with a letter or underscore.\n")
+					continue
+				}
 
-				// Add parameters
-				fmt.Println("Define method parameters:")
-				for {
-					paramName := promptString("Parameter name (empty to finish)", "")
-					if paramName == "" {
+				// Check for duplicates
+				duplicate := false
+				for _, existing := range adl.Spec.Dependencies {
+					if existing == dependency {
+						fmt.Printf("⚠️  Dependency '%s' already exists\n", dependency)
+						duplicate = true
 						break
 					}
-					paramType := promptString(fmt.Sprintf("Type for parameter '%s'", paramName), "string")
-					method.Parameters = append(method.Parameters, struct {
-						Name string `yaml:"name"`
-						Type string `yaml:"type"`
-					}{
-						Name: paramName,
-						Type: paramType,
-					})
+				}
+				
+				if !duplicate {
+					adl.Spec.Dependencies = append(adl.Spec.Dependencies, dependency)
+					fmt.Printf("✅ Added dependency: %s\n", dependency)
+					fmt.Printf("💡 You will need to implement this in internal/%s package with a New%s function\n", dependency, titleCase(dependency))
 				}
 
-				// Add return types (simplified - just type)
-				returnType := promptString("Return type (e.g., 'Event', 'error', 'string')", "error")
-				if returnType != "" {
-					method.Returns = append(method.Returns, struct {
-						Type string `yaml:"type"`
-					}{
-						Type: returnType,
-					})
-				}
-
-				dependency.Methods = append(dependency.Methods, method)
-
-				if !promptBool("Add another method", false) {
+				if !promptBool("Add another dependency", false) {
 					break
 				}
-			}
-
-			adl.Spec.Dependencies = append(adl.Spec.Dependencies, dependency)
-
-			if !promptBool("Add another dependency", false) {
-				break
-			}
 			}
 		}
 	}
@@ -496,12 +374,12 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 	if addSkills {
 		for {
 			skill := struct {
-				ID           string   `yaml:"id"`
-				Name         string   `yaml:"name"`
-				Description  string   `yaml:"description"`
-				Tags         []string `yaml:"tags"`
-				Schema       map[string]any `yaml:"schema"`
-				Dependencies []string `yaml:"dependencies,omitempty"`
+				ID          string         `yaml:"id"`
+				Name        string         `yaml:"name"`
+				Description string         `yaml:"description"`
+				Tags        []string       `yaml:"tags"`
+				Schema      map[string]any `yaml:"schema"`
+				Inject      []string       `yaml:"inject,omitempty"`
 			}{}
 
 			skill.Name = promptString("Skill name (e.g., 'get_weather')", "")
@@ -537,13 +415,13 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 			if len(adl.Spec.Dependencies) > 0 {
 				fmt.Printf("\nAvailable dependencies for skill '%s':\n", skill.Name)
 				for i, dep := range adl.Spec.Dependencies {
-					fmt.Printf("  %d. %s (%s) - %s\n", i+1, dep.Name, dep.ID, dep.Description)
+					fmt.Printf("  %d. %s\n", i+1, dep)
 				}
 				
-				addSkillDeps := promptBool("Add dependencies to this skill", false)
+				addSkillDeps := promptBool("Inject dependencies into this skill", false)
 				if addSkillDeps {
 					for {
-						depChoice := promptString("Enter dependency ID (or empty to finish)", "")
+						depChoice := promptString("Enter dependency name (or empty to finish)", "")
 						if depChoice == "" {
 							break
 						}
@@ -551,7 +429,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 						// Validate dependency exists
 						found := false
 						for _, dep := range adl.Spec.Dependencies {
-							if dep.ID == depChoice {
+							if dep == depChoice {
 								found = true
 								break
 							}
@@ -560,7 +438,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 						if found {
 							// Check if already added
 							alreadyAdded := false
-							for _, existing := range skill.Dependencies {
+							for _, existing := range skill.Inject {
 								if existing == depChoice {
 									alreadyAdded = true
 									break
@@ -568,7 +446,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 							}
 							
 							if !alreadyAdded {
-								skill.Dependencies = append(skill.Dependencies, depChoice)
+								skill.Inject = append(skill.Inject, depChoice)
 								fmt.Printf("✅ Added dependency: %s\n", depChoice)
 							} else {
 								fmt.Printf("⚠️  Dependency %s already added\n", depChoice)
@@ -977,4 +855,32 @@ func readADLFile(filePath string) (*adlData, error) {
 	}
 
 	return &adl, nil
+}
+
+// isValidIdentifier checks if a string is a valid identifier (letters, numbers, underscore, starting with letter/underscore)
+func isValidIdentifier(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+	
+	first := rune(s[0])
+	if !unicode.IsLetter(first) && first != '_' {
+		return false
+	}
+	
+	for _, r := range s[1:] {
+		if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '_' {
+			return false
+		}
+	}
+	
+	return true
+}
+
+// titleCase converts a string to title case (first letter uppercase)
+func titleCase(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
 }

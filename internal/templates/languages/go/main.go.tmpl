@@ -68,16 +68,20 @@ func main() {
 	
 	// Initialize dependencies
 	{{- range .ADL.Spec.Dependencies }}
-	var {{ .ID | toCamelCase }} deps.{{ .Name | toPascalCase }}
-	// TODO: Initialize {{ .Name }} dependency implementation
-	// {{ .Description }}
+	var {{ . | toCamelCase }} deps.{{ . | title }}Interface
+	// TODO: Initialize {{ . }} dependency implementation
+	// You should implement this in internal/{{ . }} package with a New{{ . | title }} function
+	// {{ . | toCamelCase }}, err = deps.New{{ . | title }}(ctx)
+	// if err != nil {
+	//     logger.Fatal("failed to initialize {{ . }} dependency", zap.Error(err))
+	// }
 	{{- end }}
 	{{- end }}
 
 	{{- range .ADL.Spec.Skills }}
 
 	// Register {{ .Name }} skill
-	{{ .Name | toCamelCase }}Skill := skills.New{{ .Name | toPascalCase }}Skill(logger{{ range .Dependencies }}, {{ . | toCamelCase }}{{ end }})
+	{{ .Name | toCamelCase }}Skill := skills.New{{ .Name | toPascalCase }}Skill(logger{{ range .Inject }}, {{ . | toCamelCase }}{{ end }})
 	toolBox.AddTool({{ .Name | toCamelCase }}Skill)
 	logger.Info("registered skill", zap.String("skill", "{{ .Name }}"), zap.String("description", "{{ .Description }}"))
 	{{- end }}

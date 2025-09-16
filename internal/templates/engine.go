@@ -205,10 +205,10 @@ func convertToGoMapLiteral(v interface{}) string {
 	}
 }
 
-// findDependencyByID finds a dependency by ID in the dependencies slice
-func findDependencyByID(id string, deps []schema.Dependency) int {
+// findDependencyByID finds a dependency by name in the dependencies slice
+func findDependencyByID(id string, deps []string) int {
 	for i, dep := range deps {
-		if dep.ID == id {
+		if dep == id {
 			return i
 		}
 	}

@@ -58,6 +58,36 @@ func (v *Validator) ValidateFile(filePath string) error {
 		return fmt.Errorf("validation failed:\n- %s", fmt.Sprintf("\n- %s", errors))
 	}
 
+	// Additional validation: check that injected dependencies are defined
+	var adl ADL
+	if err := yaml.Unmarshal(data, &adl); err != nil {
+		return fmt.Errorf("failed to parse ADL for dependency validation: %w", err)
+	}
+
+	if err := v.validateDependencyReferences(&adl); err != nil {
+		return fmt.Errorf("dependency validation failed: %w", err)
+	}
+
+	return nil
+}
+
+// validateDependencyReferences checks that all injected dependencies are defined in the spec
+func (v *Validator) validateDependencyReferences(adl *ADL) error {
+	// Create a map of defined dependencies for fast lookup
+	definedDeps := make(map[string]bool)
+	for _, dep := range adl.Spec.Dependencies {
+		definedDeps[dep] = true
+	}
+
+	// Check each skill's injected dependencies
+	for _, skill := range adl.Spec.Skills {
+		for _, injectedDep := range skill.Inject {
+			if !definedDeps[injectedDep] {
+				return fmt.Errorf("skill '%s' injects dependency '%s' that is not defined in spec.dependencies", skill.ID, injectedDep)
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -170,68 +200,8 @@ const adlSchema = `{
         "dependencies": {
           "type": "array",
           "items": {
-            "type": "object",
-            "required": ["id", "name", "description", "type", "methods"],
-            "properties": {
-              "id": {
-                "type": "string",
-                "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
-              },
-              "name": {
-                "type": "string"
-              },
-              "description": {
-                "type": "string"
-              },
-              "type": {
-                "type": "string"
-              },
-              "methods": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "required": ["name"],
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "type": "string"
-                    },
-                    "parameters": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "required": ["name", "type"],
-                        "properties": {
-                          "name": {
-                            "type": "string"
-                          },
-                          "type": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    },
-                    "returns": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "required": ["type"],
-                        "properties": {
-                          "type": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "config": {
-                "type": "object"
-              }
-            }
+            "type": "string",
+            "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
           }
         },
         "skills": {
@@ -323,10 +293,11 @@ const adlSchema = `{
               "implementation": {
                 "type": "string"
               },
-              "dependencies": {
+              "inject": {
                 "type": "array",
                 "items": {
-                  "type": "string"
+                  "type": "string",
+                  "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
                 }
               }
             }

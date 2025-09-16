@@ -275,17 +275,23 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 				dependencyFileName := parts[len(parts)-1]
 				dependencyName := strings.TrimSuffix(dependencyFileName, filepath.Ext(dependencyFileName))
 
-				var foundDependency *schema.Dependency
+				// Check if this dependency is defined in spec
+				var foundDependency string
 				for _, dep := range adl.Spec.Dependencies {
-					snakeCaseDependencyID := strings.ReplaceAll(dep.ID, "-", "_")
+					snakeCaseDependencyID := strings.ReplaceAll(dep, "-", "_")
 					if snakeCaseDependencyID == dependencyName {
-						foundDependency = &dep
+						foundDependency = dep
 						break
 					}
 				}
 
-				if foundDependency != nil {
-					content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, foundDependency, ctx)
+				if foundDependency != "" {
+					// Create dependency context with just the name
+					depContext := map[string]interface{}{
+						"Name": titleCase(foundDependency),
+						"ID":   foundDependency,
+					}
+					content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, depContext, ctx)
 					if err != nil {
 						return fmt.Errorf("failed to execute template %s for dependency %s: %w", templateKey, dependencyName, err)
 					}
@@ -309,7 +315,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 				}
 
 				if foundSkill != nil {
-					// Create an enhanced skill context with dependencies map and go module
+					// Create an enhanced skill context with inject dependencies and go module
 					skillContext := map[string]interface{}{
 						"ID":            foundSkill.ID,
 						"Name":          foundSkill.Name,
@@ -320,7 +326,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 						"OutputModes":   foundSkill.OutputModes,
 						"Schema":        foundSkill.Schema,
 						"Implementation": foundSkill.Implementation,
-						"Dependencies":  foundSkill.Dependencies,
+						"Inject":        foundSkill.Inject,
 					}
 					
 					// Add Go module if this is a Go project
@@ -331,13 +337,9 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 					// Create dependency map for easy lookup in template
 					dependencyMap := make(map[string]interface{})
 					for _, dep := range adl.Spec.Dependencies {
-						dependencyMap[dep.ID] = map[string]interface{}{
-							"ID":          dep.ID,
-							"Name":        dep.Name,
-							"Description": dep.Description,
-							"Type":        dep.Type,
-							"Methods":     dep.Methods,
-							"Config":      dep.Config,
+						dependencyMap[dep] = map[string]interface{}{
+							"ID":   dep,
+							"Name": titleCase(dep),
 						}
 					}
 					skillContext["DependencyMap"] = dependencyMap
@@ -856,4 +858,12 @@ func (g *Generator) generateGitLabCDWorkflow(adl *schema.ADL, outputDir string, 
 	fmt.Printf("⚠️  GitLab CD generation is not yet implemented\n")
 	fmt.Printf("This is a planned feature - contributions welcome!\n")
 	return nil
+}
+
+// titleCase converts a string to title case (first letter uppercase)
+func titleCase(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
 }
