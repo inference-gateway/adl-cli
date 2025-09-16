@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.3](https://github.com/inference-gateway/adl-cli/compare/v0.20.2...v0.20.3) (2025-09-16)
+
+### 🐛 Bug Fixes
+
+* **acronyms:** Update ADL acronyms from language - add it to spec ([5f1d6f1](https://github.com/inference-gateway/adl-cli/commit/5f1d6f1bd83437a90e87417e4f0a9473a1524553))
+
 ## [0.20.2](https://github.com/inference-gateway/adl-cli/compare/v0.20.1...v0.20.2) (2025-09-16)
 
 ### ♻️ Improvements
