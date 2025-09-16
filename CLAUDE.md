@@ -28,6 +28,38 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture
 
+### Dependency Injection
+
+The ADL CLI supports dependency injection to improve testability and maintainability of skills:
+
+#### Configuration
+Dependencies are defined at the spec level and injected into specific skills:
+
+```yaml
+spec:
+  dependencies:
+    - logger
+    - database
+  skills:
+    - id: query_database
+      name: query_database
+      inject:
+        - logger
+        - database
+```
+
+#### Implementation
+- **Dependency Packages**: Each dependency creates a package in `internal/` (e.g., `internal/logger/`)
+- **Constructor Functions**: Skills receive injected dependencies as constructor parameters
+- **Interface-Based**: Dependencies use interfaces for better testability
+- **Validation**: Build-time validation ensures injected dependencies are defined in spec
+
+#### Benefits
+- Improved testability through dependency mocking
+- Better separation of concerns
+- Centralized dependency management
+- Type-safe dependency contracts
+
 ### Core Components
 
 The ADL CLI follows a command-based architecture using Cobra framework:

@@ -55,6 +55,7 @@ The ADL CLI helps you build production-ready A2A agents quickly by generating co
 - 🛠️ **Smart Ignore** - Protect your implementations with .adl-ignore files
 - ✅ **Validation** - Built-in ADL schema validation
 - 🛠️ **Interactive Setup** - Guided project initialization with extensive CLI options
+- 🔗 **Dependency Injection** - Improved testability through dependency injection for skills
 - 🔧 **CI/CD Generation** - Automatic GitHub Actions workflows with semantic-release CD pipelines
 - 🏗️ **Sandbox Environments** - Flox and DevContainer support for isolated development
 - 🎣 **Post-Generation Hooks** - Customize build, format, and test commands after generation
@@ -345,8 +346,9 @@ The complete ADL schema includes:
 
 - **metadata**: Agent name, description, and version
 - **capabilities**: Streaming, notifications, state history
-- **agent**: AI provider configuration (OpenAI, Anthropic, DeepSeek, Ollama, Google, Mistral, Groq)
-- **skills**: Function definitions with complex JSON schemas and validation
+- **dependencies**: Service dependencies available for injection into skills
+- **agent**: AI provider configuration (OpenAI, Anthropic, DeepSeek, Ollama, Google, Mistral, Groq)  
+- **skills**: Function definitions with complex JSON schemas, validation, and dependency injection support
 - **server**: HTTP server configuration with authentication support
 - **language**: Programming language-specific settings (Go, Rust, TypeScript) and configurable acronyms
 - **scm**: Source control management configuration (GitHub, GitLab) 
@@ -448,6 +450,70 @@ spec:
   sandbox:
     flox:
       enabled: true
+```
+
+## Dependency Injection
+
+The ADL CLI supports dependency injection to improve testability and separation of concerns in your agent skills. This feature allows you to define reusable dependencies and inject them into specific skills that need them.
+
+### Basic Dependency Injection
+
+Define dependencies at the spec level and inject them into skills:
+
+```yaml
+spec:
+  dependencies:
+    - logger
+    - database
+  skills:
+    - id: query_database
+      name: query_database
+      description: "Query the company database"
+      inject:
+        - logger
+        - database
+      schema:
+        type: object
+        properties:
+          query:
+            type: string
+            description: "SQL query to execute"
+        required: [query]
+```
+
+### How It Works
+
+1. **Define Dependencies**: List all available dependencies in `spec.dependencies`
+2. **Inject into Skills**: Specify which dependencies each skill needs in the `inject` array  
+3. **Code Generation**: The CLI generates constructor functions and dependency packages
+4. **Validation**: Ensures injected dependencies are defined in the spec
+
+### Generated Code Structure
+
+The dependency injection system generates:
+
+- **Dependency Packages**: Each dependency creates a package in `internal/` (e.g., `internal/logger/`, `internal/database/`)
+- **Constructor Functions**: Skills receive injected dependencies as constructor arguments
+- **Validation**: Build-time checks that dependencies are properly defined
+
+### Benefits
+
+- **Improved Testability**: Skills can be tested with mock dependencies
+- **Better Separation of Concerns**: Clear boundaries between business logic and dependencies
+- **Maintainable Code**: Dependencies are centrally defined and managed
+- **Type Safety**: Interface-based dependency contracts
+
+### Example Generated Structure
+
+```
+my-agent/
+├── internal/
+│   ├── logger/
+│   │   └── logger.go      # Logger implementation package
+│   └── database/
+│       └── database.go    # Database implementation package
+└── skills/
+    └── query_database.go  # Skill with injected dependencies
 ```
 
 ## Generated Project Structure
