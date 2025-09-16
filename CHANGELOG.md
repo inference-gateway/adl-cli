@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.4](https://github.com/inference-gateway/adl-cli/compare/v0.20.3...v0.20.4) (2025-09-16)
+
+### 🐛 Bug Fixes
+
+* **gitignore:** Update environment file patterns to include local files and exclude example files ([4a0300c](https://github.com/inference-gateway/adl-cli/commit/4a0300ce90dcf2ecbdd8529539dd0eb5a4bb17c7))
+
 ## [0.20.3](https://github.com/inference-gateway/adl-cli/compare/v0.20.2...v0.20.3) (2025-09-16)
 
 ### 🐛 Bug Fixes
