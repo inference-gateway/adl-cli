@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.1](https://github.com/inference-gateway/adl-cli/compare/v0.20.0...v0.20.1) (2025-09-16)
+
+### 📚 Documentation
+
+* Improve documentation for dependency injection support in ADL CLI ([c6543cf](https://github.com/inference-gateway/adl-cli/commit/c6543cf1175e8a59cf462479e01249092a41f6d4))
+
 ## [0.20.0](https://github.com/inference-gateway/adl-cli/compare/v0.19.14...v0.20.0) (2025-09-16)
 
 ### ✨ Features
