@@ -268,14 +268,12 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		var content string
 		var err error
 
-		if templateKey == "dependency.go" && strings.Contains(fileName, "internal/dependencies/") {
-			// Handle dependency file generation
+		if templateKey == "dependency.go" && strings.Contains(fileName, "internal/") && !strings.Contains(fileName, "internal/dependencies/") {
 			parts := strings.Split(fileName, "/")
 			if len(parts) >= 3 {
 				dependencyFileName := parts[len(parts)-1]
 				dependencyName := strings.TrimSuffix(dependencyFileName, filepath.Ext(dependencyFileName))
 
-				// Check if this dependency is defined in spec
 				var foundDependency string
 				for _, dep := range adl.Spec.Dependencies {
 					snakeCaseDependencyID := strings.ReplaceAll(dep, "-", "_")
@@ -286,14 +284,20 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 				}
 
 				if foundDependency != "" {
-					// Create dependency context with just the name
-					depContext := map[string]interface{}{
-						"Name": titleCase(foundDependency),
-						"ID":   foundDependency,
-					}
-					content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, depContext, ctx)
-					if err != nil {
-						return fmt.Errorf("failed to execute template %s for dependency %s: %w", templateKey, dependencyName, err)
+					if foundDependency == "logger" {
+						content, err = templateEngine.ExecuteToolTemplate("logger.go", ctx)
+						if err != nil {
+							return fmt.Errorf("failed to execute logger template: %w", err)
+						}
+					} else {
+						depContext := map[string]interface{}{
+							"Name": titleCase(foundDependency),
+							"ID":   foundDependency,
+						}
+						content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, depContext, ctx)
+						if err != nil {
+							return fmt.Errorf("failed to execute template %s for dependency %s: %w", templateKey, dependencyName, err)
+						}
 					}
 				} else {
 					return fmt.Errorf("dependency %s not found in ADL spec", dependencyName)
@@ -315,26 +319,23 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 				}
 
 				if foundSkill != nil {
-					// Create an enhanced skill context with inject dependencies and go module
 					skillContext := map[string]interface{}{
-						"ID":            foundSkill.ID,
-						"Name":          foundSkill.Name,
-						"Description":   foundSkill.Description,
-						"Tags":          foundSkill.Tags,
-						"Examples":      foundSkill.Examples,
-						"InputModes":    foundSkill.InputModes,
-						"OutputModes":   foundSkill.OutputModes,
-						"Schema":        foundSkill.Schema,
+						"ID":             foundSkill.ID,
+						"Name":           foundSkill.Name,
+						"Description":    foundSkill.Description,
+						"Tags":           foundSkill.Tags,
+						"Examples":       foundSkill.Examples,
+						"InputModes":     foundSkill.InputModes,
+						"OutputModes":    foundSkill.OutputModes,
+						"Schema":         foundSkill.Schema,
 						"Implementation": foundSkill.Implementation,
-						"Inject":        foundSkill.Inject,
+						"Inject":         foundSkill.Inject,
 					}
-					
-					// Add Go module if this is a Go project
+
 					if adl.Spec.Language.Go != nil {
 						skillContext["GoModule"] = adl.Spec.Language.Go.Module
 					}
-					
-					// Create dependency map for easy lookup in template
+
 					dependencyMap := make(map[string]interface{})
 					for _, dep := range adl.Spec.Dependencies {
 						dependencyMap[dep] = map[string]interface{}{
@@ -343,7 +344,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 						}
 					}
 					skillContext["DependencyMap"] = dependencyMap
-					
+
 					content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, skillContext, ctx)
 					if err != nil {
 						return fmt.Errorf("failed to execute template %s for skill %s: %w", templateKey, toolName, err)
@@ -353,7 +354,6 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 				}
 			}
 		} else if templateKey == "dependency.go" {
-			// This shouldn't happen if the filename matching worked above
 			return fmt.Errorf("dependency template reached fallback case - this should not happen")
 		} else {
 			content, err = templateEngine.ExecuteTemplate(templateKey, ctx)

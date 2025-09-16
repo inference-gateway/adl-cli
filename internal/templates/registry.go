@@ -165,7 +165,7 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 
 	for _, dependency := range adl.Spec.Dependencies {
 		snakeCaseName := strings.ReplaceAll(dependency, "-", "_")
-		files[fmt.Sprintf("internal/dependencies/%s.go", snakeCaseName)] = "dependency.go"
+		files[fmt.Sprintf("internal/%s/%s.go", snakeCaseName, snakeCaseName)] = "dependency.go"
 	}
 
 	r.addSandboxFiles(adl, files)
