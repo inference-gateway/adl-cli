@@ -337,7 +337,7 @@ spec:
     go:
       module: "github.com/example/weather-agent"
       version: "1.24"
-    acronyms: ["api", "json", "xml"] # Optional: Custom acronyms for better code generation
+  acronyms: ["api", "json", "xml"] # Optional: Custom acronyms for better code generation
 ```
 
 ### ADL Schema
@@ -1133,7 +1133,7 @@ The ADL CLI includes support for configurable acronyms to improve code generatio
 
 ### How It Works
 
-Define custom acronyms in your ADL file's `spec.language.acronyms` field. These acronyms will be properly capitalized when generating identifiers in your code.
+Define custom acronyms in your ADL file's `spec.acronyms` field. These acronyms will be properly capitalized when generating identifiers in your code.
 
 ### Configuration
 
@@ -1143,7 +1143,7 @@ spec:
     go:
       module: "github.com/company/my-agent"
       version: "1.24"
-    acronyms: ["n8n", "xml", "mqtt", "iot", "uuid"]
+  acronyms: ["n8n", "xml", "mqtt", "iot", "uuid"]
 ```
 
 ### Generated Code Examples

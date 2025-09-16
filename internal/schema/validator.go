@@ -204,6 +204,12 @@ const adlSchema = `{
             "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
           }
         },
+        "acronyms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "skills": {
           "type": "array",
           "items": {
@@ -368,8 +374,7 @@ const adlSchema = `{
               }
             }
           },
-          "minProperties": 1,
-          "maxProperties": 1
+          "minProperties": 1
         },
         "scm": {
           "type": "object",

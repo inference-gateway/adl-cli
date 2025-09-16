@@ -26,6 +26,7 @@ type Spec struct {
 	Skills        []Skill           `yaml:"skills,omitempty" json:"skills,omitempty"`
 	Server        Server            `yaml:"server" json:"server"`
 	Language      *Language         `yaml:"language,omitempty" json:"language,omitempty"`
+	Acronyms      []string          `yaml:"acronyms,omitempty" json:"acronyms,omitempty"`
 	SCM           *SCM              `yaml:"scm,omitempty" json:"scm,omitempty"`
 	Sandbox       *SandboxConfig    `yaml:"sandbox,omitempty" json:"sandbox,omitempty"`
 	Deployment    *DeploymentConfig `yaml:"deployment,omitempty" json:"deployment,omitempty"`
@@ -110,7 +111,6 @@ type Language struct {
 	Go         *GoConfig         `yaml:"go,omitempty" json:"go,omitempty"`
 	TypeScript *TypeScriptConfig `yaml:"typescript,omitempty" json:"typescript,omitempty"`
 	Rust       *RustConfig       `yaml:"rust,omitempty" json:"rust,omitempty"`
-	Acronyms   []string          `yaml:"acronyms,omitempty" json:"acronyms,omitempty"`
 }
 
 // SCM contains source control management configuration

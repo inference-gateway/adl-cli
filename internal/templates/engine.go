@@ -254,8 +254,8 @@ func customFuncMapWithAcronyms(acronyms map[string]string) template.FuncMap {
 // prepareContext prepares the context with custom acronyms
 func (e *Engine) prepareContext(ctx Context) Context {
 	var customAcronyms []string
-	if ctx.ADL != nil && ctx.ADL.Spec.Language != nil && ctx.ADL.Spec.Language.Acronyms != nil {
-		customAcronyms = ctx.ADL.Spec.Language.Acronyms
+	if ctx.ADL != nil && ctx.ADL.Spec.Acronyms != nil {
+		customAcronyms = ctx.ADL.Spec.Acronyms
 	}
 	
 	ctx.customAcronyms = buildAcronymsMap(customAcronyms)

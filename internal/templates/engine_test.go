@@ -222,9 +222,7 @@ func TestEngine_PrepareContext(t *testing.T) {
 			name: "with custom acronyms",
 			adl: &schema.ADL{
 				Spec: schema.Spec{
-					Language: &schema.Language{
-						Acronyms: []string{"n8n", "xyz"},
-					},
+					Acronyms: []string{"n8n", "xyz"},
 				},
 			},
 			expected: func() map[string]string {
@@ -278,9 +276,7 @@ func TestEngine_Execute_WithCustomAcronyms(t *testing.T) {
 			template: `{{ "get_n8n_docs" | toPascalCase }}`,
 			adl: &schema.ADL{
 				Spec: schema.Spec{
-					Language: &schema.Language{
-						Acronyms: []string{"n8n"},
-					},
+					Acronyms: []string{"n8n"},
 				},
 			},
 			expected: "GetN8NDocs\n",
@@ -290,9 +286,7 @@ func TestEngine_Execute_WithCustomAcronyms(t *testing.T) {
 			template: `{{ "get_n8n_docs" | toCamelCase }}`,
 			adl: &schema.ADL{
 				Spec: schema.Spec{
-					Language: &schema.Language{
-						Acronyms: []string{"n8n"},
-					},
+					Acronyms: []string{"n8n"},
 				},
 			},
 			expected: "getN8NDocs\n",
@@ -312,9 +306,7 @@ func TestEngine_Execute_WithCustomAcronyms(t *testing.T) {
 			template: `{{ "process_n8n_api_data" | toPascalCase }}`,
 			adl: &schema.ADL{
 				Spec: schema.Spec{
-					Language: &schema.Language{
-						Acronyms: []string{"n8n"},
-					},
+					Acronyms: []string{"n8n"},
 				},
 			},
 			expected: "ProcessN8NAPIData\n",
