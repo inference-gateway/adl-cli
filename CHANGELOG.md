@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.0](https://github.com/inference-gateway/adl-cli/compare/v0.19.14...v0.20.0) (2025-09-16)
+
+### ✨ Features
+
+* **dependencies:** Add dependency injection support for skills ([#75](https://github.com/inference-gateway/adl-cli/issues/75)) ([a16faec](https://github.com/inference-gateway/adl-cli/commit/a16faec9db0115d7ecbb99a7fe65734373334e78))
+
 ## [0.19.14](https://github.com/inference-gateway/adl-cli/compare/v0.19.13...v0.19.14) (2025-09-15)
 
 ### ♻️ Improvements
