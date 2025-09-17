@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.8](https://github.com/inference-gateway/adl-cli/compare/v0.20.7...v0.20.8) (2025-09-17)
+
+### ♻️ Improvements
+
+* Add exec plugin for version update in release process ([e50a5bf](https://github.com/inference-gateway/adl-cli/commit/e50a5bfe6709cfbac5899e310bad77391e2d3466))
+
+### 🐛 Bug Fixes
+
+* Correct go.version format in manifest.toml.tmpl ([4103162](https://github.com/inference-gateway/adl-cli/commit/4103162869000def2b373f419f18cd625a2b3308))
+
 ## [0.20.7](https://github.com/inference-gateway/adl-cli/compare/v0.20.6...v0.20.7) (2025-09-17)
 
 ### 🐛 Bug Fixes
