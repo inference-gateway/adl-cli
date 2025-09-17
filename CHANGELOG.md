@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.6](https://github.com/inference-gateway/adl-cli/compare/v0.20.5...v0.20.6) (2025-09-17)
+
+### ♻️ Improvements
+
+* Improve dynamic type handling for configuration fields in Go template ([19c5731](https://github.com/inference-gateway/adl-cli/commit/19c57317b4a31ee94f77b5a90ee2b289c9799102))
+
+### 📚 Documentation
+
+* Document configuration and dependency management in go-agent example ([2122111](https://github.com/inference-gateway/adl-cli/commit/2122111121831cb7591127c32332fd6be649fd56))
+
 ## [0.20.5](https://github.com/inference-gateway/adl-cli/compare/v0.20.4...v0.20.5) (2025-09-16)
 
 ### ♻️ Improvements
