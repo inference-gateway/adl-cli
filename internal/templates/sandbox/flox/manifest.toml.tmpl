@@ -3,7 +3,7 @@ version = 1
 [install]
 {{- if eq .Language "go" }}
 go.pkg-path = "go"
-go.version = "^{{ .ADL.Spec.Language.Go.Version }}"
+go.version = "{{ .ADL.Spec.Language.Go.Version }}"
 
 golangci-lint.pkg-path = "golangci-lint"
 golangci-lint.version = "^2.4.0"
