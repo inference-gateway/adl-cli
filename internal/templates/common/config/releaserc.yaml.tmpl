@@ -50,12 +50,26 @@ plugins:
       verifyConditions: true
 
   - - '@semantic-release/exec'
-    - prepareCmd: 'sed -i "/^metadata:/,/^spec:/ s/version: \"[^\"]*\"/version: \"${nextRelease.version}\"/" agent.yaml'
+    - prepareCmd: |
+        sed -i "/^metadata:/,/^spec:/ s/version: \"[^\"]*\"/version: \"${nextRelease.version}\"/" agent.yaml
+        task generate
+      publishCmd: |
+        echo "Building and pushing Docker image for version ${nextRelease.version}"
+        docker buildx build --platform linux/amd64,linux/arm64 \
+          --tag ghcr.io/${GITHUB_REPOSITORY,,}:${nextRelease.version} \
+          --tag ghcr.io/${GITHUB_REPOSITORY,,}:latest \
+          --push .
 
   - - '@semantic-release/git'
     - assets:
         - CHANGELOG.md
         - agent.yaml
+        - AGENTS.md
+        - Dockerfile
+        - main.go
+        - README.md
+        - Taskfile.yml
+        - .well-known/agent.json
       message: "chore(release): 🔖 ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
 
   - - '@semantic-release/github'
