@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.12](https://github.com/inference-gateway/adl-cli/compare/v0.20.11...v0.20.12) (2025-09-17)
+
+### 🐛 Bug Fixes
+
+* Correct conditional syntax for Rust setup and remove unnecessary dependency in deployment job ([5e7d91c](https://github.com/inference-gateway/adl-cli/commit/5e7d91cffc14161aec1388c5d357556f131ae14b))
+
 ## [0.20.11](https://github.com/inference-gateway/adl-cli/compare/v0.20.10...v0.20.11) (2025-09-17)
 
 ### ♻️ Improvements
