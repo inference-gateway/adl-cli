@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.11](https://github.com/inference-gateway/adl-cli/compare/v0.20.10...v0.20.11) (2025-09-17)
+
+### ♻️ Improvements
+
+* Improve CI/CD workflow with Docker Buildx and GitHub Container Registry setup ([e114ece](https://github.com/inference-gateway/adl-cli/commit/e114eceed699513c97cdbc264daf3877f95dc5a0))
+
 ## [0.20.10](https://github.com/inference-gateway/adl-cli/compare/v0.20.9...v0.20.10) (2025-09-17)
 
 ### 🐛 Bug Fixes
