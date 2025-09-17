@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.10](https://github.com/inference-gateway/adl-cli/compare/v0.20.9...v0.20.10) (2025-09-17)
+
+### 🐛 Bug Fixes
+
+* Remove generated timestamp from agent template ([e80c275](https://github.com/inference-gateway/adl-cli/commit/e80c2755302e0f52035c87c636a1ae644fb26ea2))
+
 ## [0.20.9](https://github.com/inference-gateway/adl-cli/compare/v0.20.8...v0.20.9) (2025-09-17)
 
 ### 🐛 Bug Fixes
