@@ -26,7 +26,17 @@ type Config struct {
 // {{ $sectionName | toPascalCase }}Config represents the {{ $sectionName }} configuration
 type {{ $sectionName | toPascalCase }}Config struct {
 	{{- range $key, $value := $sectionConfig }}
-	{{ $key | toPascalCase }} string `env:"{{ $key | toUpperSnakeCase }}"`
+	{{- $type := "string" }}
+	{{- if kindIs "bool" $value }}
+		{{- $type = "bool" }}
+	{{- else if kindIs "float64" $value }}
+		{{- if contains "." (toString $value) }}
+			{{- $type = "float64" }}
+		{{- else }}
+			{{- $type = "int" }}
+		{{- end }}
+	{{- end }}
+	{{ $key | toPascalCase }} {{ $type }} `env:"{{ $key | toUpperSnakeCase }}{{- if $value }},default={{ $value }}{{- end }}"`
 	{{- end }}
 }
 {{- end }}
