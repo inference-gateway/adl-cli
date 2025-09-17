@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.9](https://github.com/inference-gateway/adl-cli/compare/v0.20.8...v0.20.9) (2025-09-17)
+
+### 🐛 Bug Fixes
+
+* Remove timestamp from generated file header ([e48bea7](https://github.com/inference-gateway/adl-cli/commit/e48bea7b2a1608c87a14a809c40e8d594feca882))
+
 ## [0.20.8](https://github.com/inference-gateway/adl-cli/compare/v0.20.7...v0.20.8) (2025-09-17)
 
 ### ♻️ Improvements
