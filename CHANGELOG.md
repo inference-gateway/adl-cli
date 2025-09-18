@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.16](https://github.com/inference-gateway/adl-cli/compare/v0.20.15...v0.20.16) (2025-09-18)
+
+### 👷 CI
+
+* Add validation step for ADL in CI workflow and taskfile ([ebf0d75](https://github.com/inference-gateway/adl-cli/commit/ebf0d755a1e53a40ff79806985762e6ae2ca2ce4))
+
 ## [0.20.15](https://github.com/inference-gateway/adl-cli/compare/v0.20.14...v0.20.15) (2025-09-18)
 
 ### 🐛 Bug Fixes
