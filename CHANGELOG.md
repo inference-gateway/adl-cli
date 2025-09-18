@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.14](https://github.com/inference-gateway/adl-cli/compare/v0.20.13...v0.20.14) (2025-09-18)
+
+### 🐛 Bug Fixes
+
+* Improve Docker build command with caching and metadata annotations for release candidate branches ([38f9219](https://github.com/inference-gateway/adl-cli/commit/38f9219101a1adb3e037de17d53398f2fdac7d6d))
+* Update Docker build command to conditionally handle release candidate branches ([a56ddda](https://github.com/inference-gateway/adl-cli/commit/a56ddda4a370c8e5ad783d300509963d9d295ac0))
+
 ## [0.20.13](https://github.com/inference-gateway/adl-cli/compare/v0.20.12...v0.20.13) (2025-09-18)
 
 ### 🐛 Bug Fixes
