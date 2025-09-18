@@ -55,9 +55,10 @@ plugins:
         task generate
       publishCmd: |
         echo "Building and pushing Docker image for version ${nextRelease.version}"
+        REPO_LOWER=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')
         docker buildx build --platform linux/amd64,linux/arm64 \
-          --tag ghcr.io/${GITHUB_REPOSITORY,,}:${nextRelease.version} \
-          --tag ghcr.io/${GITHUB_REPOSITORY,,}:latest \
+          --tag ghcr.io/$REPO_LOWER:${nextRelease.version} \
+          --tag ghcr.io/$REPO_LOWER:latest \
           --push .
 
   - - '@semantic-release/git'
