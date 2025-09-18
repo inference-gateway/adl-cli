@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.13](https://github.com/inference-gateway/adl-cli/compare/v0.20.12...v0.20.13) (2025-09-18)
+
+### 🐛 Bug Fixes
+
+* Add ADL CLI installation step in CI/CD workflow ([b6feda5](https://github.com/inference-gateway/adl-cli/commit/b6feda53f3c70f8b7816400aad2d0e644fa38561))
+
 ## [0.20.12](https://github.com/inference-gateway/adl-cli/compare/v0.20.11...v0.20.12) (2025-09-17)
 
 ### 🐛 Bug Fixes
