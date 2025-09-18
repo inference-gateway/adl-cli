@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.15](https://github.com/inference-gateway/adl-cli/compare/v0.20.14...v0.20.15) (2025-09-18)
+
+### 🐛 Bug Fixes
+
+* Correct metadata references in Docker build command ([902467d](https://github.com/inference-gateway/adl-cli/commit/902467d5790d31fe0ad34ec35a69daf1b2cb3ee0))
+
 ## [0.20.14](https://github.com/inference-gateway/adl-cli/compare/v0.20.13...v0.20.14) (2025-09-18)
 
 ### 🐛 Bug Fixes
