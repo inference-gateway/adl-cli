@@ -56,8 +56,8 @@ plugins:
       publishCmd: |
         echo "Building and pushing Docker image for version ${nextRelease.version}"
         REPO_LOWER=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')
-        DESCRIPTION="{{ .ADL.Spec.Metadata.Description }}"
-        TITLE="{{ .ADL.Spec.Metadata.Name }}"
+        DESCRIPTION="{{ .ADL.Metadata.Description }}"
+        TITLE="{{ .ADL.Metadata.Name }}"
         
         if [[ "$GITHUB_REF_NAME" == rc/* ]]; then
           docker buildx build --platform linux/amd64,linux/arm64 \
