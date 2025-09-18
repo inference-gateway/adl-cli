@@ -56,15 +56,33 @@ plugins:
       publishCmd: |
         echo "Building and pushing Docker image for version ${nextRelease.version}"
         REPO_LOWER=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')
+        DESCRIPTION="{{ .ADL.Spec.Metadata.Description }}"
+        TITLE="{{ .ADL.Spec.Metadata.Name }}"
         
         if [[ "$GITHUB_REF_NAME" == rc/* ]]; then
           docker buildx build --platform linux/amd64,linux/arm64 \
+            --cache-from type=gha \
+            --cache-from type=registry,ref=ghcr.io/$REPO_LOWER:buildcache \
+            --cache-to type=gha,mode=max \
+            --cache-to type=registry,ref=ghcr.io/$REPO_LOWER:buildcache,mode=max \
+            --annotation "index:org.opencontainers.image.source=https://github.com/$REPO_LOWER" \
+            --annotation "index:org.opencontainers.image.description=$DESCRIPTION" \
+            --annotation "index:org.opencontainers.image.version=${nextRelease.version}" \
+            --annotation "index:org.opencontainers.image.title=$TITLE" \
             --tag ghcr.io/$REPO_LOWER:${nextRelease.version} \
-            --tag ghcr.io/$REPO_LOWER:latest \
             --push .
         else
           docker buildx build --platform linux/amd64,linux/arm64 \
+            --cache-from type=gha \
+            --cache-from type=registry,ref=ghcr.io/$REPO_LOWER:buildcache \
+            --cache-to type=gha,mode=max \
+            --cache-to type=registry,ref=ghcr.io/$REPO_LOWER:buildcache,mode=max \
+            --annotation "index:org.opencontainers.image.source=https://github.com/$REPO_LOWER" \
+            --annotation "index:org.opencontainers.image.description=$DESCRIPTION" \
+            --annotation "index:org.opencontainers.image.version=${nextRelease.version}" \
+            --annotation "index:org.opencontainers.image.title=$TITLE" \
             --tag ghcr.io/$REPO_LOWER:${nextRelease.version} \
+            --tag ghcr.io/$REPO_LOWER:latest \
             --push .
         fi
 
