@@ -56,10 +56,17 @@ plugins:
       publishCmd: |
         echo "Building and pushing Docker image for version ${nextRelease.version}"
         REPO_LOWER=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')
-        docker buildx build --platform linux/amd64,linux/arm64 \
-          --tag ghcr.io/$REPO_LOWER:${nextRelease.version} \
-          --tag ghcr.io/$REPO_LOWER:latest \
-          --push .
+        
+        if [[ "$GITHUB_REF_NAME" == rc/* ]]; then
+          docker buildx build --platform linux/amd64,linux/arm64 \
+            --tag ghcr.io/$REPO_LOWER:${nextRelease.version} \
+            --tag ghcr.io/$REPO_LOWER:latest \
+            --push .
+        else
+          docker buildx build --platform linux/amd64,linux/arm64 \
+            --tag ghcr.io/$REPO_LOWER:${nextRelease.version} \
+            --push .
+        fi
 
   - - '@semantic-release/git'
     - assets:
