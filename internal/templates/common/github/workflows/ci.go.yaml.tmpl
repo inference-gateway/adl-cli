@@ -30,7 +30,15 @@ jobs:
       uses: arduino/setup-task@v2
       with:
         version: 3.x
-    
+
+    - name: Install ADL CLI
+      run: |
+        curl -fsSL https://raw.githubusercontent.com/inference-gateway/adl-cli/main/install.sh | bash
+        adl --version
+
+    - name: Validate ADL
+      run: task validate
+
     - name: Download dependencies
       run: go mod download
     

@@ -5,6 +5,10 @@ vars:
   VERSION: {{ .ADL.Metadata.Version }}
 
 tasks:
+  validate:
+    desc: Validate ADL
+    cmd: adl validate agent.yaml
+
   generate:
     desc: Generate code from ADL
     cmd: {{ .GenerateCommand }}
