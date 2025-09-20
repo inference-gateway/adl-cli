@@ -38,7 +38,7 @@ spec:
   language:
     go:
       module: github.com/example/cloudrun-example
-      version: "1.24"
+      version: "1.25"
   scm:
     provider: github
     url: "https://github.com/example/cloudrun-example"

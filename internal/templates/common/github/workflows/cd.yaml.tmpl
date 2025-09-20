@@ -58,7 +58,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5.5.0
         with:
-          go-version: {{ if and .ADL.Spec.Language.Go .ADL.Spec.Language.Go.Version }}{{ .ADL.Spec.Language.Go.Version }}{{ else }}1.24{{ end }}
+          go-version: {{ if and .ADL.Spec.Language.Go .ADL.Spec.Language.Go.Version }}{{ .ADL.Spec.Language.Go.Version }}{{ else }}1.25{{ end }}
           cache: true
 
       - name: Install Task

@@ -204,7 +204,7 @@ type adlData struct {
 			Temperature  float64 `yaml:"temperature,omitempty"`
 		} `yaml:"agent,omitempty"`
 		Dependencies []string `yaml:"dependencies,omitempty"`
-		Skills []struct {
+		Skills       []struct {
 			ID          string         `yaml:"id"`
 			Name        string         `yaml:"name"`
 			Description string         `yaml:"description"`
@@ -330,7 +330,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 			fmt.Printf("Dependency name (e.g., 'logger', 'database') []: logger\n")
 			fmt.Printf("✅ Added default logger dependency\n")
 		}
-		
+
 		if !useDefaults {
 			for {
 				dependency := promptString("Dependency name (e.g., 'logger', 'database', 'cache', empty to finish)", "")
@@ -353,7 +353,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 						break
 					}
 				}
-				
+
 				if !duplicate {
 					adl.Spec.Dependencies = append(adl.Spec.Dependencies, dependency)
 					fmt.Printf("✅ Added dependency: %s\n", dependency)
@@ -417,7 +417,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 				for i, dep := range adl.Spec.Dependencies {
 					fmt.Printf("  %d. %s\n", i+1, dep)
 				}
-				
+
 				addSkillDeps := promptBool("Inject dependencies into this skill", false)
 				if addSkillDeps {
 					for {
@@ -425,7 +425,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 						if depChoice == "" {
 							break
 						}
-						
+
 						// Validate dependency exists
 						found := false
 						for _, dep := range adl.Spec.Dependencies {
@@ -434,7 +434,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 								break
 							}
 						}
-						
+
 						if found {
 							// Check if already added
 							alreadyAdded := false
@@ -444,7 +444,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 									break
 								}
 							}
-							
+
 							if !alreadyAdded {
 								skill.Inject = append(skill.Inject, depChoice)
 								fmt.Printf("✅ Added dependency: %s\n", depChoice)
@@ -554,7 +554,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 		}{}
 		defaultModule := getDefaultGoModule(adl.Metadata.Name)
 		adl.Spec.Language.Go.Module = promptWithConfig("go-module", useDefaults, "Go module", defaultModule)
-		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.24")
+		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.25")
 
 	case "rust":
 		adl.Spec.Language.Rust = &struct {
@@ -582,7 +582,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 		}{}
 		defaultModule := getDefaultGoModule(adl.Metadata.Name)
 		adl.Spec.Language.Go.Module = promptWithConfig("go-module", useDefaults, "Go module", defaultModule)
-		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.24")
+		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.25")
 	}
 
 	fmt.Println("\n🏗️ Sandbox Configuration")
@@ -862,18 +862,18 @@ func isValidIdentifier(s string) bool {
 	if len(s) == 0 {
 		return false
 	}
-	
+
 	first := rune(s[0])
 	if !unicode.IsLetter(first) && first != '_' {
 		return false
 	}
-	
+
 	for _, r := range s[1:] {
 		if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '_' {
 			return false
 		}
 	}
-	
+
 	return true
 }
 

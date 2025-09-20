@@ -19,9 +19,9 @@ jobs:
           persist-credentials: false
 
       - name: Set up Go
-        uses: actions/setup-go@v5.5.0
+        uses: actions/setup-go@v6.0.0
         with:
-          go-version: '1.24'
+          go-version: '1.25'
           cache: true
 
       - name: Install golangci-lint

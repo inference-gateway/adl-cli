@@ -236,7 +236,7 @@ func TestGenerateProject(t *testing.T) {
 ### GitHub Actions Workflows
 
 - **ci.yml**: Runs on PR and main branch
-  - Go 1.24 setup with caching
+  - Go 1.25 setup with caching
   - golangci-lint v2.4.0
   - Module tidying and dirty check
   - Full test suite
@@ -267,7 +267,7 @@ func TestGenerateProject(t *testing.T) {
 
 ## Important Notes
 
-- Go 1.24 required (uses new Go features)
+- Go 1.25 required (uses new Go features)
 - Templates use Sprig v3 functions
 - ADL schema version: `adl.dev/v1`
 - Supports Go, Rust, TypeScript (planned)

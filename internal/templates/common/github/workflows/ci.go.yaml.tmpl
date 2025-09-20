@@ -14,12 +14,12 @@ jobs:
     runs-on: ubuntu-24.04
     
     steps:
-    - uses: actions/checkout@v4.2.2
+    - uses: actions/checkout@v5.0.0
     
     - name: Set up Go
-      uses: actions/setup-go@v5.5.0
+      uses: actions/setup-go@v6.0.0
       with:
-        go-version: {{ if and .ADL.Spec.Language.Go .ADL.Spec.Language.Go.Version }}{{ .ADL.Spec.Language.Go.Version }}{{ else }}1.24{{ end }}
+        go-version: {{ if and .ADL.Spec.Language.Go .ADL.Spec.Language.Go.Version }}{{ .ADL.Spec.Language.Go.Version }}{{ else }}1.25{{ end }}
         cache: true
 
     - name: Install golangci-lint

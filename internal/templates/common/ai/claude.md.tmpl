@@ -135,7 +135,7 @@ Open in DevContainer-compatible editor (VS Code, GitHub Codespaces) for automati
 {{- else }}
 Standard development environment required. Install:
 {{- if .ADL.Spec.Language.Go }}
-- Go {{ .ADL.Spec.Language.Go.Version | default "1.24+" }}
+- Go {{ .ADL.Spec.Language.Go.Version | default "1.25+" }}
 {{- else if .ADL.Spec.Language.Rust }}
 - Rust {{ .ADL.Spec.Language.Rust.Version | default "1.70+" }}
 {{- else if .ADL.Spec.Language.TypeScript }}
