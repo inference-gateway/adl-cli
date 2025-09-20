@@ -59,13 +59,13 @@ jobs:
           install-only: true
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4.4.0
+        uses: actions/setup-node@v5.0.0
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Install semantic release and plugins
         run: |
-          npm install -g semantic-release@v24.2.7 \
+          npm install -g semantic-release@v24.2.9 \
             conventional-changelog-cli \
             conventional-changelog-conventionalcommits \
             @semantic-release/changelog \
