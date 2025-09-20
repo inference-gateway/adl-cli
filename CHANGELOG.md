@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.21.2](https://github.com/inference-gateway/adl-cli/compare/v0.21.1...v0.21.2) (2025-09-20)
+
+### 🐛 Bug Fixes
+
+* Correct custom configuration variable formatting in README.md ([f602276](https://github.com/inference-gateway/adl-cli/commit/f602276239cb8e46e5c30c3372ee744e8ff16e63))
+
 ## [0.21.1](https://github.com/inference-gateway/adl-cli/compare/v0.21.0...v0.21.1) (2025-09-20)
 
 ### 🔧 Miscellaneous
