@@ -237,7 +237,7 @@ func TestGenerateProject(t *testing.T) {
 
 - **ci.yml**: Runs on PR and main branch
   - Go 1.24 setup with caching
-  - golangci-lint v2.1.6
+  - golangci-lint v2.4.0
   - Module tidying and dirty check
   - Full test suite
 

@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/devcontainers/go:1-1.24-bookworm
 
 ENV TASK_VERSION=v3.44.1 \
-    GOLANG_CI_LINT_VERSION=v2.1.6 \
+    GOLANG_CI_LINT_VERSION=v2.4.0 \
     GITHUB_CLI_VERSION=2.74.0 \
     NODE_VERSION=lts \
     SEMANTIC_RELEASE_VERSION=v24.2.5
