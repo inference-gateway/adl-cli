@@ -55,7 +55,7 @@ The ADL CLI helps you build production-ready A2A agents quickly by generating co
 - 🛠️ **Smart Ignore** - Protect your implementations with .adl-ignore files
 - ✅ **Validation** - Built-in ADL schema validation
 - 🛠️ **Interactive Setup** - Guided project initialization with extensive CLI options
-- 🔗 **Structured Dependencies** - Type-safe dependency injection with interfaces and factory functions
+- 🔗 **Structured Services** - Type-safe dependency injection with interfaces and factory functions
 - ⚙️ **Configuration Management** - Automatic environment variable mapping with proper naming conventions
 - 🔧 **CI/CD Generation** - Automatic GitHub Actions workflows with semantic-release CD pipelines
 - 🏗️ **Sandbox Environments** - Flox and DevContainer support for isolated development
@@ -256,7 +256,7 @@ adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun --
 - **Language-Specific Workflows**: Tailored CI configurations for Go, Rust, and TypeScript
 - **Version Integration**: Uses language versions from ADL configuration
 - **Task Integration**: Leverages generated Taskfile for consistent build processes
-- **Caching**: Includes dependency caching for faster builds
+- **Caching**: Includes service caching for faster builds
 
 **CD Generation Features:**
 - **Semantic Release Integration**: Automatic versioning based on conventional commits
@@ -348,9 +348,9 @@ The complete ADL schema includes:
 - **metadata**: Agent name, description, and version
 - **capabilities**: Streaming, notifications, state history
 - **config**: Structured configuration sections with environment variable mapping
-- **dependencies**: Service dependencies with interfaces, factories, and type definitions
+- **services**: Service services with interfaces, factories, and type definitions
 - **agent**: AI provider configuration (OpenAI, Anthropic, DeepSeek, Ollama, Google, Mistral, Groq)  
-- **skills**: Function definitions with complex JSON schemas, validation, and dependency injection support
+- **skills**: Function definitions with complex JSON schemas, validation, and service injection support
 - **server**: HTTP server configuration with authentication support
 - **language**: Programming language-specific settings (Go, Rust, TypeScript) and configurable acronyms
 - **scm**: Source control management configuration (GitHub, GitLab) 
@@ -388,7 +388,7 @@ spec:
       slackWebhook: "https://hooks.slack.com/services/..."
       emailApiKey: "your-email-api-key"
       retryAttempts: "3"
-  dependencies:
+  services:
     database:
       type: service
       interface: DatabaseService
@@ -480,13 +480,13 @@ spec:
       enabled: true
 ```
 
-## Dependency Injection & Configuration Management
+## Service Injection & Configuration Management
 
-The ADL CLI provides a sophisticated dependency injection system with structured configuration management. This system improves testability, separation of concerns, and provides type-safe configuration with environment variable mapping.
+The ADL CLI provides a sophisticated service injection system with structured configuration management. This system improves testability, separation of concerns, and provides type-safe configuration with environment variable mapping.
 
-### Structured Dependency System
+### Structured Service System
 
-Define dependencies with explicit types, interfaces, and factory functions. The system supports both built-in dependencies (like logger) and custom service dependencies:
+Define services with explicit types, interfaces, and factory functions. The system supports both built-in services (like logger) and custom service services:
 
 ```yaml
 spec:
@@ -497,7 +497,7 @@ spec:
     cache:
       ttl: "3600"
       maxEntries: "1000"
-  dependencies:
+  services:
     googleCalendar:
       type: service
       interface: CalendarService
@@ -513,8 +513,8 @@ spec:
       description: "Create a new calendar event"
       inject:
         - logger          # Built-in, always available
-        - googleCalendar  # Custom dependency
-        - cache          # Custom dependency
+        - googleCalendar  # Custom service
+        - cache          # Custom service
       schema:
         type: object
         properties:
@@ -562,16 +562,16 @@ type CacheConfig struct {
 - `CACHE_MAX_ENTRIES="1000"`
 - `CACHE_TTL="3600"`
 
-### Dependency Architecture
+### Service Architecture
 
-The dependency injection system generates:
+The service injection system generates:
 
 1. **Built-in Logger**: Automatically available as `*zap.Logger` without declaration
 2. **Type-Safe Configuration**: Structured config with environment variable mapping
-3. **Service Interfaces**: Custom dependency packages with interface definitions
+3. **Service Interfaces**: Custom service packages with interface definitions
 4. **Factory Functions**: Constructor functions that receive logger and configuration
-5. **Automatic Registration**: Dependencies are automatically wired into skills
-6. **File Protection**: Generated dependency files are automatically added to `.adl-ignore`
+5. **Automatic Registration**: Services are automatically wired into skills
+6. **File Protection**: Generated service files are automatically added to `.adl-ignore`
 
 ### Generated Structure
 
@@ -587,14 +587,14 @@ my-agent/
 │   └── cache/
 │       └── cache.go                # Cache service with interface
 ├── skills/
-│   ├── create_event.go             # Skills with injected dependencies
+│   ├── create_event.go             # Skills with injected services
 │   └── list_events.go
 └── .adl-ignore                     # Protects custom implementations
 ```
 
-### Generated Dependency Code
+### Generated Service Code
 
-Each dependency generates a package with interface and factory:
+Each service generates a package with interface and factory:
 
 **Example `internal/googleCalendar/googleCalendar.go`:**
 ```go
@@ -620,7 +620,7 @@ func NewCalendarService(logger *zap.Logger, cfg *config.Config) (CalendarService
 
 ### Skill Integration
 
-Skills automatically receive injected dependencies as constructor parameters:
+Skills automatically receive injected services as constructor parameters:
 
 **Example `skills/create_event.go`:**
 ```go
@@ -643,20 +643,20 @@ func NewCreateEventSkill(logger *zap.Logger, calendar googleCalendar.CalendarSer
 
 - **Type Safety**: Structured configuration with compile-time validation
 - **Environment Variables**: Automatic mapping with proper naming conventions
-- **Interface-Based Design**: Testable dependencies with clear contracts
-- **Separation of Concerns**: Configuration separate from dependency definitions
+- **Interface-Based Design**: Testable services with clear contracts
+- **Separation of Concerns**: Configuration separate from service definitions
 - **Language Agnostic**: Works across Go, Rust, and planned TypeScript support
 - **Hot Reload**: Configuration changes via environment variables
 - **Security**: No secrets in code, environment-based configuration
-- **Scalability**: Easy to add new dependencies and configuration sections
+- **Scalability**: Easy to add new services and configuration sections
 
 ### Best Practices
 
 1. **Configuration**: Use environment variables for secrets and environment-specific values
 2. **Interfaces**: Define clear interfaces for testability and modularity
-3. **Factory Functions**: Initialize dependencies with proper error handling
+3. **Factory Functions**: Initialize services with proper error handling
 4. **Logging**: Use the injected logger for consistent log formatting
-5. **Testing**: Create mock implementations of dependency interfaces
+5. **Testing**: Create mock implementations of service interfaces
 6. **Documentation**: Document interface methods and configuration options
 
 ## Generated Project Structure
@@ -953,7 +953,7 @@ spec:
 ```
 
 Generated files:
-- `.flox/env/manifest.toml` - Flox environment manifest with language-specific dependencies
+- `.flox/env/manifest.toml` - Flox environment manifest with language-specific services
 - `.flox/env.json` - Environment configuration
 - `.flox/.gitignore` - Flox-specific ignore patterns  
 - `.flox/.gitattributes` - Git attributes for Flox files

@@ -23,7 +23,7 @@ type Spec struct {
 	Card          *Card                     `yaml:"card,omitempty" json:"card,omitempty"`
 	Agent         *Agent                    `yaml:"agent,omitempty" json:"agent,omitempty"`
 	Config        map[string]map[string]any `yaml:"config,omitempty" json:"config,omitempty"`
-	Dependencies  map[string]Dependency     `yaml:"dependencies,omitempty" json:"dependencies,omitempty"`
+	Services      map[string]Service        `yaml:"services,omitempty" json:"services,omitempty"`
 	Skills        []Skill                   `yaml:"skills,omitempty" json:"skills,omitempty"`
 	Server        Server                    `yaml:"server" json:"server"`
 	Language      *Language                 `yaml:"language,omitempty" json:"language,omitempty"`
@@ -61,8 +61,8 @@ type Agent struct {
 	Temperature  float64 `yaml:"temperature" json:"temperature"`
 }
 
-// Dependency represents a service dependency
-type Dependency struct {
+// Service represents a service that can be injected
+type Service struct {
 	Type        string `yaml:"type" json:"type"`
 	Interface   string `yaml:"interface" json:"interface"`
 	Factory     string `yaml:"factory" json:"factory"`

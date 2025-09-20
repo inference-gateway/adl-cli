@@ -166,9 +166,9 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 
 	files["internal/logger/logger.go"] = "logger.go"
 
-	for depName := range adl.Spec.Dependencies {
-		snakeCaseName := strings.ReplaceAll(depName, "-", "_")
-		files[fmt.Sprintf("internal/%s/%s.go", snakeCaseName, snakeCaseName)] = "dependency.go"
+	for serviceName := range adl.Spec.Services {
+		snakeCaseName := strings.ReplaceAll(serviceName, "-", "_")
+		files[fmt.Sprintf("internal/%s/%s.go", snakeCaseName, snakeCaseName)] = "service.go"
 	}
 
 	r.addSandboxFiles(adl, files)

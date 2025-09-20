@@ -58,32 +58,32 @@ func (v *Validator) ValidateFile(filePath string) error {
 		return fmt.Errorf("validation failed:\n- %s", fmt.Sprintf("\n- %s", errors))
 	}
 
-	// Additional validation: check that injected dependencies are defined
+	// Additional validation: check that injected services are defined
 	var adl ADL
 	if err := yaml.Unmarshal(data, &adl); err != nil {
-		return fmt.Errorf("failed to parse ADL for dependency validation: %w", err)
+		return fmt.Errorf("failed to parse ADL for service validation: %w", err)
 	}
 
-	if err := v.validateDependencyReferences(&adl); err != nil {
-		return fmt.Errorf("dependency validation failed: %w", err)
+	if err := v.validateServiceReferences(&adl); err != nil {
+		return fmt.Errorf("service validation failed: %w", err)
 	}
 
 	return nil
 }
 
-// validateDependencyReferences checks that all injected dependencies are defined in the spec
-func (v *Validator) validateDependencyReferences(adl *ADL) error {
-	definedDeps := make(map[string]bool)
-	for depName := range adl.Spec.Dependencies {
-		definedDeps[depName] = true
+// validateServiceReferences checks that all injected services are defined in the spec
+func (v *Validator) validateServiceReferences(adl *ADL) error {
+	definedServices := make(map[string]bool)
+	for serviceName := range adl.Spec.Services {
+		definedServices[serviceName] = true
 	}
 
-	definedDeps["logger"] = true
+	definedServices["logger"] = true
 
 	for _, skill := range adl.Spec.Skills {
-		for _, injectedDep := range skill.Inject {
-			if !definedDeps[injectedDep] {
-				return fmt.Errorf("skill '%s' injects dependency '%s' that is not defined in spec.dependencies", skill.ID, injectedDep)
+		for _, injectedService := range skill.Inject {
+			if !definedServices[injectedService] {
+				return fmt.Errorf("skill '%s' injects service '%s' that is not defined in spec.services", skill.ID, injectedService)
 			}
 		}
 	}
@@ -204,7 +204,7 @@ const adlSchema = `{
             "additionalProperties": true
           }
         },
-        "dependencies": {
+        "services": {
           "type": "object",
           "additionalProperties": {
             "type": "object",

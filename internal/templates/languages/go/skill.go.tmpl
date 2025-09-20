@@ -14,20 +14,20 @@ import (
 {{- end }}
 )
 
-// {{ .Name | toPascalCase }}Skill struct holds the skill with dependencies
+// {{ .Name | toPascalCase }}Skill struct holds the skill with services
 type {{ .Name | toPascalCase }}Skill struct {
 {{- range $depID := .Inject }}
 {{- if eq $depID "logger" }}
 	{{ $depID | toCamelCase }} *zap.Logger
 {{- else }}
-{{- $dep := index $.DependencyMap $depID }}
-	{{ $depID | toCamelCase }} {{ $depID | toCamelCase }}.{{ $dep.Interface }}
+{{- $svc := index $.ServiceMap $depID }}
+	{{ $depID | toCamelCase }} {{ $depID | toCamelCase }}.{{ $svc.Interface }}
 {{- end }}
 {{- end }}
 }
 
 // New{{ .Name | toPascalCase }}Skill creates a new {{ .Name }} skill
-func New{{ .Name | toPascalCase }}Skill({{ range $index, $depID := .Inject }}{{ if $index }}, {{ end }}{{- if eq $depID "logger" }}{{ $depID | toCamelCase }} *zap.Logger{{- else }}{{- $dep := index $.DependencyMap $depID }}{{ $depID | toCamelCase }} {{ $depID | toCamelCase }}.{{ $dep.Interface }}{{- end }}{{ end }}) server.Tool {
+func New{{ .Name | toPascalCase }}Skill({{ range $index, $depID := .Inject }}{{ if $index }}, {{ end }}{{- if eq $depID "logger" }}{{ $depID | toCamelCase }} *zap.Logger{{- else }}{{- $svc := index $.ServiceMap $depID }}{{ $depID | toCamelCase }} {{ $depID | toCamelCase }}.{{ $svc.Interface }}{{- end }}{{ end }}) server.Tool {
 	skill := &{{ .Name | toPascalCase }}Skill{
 {{- range $depID := .Inject }}
 		{{ $depID | toCamelCase }}: {{ $depID | toCamelCase }},
@@ -70,7 +70,7 @@ func (s *{{ .Name | toPascalCase }}Skill) {{ .Name | toPascalCase }}Handler(ctx 
 	// TODO: Implement {{ .Name }} logic
 	// {{ .Description }}
 
-	// Example of using dependencies:
+	// Example of using services:
 	{{- range $depID := .Inject }}
 	// s.{{ $depID | toCamelCase }}.SomeMethod(ctx, ...)
 	{{- end }}

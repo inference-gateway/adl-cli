@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `task lint` - Run golangci-lint (must be installed)
 - `task fmt` - Format all Go code
 - `task vet` - Run go vet for static analysis
-- `task mod` - Download dependencies and tidy go.mod
+- `task mod` - Download Go modules and tidy go.mod
 - `task ci` - Run complete CI pipeline: fmt, lint, test, build
 
 ### Testing
@@ -28,38 +28,42 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture
 
-### Dependency Injection
+### Service Injection
 
-The ADL CLI supports dependency injection to improve testability and maintainability of skills:
+The ADL CLI supports service injection to improve testability and maintainability of skills:
 
 #### Configuration
-Dependencies are defined at the spec level and injected into specific skills. The `logger` dependency is built-in and doesn't need to be declared in the dependencies list:
+Services are defined at the spec level and injected into specific skills. The `logger` service is built-in and doesn't need to be declared in the services list:
 
 ```yaml
 spec:
-  dependencies:
-    - database  # Custom dependencies only
+  services:
+    database:  # Custom services
+      type: service
+      interface: DatabaseService
+      factory: NewDatabaseService
+      description: Database service for data access
   skills:
     - id: query_database
       name: query_database
       inject:
         - logger    # Built-in, always available
-        - database  # Must be declared in dependencies
+        - database  # Must be declared in services
 ```
 
 #### Implementation
-- **Built-in Logger**: `logger` dependency is automatically available as `*zap.Logger` without declaration
-- **Custom Dependencies**: User-defined dependencies create packages in `internal/` (e.g., `internal/database/`)
-- **Constructor Functions**: Skills receive injected dependencies as constructor parameters
-- **Interface-Based**: Custom dependencies use interfaces for better testability
+- **Built-in Logger**: `logger` service is automatically available as `*zap.Logger` without declaration
+- **Custom Services**: User-defined services create packages in `internal/` (e.g., `internal/database/`)
+- **Constructor Functions**: Skills receive injected services as constructor parameters
+- **Interface-Based**: Custom services use interfaces for better testability
 - **Configuration Package**: Application configuration is centralized in `config/config.go`
-- **Validation**: Build-time validation ensures injected dependencies are defined in spec
+- **Validation**: Build-time validation ensures injected services are defined in spec
 
 #### Benefits
-- Improved testability through dependency mocking
+- Improved testability through service mocking
 - Better separation of concerns
-- Centralized dependency and configuration management
-- Type-safe dependency contracts
+- Centralized service and configuration management
+- Type-safe service contracts
 - Simplified logging with direct zap.Logger integration
 
 ### Core Components
@@ -121,7 +125,7 @@ The template system uses Go's `text/template` with Sprig functions:
    - Parse and validate ADL YAML against schema
    - Check for required fields and constraints
    - Validate skill schemas and configurations
-   - Verify dependency injection references (built-in logger support)
+   - Verify service injection references (built-in logger support)
 
 2. **Template Selection**:
    - Detect target language from ADL spec
@@ -130,7 +134,7 @@ The template system uses Go's `text/template` with Sprig functions:
 
 3. **Generation Phase**:
    - Create output directory structure
-   - Render templates with ADL context and dependency information
+   - Render templates with ADL context and service information
    - Handle .adl-ignore for file protection
    - Execute post-generation hooks
 
@@ -150,7 +154,7 @@ The template system uses Go's `text/template` with Sprig functions:
 
 ### Unit Tests
 - Table-driven tests for all packages
-- Mock interfaces for external dependencies
+- Mock interfaces for external services
 - Isolated test cases with dedicated mocks
 - Coverage target: >80%
 
@@ -198,7 +202,7 @@ func TestGenerateProject(t *testing.T) {
 - Provide actionable error messages
 
 ### Testing
-- Each test case with isolated dependencies
+- Each test case with isolated services
 - Mock external services and file systems
 - Use test fixtures in `testdata/` directories
 - Clean up test artifacts

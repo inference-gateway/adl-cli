@@ -42,7 +42,7 @@ spec:
       templateDir: "/app/templates"
       maxFileSizeMB: "50"
       retention: "30d"
-  dependencies:
+  services:
     database:
       type: service
       interface: DatabaseService

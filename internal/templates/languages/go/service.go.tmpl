@@ -5,23 +5,23 @@ import (
 	zap "go.uber.org/zap"
 )
 
-// {{ .Interface }} represents the {{ .ID }} dependency interface
+// {{ .Interface }} represents the {{ .ID }} service interface
 // {{ .Description }}
 type {{ .Interface }} interface {
-	// TODO: Define the methods for {{ .ID }} dependency
+	// TODO: Define the methods for {{ .ID }} service
 	// Example:
 	// SomeMethod(ctx context.Context, param string) error
 }
 
 // {{ .ID }}Impl is the implementation of {{ .Interface }}
 type {{ .ID }}Impl struct {
-	// TODO: Add fields needed for this dependency
+	// TODO: Add fields needed for this service
 }
 
 // {{ .Factory }} creates a new instance of {{ .Interface }}
 func {{ .Factory }}(logger *zap.Logger, cfg *config.Config) ({{ .Interface }}, error) {
 	// TODO: Implement constructor logic for {{ .ID }}
 	// You can use logger for logging and cfg for configuration settings
-	logger.Info("initializing {{ .ID }} dependency")
+	logger.Info("initializing {{ .ID }} service")
 	return &{{ .ID }}Impl{}, nil
 }

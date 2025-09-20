@@ -203,7 +203,7 @@ type adlData struct {
 			MaxTokens    int     `yaml:"maxTokens,omitempty"`
 			Temperature  float64 `yaml:"temperature,omitempty"`
 		} `yaml:"agent,omitempty"`
-		Dependencies []string `yaml:"dependencies,omitempty"`
+		Services []string `yaml:"services,omitempty"`
 		Skills       []struct {
 			ID          string         `yaml:"id"`
 			Name        string         `yaml:"name"`
@@ -324,8 +324,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 
 	if addDependencies {
 		if useDefaults {
-			// Add default logger dependency
-			adl.Spec.Dependencies = append(adl.Spec.Dependencies, "logger")
+			adl.Spec.Services = append(adl.Spec.Services, "logger")
 			fmt.Printf("Add dependencies for dependency injection [y/n] [n]: y\n")
 			fmt.Printf("Dependency name (e.g., 'logger', 'database') []: logger\n")
 			fmt.Printf("✅ Added default logger dependency\n")
@@ -333,34 +332,32 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 
 		if !useDefaults {
 			for {
-				dependency := promptString("Dependency name (e.g., 'logger', 'database', 'cache', empty to finish)", "")
-				if dependency == "" {
+				service := promptString("Service name (e.g., 'logger', 'database', 'cache', empty to finish)", "")
+				if service == "" {
 					break
 				}
 
-				// Validate dependency name
-				if !isValidIdentifier(dependency) {
-					fmt.Printf("⚠️  Invalid dependency name. Use only letters, numbers, and underscores, starting with a letter or underscore.\n")
+				if !isValidIdentifier(service) {
+					fmt.Printf("⚠️  Invalid service name. Use only letters, numbers, and underscores, starting with a letter or underscore.\n")
 					continue
 				}
 
-				// Check for duplicates
 				duplicate := false
-				for _, existing := range adl.Spec.Dependencies {
-					if existing == dependency {
-						fmt.Printf("⚠️  Dependency '%s' already exists\n", dependency)
+				for _, existing := range adl.Spec.Services {
+					if existing == service {
+						fmt.Printf("⚠️  Service '%s' already exists\n", service)
 						duplicate = true
 						break
 					}
 				}
 
 				if !duplicate {
-					adl.Spec.Dependencies = append(adl.Spec.Dependencies, dependency)
-					fmt.Printf("✅ Added dependency: %s\n", dependency)
-					fmt.Printf("💡 You will need to implement this in internal/%s package with a New%s function\n", dependency, titleCase(dependency))
+					adl.Spec.Services = append(adl.Spec.Services, service)
+					fmt.Printf("✅ Added service: %s\n", service)
+					fmt.Printf("💡 You will need to implement this in internal/%s package with a New%s function\n", service, titleCase(service))
 				}
 
-				if !promptBool("Add another dependency", false) {
+				if !promptBool("Add another service", false) {
 					break
 				}
 			}
@@ -411,48 +408,45 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 				"required": []string{"input"},
 			}
 
-			// Allow selecting dependencies for this skill
-			if len(adl.Spec.Dependencies) > 0 {
-				fmt.Printf("\nAvailable dependencies for skill '%s':\n", skill.Name)
-				for i, dep := range adl.Spec.Dependencies {
-					fmt.Printf("  %d. %s\n", i+1, dep)
+			if len(adl.Spec.Services) > 0 {
+				fmt.Printf("\nAvailable services for skill '%s':\n", skill.Name)
+				for i, svc := range adl.Spec.Services {
+					fmt.Printf("  %d. %s\n", i+1, svc)
 				}
 
-				addSkillDeps := promptBool("Inject dependencies into this skill", false)
-				if addSkillDeps {
+				addSkillServices := promptBool("Inject services into this skill", false)
+				if addSkillServices {
 					for {
-						depChoice := promptString("Enter dependency name (or empty to finish)", "")
-						if depChoice == "" {
+						svcChoice := promptString("Enter service name (or empty to finish)", "")
+						if svcChoice == "" {
 							break
 						}
 
-						// Validate dependency exists
 						found := false
-						for _, dep := range adl.Spec.Dependencies {
-							if dep == depChoice {
+						for _, svc := range adl.Spec.Services {
+							if svc == svcChoice {
 								found = true
 								break
 							}
 						}
 
 						if found {
-							// Check if already added
 							alreadyAdded := false
 							for _, existing := range skill.Inject {
-								if existing == depChoice {
+								if existing == svcChoice {
 									alreadyAdded = true
 									break
 								}
 							}
 
 							if !alreadyAdded {
-								skill.Inject = append(skill.Inject, depChoice)
-								fmt.Printf("✅ Added dependency: %s\n", depChoice)
+								skill.Inject = append(skill.Inject, svcChoice)
+								fmt.Printf("✅ Added service: %s\n", svcChoice)
 							} else {
-								fmt.Printf("⚠️  Dependency %s already added\n", depChoice)
+								fmt.Printf("⚠️  Service %s already added\n", svcChoice)
 							}
 						} else {
-							fmt.Printf("⚠️  Dependency '%s' not found\n", depChoice)
+							fmt.Printf("⚠️  Service '%s' not found\n", svcChoice)
 						}
 					}
 				}

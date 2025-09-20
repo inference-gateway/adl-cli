@@ -17,17 +17,17 @@ import (
 {{- end }}
 
 	logger "{{ .ADL.Spec.Language.Go.Module }}/internal/logger"
-{{- range $depName, $dep := .ADL.Spec.Dependencies }}
-{{- $depUsed := false }}
+{{- range $serviceName, $svc := .ADL.Spec.Services }}
+{{- $svcUsed := false }}
 {{- range $.ADL.Spec.Skills }}
 {{- range .Inject }}
-{{- if eq . $depName }}
-{{- $depUsed = true }}
+{{- if eq . $serviceName }}
+{{- $svcUsed = true }}
 {{- end }}
 {{- end }}
 {{- end }}
-{{- if $depUsed }}
-	{{ $depName | toCamelCase }} "{{ $.ADL.Spec.Language.Go.Module }}/internal/{{ $depName | toSnakeCase }}"
+{{- if $svcUsed }}
+	{{ $serviceName | toCamelCase }} "{{ $.ADL.Spec.Language.Go.Module }}/internal/{{ $serviceName | toSnakeCase }}"
 {{- end }}
 {{- end }}
 )
@@ -57,34 +57,34 @@ func main() {
 
 	toolBox := server.NewDefaultToolBox()
 
-	{{- if .ADL.Spec.Dependencies }}
-	{{- $anyDepUsed := false }}
-	{{- range $depName, $dep := .ADL.Spec.Dependencies }}
+	{{- if .ADL.Spec.Services }}
+	{{- $anySvcUsed := false }}
+	{{- range $serviceName, $svc := .ADL.Spec.Services }}
 	{{- range $.ADL.Spec.Skills }}
 	{{- range .Inject }}
-	{{- if eq . $depName }}
-	{{- $anyDepUsed = true }}
+	{{- if eq . $serviceName }}
+	{{- $anySvcUsed = true }}
 	{{- end }}
 	{{- end }}
 	{{- end }}
 	{{- end }}
-	{{- if $anyDepUsed }}
-	
-	// Initialize dependencies
+	{{- if $anySvcUsed }}
+
+	// Initialize services
 	{{- end }}
-	{{- range $depName, $dep := .ADL.Spec.Dependencies }}
-	{{- $depUsed := false }}
+	{{- range $serviceName, $svc := .ADL.Spec.Services }}
+	{{- $svcUsed := false }}
 	{{- range $.ADL.Spec.Skills }}
 	{{- range .Inject }}
-	{{- if eq . $depName }}
-	{{- $depUsed = true }}
+	{{- if eq . $serviceName }}
+	{{- $svcUsed = true }}
 	{{- end }}
 	{{- end }}
 	{{- end }}
-	{{- if $depUsed }}
-	{{ $depName | toCamelCase }}Dep, err := {{ $depName | toCamelCase }}.{{ $dep.Factory }}(l, &cfg)
+	{{- if $svcUsed }}
+	{{ $serviceName | toCamelCase }}Svc, err := {{ $serviceName | toCamelCase }}.{{ $svc.Factory }}(l, &cfg)
 	if err != nil {
-		l.Fatal("failed to initialize {{ $depName }} dependency", zap.Error(err))
+		l.Fatal("failed to initialize {{ $serviceName }} service", zap.Error(err))
 	}
 	{{- end }}
 	{{- end }}
@@ -93,7 +93,7 @@ func main() {
 	{{- range .ADL.Spec.Skills }}
 
 	// Register {{ .Name }} skill
-	{{ .Name | toCamelCase }}Skill := skills.New{{ .Name | toPascalCase }}Skill({{ range $index, $dep := .Inject }}{{ if $index }}, {{ end }}{{ if eq $dep "logger" }}l{{ else }}{{ $dep | toCamelCase }}Dep{{ end }}{{ end }})
+	{{ .Name | toCamelCase }}Skill := skills.New{{ .Name | toPascalCase }}Skill({{ range $index, $svc := .Inject }}{{ if $index }}, {{ end }}{{ if eq $svc "logger" }}l{{ else }}{{ $svc | toCamelCase }}Svc{{ end }}{{ end }})
 	toolBox.AddTool({{ .Name | toCamelCase }}Skill)
 	l.Info("registered skill: {{ .Name }} ({{ .Description }})")
 	{{- end }}

@@ -268,49 +268,49 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		var content string
 		var err error
 
-		if templateKey == "dependency.go" && strings.Contains(fileName, "internal/") && !strings.Contains(fileName, "internal/dependencies/") {
+		if templateKey == "service.go" && strings.Contains(fileName, "internal/") && !strings.Contains(fileName, "internal/services/") {
 			parts := strings.Split(fileName, "/")
 			if len(parts) >= 3 {
-				dependencyFileName := parts[len(parts)-1]
-				dependencyName := strings.TrimSuffix(dependencyFileName, filepath.Ext(dependencyFileName))
+				serviceFileName := parts[len(parts)-1]
+				serviceName := strings.TrimSuffix(serviceFileName, filepath.Ext(serviceFileName))
 
-				var foundDependency string
-				for depName := range adl.Spec.Dependencies {
-					snakeCaseDependencyID := strings.ReplaceAll(depName, "-", "_")
-					if snakeCaseDependencyID == dependencyName {
-						foundDependency = depName
+				var foundService string
+				for svcName := range adl.Spec.Services {
+					snakeCaseServiceID := strings.ReplaceAll(svcName, "-", "_")
+					if snakeCaseServiceID == serviceName {
+						foundService = svcName
 						break
 					}
 				}
 
-				if foundDependency != "" {
-					if foundDependency == "logger" {
+				if foundService != "" {
+					if foundService == "logger" {
 						content, err = templateEngine.ExecuteToolTemplate("logger.go", ctx)
 						if err != nil {
 							return fmt.Errorf("failed to execute logger template: %w", err)
 						}
 					} else {
-						dep := adl.Spec.Dependencies[foundDependency]
-						depContext := map[string]interface{}{
-							"Name":        dep.Interface,
-							"ID":          foundDependency,
-							"Interface":   dep.Interface,
-							"Factory":     dep.Factory,
-							"Type":        dep.Type,
-							"Description": dep.Description,
+						svc := adl.Spec.Services[foundService]
+						svcContext := map[string]interface{}{
+							"Name":        svc.Interface,
+							"ID":          foundService,
+							"Interface":   svc.Interface,
+							"Factory":     svc.Factory,
+							"Type":        svc.Type,
+							"Description": svc.Description,
 							"Config":      adl.Spec.Config,
 						}
 
 						if adl.Spec.Language.Go != nil {
-							depContext["GoModule"] = adl.Spec.Language.Go.Module
+							svcContext["GoModule"] = adl.Spec.Language.Go.Module
 						}
-						content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, depContext, ctx)
+						content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, svcContext, ctx)
 						if err != nil {
-							return fmt.Errorf("failed to execute template %s for dependency %s: %w", templateKey, dependencyName, err)
+							return fmt.Errorf("failed to execute template %s for service %s: %w", templateKey, serviceName, err)
 						}
 					}
 				} else {
-					return fmt.Errorf("dependency %s not found in ADL spec", dependencyName)
+					return fmt.Errorf("service %s not found in ADL spec", serviceName)
 				}
 			}
 		} else if (templateKey == "skill.go" || templateKey == "skill.rs" || templateKey == "skill.ts") && strings.Contains(fileName, "/") {
@@ -346,18 +346,18 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 						skillContext["GoModule"] = adl.Spec.Language.Go.Module
 					}
 
-					dependencyMap := make(map[string]interface{})
-					for depName, dep := range adl.Spec.Dependencies {
-						dependencyMap[depName] = map[string]interface{}{
-							"ID":   depName,
-							"Name": titleCase(depName),
-							"Type": dep.Type,
-							"Interface": dep.Interface,
-							"Factory": dep.Factory,
-							"Description": dep.Description,
+					serviceMap := make(map[string]interface{})
+					for svcName, svc := range adl.Spec.Services {
+						serviceMap[svcName] = map[string]interface{}{
+							"ID":   svcName,
+							"Name": titleCase(svcName),
+							"Type": svc.Type,
+							"Interface": svc.Interface,
+							"Factory": svc.Factory,
+							"Description": svc.Description,
 						}
 					}
-					skillContext["DependencyMap"] = dependencyMap
+					skillContext["ServiceMap"] = serviceMap
 
 					content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, skillContext, ctx)
 					if err != nil {
@@ -367,8 +367,8 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 					return fmt.Errorf("skill %s not found in ADL spec", toolName)
 				}
 			}
-		} else if templateKey == "dependency.go" {
-			return fmt.Errorf("dependency template reached fallback case - this should not happen")
+		} else if templateKey == "service.go" {
+			return fmt.Errorf("service template reached fallback case - this should not happen")
 		} else {
 			content, err = templateEngine.ExecuteTemplate(templateKey, ctx)
 			if err != nil {
@@ -396,7 +396,10 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		isSkillFile := (templateKey == "skill.go" || templateKey == "skill.rs" || templateKey == "skill.ts") ||
 			(strings.Contains(fileName, "/skills/") && (ext == ".go" || ext == ".rs" || ext == ".ts"))
 
-		if fileType != "" && !isSkillFile {
+		isServiceFile := templateKey == "service.go" ||
+			(strings.Contains(fileName, "/internal/") && strings.HasSuffix(fileName, ".go") && !strings.Contains(fileName, "/logger/"))
+
+		if fileType != "" && !isSkillFile && !isServiceFile {
 			header := templates.GetGeneratedFileHeader(fileType, ctx.Metadata.CLIVersion, ctx.Metadata.GeneratedAt)
 			content = header + content
 		}
@@ -546,8 +549,8 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 				filesToIgnore = append(filesToIgnore, fmt.Sprintf("skills/%s.go", snakeCaseName))
 			}
 
-			for depName := range adl.Spec.Dependencies {
-				snakeCaseName := strings.ReplaceAll(depName, "-", "_")
+			for serviceName := range adl.Spec.Services {
+				snakeCaseName := strings.ReplaceAll(serviceName, "-", "_")
 				filesToIgnore = append(filesToIgnore, fmt.Sprintf("internal/%s/%s.go", snakeCaseName, snakeCaseName))
 			}
 		case "rust":
@@ -556,9 +559,9 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/skills/%s.rs", snakeCaseName))
 			}
 
-			for depName := range adl.Spec.Dependencies {
-				snakeCaseName := strings.ReplaceAll(depName, "-", "_")
-				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/dependencies/%s.rs", snakeCaseName))
+			for serviceName := range adl.Spec.Services {
+				snakeCaseName := strings.ReplaceAll(serviceName, "-", "_")
+				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/services/%s.rs", snakeCaseName))
 			}
 		case "typescript":
 			for _, skill := range adl.Spec.Skills {
@@ -566,9 +569,9 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/skills/%s.ts", snakeCaseName))
 			}
 
-			for depName := range adl.Spec.Dependencies {
-				snakeCaseName := strings.ReplaceAll(depName, "-", "_")
-				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/dependencies/%s.ts", snakeCaseName))
+			for serviceName := range adl.Spec.Services {
+				snakeCaseName := strings.ReplaceAll(serviceName, "-", "_")
+				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/services/%s.ts", snakeCaseName))
 			}
 		}
 	}
