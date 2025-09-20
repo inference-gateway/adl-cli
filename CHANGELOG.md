@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.21.0](https://github.com/inference-gateway/adl-cli/compare/v0.20.17...v0.21.0) (2025-09-20)
+
+### ✨ Features
+
+* Add custom config environment variables to README.md ([#77](https://github.com/inference-gateway/adl-cli/issues/77)) ([5e547e3](https://github.com/inference-gateway/adl-cli/commit/5e547e37ea847165bcda972fef6536142261969c))
+
+### 🔧 Miscellaneous
+
+* **deps:** Update dependencies and tools ([3a65850](https://github.com/inference-gateway/adl-cli/commit/3a6585064889492d411b42154de3688156fd9536))
+* **deps:** Upgrade Go version to 1.25 across all configurations and documentation ([56df224](https://github.com/inference-gateway/adl-cli/commit/56df22430f92ab0798fa28ae135fa48226a9d4e5))
+
 ## [0.20.17](https://github.com/inference-gateway/adl-cli/compare/v0.20.16...v0.20.17) (2025-09-20)
 
 ### 🐛 Bug Fixes
