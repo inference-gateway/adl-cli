@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.21.1](https://github.com/inference-gateway/adl-cli/compare/v0.21.0...v0.21.1) (2025-09-20)
+
+### 🔧 Miscellaneous
+
+* **deps:** Upgrade actions/checkout to v5.0.0 in CI, Claude, and Release workflows ([5a8d2d3](https://github.com/inference-gateway/adl-cli/commit/5a8d2d3131e8c91f7908b5d62ceab0edc921780e))
+* Remove Copilot custom instructions document ([48ddf08](https://github.com/inference-gateway/adl-cli/commit/48ddf089684c26f57fc200bfc45313406dc7fb86))
+
 ## [0.21.0](https://github.com/inference-gateway/adl-cli/compare/v0.20.17...v0.21.0) (2025-09-20)
 
 ### ✨ Features
