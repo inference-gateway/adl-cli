@@ -87,7 +87,7 @@ The following custom configuration variables are available:
 |----------|----------|-------------|---------|
 {{- range $category, $configs := .ADL.Spec.Config }}
 {{- range $key, $value := $configs }}
-| **{{ $category | title }}** | `{{ $key | upper }}` | {{ $key | title }} configuration | `{{ $value }}` |
+| **{{ $category | title }}** | `{{ $key | toUpperSnakeCase }}` | {{ $key | title }} configuration | `{{ $value }}` |
 {{- end }}
 {{- end }}
 {{- end }}
