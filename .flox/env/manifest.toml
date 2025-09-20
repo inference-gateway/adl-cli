@@ -2,16 +2,16 @@ version = 1
 
 [install]
 go.pkg-path = "go"
-go.version = "^1.24"
+go.version = "^1.25"
 
 claude-code.pkg-path = "claude-code"
-claude-code.version = "^1.0.96"
+claude-code.version = "^1.0.115"
 
 golangci-lint.pkg-path = "golangci-lint"
 golangci-lint.version = "^2.4.0"
 
 goreleaser.pkg-path = "goreleaser"
-goreleaser.version = "^2.11.2"
+goreleaser.version = "^2.12.0"
 
 go-task.pkg-path = "go-task"
 go-task.version = "^3.44.1"
