@@ -48,6 +48,9 @@ func getDefaultAcronyms() map[string]string {
 		"io":    "IO",
 		"os":    "OS",
 		"db":    "DB",
+		"mb":    "MB",
+		"gb":    "GB",
+		"kb":    "KB",
 	}
 }
 
@@ -111,12 +114,30 @@ func toCamelCase(s string) string {
 	return string(runes)
 }
 
-// camelToSnakeCase converts camelCase to snake_case
+// camelToSnakeCase converts camelCase to snake_case with proper acronym handling
 func camelToSnakeCase(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+
 	var result strings.Builder
-	for i, r := range s {
+	runes := []rune(s)
+
+	for i, r := range runes {
 		if i > 0 && unicode.IsUpper(r) {
-			result.WriteRune('_')
+			needsUnderscore := false
+
+			if i > 1 && unicode.IsUpper(runes[i-1]) {
+				if i+1 < len(runes) && unicode.IsLower(runes[i+1]) {
+					needsUnderscore = true
+				}
+			} else {
+				needsUnderscore = true
+			}
+
+			if needsUnderscore {
+				result.WriteRune('_')
+			}
 		}
 		result.WriteRune(unicode.ToLower(r))
 	}
@@ -137,6 +158,29 @@ func toUpperSnakeCase(s string) string {
 	s = strings.ReplaceAll(s, "-", "_")
 
 	return strings.ToUpper(s)
+}
+
+// toUpperSnakeCaseWithAcronyms converts camelCase, dash-case, or snake_case to UPPER_SNAKE_CASE with acronym support
+func toUpperSnakeCaseWithAcronyms(s string, acronyms map[string]string) string {
+	if !strings.Contains(s, "_") && !strings.Contains(s, "-") {
+		s = camelToSnakeCase(s)
+	}
+	s = strings.ReplaceAll(s, "-", "_")
+
+	words := strings.Split(s, "_")
+	result := make([]string, len(words))
+	for i, word := range words {
+		if len(word) == 0 {
+			continue
+		}
+		lowerWord := strings.ToLower(word)
+		if acronym, exists := acronyms[lowerWord]; exists {
+			result[i] = acronym
+		} else {
+			result[i] = strings.ToUpper(word)
+		}
+	}
+	return strings.Join(result, "_")
 }
 
 // Context provides data for template execution
@@ -275,7 +319,9 @@ func customFuncMapWithAcronyms(acronyms map[string]string) template.FuncMap {
 
 	funcMap["toSnakeCase"] = toSnakeCase
 	funcMap["toUpperCase"] = strings.ToUpper
-	funcMap["toUpperSnakeCase"] = toUpperSnakeCase
+	funcMap["toUpperSnakeCase"] = func(s string) string {
+		return toUpperSnakeCaseWithAcronyms(s, acronyms)
+	}
 	funcMap["toJson"] = toJson
 	funcMap["toGoMap"] = toGoMap
 	funcMap["findDependencyByID"] = findDependencyByID

@@ -77,6 +77,20 @@ docker run -p {{ .ADL.Spec.Server.Port | default 8080 }}:{{ .ADL.Spec.Server.Por
 ## Configuration
 
 Configure the agent via environment variables:
+{{- if .ADL.Spec.Config }}
+
+### Custom Configuration
+
+The following custom configuration variables are available:
+
+| Category | Variable | Description | Default |
+|----------|----------|-------------|---------|
+{{- range $category, $configs := .ADL.Spec.Config }}
+{{- range $key, $value := $configs }}
+| **{{ $category | title }}** | `{{ $key | toUpperSnakeCase }}` | {{ $key | title }} configuration | `{{ $value }}` |
+{{- end }}
+{{- end }}
+{{- end }}
 
 | Category | Variable | Description | Default |
 |----------|----------|-------------|---------|
