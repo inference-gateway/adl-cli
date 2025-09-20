@@ -130,7 +130,7 @@ Projects may include environment configuration:
 ### Development Environment Setup
 
 Standard development environment required:
-- Go 1.24+ (or version specified in agent.yaml)
+- Go 1.25+ (or version specified in agent.yaml)
 - Task runner (`go install github.com/go-task/task/v3/cmd/task@latest`)
 - Docker (for containerized operations)
 

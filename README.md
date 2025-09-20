@@ -6,7 +6,7 @@
 
 > ⚠️ **Early Development Warning**: This project is in its early stages of development. Breaking changes are expected and acceptable until we reach a stable version. Use with caution in production environments.
 
-[![Go Version](https://img.shields.io/badge/go-1.24+-blue.svg?style=flat-square&logo=go)](https://golang.org)
+[![Go Version](https://img.shields.io/badge/go-1.25+-blue.svg?style=flat-square&logo=go)](https://golang.org)
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/inference-gateway/adl-cli/ci.yml?style=flat-square&logo=github)](https://github.com/inference-gateway/adl-cli/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/inference-gateway/adl-cli?style=flat-square)](https://goreportcard.com/report/github.com/inference-gateway/adl-cli)
@@ -202,7 +202,7 @@ The init command supports extensive configuration options:
 
 **Go Options:**
 - `--go-module` - Go module path (e.g., `github.com/user/project`)
-- `--go-version` - Go version (e.g., `1.24`)
+- `--go-version` - Go version (e.g., `1.25`)
 
 **Rust Options:**
 - `--rust-package-name` - Rust package name
@@ -337,7 +337,7 @@ spec:
   language:
     go:
       module: "github.com/example/weather-agent"
-      version: "1.24"
+      version: "1.25"
   acronyms: ["api", "json", "xml"] # Optional: Custom acronyms for better code generation
 ```
 
@@ -448,7 +448,7 @@ spec:
   language:
     go:
       module: "github.com/company/advanced-agent"
-      version: "1.24"
+      version: "1.25"
   scm:
     provider: github
     url: "https://github.com/company/advanced-agent"
@@ -1215,7 +1215,7 @@ Taskfile.yml
 
 ### Prerequisites
 
-- Go 1.24+
+- Go 1.25+
 - [Task](https://taskfile.dev/) (optional, for using Taskfile commands)
 
 ### Building from Source
@@ -1280,7 +1280,7 @@ spec:
   language:
     go:
       module: "github.com/company/my-agent"
-      version: "1.24"
+      version: "1.25"
   acronyms: ["n8n", "xml", "mqtt", "iot", "uuid"]
 ```
 
