@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.21.4](https://github.com/inference-gateway/adl-cli/compare/v0.21.3...v0.21.4) (2025-09-22)
+
+### 🐛 Bug Fixes
+
+* Update version formatting in prepareCmd for agent.yaml ([55fa854](https://github.com/inference-gateway/adl-cli/commit/55fa8543469cfcbcc82618fe3fabe8779285c679))
+
 ## [0.21.3](https://github.com/inference-gateway/adl-cli/compare/v0.21.2...v0.21.3) (2025-09-20)
 
 ### ♻️ Improvements
