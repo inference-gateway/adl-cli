@@ -51,7 +51,7 @@ plugins:
 
   - - '@semantic-release/exec'
     - prepareCmd: |
-        sed -i "/^metadata:/,/^spec:/ s/version: \"[^\"]*\"/version: \"${nextRelease.version}\"/" agent.yaml
+        sed -i "/^metadata:/,/^spec:/ s/  version: .*/  version: ${nextRelease.version}/" agent.yaml
         task generate
       publishCmd: |
         echo "Building and pushing Docker image for version ${nextRelease.version}"
