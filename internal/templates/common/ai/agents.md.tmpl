@@ -99,7 +99,7 @@ No skills defined - this agent provides basic A2A communication without speciali
 
 The agent exposes the following HTTP endpoints:
 
-- `GET /.well-known/agent.json` - Agent metadata and capabilities
+- `GET /.well-known/agent-card.json` - Agent metadata and capabilities
 - `POST /skills/{skill_name}` - Execute a specific skill{{ if .ADL.Spec.Capabilities.Streaming }}
 - `GET /skills/{skill_name}/stream` - Stream skill execution results{{ end }}{{ if .ADL.Spec.Capabilities.PushNotifications }}
 - `GET /events` - Server-sent events for notifications{{ end }}{{ if .ADL.Spec.Capabilities.StateTransitionHistory }}
@@ -171,7 +171,7 @@ The agent implements the A2A protocol and can be communicated with via HTTP requ
 
 ```bash
 # Get agent information
-curl http://localhost:{{ .ADL.Spec.Server.Port }}/.well-known/agent.json
+curl http://localhost:{{ .ADL.Spec.Server.Port }}/.well-known/agent-card.json
 
 {{ if .ADL.Spec.Skills }}
 {{ range .ADL.Spec.Skills }}
@@ -238,7 +238,7 @@ docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Me
 │   └── {{ .Name }}.go   # {{ .Description }}
 {{ end }}
 ├── .well-known/         # Agent configuration
-│   └── agent.json       # Agent metadata
+│   └── agent-card.json  # Agent metadata
 ├── go.mod               # Go module definition
 └── README.md            # Project documentation
 ```
@@ -253,7 +253,7 @@ docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Me
 {{ end }}
 │       └── mod.rs       # Skills module
 ├── .well-known/         # Agent configuration  
-│   └── agent.json       # Agent metadata
+│   └── agent-card.json  # Agent metadata
 ├── Cargo.toml           # Rust package definition
 └── README.md            # Project documentation
 ```
@@ -267,7 +267,7 @@ docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Me
 │       └── {{ .Name }}.ts # {{ .Description }}
 {{ end }}
 ├── .well-known/         # Agent configuration
-│   └── agent.json       # Agent metadata
+│   └── agent-card.json  # Agent metadata
 ├── package.json         # Node.js package definition
 ├── tsconfig.json        # TypeScript configuration
 └── README.md            # Project documentation

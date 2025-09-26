@@ -116,7 +116,7 @@ func main() {
 
 	a2aServer, err := server.NewA2AServerBuilder(cfg.A2A, l).
 		WithAgent(agent).
-		WithAgentCardFromFile(".well-known/agent.json", map[string]any{
+		WithAgentCardFromFile(".well-known/agent-card.json", map[string]any{
 			"name":        AgentName,
 			"version":     Version,
 			"description": AgentDescription,

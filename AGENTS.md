@@ -10,7 +10,7 @@ Generated A2A (Agent-to-Agent) servers implement the [A2A Protocol](https://gith
 
 ### Core Components
 - **Main Entry Point**: `main.go` - Configures and starts the A2A server with agent provider configuration and graceful shutdown handling
-- **Agent Configuration**: `.well-known/agent.json` - Serves agent metadata at runtime
+- **Agent Configuration**: `.well-known/agent-card.json` - Serves agent metadata at runtime
 - **Skills Implementation**: Generated skill files with TODO placeholders for business logic
 - **Environment Configuration**: Extensive env vars with `A2A_` prefix for runtime configuration
 
@@ -145,7 +145,7 @@ Standard development environment required:
 
 - Enable debug mode: `A2A_DEBUG=true`
 - Check health: `GET /health`
-- View agent metadata: `GET /.well-known/agent.json`
+- View agent metadata: `GET /.well-known/agent-card.json`
 - Monitor streaming updates: Set `A2A_STREAMING_STATUS_UPDATE_INTERVAL`
 - Use A2A Debugger container for interactive testing
 - Check logs for skill execution details

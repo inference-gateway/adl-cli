@@ -138,16 +138,16 @@ func (r *Registry) GetFiles(adl *schema.ADL) map[string]string {
 // getGoFiles returns the file mapping for Go projects
 func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 	files := map[string]string{
-		"main.go":                "main.go",
-		"go.mod":                 "go.mod",
-		"config/config.go":       "config.go",
-		".well-known/agent.json": "config/agent.json",
-		"Taskfile.yml":           "taskfile/taskfile.yml",
-		"Dockerfile":             "docker/dockerfile.go",
-		".gitignore":             "config/gitignore",
-		".gitattributes":         "config/gitattributes",
-		".editorconfig":          "config/editorconfig",
-		"README.md":              "docs/README.md",
+		"main.go":                     "main.go",
+		"go.mod":                      "go.mod",
+		"config/config.go":            "config.go",
+		".well-known/agent-card.json": "config/agent.json",
+		"Taskfile.yml":                "taskfile/taskfile.yml",
+		"Dockerfile":                  "docker/dockerfile.go",
+		".gitignore":                  "config/gitignore",
+		".gitattributes":              "config/gitattributes",
+		".editorconfig":               "config/editorconfig",
+		"README.md":                   "docs/README.md",
 	}
 
 	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" {
@@ -181,15 +181,15 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 // getRustFiles returns the file mapping for Rust projects
 func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 	files := map[string]string{
-		"src/main.rs":            "main.rs",
-		"Cargo.toml":             "Cargo.toml",
-		".well-known/agent.json": "config/agent.json",
-		"Taskfile.yml":           "taskfile/taskfile.yml",
-		"Dockerfile":             "docker/dockerfile.rust",
-		".gitignore":             "config/gitignore",
-		".gitattributes":         "config/gitattributes",
-		".editorconfig":          "config/editorconfig",
-		"README.md":              "docs/README.md",
+		"src/main.rs":                 "main.rs",
+		"Cargo.toml":                  "Cargo.toml",
+		".well-known/agent-card.json": "config/agent.json",
+		"Taskfile.yml":                "taskfile/taskfile.yml",
+		"Dockerfile":                  "docker/dockerfile.rust",
+		".gitignore":                  "config/gitignore",
+		".gitattributes":              "config/gitattributes",
+		".editorconfig":               "config/editorconfig",
+		"README.md":                   "docs/README.md",
 	}
 
 	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" {
@@ -220,16 +220,16 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 // getTypeScriptFiles returns the file mapping for TypeScript projects
 func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 	files := map[string]string{
-		"src/index.ts":           "index.ts",
-		"package.json":           "package.json",
-		"tsconfig.json":          "tsconfig.json",
-		".well-known/agent.json": "config/agent.json",
-		"Taskfile.yml":           "taskfile/taskfile.yml",
-		"Dockerfile":             "docker/dockerfile.ts",
-		".gitignore":             "config/gitignore",
-		".gitattributes":         "config/gitattributes",
-		".editorconfig":          "config/editorconfig",
-		"README.md":              "docs/README.md",
+		"src/index.ts":                "index.ts",
+		"package.json":                "package.json",
+		"tsconfig.json":               "tsconfig.json",
+		".well-known/agent-card.json": "config/agent.json",
+		"Taskfile.yml":                "taskfile/taskfile.yml",
+		"Dockerfile":                  "docker/dockerfile.ts",
+		".gitignore":                  "config/gitignore",
+		".gitattributes":              "config/gitattributes",
+		".editorconfig":               "config/editorconfig",
+		"README.md":                   "docs/README.md",
 	}
 
 	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" {

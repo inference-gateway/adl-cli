@@ -349,11 +349,11 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 					serviceMap := make(map[string]interface{})
 					for svcName, svc := range adl.Spec.Services {
 						serviceMap[svcName] = map[string]interface{}{
-							"ID":   svcName,
-							"Name": titleCase(svcName),
-							"Type": svc.Type,
-							"Interface": svc.Interface,
-							"Factory": svc.Factory,
+							"ID":          svcName,
+							"Name":        titleCase(svcName),
+							"Type":        svc.Type,
+							"Interface":   svc.Interface,
+							"Factory":     svc.Factory,
 							"Description": svc.Description,
 						}
 					}
@@ -409,9 +409,6 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 			return fmt.Errorf("failed to write %s: %w", fileName, err)
 		}
 	}
-
-	// The agent.json is now generated via the template in the files map above
-	// No need for separate generateAgentJSON function
 
 	if err := g.generateADLIgnoreFile(outputDir, templateEngine.GetTemplate(), adl); err != nil {
 		return fmt.Errorf("failed to generate .adl-ignore file: %w", err)
