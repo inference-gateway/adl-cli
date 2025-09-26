@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.21.6](https://github.com/inference-gateway/adl-cli/compare/v0.21.5...v0.21.6) (2025-09-26)
+
+### ♻️ Improvements
+
+* Update agent metadata file references from agent.json to agent-card.json ([#78](https://github.com/inference-gateway/adl-cli/issues/78)) ([4217c89](https://github.com/inference-gateway/adl-cli/commit/4217c89c83733abc458a57ecb575a9375176bad7))
+
 ## [0.21.5](https://github.com/inference-gateway/adl-cli/compare/v0.21.4...v0.21.5) (2025-09-24)
 
 ### 🐛 Bug Fixes
