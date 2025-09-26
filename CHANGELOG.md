@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.21.7](https://github.com/inference-gateway/adl-cli/compare/v0.21.6...v0.21.7) (2025-09-26)
+
+### ♻️ Improvements
+
+* Update adk dependency version to v0.11.1 in go.mod template ([18bf2ec](https://github.com/inference-gateway/adl-cli/commit/18bf2eca32c569af359c4b5774ea6f0aa3c2048f))
+
 ## [0.21.6](https://github.com/inference-gateway/adl-cli/compare/v0.21.5...v0.21.6) (2025-09-26)
 
 ### ♻️ Improvements
