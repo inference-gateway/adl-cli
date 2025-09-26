@@ -680,7 +680,7 @@ my-go-agent/
 ├── Dockerfile                 # Container configuration
 ├── .adl-ignore                # Files to protect from regeneration
 ├── .well-known/
-│   └── agent.json             # Agent capabilities (auto-generated)
+│   └── agent-card.json        # Agent capabilities (auto-generated)
 ├── .github/                   # GitHub-specific configurations
 │   ├── workflows/             # Generated when using --ci flag
 │   │   ├── ci.yml             # GitHub Actions CI workflow
@@ -720,7 +720,7 @@ my-rust-agent/
 ├── Dockerfile                 # Rust-optimized container
 ├── .adl-ignore                # Protection configuration
 ├── .well-known/
-│   └── agent.json             # Agent capabilities
+│   └── agent-card.json        # Agent capabilities
 ├── .github/workflows/         # CI configuration (with --ci)
 │   ├── ci.yml                 # Rust-specific CI workflow
 │   └── cd.yml                 # GitHub Actions CD workflow (with --cd flag)
@@ -737,7 +737,7 @@ my-rust-agent/
 
 All projects include these essential files regardless of language:
 
-- **`.well-known/agent.json`** - A2A agent discovery and capabilities manifest
+- **`.well-known/agent-card.json`** - A2A agent discovery and capabilities manifest
 - **`Taskfile.yml`** - Unified task runner configuration for build, test, lint, run
 - **`Dockerfile`** - Language-optimized container configuration  
 - **`k8s/deployment.yaml`** - Kubernetes deployment manifest
@@ -1151,7 +1151,7 @@ Each language has its own file mapping that determines what gets generated:
 
 **Universal Files:**
 - `Taskfile.yml` → Development task runner
-- `.well-known/agent.json` → A2A capabilities manifest
+- `.well-known/agent-card.json` → A2A capabilities manifest
 - `k8s/deployment.yaml` → Kubernetes deployment
 - CI workflows and sandbox configurations
 

@@ -23,7 +23,7 @@ The codebase is generated using ADL CLI {{ .Metadata.CLIVersion }} and follows a
   - A2A server with streaming and background task handlers
   - Graceful shutdown handling
 
-- **Agent Configuration**: `.well-known/agent.json` - Serves agent metadata at runtime
+- **Agent Configuration**: `.well-known/agent-card.json` - Serves agent metadata at runtime
 - **Environment Configuration**: Extensive env vars with `A2A_` prefix (see README for full list)
 
 ## Development Commands
@@ -157,7 +157,7 @@ Standard development environment required. Install:
 
 - Enable debug mode: `A2A_DEBUG=true`{{ if .ADL.Spec.Server.Debug }} (currently enabled in agent.yaml){{ end }}
 - Check health: `GET /health`
-- View agent metadata: `GET /.well-known/agent.json`
+- View agent metadata: `GET /.well-known/agent-card.json`
 {{- if .ADL.Spec.Capabilities.Streaming }}
 - Monitor streaming updates: Set `A2A_STREAMING_STATUS_UPDATE_INTERVAL`
 {{- end }}
