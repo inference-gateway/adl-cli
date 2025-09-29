@@ -1,0 +1,99 @@
+apiVersion: adl.dev/v1
+kind: Agent
+metadata:
+  name: go-agent-minio-artifacts
+  description: "Agent with MinIO artifacts server support"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: true
+    stateTransitionHistory: true
+  card:
+    protocolVersion: "0.3.0"
+    preferredTransport: "JSONRPC"
+    defaultInputModes: ["text", "voice"]
+    defaultOutputModes: ["text", "audio"]
+    url: "https://my-agent.example.com:8443"
+    documentationUrl: "https://github.com/company/go-agent/docs"
+    iconUrl: "https://github.com/company/go-agent/icon.png"
+  agent:
+    provider: deepseek
+    model: deepseek-chat
+    systemPrompt: |
+      You are a helpful assistant with MinIO artifacts support.
+      You can create, read, and manage artifacts using MinIO object storage.
+      Always prioritize security, accuracy, and compliance in your responses.
+    maxTokens: 8192
+    temperature: 0.3
+  artifacts:
+    provider: minio
+    config:
+      endpoint: "localhost:9000"
+      bucketName: "agent-artifacts"
+  skills:
+    - id: create_artifact
+      name: create_artifact
+      description: "Create a new artifact in MinIO"
+      tags: ["artifacts", "minio", "create"]
+      inject:
+        - logger
+      schema:
+        type: object
+        properties:
+          name:
+            type: string
+            description: "Name of the artifact"
+          content:
+            type: string
+            description: "Content of the artifact"
+          mimeType:
+            type: string
+            description: "MIME type of the artifact"
+            default: "text/plain"
+        required: [name, content]
+    - id: read_artifact
+      name: read_artifact
+      description: "Read an artifact from MinIO"
+      tags: ["artifacts", "minio", "read"]
+      inject:
+        - logger
+      schema:
+        type: object
+        properties:
+          id:
+            type: string
+            description: "Artifact ID to read"
+        required: [id]
+    - id: list_artifacts
+      name: list_artifacts
+      description: "List available artifacts from MinIO"
+      tags: ["artifacts", "minio", "list"]
+      inject:
+        - logger
+      schema:
+        type: object
+        properties:
+          prefix:
+            type: string
+            description: "Optional prefix to filter artifacts"
+        required: []
+  server:
+    port: 8443
+    debug: false
+    auth:
+      enabled: true
+  language:
+    go:
+      module: "github.com/inference-gateway/adl-cli/examples/go-agent-minio-artifacts"
+      version: "1.25"
+  scm:
+    provider: github
+    url: "https://github.com/inference-gateway/adl-cli"
+    github_app: true
+    issue_templates: true
+  sandbox:
+    flox:
+      enabled: true
+    devcontainer:
+      enabled: false

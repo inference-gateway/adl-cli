@@ -1,0 +1,83 @@
+apiVersion: adl.dev/v1
+kind: Agent
+metadata:
+  name: go-agent-filesystem-artifacts
+  description: "Agent with filesystem artifacts server support"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: true
+    stateTransitionHistory: true
+  card:
+    protocolVersion: "0.3.0"
+    preferredTransport: "JSONRPC"
+    defaultInputModes: ["text", "voice"]
+    defaultOutputModes: ["text", "audio"]
+    url: "https://my-agent.example.com:8443"
+    documentationUrl: "https://github.com/company/go-agent/docs"
+    iconUrl: "https://github.com/company/go-agent/icon.png"
+  agent:
+    provider: deepseek
+    model: deepseek-chat
+    systemPrompt: |
+      You are a helpful assistant with artifacts support.
+      You can create, read, and manage artifacts using the filesystem.
+      Always prioritize security, accuracy, and compliance in your responses.
+    maxTokens: 8192
+    temperature: 0.3
+  artifacts:
+    provider: filesystem
+  skills:
+    - id: create_artifact
+      name: create_artifact
+      description: "Create a new artifact in the filesystem"
+      tags: ["artifacts", "filesystem", "create"]
+      inject:
+        - logger
+      schema:
+        type: object
+        properties:
+          name:
+            type: string
+            description: "Name of the artifact"
+          content:
+            type: string
+            description: "Content of the artifact"
+          mimeType:
+            type: string
+            description: "MIME type of the artifact"
+            default: "text/plain"
+        required: [name, content]
+    - id: read_artifact
+      name: read_artifact
+      description: "Read an artifact from the filesystem"
+      tags: ["artifacts", "filesystem", "read"]
+      inject:
+        - logger
+      schema:
+        type: object
+        properties:
+          id:
+            type: string
+            description: "Artifact ID to read"
+        required: [id]
+  server:
+    port: 8443
+    debug: false
+    auth:
+      enabled: true
+  language:
+    go:
+      module: "github.com/inference-gateway/adl-cli/examples/go-agent-filesystem-artifacts"
+      version: "1.25"
+  scm:
+    provider: github
+    url: "https://github.com/inference-gateway/adl-cli"
+    github_app: true
+    issue_templates: true
+  sandbox:
+    flox:
+      enabled: true
+    devcontainer:
+      enabled: false

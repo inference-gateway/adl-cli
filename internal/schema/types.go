@@ -27,6 +27,7 @@ type Spec struct {
 	Skills        []Skill                   `yaml:"skills,omitempty" json:"skills,omitempty"`
 	Server        Server                    `yaml:"server" json:"server"`
 	Language      *Language                 `yaml:"language,omitempty" json:"language,omitempty"`
+	Artifacts     *ArtifactsConfig          `yaml:"artifacts,omitempty" json:"artifacts,omitempty"`
 	Acronyms      []string                  `yaml:"acronyms,omitempty" json:"acronyms,omitempty"`
 	SCM           *SCM                      `yaml:"scm,omitempty" json:"scm,omitempty"`
 	Sandbox       *SandboxConfig            `yaml:"sandbox,omitempty" json:"sandbox,omitempty"`
@@ -193,6 +194,12 @@ type ServiceConfig struct {
 // Hooks contains lifecycle hooks for the generation process
 type Hooks struct {
 	Post []string `yaml:"post,omitempty" json:"post,omitempty"`
+}
+
+// ArtifactsConfig contains artifacts server configuration
+type ArtifactsConfig struct {
+	Provider string                  `yaml:"provider" json:"provider"`
+	Config   map[string]interface{}  `yaml:"config,omitempty" json:"config,omitempty"`
 }
 
 // GeneratedMetadata contains information about the generation

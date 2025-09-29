@@ -31,6 +31,7 @@
 - [Generated Project Structure](#generated-project-structure)
 - [Sandbox Environments](#sandbox-environments)
 - [Enterprise Features](#enterprise-features)
+- [Artifacts Support](#artifacts-support)
 - [GitHub Issue Templates](#github-issue-templates)
 - [Examples](#examples)
 - [Template System & Architecture](#template-system--architecture)
@@ -61,6 +62,7 @@ The ADL CLI helps you build enterprise-ready A2A agents quickly by generating co
 - 🏗️ **Sandbox Environments** - Flox and DevContainer support for isolated development
 - 🎣 **Post-Generation Hooks** - Customize build, format, and test commands after generation
 - 🤖 **Multi-Provider AI** - OpenAI, Anthropic, DeepSeek, Ollama, Google, Mistral, and Groq support
+- 📁 **Artifacts Support** - Integrated filesystem and MinIO object storage for artifact management
 
 ## Installation
 
@@ -1058,6 +1060,51 @@ When `github_app: true` is set, the generated CD pipeline will use GitHub App au
 ### AI Provider Support
 
 The ADL CLI supports multiple AI providers including OpenAI, Anthropic, DeepSeek, Ollama (for local LLMs), Google AI, Mistral, and Groq. Each provider requires appropriate API keys to be configured as environment variables. See the ADL examples above for configuration details.
+
+## Artifacts Support
+
+The ADL CLI includes built-in support for artifacts servers, enabling agents to create, store, and manage files and resources. This is essential for agents that need to persist data, generate documents, or work with binary content.
+
+### Filesystem Artifacts
+
+For simple use cases or local development, use the filesystem artifacts provider:
+
+```yaml
+spec:
+  artifacts:
+    provider: filesystem
+```
+
+This configuration automatically integrates a filesystem-based artifacts server into your agent, storing artifacts locally on the server's filesystem.
+
+### MinIO Artifacts
+
+For production deployments requiring object storage, use the MinIO artifacts provider:
+
+```yaml
+spec:
+  artifacts:
+    provider: minio
+    config:
+      endpoint: "localhost:9000"
+      bucketName: "agent-artifacts"
+```
+
+**Environment Variables:**
+- `ARTIFACTS_MINIO_ENDPOINT` - MinIO server endpoint (default: localhost:9000)
+- `ARTIFACTS_MINIO_ACCESS_KEY_ID` - MinIO access key (default: minioadmin)
+- `ARTIFACTS_MINIO_SECRET_ACCESS_KEY` - MinIO secret key (default: minioadmin)
+- `ARTIFACTS_MINIO_BUCKET_NAME` - Bucket for artifacts (default: artifacts)
+- `ARTIFACTS_MINIO_USE_SSL` - Enable SSL connection (default: false)
+
+**Benefits:**
+- **Scalability** - Object storage scales independently of agent instances
+- **Durability** - Built-in replication and data protection
+- **Enterprise Ready** - Compatible with AWS S3 and other S3-compatible services
+- **Multi-Access** - Multiple agent instances can share artifacts
+
+**Example Skills:**
+See `examples/go-agent-artifacts-filesystem.yaml` and `examples/go-agent-artifacts-minio.yaml` for complete examples with artifact-enabled skills.
 
 ## GitHub Issue Templates
 
