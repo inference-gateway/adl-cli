@@ -2,7 +2,7 @@
 
 # ADL CLI
 
-*A command-line interface for generating production-ready A2A (Agent-to-Agent) servers from Agent Definition Language (ADL) files.*
+*A command-line interface for generating enterprise-ready A2A (Agent-to-Agent) servers from Agent Definition Language (ADL) files.*
 
 > ⚠️ **Early Development Warning**: This project is in its early stages of development. Breaking changes are expected and acceptable until we reach a stable version. Use with caution in production environments.
 
@@ -44,13 +44,13 @@
 
 ## Overview
 
-The ADL CLI helps you build production-ready A2A agents quickly by generating complete project scaffolding from YAML-based Agent Definition Language (ADL) files. It eliminates boilerplate code and ensures consistent patterns across your agent implementations.
+The ADL CLI helps you build enterprise-ready A2A agents quickly by generating complete project scaffolding from YAML-based Agent Definition Language (ADL) files. It eliminates boilerplate code and ensures consistent patterns across your agent implementations.
 
 ### Key Features
 
 - 🚀 **Rapid Development** - Generate complete projects in seconds
 - 📋 **Schema-Driven** - Use YAML Agent Definition Language files (ADL) to define your agents
-- 🎯 **Production Ready** - Single unified template with AI integration and enterprise features
+- 🎯 **Enterprise Ready** - Single unified template with AI integration and enterprise features
 - 🔐 **Enterprise Features** - Authentication, SCM integration, and audit logging
 - 🛠️ **Smart Ignore** - Protect your implementations with .adl-ignore files
 - ✅ **Validation** - Built-in ADL schema validation
