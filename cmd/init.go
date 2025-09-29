@@ -203,6 +203,10 @@ type adlData struct {
 			MaxTokens    int     `yaml:"maxTokens,omitempty"`
 			Temperature  float64 `yaml:"temperature,omitempty"`
 		} `yaml:"agent,omitempty"`
+		Artifacts *struct {
+			Provider string                 `yaml:"provider"`
+			Config   map[string]interface{} `yaml:"config,omitempty"`
+		} `yaml:"artifacts,omitempty"`
 		Services []string `yaml:"services,omitempty"`
 		Skills       []struct {
 			ID          string         `yaml:"id"`
@@ -317,6 +321,24 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 	adl.Spec.Capabilities.Streaming = conditionalPromptBool(useDefaults, "Enable streaming", true)
 	adl.Spec.Capabilities.PushNotifications = conditionalPromptBool(useDefaults, "Enable push notifications", false)
 	adl.Spec.Capabilities.StateTransitionHistory = conditionalPromptBool(useDefaults, "Enable state transition history", false)
+
+	fmt.Println("\n📂 Artifacts Configuration")
+	fmt.Println("--------------------------")
+	enableArtifacts := conditionalPromptBool(useDefaults, "Enable artifacts server support", true)
+
+	if enableArtifacts {
+		adl.Spec.Artifacts = &struct {
+			Provider string                 `yaml:"provider"`
+			Config   map[string]interface{} `yaml:"config,omitempty"`
+		}{}
+
+		artifactsProvider := conditionalPromptChoice(useDefaults, "Artifacts provider", []string{"filesystem", "minio", "s3"}, "filesystem")
+		adl.Spec.Artifacts.Provider = artifactsProvider
+
+		if useDefaults {
+			fmt.Printf("Artifacts provider (filesystem/minio/s3) [filesystem]: filesystem\n")
+		}
+	}
 
 	fmt.Println("\n🔌 Dependencies")
 	fmt.Println("---------------")
