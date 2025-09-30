@@ -125,39 +125,13 @@ func main() {
 		WithDefaultBackgroundTaskHandler().
 		WithDefaultStreamingTaskHandler()
 
-{{- if .ADL.Spec.Artifacts }}
-	// Create and configure artifacts server
-	{{- if eq .ADL.Spec.Artifacts.Provider "filesystem" }}
-	artifactsServer, err := server.NewArtifactsServer(cfg.A2A, l).
-		WithFilesystemStorage("./artifacts").
+{{ if .ADL.Spec.Artifacts }}
+	artifactsServer, err := server.
+		NewArtifactsServerBuilder(&cfg.A2A.ArtifactsConfig, l).
 		Build()
 	if err != nil {
 		l.Fatal("failed to create artifacts server", zap.Error(err))
 	}
-	
-	// Add artifacts server to A2A server
-	serverBuilder = serverBuilder.WithArtifactsServer(artifactsServer)
-	l.Info("artifacts server configured with filesystem storage", zap.String("storage_path", "./artifacts"))
-	{{- else if eq .ADL.Spec.Artifacts.Provider "minio" }}
-	artifactsServer, err := server.NewArtifactsServer(cfg.A2A, l).
-		WithMinIOStorage(
-			cfg.Artifacts.MinIO.Endpoint,
-			cfg.Artifacts.MinIO.AccessKeyID,
-			cfg.Artifacts.MinIO.SecretAccessKey,
-			cfg.Artifacts.MinIO.BucketName,
-			cfg.Artifacts.MinIO.UseSSL,
-		).
-		Build()
-	if err != nil {
-		l.Fatal("failed to create artifacts server", zap.Error(err))
-	}
-	
-	// Add artifacts server to A2A server
-	serverBuilder = serverBuilder.WithArtifactsServer(artifactsServer)
-	l.Info("artifacts server configured with MinIO storage",
-		zap.String("endpoint", cfg.Artifacts.MinIO.Endpoint),
-		zap.String("bucket", cfg.Artifacts.MinIO.BucketName))
-	{{- end }}
 {{- end }}
 
 	a2aServer, err := serverBuilder.Build()
@@ -172,6 +146,15 @@ func main() {
 		}
 	}()
 
+{{ if .ADL.Spec.Artifacts }}
+	go func() {
+		l.Info("starting A2A artifacts server", zap.String("port", cfg.A2A.ArtifactsConfig.ServerConfig.Port))
+		if err := artifactsServer.Start(ctx); err != nil {
+			l.Fatal("artifacts server failed to start", zap.Error(err))
+		}
+	}()
+{{- end }}
+
 	l.Info("{{ .ADL.Metadata.Name }} agent running successfully", 
 		zap.String("port", cfg.A2A.ServerConfig.Port),
 		zap.String("environment", cfg.Environment))
@@ -182,5 +165,8 @@ func main() {
 
 	l.Info("shutdown signal received, gracefully stopping server...")
 	a2aServer.Stop(ctx)
+{{- if .ADL.Spec.Artifacts }}
+	artifactsServer.Stop(ctx)
+{{- end }}
 	l.Info("{{ .ADL.Metadata.Name }} agent stopped")
 }
