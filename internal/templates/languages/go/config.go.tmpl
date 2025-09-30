@@ -25,25 +25,6 @@ type Config struct {
 	{{- end }}
 }
 
-{{- if and .ADL.Spec.Artifacts (eq .ADL.Spec.Artifacts.Provider "minio") }}
-
-// ArtifactsConfig represents the artifacts server configuration
-type ArtifactsConfig struct {
-	MinIO MinIOConfig `env:",prefix=MINIO_"`
-}
-
-{{- if eq .ADL.Spec.Artifacts.Provider "minio" }}
-// MinIOConfig represents MinIO artifacts server configuration
-type MinIOConfig struct {
-	Endpoint        string `env:"ENDPOINT,default=localhost:9000"`
-	AccessKeyID     string `env:"ACCESS_KEY_ID,default=minioadmin"`
-	SecretAccessKey string `env:"SECRET_ACCESS_KEY,default=minioadmin"`
-	BucketName      string `env:"BUCKET_NAME,default=artifacts"`
-	UseSSL          bool   `env:"USE_SSL,default=false"`
-}
-{{- end }}
-{{- end }}
-
 {{- if .ADL.Spec.Config }}
 {{- range $sectionName, $sectionConfig := .ADL.Spec.Config }}
 
