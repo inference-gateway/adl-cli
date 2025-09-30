@@ -28,9 +28,17 @@ spec:
     temperature: 0.3
   artifacts:
     provider: minio
-    config:
+    storage:
+      enable: true
       endpoint: "localhost:9000"
       bucketName: "agent-artifacts"
+      useSSL: false
+      basePath: "artifacts"
+      baseURL: "http://localhost:9000"
+    retention:
+      maxArtifacts: 100
+      maxAge: 720h
+      cleanupInterval: 24h
   skills:
     - id: create_artifact
       name: create_artifact

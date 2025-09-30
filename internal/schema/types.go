@@ -19,20 +19,20 @@ type Metadata struct {
 
 // Spec contains the agent specification
 type Spec struct {
-	Capabilities  *Capabilities             `yaml:"capabilities,omitempty" json:"capabilities,omitempty"`
-	Card          *Card                     `yaml:"card,omitempty" json:"card,omitempty"`
-	Agent         *Agent                    `yaml:"agent,omitempty" json:"agent,omitempty"`
-	Config        map[string]map[string]any `yaml:"config,omitempty" json:"config,omitempty"`
-	Services      map[string]Service        `yaml:"services,omitempty" json:"services,omitempty"`
-	Skills        []Skill                   `yaml:"skills,omitempty" json:"skills,omitempty"`
-	Server        Server                    `yaml:"server" json:"server"`
-	Language      *Language                 `yaml:"language,omitempty" json:"language,omitempty"`
-	Artifacts     *ArtifactsConfig          `yaml:"artifacts,omitempty" json:"artifacts,omitempty"`
-	Acronyms      []string                  `yaml:"acronyms,omitempty" json:"acronyms,omitempty"`
-	SCM           *SCM                      `yaml:"scm,omitempty" json:"scm,omitempty"`
-	Sandbox       *SandboxConfig            `yaml:"sandbox,omitempty" json:"sandbox,omitempty"`
-	Deployment    *DeploymentConfig         `yaml:"deployment,omitempty" json:"deployment,omitempty"`
-	Hooks         *Hooks                    `yaml:"hooks,omitempty" json:"hooks,omitempty"`
+	Capabilities *Capabilities             `yaml:"capabilities,omitempty" json:"capabilities,omitempty"`
+	Card         *Card                     `yaml:"card,omitempty" json:"card,omitempty"`
+	Agent        *Agent                    `yaml:"agent,omitempty" json:"agent,omitempty"`
+	Config       map[string]map[string]any `yaml:"config,omitempty" json:"config,omitempty"`
+	Services     map[string]Service        `yaml:"services,omitempty" json:"services,omitempty"`
+	Skills       []Skill                   `yaml:"skills,omitempty" json:"skills,omitempty"`
+	Server       Server                    `yaml:"server" json:"server"`
+	Language     *Language                 `yaml:"language,omitempty" json:"language,omitempty"`
+	Artifacts    *ArtifactsConfig          `yaml:"artifacts,omitempty" json:"artifacts,omitempty"`
+	Acronyms     []string                  `yaml:"acronyms,omitempty" json:"acronyms,omitempty"`
+	SCM          *SCM                      `yaml:"scm,omitempty" json:"scm,omitempty"`
+	Sandbox      *SandboxConfig            `yaml:"sandbox,omitempty" json:"sandbox,omitempty"`
+	Deployment   *DeploymentConfig         `yaml:"deployment,omitempty" json:"deployment,omitempty"`
+	Hooks        *Hooks                    `yaml:"hooks,omitempty" json:"hooks,omitempty"`
 }
 
 // Card represents the agent card configuration
@@ -69,7 +69,6 @@ type Service struct {
 	Factory     string `yaml:"factory" json:"factory"`
 	Description string `yaml:"description" json:"description"`
 }
-
 
 // Skill represents a distinct capability or function that an agent can perform
 type Skill struct {
@@ -123,6 +122,37 @@ type Language struct {
 	Rust       *RustConfig       `yaml:"rust,omitempty" json:"rust,omitempty"`
 }
 
+// ArtifactStorageProvider represents supported storage backends
+type ArtifactsStorageProvider string
+
+const (
+	ArtifactStorageFilesystem ArtifactsStorageProvider = "filesystem"
+	ArtifactStorageMinio      ArtifactsStorageProvider = "minio"
+)
+
+type ArtifactsStorageConfig struct {
+	Enable     bool    `yaml:"enable,omitempty" json:"enable,omitempty"`
+	Endpoint   string  `yaml:"endpoint,omitempty" json:"endpoint,omitempty"`
+	BucketName string  `yaml:"bucketName,omitempty" json:"bucketName,omitempty"`
+	UseSSL     bool    `yaml:"useSSL,omitempty" json:"useSSL,omitempty"`
+	BaseURL    string  `yaml:"baseURL,omitempty" json:"baseURL,omitempty"`
+	BasePath   string  `yaml:"basePath,omitempty" json:"basePath,omitempty"`
+	SecretKey  *string `yaml:"-" json:"-"`
+	AccessKey  *string `yaml:"-" json:"-"`
+}
+
+type ArtifactsRetentionConfig struct {
+	MaxArtifacts    int           `yaml:"maxArtifacts,omitempty" json:"maxArtifacts,omitempty"`
+	MaxAge          time.Duration `yaml:"maxAge,omitempty" json:"maxAge,omitempty"`
+	CleanupInterval time.Duration `yaml:"cleanupInterval,omitempty" json:"cleanupInterval,omitempty"`
+}
+
+type ArtifactsConfig struct {
+	Provider  ArtifactsStorageProvider  `yaml:"provider" json:"provider"`
+	Storage   *ArtifactsStorageConfig   `yaml:"storage,omitempty" json:"storage,omitempty"`
+	Retention *ArtifactsRetentionConfig `yaml:"retention,omitempty" json:"retention,omitempty"`
+}
+
 // SCM contains source control management configuration
 type SCM struct {
 	Provider       string `yaml:"provider" json:"provider"`
@@ -149,25 +179,25 @@ type DevContainerConfig struct {
 
 // DeploymentConfig for deployment platform settings
 type DeploymentConfig struct {
-	Type     string            `yaml:"type,omitempty" json:"type,omitempty"`
-	CloudRun *CloudRunConfig  `yaml:"cloudrun,omitempty" json:"cloudrun,omitempty"`
+	Type     string          `yaml:"type,omitempty" json:"type,omitempty"`
+	CloudRun *CloudRunConfig `yaml:"cloudrun,omitempty" json:"cloudrun,omitempty"`
 }
 
 // CloudRunConfig for Google Cloud Run specific deployment settings
 type CloudRunConfig struct {
-	Image        *ImageConfig        `yaml:"image,omitempty" json:"image,omitempty"`
-	Resources    *ResourcesConfig    `yaml:"resources,omitempty" json:"resources,omitempty"`
-	Scaling      *ScalingConfig      `yaml:"scaling,omitempty" json:"scaling,omitempty"`
-	Service      *ServiceConfig      `yaml:"service,omitempty" json:"service,omitempty"`
-	Environment  map[string]string   `yaml:"environment,omitempty" json:"environment,omitempty"`
+	Image       *ImageConfig      `yaml:"image,omitempty" json:"image,omitempty"`
+	Resources   *ResourcesConfig  `yaml:"resources,omitempty" json:"resources,omitempty"`
+	Scaling     *ScalingConfig    `yaml:"scaling,omitempty" json:"scaling,omitempty"`
+	Service     *ServiceConfig    `yaml:"service,omitempty" json:"service,omitempty"`
+	Environment map[string]string `yaml:"environment,omitempty" json:"environment,omitempty"`
 }
 
 // ImageConfig for container image settings
 type ImageConfig struct {
-	Registry    string `yaml:"registry,omitempty" json:"registry,omitempty"`
-	Repository  string `yaml:"repository,omitempty" json:"repository,omitempty"`
-	Tag         string `yaml:"tag,omitempty" json:"tag,omitempty"`
-	UseCloudBuild bool `yaml:"useCloudBuild,omitempty" json:"useCloudBuild,omitempty"`
+	Registry      string `yaml:"registry,omitempty" json:"registry,omitempty"`
+	Repository    string `yaml:"repository,omitempty" json:"repository,omitempty"`
+	Tag           string `yaml:"tag,omitempty" json:"tag,omitempty"`
+	UseCloudBuild bool   `yaml:"useCloudBuild,omitempty" json:"useCloudBuild,omitempty"`
 }
 
 // ResourcesConfig for CloudRun resource allocation
@@ -185,10 +215,10 @@ type ScalingConfig struct {
 
 // ServiceConfig for CloudRun service settings
 type ServiceConfig struct {
-	Timeout                int    `yaml:"timeout,omitempty" json:"timeout,omitempty"`
-	AllowUnauthenticated  bool   `yaml:"allowUnauthenticated,omitempty" json:"allowUnauthenticated,omitempty"`
-	ServiceAccount        string `yaml:"serviceAccount,omitempty" json:"serviceAccount,omitempty"`
-	ExecutionEnvironment  string `yaml:"executionEnvironment,omitempty" json:"executionEnvironment,omitempty"`
+	Timeout              int    `yaml:"timeout,omitempty" json:"timeout,omitempty"`
+	AllowUnauthenticated bool   `yaml:"allowUnauthenticated,omitempty" json:"allowUnauthenticated,omitempty"`
+	ServiceAccount       string `yaml:"serviceAccount,omitempty" json:"serviceAccount,omitempty"`
+	ExecutionEnvironment string `yaml:"executionEnvironment,omitempty" json:"executionEnvironment,omitempty"`
 }
 
 // Hooks contains lifecycle hooks for the generation process

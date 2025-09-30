@@ -28,6 +28,14 @@ spec:
     temperature: 0.3
   artifacts:
     provider: filesystem
+    storage:
+      enable: true
+      basePath: "./artifacts"
+      baseURL: "http://localhost:8443/artifacts"
+    retention:
+      maxArtifacts: 50
+      maxAge: 168h
+      cleanupInterval: 12h
   skills:
     - id: create_artifact
       name: create_artifact
