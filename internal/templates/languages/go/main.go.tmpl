@@ -2,11 +2,6 @@ package main
 
 import (
 	"context"
-{{- if .ADL.Spec.Artifacts }}
-{{- if eq .ADL.Spec.Artifacts.Provider "filesystem" }}
-	"fmt"
-{{- end }}
-{{- end }}
 	"log"
 	"os"
 	"os/signal"
@@ -131,28 +126,7 @@ func main() {
 		WithDefaultStreamingTaskHandler()
 
 {{- if .ADL.Spec.Artifacts }}
-
-	artifactsBuilder := server.NewArtifactsServerBuilder(&cfg.A2A.ArtifactsConfig, l)
-	{{- if eq .ADL.Spec.Artifacts.Provider "filesystem" }}
-	baseURL := fmt.Sprintf("http://%s:%s", cfg.A2A.ArtifactsConfig.ServerConfig.Host, cfg.A2A.ArtifactsConfig.ServerConfig.Port)
-	artifactsBuilder = artifactsBuilder.WithFilesystemStorage("./artifacts", baseURL)
-	{{- else if eq .ADL.Spec.Artifacts.Provider "minio" }}
-	artifactsBuilder = artifactsBuilder.WithMinIOStorage(
-		cfg.Artifacts.MinIO.Endpoint,
-		cfg.Artifacts.MinIO.AccessKeyID,
-		cfg.Artifacts.MinIO.SecretAccessKey,
-		cfg.Artifacts.MinIO.BucketName,
-		cfg.A2A.AgentURL,
-		cfg.Artifacts.MinIO.UseSSL,
-	)
-	{{- end }}
-	
-	artifactsServer, err := artifactsBuilder.Build()
-	if err != nil {
-		l.Fatal("failed to create artifacts server", zap.Error(err))
-	}
-	serverBuilder = serverBuilder.WithArtifactsServer(artifactsServer)
-	l.Info("configured {{ .ADL.Spec.Artifacts.Provider }} artifacts server")
+	l.Info("artifacts support enabled with {{ .ADL.Spec.Artifacts.Provider }} provider")
 {{- end }}
 
 	a2aServer, err := serverBuilder.Build()
