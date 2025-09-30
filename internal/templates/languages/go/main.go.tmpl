@@ -126,7 +126,38 @@ func main() {
 		WithDefaultStreamingTaskHandler()
 
 {{- if .ADL.Spec.Artifacts }}
-	l.Info("artifacts support enabled with {{ .ADL.Spec.Artifacts.Provider }} provider")
+	// Create and configure artifacts server
+	{{- if eq .ADL.Spec.Artifacts.Provider "filesystem" }}
+	artifactsServer, err := server.NewArtifactsServer(cfg.A2A, l).
+		WithFilesystemStorage("./artifacts").
+		Build()
+	if err != nil {
+		l.Fatal("failed to create artifacts server", zap.Error(err))
+	}
+	
+	// Add artifacts server to A2A server
+	serverBuilder = serverBuilder.WithArtifactsServer(artifactsServer)
+	l.Info("artifacts server configured with filesystem storage", zap.String("storage_path", "./artifacts"))
+	{{- else if eq .ADL.Spec.Artifacts.Provider "minio" }}
+	artifactsServer, err := server.NewArtifactsServer(cfg.A2A, l).
+		WithMinIOStorage(
+			cfg.Artifacts.MinIO.Endpoint,
+			cfg.Artifacts.MinIO.AccessKeyID,
+			cfg.Artifacts.MinIO.SecretAccessKey,
+			cfg.Artifacts.MinIO.BucketName,
+			cfg.Artifacts.MinIO.UseSSL,
+		).
+		Build()
+	if err != nil {
+		l.Fatal("failed to create artifacts server", zap.Error(err))
+	}
+	
+	// Add artifacts server to A2A server
+	serverBuilder = serverBuilder.WithArtifactsServer(artifactsServer)
+	l.Info("artifacts server configured with MinIO storage",
+		zap.String("endpoint", cfg.Artifacts.MinIO.Endpoint),
+		zap.String("bucket", cfg.Artifacts.MinIO.BucketName))
+	{{- end }}
 {{- end }}
 
 	a2aServer, err := serverBuilder.Build()
