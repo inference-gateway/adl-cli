@@ -11,7 +11,7 @@ type Config struct {
 	
 	// A2A configuration (all A2A_ prefixed vars)
 	A2A serverConfig.Config `env:",prefix=A2A_"`
-	{{- if .ADL.Spec.Artifacts }}
+	{{- if and .ADL.Spec.Artifacts (eq .ADL.Spec.Artifacts.Provider "minio") }}
 	
 	// Artifacts configuration
 	Artifacts ArtifactsConfig `env:",prefix=ARTIFACTS_"`
@@ -25,15 +25,11 @@ type Config struct {
 	{{- end }}
 }
 
-{{- if .ADL.Spec.Artifacts }}
+{{- if and .ADL.Spec.Artifacts (eq .ADL.Spec.Artifacts.Provider "minio") }}
 
 // ArtifactsConfig represents the artifacts server configuration
 type ArtifactsConfig struct {
-	{{- if eq .ADL.Spec.Artifacts.Provider "filesystem" }}
-	// No additional config needed for filesystem provider
-	{{- else if eq .ADL.Spec.Artifacts.Provider "minio" }}
 	MinIO MinIOConfig `env:",prefix=MINIO_"`
-	{{- end }}
 }
 
 {{- if eq .ADL.Spec.Artifacts.Provider "minio" }}

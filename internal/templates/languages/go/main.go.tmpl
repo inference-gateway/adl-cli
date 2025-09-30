@@ -131,35 +131,28 @@ func main() {
 		WithDefaultStreamingTaskHandler()
 
 {{- if .ADL.Spec.Artifacts }}
+
+	artifactsBuilder := server.NewArtifactsServerBuilder(&cfg.A2A.ArtifactsConfig, l)
 	{{- if eq .ADL.Spec.Artifacts.Provider "filesystem" }}
-
 	baseURL := fmt.Sprintf("http://%s:%s", cfg.A2A.ArtifactsConfig.ServerConfig.Host, cfg.A2A.ArtifactsConfig.ServerConfig.Port)
-	artifactsServer, err := server.NewArtifactsServerBuilder(&cfg.A2A.ArtifactsConfig, l).
-		WithFilesystemStorage("./artifacts", baseURL).
-		Build()
-	if err != nil {
-		l.Fatal("failed to create filesystem artifacts server", zap.Error(err))
-	}
-	serverBuilder = serverBuilder.WithArtifactsServer(artifactsServer)
-	l.Info("configured filesystem artifacts server")
+	artifactsBuilder = artifactsBuilder.WithFilesystemStorage("./artifacts", baseURL)
 	{{- else if eq .ADL.Spec.Artifacts.Provider "minio" }}
-
-	artifactsServer, err := server.NewArtifactsServerBuilder(&cfg.A2A.ArtifactsConfig, l).
-		WithMinIOStorage(
-			cfg.Artifacts.MinIO.Endpoint,
-			cfg.Artifacts.MinIO.AccessKeyID,
-			cfg.Artifacts.MinIO.SecretAccessKey,
-			cfg.Artifacts.MinIO.BucketName,
-			cfg.A2A.AgentURL,
-			cfg.Artifacts.MinIO.UseSSL,
-		).
-		Build()
+	artifactsBuilder = artifactsBuilder.WithMinIOStorage(
+		cfg.Artifacts.MinIO.Endpoint,
+		cfg.Artifacts.MinIO.AccessKeyID,
+		cfg.Artifacts.MinIO.SecretAccessKey,
+		cfg.Artifacts.MinIO.BucketName,
+		cfg.A2A.AgentURL,
+		cfg.Artifacts.MinIO.UseSSL,
+	)
+	{{- end }}
+	
+	artifactsServer, err := artifactsBuilder.Build()
 	if err != nil {
-		l.Fatal("failed to create MinIO artifacts server", zap.Error(err))
+		l.Fatal("failed to create artifacts server", zap.Error(err))
 	}
 	serverBuilder = serverBuilder.WithArtifactsServer(artifactsServer)
-	l.Info("configured MinIO artifacts server", zap.String("endpoint", cfg.Artifacts.MinIO.Endpoint), zap.String("bucket", cfg.Artifacts.MinIO.BucketName))
-	{{- end }}
+	l.Info("configured {{ .ADL.Spec.Artifacts.Provider }} artifacts server")
 {{- end }}
 
 	a2aServer, err := serverBuilder.Build()
