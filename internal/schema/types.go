@@ -196,12 +196,6 @@ type Hooks struct {
 	Post []string `yaml:"post,omitempty" json:"post,omitempty"`
 }
 
-// ArtifactsConfig contains artifacts server configuration
-type ArtifactsConfig struct {
-	Provider string                  `yaml:"provider" json:"provider"`
-	Config   map[string]interface{}  `yaml:"config,omitempty" json:"config,omitempty"`
-}
-
 // GeneratedMetadata contains information about the generation
 type GeneratedMetadata struct {
 	GeneratedAt time.Time `json:"generatedAt"`

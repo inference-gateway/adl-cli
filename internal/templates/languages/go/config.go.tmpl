@@ -11,11 +11,6 @@ type Config struct {
 	
 	// A2A configuration (all A2A_ prefixed vars)
 	A2A serverConfig.Config `env:",prefix=A2A_"`
-	{{- if and .ADL.Spec.Artifacts (eq .ADL.Spec.Artifacts.Provider "minio") }}
-	
-	// Artifacts configuration
-	Artifacts ArtifactsConfig `env:",prefix=ARTIFACTS_"`
-	{{- end }}
 	{{- if .ADL.Spec.Config }}
 	
 	// Custom configuration sections
