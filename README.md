@@ -2,7 +2,7 @@
 
 # ADL CLI
 
-*A command-line interface for generating enterprise-ready A2A (Agent-to-Agent) servers from Agent Definition Language (ADL) files.*
+_A command-line interface for generating enterprise-ready A2A (Agent-to-Agent) servers from Agent Definition Language (ADL) files._
 
 > ⚠️ **Early Development Warning**: This project is in its early stages of development. Breaking changes are expected and acceptable until we reach a stable version. Use with caution in production environments.
 
@@ -86,7 +86,6 @@ chmod +x install.sh
 - Custom install directory: `INSTALL_DIR=~/bin ./install.sh`
 - Show help: `./install.sh --help`
 
-
 ### From Source
 
 ```bash
@@ -142,11 +141,11 @@ task run
 
 ### Commands
 
-| Command | Description |
-|---------|-------------|
-| `adl init [name]` | Create ADL manifest file interactively with options |
-| `adl generate` | Generate project code from ADL file with CI/CD and sandbox support |
-| `adl validate [file]` | Validate an ADL file against the complete schema |
+| Command               | Description                                                        |
+| --------------------- | ------------------------------------------------------------------ |
+| `adl init [name]`     | Create ADL manifest file interactively with options                |
+| `adl generate`        | Generate project code from ADL file with CI/CD and sandbox support |
+| `adl validate [file]` | Validate an ADL file against the complete schema                   |
 
 ### Init Command
 
@@ -174,13 +173,15 @@ adl init my-agent \
 The init command supports extensive configuration options:
 
 **Project Settings:**
+
 - `--defaults` - Use default values for all prompts
 - `--path` - Project directory path
 - `--name` - Agent name
-- `--description` - Agent description  
+- `--description` - Agent description
 - `--version` - Agent version
 
 **Agent Configuration:**
+
 - `--type` - Agent type (`ai-powered`/`minimal`)
 - `--provider` - AI provider (`openai`/`anthropic`/`deepseek`/`ollama`/`google`/`mistral`/`groq`)
 - `--model` - AI model name
@@ -189,30 +190,37 @@ The init command supports extensive configuration options:
 - `--temperature` - Temperature (0.0-2.0)
 
 **Capabilities:**
+
 - `--streaming` - Enable streaming responses
 - `--notifications` - Enable push notifications
 - `--history` - Enable state transition history
 
 **Server Configuration:**
+
 - `--port` - Server port (integer)
 - `--debug` - Enable debug mode
 
 **Language-Specific Options:**
+
 - `--language` - Programming language (`go`/`rust`, TypeScript support planned)
 
 **Go Options:**
+
 - `--go-module` - Go module path (e.g., `github.com/user/project`)
 - `--go-version` - Go version (e.g., `1.25`)
 
 **Rust Options:**
+
 - `--rust-package-name` - Rust package name
-- `--rust-version` - Rust version (e.g., `1.88`)  
+- `--rust-version` - Rust version (e.g., `1.88`)
 - `--rust-edition` - Rust edition (e.g., `2024`)
 
 **TypeScript Options:**
+
 - `--typescript-name` - TypeScript package name
 
 **Environment Options:**
+
 - `--flox` - Enable Flox environment
 - `--devcontainer` - Enable DevContainer environment
 
@@ -240,18 +248,19 @@ adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun --
 
 #### Generate Flags
 
-| Flag | Description |
-|------|-------------|
-| `--file`, `-f` | ADL file to generate from (default: "agent.yaml") |
-| `--output`, `-o` | Output directory for generated code (default: ".") |
-| `--template`, `-t` | Template to use (default: "minimal") |
-| `--overwrite` | Overwrite existing files (respects .adl-ignore) |
-| `--ci` | Generate CI workflow configuration (GitHub Actions) |
-| `--cd` | Generate CD pipeline configuration with semantic-release |
-| `--deployment` | Generate deployment configuration (`kubernetes`, `cloudrun`) |
-| `--ai` | Generate AI assistant instructions (CLAUDE.md) and add claude-code to sandbox environments |
+| Flag               | Description                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------ |
+| `--file`, `-f`     | ADL file to generate from (default: "agent.yaml")                                          |
+| `--output`, `-o`   | Output directory for generated code (default: ".")                                         |
+| `--template`, `-t` | Template to use (default: "minimal")                                                       |
+| `--overwrite`      | Overwrite existing files (respects .adl-ignore)                                            |
+| `--ci`             | Generate CI workflow configuration (GitHub Actions)                                        |
+| `--cd`             | Generate CD pipeline configuration with semantic-release                                   |
+| `--deployment`     | Generate deployment configuration (`kubernetes`, `cloudrun`)                               |
+| `--ai`             | Generate AI assistant instructions (CLAUDE.md) and add claude-code to sandbox environments |
 
 **CI Generation Features:**
+
 - **Automatic Provider Detection**: Detects GitHub from ADL `spec.scm.provider` (GitLab support planned)
 - **Language-Specific Workflows**: Tailored CI configurations for Go, Rust, and TypeScript
 - **Version Integration**: Uses language versions from ADL configuration
@@ -259,6 +268,7 @@ adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun --
 - **Caching**: Includes service caching for faster builds
 
 **CD Generation Features:**
+
 - **Semantic Release Integration**: Automatic versioning based on conventional commits
 - **Multi-Language Support**: Builds and tests for Go, Rust, and TypeScript projects
 - **Container Publishing**: Builds and pushes Docker images to GitHub Container Registry
@@ -312,8 +322,8 @@ spec:
     pushNotifications: false
     stateTransitionHistory: false
   agent:
-    provider: ""  # Choose: openai, anthropic, deepseek, ollama, google, mistral, groq
-    model: ""     # Specify default model name for chosen provider
+    provider: "" # Choose: openai, anthropic, deepseek, ollama, google, mistral, groq
+    model: "" # Specify default model name for chosen provider
     systemPrompt: "You are a helpful weather assistant."
     maxTokens: 4096
     temperature: 0.7
@@ -349,11 +359,11 @@ The complete ADL schema includes:
 - **capabilities**: Streaming, notifications, state history
 - **config**: Structured configuration sections with environment variable mapping
 - **services**: Service services with interfaces, factories, and type definitions
-- **agent**: AI provider configuration (OpenAI, Anthropic, DeepSeek, Ollama, Google, Mistral, Groq)  
+- **agent**: AI provider configuration (OpenAI, Anthropic, DeepSeek, Ollama, Google, Mistral, Groq)
 - **skills**: Function definitions with complex JSON schemas, validation, and service injection support
 - **server**: HTTP server configuration with authentication support
 - **language**: Programming language-specific settings (Go, Rust, TypeScript) and configurable acronyms
-- **scm**: Source control management configuration (GitHub, GitLab) 
+- **scm**: Source control management configuration (GitHub, GitLab)
 - **sandbox**: Development environment configuration (Flox, DevContainer)
 - **deployment**: Platform-specific deployment configuration (Kubernetes, Cloud Run)
 
@@ -512,9 +522,9 @@ spec:
     - name: create_event
       description: "Create a new calendar event"
       inject:
-        - logger          # Built-in, always available
-        - googleCalendar  # Custom service
-        - cache          # Custom service
+        - logger # Built-in, always available
+        - googleCalendar # Custom service
+        - cache # Custom service
       schema:
         type: object
         properties:
@@ -532,14 +542,15 @@ spec:
 The configuration system generates type-safe structs with automatic environment variable mapping:
 
 **Generated Configuration (`config/config.go`):**
+
 ```go
 type Config struct {
     // Core application settings
     Environment string `env:"ENVIRONMENT"`
-    
+
     // A2A configuration
     A2A serverConfig.Config `env:",prefix=A2A_"`
-    
+
     // Custom configuration sections
     Cache          CacheConfig          `env:",prefix=CACHE_"`
     GoogleCalendar GoogleCalendarConfig `env:",prefix=GOOGLE_CALENDAR_"`
@@ -557,6 +568,7 @@ type CacheConfig struct {
 ```
 
 **Environment Variables:**
+
 - `GOOGLE_CALENDAR_CREDENTIALS_PATH="/secrets/google-creds.json"`
 - `GOOGLE_CALENDAR_SCOPES="https://www.googleapis.com/auth/calendar"`
 - `CACHE_MAX_ENTRIES="1000"`
@@ -597,6 +609,7 @@ my-agent/
 Each service generates a package with interface and factory:
 
 **Example `internal/googleCalendar/googleCalendar.go`:**
+
 ```go
 type CalendarService interface {
     // TODO: Define your CalendarService interface methods
@@ -623,6 +636,7 @@ func NewCalendarService(logger *zap.Logger, cfg *config.Config) (CalendarService
 Skills automatically receive injected services as constructor parameters:
 
 **Example `skills/create_event.go`:**
+
 ```go
 type CreateEventSkill struct {
     logger    *zap.Logger
@@ -664,6 +678,7 @@ func NewCreateEventSkill(logger *zap.Logger, calendar googleCalendar.CalendarSer
 The ADL CLI generates project scaffolding tailored to your chosen language:
 
 ### Go Project Structure
+
 ```
 my-go-agent/
 ├── main.go                    # Main server setup
@@ -707,6 +722,7 @@ my-go-agent/
 ```
 
 ### Rust Project Structure
+
 ```
 my-rust-agent/
 ├── src/
@@ -739,7 +755,7 @@ All projects include these essential files regardless of language:
 
 - **`.well-known/agent-card.json`** - A2A agent discovery and capabilities manifest
 - **`Taskfile.yml`** - Unified task runner configuration for build, test, lint, run
-- **`Dockerfile`** - Language-optimized container configuration  
+- **`Dockerfile`** - Language-optimized container configuration
 - **`k8s/deployment.yaml`** - Kubernetes deployment manifest
 - **`deploy` task in `Taskfile.yml`** - CloudRun deployment task (when using `--deployment cloudrun`)
 - **`.adl-ignore`** - Protects user implementations from overwrite
@@ -800,6 +816,7 @@ The generated CD pipeline includes:
 #### CD Workflow Features
 
 **Manual Trigger**: The CD workflow uses `workflow_dispatch` for controlled releases:
+
 ```bash
 # Trigger via GitHub CLI
 gh workflow run cd.yml
@@ -808,11 +825,13 @@ gh workflow run cd.yml
 ```
 
 **Conventional Commits Support**: The pipeline recognizes these commit types for versioning:
+
 - `feat:` - Minor version bump (new features)
 - `fix:` - Patch version bump (bug fixes)
 - `refactor:`, `perf:`, `ci:`, `docs:`, `style:`, `test:`, `build:`, `chore:` - Patch version bump
 
 **Container Registry**: Published images are available at:
+
 ```
 ghcr.io/your-org/your-agent:latest
 ghcr.io/your-org/your-agent:v1.0.0
@@ -833,23 +852,23 @@ spec:
     type: cloudrun
     cloudrun:
       image:
-        registry: gcr.io        # gcr.io or ghcr.io
-        repository: my-agent    # Repository name
-        tag: latest            # Image tag
-        useCloudBuild: true    # Use Cloud Build or local Docker
+        registry: gcr.io # gcr.io or ghcr.io
+        repository: my-agent # Repository name
+        tag: latest # Image tag
+        useCloudBuild: true # Use Cloud Build or local Docker
       resources:
-        cpu: "2"               # CPU allocation (0.1 to 8)
-        memory: 1Gi           # Memory limit (128Mi to 32Gi)
+        cpu: "2" # CPU allocation (0.1 to 8)
+        memory: 1Gi # Memory limit (128Mi to 32Gi)
       scaling:
-        minInstances: 0        # Minimum instances (0 to 1000)
-        maxInstances: 100     # Maximum instances (1 to 1000)
-        concurrency: 1000     # Max concurrent requests per instance
+        minInstances: 0 # Minimum instances (0 to 1000)
+        maxInstances: 100 # Maximum instances (1 to 1000)
+        concurrency: 1000 # Max concurrent requests per instance
       service:
-        timeout: 3600         # Request timeout in seconds
-        allowUnauthenticated: true    # Allow public access
+        timeout: 3600 # Request timeout in seconds
+        allowUnauthenticated: true # Allow public access
         serviceAccount: my-agent@PROJECT_ID.iam.gserviceaccount.com
-        executionEnvironment: gen2    # gen1 or gen2
-      environment:            # Custom environment variables
+        executionEnvironment: gen2 # gen1 or gen2
+      environment: # Custom environment variables
         LOG_LEVEL: info
         ENVIRONMENT: production
 ```
@@ -857,19 +876,21 @@ spec:
 ### Container Registry Options
 
 **Google Container Registry (GCR):**
+
 ```yaml
 image:
   registry: gcr.io
   repository: my-project/my-agent
-  useCloudBuild: true        # Automatically build and push
+  useCloudBuild: true # Automatically build and push
 ```
 
 **GitHub Container Registry (GHCR):**
+
 ```yaml
 image:
   registry: ghcr.io
   repository: myorg/my-agent
-  useCloudBuild: false       # Skip Cloud Build, use pre-built image
+  useCloudBuild: false # Skip Cloud Build, use pre-built image
 ```
 
 ### Generated Deployment Script
@@ -905,11 +926,13 @@ adl generate --file agent.yaml --deployment cloudrun --cd
 ```
 
 This creates:
+
 - **CD Workflow**: Automatically deploys to CloudRun after releases
 - **Environment Integration**: Uses GitHub secrets for GCP authentication
 - **Multi-Environment Support**: Deploy to different regions/projects
 
 **Required GitHub Secrets:**
+
 - `GCP_SA_KEY`: Service account key JSON
 - `GCP_PROJECT_ID`: Google Cloud project ID
 - `GCP_REGION`: Deployment region (e.g., us-central1)
@@ -953,12 +976,13 @@ spec:
 ```
 
 Generated files:
+
 - `.flox/env/manifest.toml` - Flox environment manifest with language-specific services
 - `.flox/env.json` - Environment configuration
-- `.flox/.gitignore` - Flox-specific ignore patterns  
+- `.flox/.gitignore` - Flox-specific ignore patterns
 - `.flox/.gitattributes` - Git attributes for Flox files
 
-### DevContainer Environment  
+### DevContainer Environment
 
 Configure DevContainer for your project:
 
@@ -970,6 +994,7 @@ spec:
 ```
 
 Generated files:
+
 - `.devcontainer/devcontainer.json` - VS Code DevContainer configuration with language support
 
 ### Multiple Environment Support
@@ -1004,7 +1029,7 @@ Enable server authentication in your ADL file:
 spec:
   server:
     port: 8443
-    debug: false  
+    debug: false
     auth:
       enabled: true
 ```
@@ -1018,13 +1043,14 @@ Configure source control management for automatic CI/CD provider detection:
 ```yaml
 spec:
   scm:
-    provider: github  # gitlab support planned
+    provider: github # gitlab support planned
     url: "https://github.com/company/my-agent"
-    github_app: false  # optional: enable GitHub App for CD
-    issue_templates: true  # optional: generate GitHub issue templates
+    github_app: false # optional: enable GitHub App for CD
+    issue_templates: true # optional: generate GitHub issue templates
 ```
 
 **Features:**
+
 - **Automatic CI Detection** - Generates appropriate workflows based on SCM provider
 - **Repository Integration** - Links generated projects to source control
 - **Workflow Optimization** - SCM-specific optimizations and best practices
@@ -1044,12 +1070,14 @@ spec:
 ```
 
 **GitHub App CD Benefits:**
+
 - **Enhanced Security** - App tokens are automatically revoked after pipeline execution
 - **Enterprise Compliance** - Keeps main branch protected from direct pushes
 - **Bot Identity** - Release operations performed by dedicated bot account
 - **Audit Trail** - Clear attribution of automated actions
 
 **Required GitHub Secrets:**
+
 - `BOT_GH_APP_ID` - Your GitHub App ID
 - `BOT_GH_APP_PRIVATE_KEY` - Your GitHub App private key
 
@@ -1068,7 +1096,7 @@ spec:
   scm:
     provider: github
     url: "https://github.com/company/my-agent"
-    issue_templates: true  # Enable issue template generation
+    issue_templates: true # Enable issue template generation
 ```
 
 When `issue_templates: true` is set, the following templates are generated in `.github/ISSUE_TEMPLATE/`:
@@ -1078,6 +1106,7 @@ When `issue_templates: true` is set, the following templates are generated in `.
 - **`refactor_request.md`** - Code improvement requests with motivation and impact analysis
 
 **Issue Template Features:**
+
 - **Agent Context** - Templates include agent name and version from your ADL metadata
 - **Structured Sections** - Consistent formatting for better issue triage and tracking
 - **GitHub Integration** - Automatic labels and assignees configured in frontmatter
@@ -1091,7 +1120,7 @@ The CLI includes example ADL files in the `examples/` directory:
 ```bash
 # Validate examples
 adl validate examples/go-agent.yaml
-adl validate examples/rust-agent.yaml  
+adl validate examples/rust-agent.yaml
 adl validate examples/github-app-agent.yaml
 adl validate examples/cloudrun-agent.yaml
 adl validate examples/cloudrun-ghcr-agent.yaml
@@ -1109,6 +1138,7 @@ adl generate --file examples/cloudrun-agent.yaml --output ./cloudrun-enterprise 
 ```
 
 **Example ADL Files:**
+
 - `go-agent.yaml` - Basic Go agent with multiple skills and capabilities
 - `rust-agent.yaml` - Rust agent with enterprise features
 - `github-app-agent.yaml` - Enterprise agent with GitHub App CD integration
@@ -1127,7 +1157,7 @@ The generator automatically detects your target language from the ADL file:
 // Automatic detection based on spec.language configuration
 func DetectLanguageFromADL(adl *schema.ADL) string {
     if adl.Spec.Language.Go != nil     { return "go" }
-    if adl.Spec.Language.Rust != nil   { return "rust" }  
+    if adl.Spec.Language.Rust != nil   { return "rust" }
     if adl.Spec.Language.TypeScript != nil { return "typescript" }
     return "go" // default
 }
@@ -1138,18 +1168,21 @@ func DetectLanguageFromADL(adl *schema.ADL) string {
 Each language has its own file mapping that determines what gets generated:
 
 **Go Projects:**
+
 - `main.go` → Go main server setup
-- `skills/{skillname}.go` → Individual skill implementations  
+- `skills/{skillname}.go` → Individual skill implementations
 - `go.mod` → Go module configuration
 - Language-specific Dockerfile and CI configurations
 
-**Rust Projects:**  
+**Rust Projects:**
+
 - `src/main.rs` → Rust main application
 - `src/skills/{skillname}.rs` → Skill implementations
 - `src/skills/mod.rs` → Module declarations
 - `Cargo.toml` → Rust package configuration
 
 **Universal Files:**
+
 - `Taskfile.yml` → Development task runner
 - `.well-known/agent-card.json` → A2A capabilities manifest
 - `k8s/deployment.yaml` → Kubernetes deployment
@@ -1287,18 +1320,21 @@ spec:
 ### Generated Code Examples
 
 **Without custom acronyms:**
-- `get_n8n_docs` → `GetN8nDocsSkill` 
+
+- `get_n8n_docs` → `GetN8nDocsSkill`
 - `process_xml_data` → `ProcessXmlDataSkill`
 
 **With custom acronyms:**
+
 - `get_n8n_docs` → `GetN8NDocsSkill`
 - `process_xml_data` → `ProcessXMLDataSkill`
 
 ### Default Acronyms
 
 The following acronyms are recognized by default:
+
 - **Common**: id, api, url, uri, json, xml, sql, html, css, js, ui, uuid
-- **Network**: http, https, tcp, udp, ip, dns, tls, ssl  
+- **Network**: http, https, tcp, udp, ip, dns, tls, ssl
 - **Tech**: cpu, gpu, ram, io, os, db
 
 Your custom acronyms extend these defaults and take precedence over them.
@@ -1312,11 +1348,13 @@ The ADL CLI supports custom post-generation hooks that run automatically after p
 Each language has sensible defaults:
 
 **Go Projects:**
+
 - `go fmt ./...` - Format all Go source files
 - `go mod tidy` - Download dependencies and clean up go.mod
 
 **Rust Projects:**
-- `cargo fmt` - Format all Rust source files  
+
+- `cargo fmt` - Format all Rust source files
 - `cargo check` - Check the project for errors
 
 ### Custom Hooks
@@ -1330,7 +1368,7 @@ metadata:
   name: my-agent
 spec:
   # ... other configuration ...
-  
+
   # Custom post-generation hooks
   hooks:
     post:
@@ -1352,18 +1390,20 @@ spec:
 ### Example Configurations
 
 **Extended Go Development:**
+
 ```yaml
 hooks:
   post:
-    - "go mod download"             # Download dependencies first
-    - "go generate ./..."           # Generate code if needed
-    - "gofumpt -l -w ."             # Improved formatting
-    - "golangci-lint run --fix"     # Lint and auto-fix
-    - "go test -race -short ./..."  # Run tests
-    - "go build -v ./..."           # Verify build works
+    - "go mod download" # Download dependencies first
+    - "go generate ./..." # Generate code if needed
+    - "gofumpt -l -w ." # Improved formatting
+    - "golangci-lint run --fix" # Lint and auto-fix
+    - "go test -race -short ./..." # Run tests
+    - "go build -v ./..." # Verify build works
 ```
 
 **Rust with Additional Tools:**
+
 ```yaml
 hooks:
   post:
@@ -1374,6 +1414,7 @@ hooks:
 ```
 
 **TypeScript/Node.js:**
+
 ```yaml
 hooks:
   post:
@@ -1398,10 +1439,12 @@ hooks:
 The ADL CLI currently supports Go and Rust, with plans to expand to additional programming languages:
 
 #### ✅ Currently Supported
+
 - **Go** - Full support with templates for main.go, go.mod, and tools
 - **Rust** - Full support with templates for main.rs, Cargo.toml, and tools
 
 #### 🚧 Planned Support
+
 - **TypeScript/Node.js** - Template structure exists but templates not yet implemented
   - Complete A2A agent generation with Express.js framework planned
   - AI-powered agents with OpenAI/Anthropic integration
@@ -1414,6 +1457,7 @@ The ADL CLI currently supports Go and Rust, with plans to expand to additional p
   - Jupyter notebook support for development
 
 #### 🔮 Future Considerations
+
 - **Java/Kotlin** - Enterprise JVM support
 - **C#/.NET** - Microsoft ecosystem integration
 - **Swift** - Apple ecosystem and server-side Swift
@@ -1428,6 +1472,7 @@ The ADL CLI currently supports Go and Rust, with plans to expand to additional p
 ### Contribute to the Roadmap
 
 We welcome community input on our roadmap! Please:
+
 - 💡 Suggest new languages or frameworks via [Issues](https://github.com/inference-gateway/adl-cli/issues)
 - 🤝 Contribute implementations for new languages (see [Contributing Guide](CONTRIBUTING.md))
 

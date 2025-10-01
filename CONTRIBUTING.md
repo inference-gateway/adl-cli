@@ -30,6 +30,7 @@ This project adheres to a code of conduct. By participating, you are expected to
 ### Development Setup
 
 1. **Fork the repository**
+
    ```bash
    # Fork the repo on GitHub, then clone your fork
    git clone https://github.com/YOUR_USERNAME/adl-cli.git
@@ -37,23 +38,26 @@ This project adheres to a code of conduct. By participating, you are expected to
    ```
 
 2. **Add upstream remote**
+
    ```bash
    git remote add upstream https://github.com/inference-gateway/adl-cli.git
    ```
 
 3. **Install dependencies**
+
    ```bash
    go mod download
    ```
 
 4. **Verify setup**
+
    ```bash
    # Run tests
    task test
-   
+
    # Run linting
    task lint
-   
+
    # Build the CLI
    task build
    ```
@@ -111,6 +115,7 @@ Fixes #123
 Format: `type: description`
 
 Types:
+
 - `feat:` - New feature
 - `fix:` - Bug fix
 - `docs:` - Documentation changes
@@ -123,6 +128,7 @@ Types:
 ### Pull Request Process
 
 1. **Create a feature branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -133,18 +139,20 @@ Types:
    - Update documentation as needed
 
 3. **Test your changes**
+
    ```bash
    # Run all tests
    task test
-   
+
    # Run linting
    task lint
-   
+
    # Test with examples
    task examples:test
    ```
 
 4. **Commit and push**
+
    ```bash
    git add .
    git commit -m "feat: your descriptive commit message"
@@ -295,7 +303,7 @@ func TestGenerator_GenerateRust(t *testing.T) {
         },
         // ... more test cases
     }
-    
+
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
             // Test implementation
@@ -337,6 +345,7 @@ func TestGenerator_GenerateRust(t *testing.T) {
 ### Recognition
 
 Contributors will be recognized in:
+
 - GitHub contributors list
 - Release notes for significant contributions
 - Project documentation

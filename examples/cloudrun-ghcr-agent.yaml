@@ -46,7 +46,7 @@ spec:
         registry: ghcr.io
         repository: example/ghcr-example
         tag: latest
-        useCloudBuild: false  # Skip Cloud Build since image is pre-built in GHCR
+        useCloudBuild: false # Skip Cloud Build since image is pre-built in GHCR
       resources:
         cpu: "2"
         memory: 1Gi
