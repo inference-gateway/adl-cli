@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ### Development
+
 - `task build` - Build the ADL CLI binary to `bin/adl`
 - `task test` - Run all tests
 - `task test:coverage` - Run tests with coverage report
@@ -15,6 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `task ci` - Run complete CI pipeline: fmt, lint, test, build
 
 ### Testing
+
 - `go test -v ./...` - Run all tests with verbose output
 - `go test -v ./cmd -run TestInit` - Run specific test
 - `go test -v ./internal/generator` - Test specific package
@@ -22,6 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `task examples:generate` - Generate projects from all examples
 
 ### Development Workflow
+
 - `task dev -- init my-agent` - Run ADL CLI in development mode
 - `task dev -- generate --file agent.yaml --output ./test` - Generate project
 - `task dev -- validate examples/go-agent.yaml` - Validate ADL file
@@ -33,12 +36,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The ADL CLI supports service injection to improve testability and maintainability of skills:
 
 #### Configuration
+
 Services are defined at the spec level and injected into specific skills. The `logger` service is built-in and doesn't need to be declared in the services list:
 
 ```yaml
 spec:
   services:
-    database:  # Custom services
+    database: # Custom services
       type: service
       interface: DatabaseService
       factory: NewDatabaseService
@@ -47,11 +51,12 @@ spec:
     - id: query_database
       name: query_database
       inject:
-        - logger    # Built-in, always available
-        - database  # Must be declared in services
+        - logger # Built-in, always available
+        - database # Must be declared in services
 ```
 
 #### Implementation
+
 - **Built-in Logger**: `logger` service is automatically available as `*zap.Logger` without declaration
 - **Custom Services**: User-defined services create packages in `internal/` (e.g., `internal/database/`)
 - **Constructor Functions**: Skills receive injected services as constructor parameters
@@ -60,6 +65,7 @@ spec:
 - **Validation**: Build-time validation ensures injected services are defined in spec
 
 #### Benefits
+
 - Improved testability through service mocking
 - Better separation of concerns
 - Centralized service and configuration management
@@ -153,18 +159,21 @@ The template system uses Go's `text/template` with Sprig functions:
 ## Testing Strategy
 
 ### Unit Tests
+
 - Table-driven tests for all packages
 - Mock interfaces for external services
 - Isolated test cases with dedicated mocks
 - Coverage target: >80%
 
 ### Integration Tests
+
 - End-to-end generation tests
 - ADL validation against examples
 - Template rendering verification
 - CI/CD generation validation
 
 ### Test Patterns
+
 ```go
 // Table-driven test example
 func TestGenerateProject(t *testing.T) {
@@ -176,7 +185,7 @@ func TestGenerateProject(t *testing.T) {
     }{
         // Test cases here
     }
-    
+
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
             // Test implementation
@@ -188,6 +197,7 @@ func TestGenerateProject(t *testing.T) {
 ## Code Style Guidelines
 
 ### Go Conventions
+
 - Use early returns to reduce nesting
 - Prefer switch over if-else chains
 - Table-driven tests for comprehensive coverage
@@ -196,12 +206,14 @@ func TestGenerateProject(t *testing.T) {
 - Type safety over dynamic typing
 
 ### Error Handling
+
 - Wrap errors with context using `fmt.Errorf`
 - Return errors early
 - Log errors at appropriate levels
 - Provide actionable error messages
 
 ### Testing
+
 - Each test case with isolated services
 - Mock external services and file systems
 - Use test fixtures in `testdata/` directories

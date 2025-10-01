@@ -9,6 +9,7 @@ Generated A2A (Agent-to-Agent) servers implement the [A2A Protocol](https://gith
 ## Key Architecture Components
 
 ### Core Components
+
 - **Main Entry Point**: `main.go` - Configures and starts the A2A server with agent provider configuration and graceful shutdown handling
 - **Agent Configuration**: `.well-known/agent-card.json` - Serves agent metadata at runtime
 - **Skills Implementation**: Generated skill files with TODO placeholders for business logic
@@ -17,6 +18,7 @@ Generated A2A (Agent-to-Agent) servers implement the [A2A Protocol](https://gith
 ### ADL-Generated Structure
 
 The codebase follows a strict generation pattern:
+
 - **Generated Files**: Marked with `DO NOT EDIT` headers - manual changes will be overwritten
 - **Configuration Source**: `agent.yaml` - defines agent capabilities, skills, and metadata
 - **Server Implementation**: Built on the ADK (Agent Development Kit) framework from `github.com/inference-gateway/adk`
@@ -24,6 +26,7 @@ The codebase follows a strict generation pattern:
 ## Development Commands
 
 ### Basic Operations
+
 ```bash
 # Generate/regenerate code from ADL specification
 task generate
@@ -47,6 +50,7 @@ task clean
 ```
 
 ### Docker Operations
+
 ```bash
 # Build Docker image
 task docker:build
@@ -58,17 +62,20 @@ docker run -p 8080:8080 your-agent-name
 ## Development Workflow
 
 ### Skills Implementation
+
 1. **Locate Skill Files**: Skills are generated in the `skills/` directory with TODO placeholders
 2. **Implement Business Logic**: Replace TODO comments with actual skill implementations
 3. **Follow ADK Patterns**: Use the ADK framework patterns for request handling and response formatting
 4. **Add Tests**: Create `*_test.go` files alongside skill implementations
 
 ### Agent Configuration
+
 - **System Prompt**: Edit in `agent.yaml`, then regenerate
 - **Capabilities**: Modify in `agent.yaml` (streaming, pushNotifications, stateTransitionHistory)
 - **Server Configuration**: Update environment variables or `agent.yaml` server section
 
 ### Adding New Skills
+
 1. Update `agent.yaml` with new skill definitions
 2. Run `task generate` to regenerate the codebase
 3. Implement skill logic in newly generated skill files
@@ -77,6 +84,7 @@ docker run -p 8080:8080 your-agent-name
 ## LLM Provider Configuration
 
 Configure your AI provider with environment variables:
+
 - `A2A_AGENT_CLIENT_PROVIDER`: `openai`, `anthropic`, `azure`, `ollama`, `deepseek`
 - `A2A_AGENT_CLIENT_MODEL`: Model identifier (e.g., `gpt-4o-mini`, `claude-3-haiku`)
 - `A2A_AGENT_CLIENT_API_KEY`: Provider API key
@@ -85,6 +93,7 @@ Configure your AI provider with environment variables:
 ## Testing Strategy
 
 When implementing tests:
+
 - Create `*_test.go` files alongside implementation files
 - Use table-driven tests for comprehensive coverage
 - Mock external dependencies (LLM client, Redis if used)
@@ -105,6 +114,7 @@ docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest
 ## Code Patterns and Conventions
 
 ### Go Code Style
+
 - Follow standard Go conventions and gofmt formatting
 - Use table-driven testing for all tests
 - Prefer early returns to avoid deep nesting
@@ -114,6 +124,7 @@ docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest
 - Always ensure a new line at the end of files
 
 ### Skill Development
+
 - Keep skill implementations focused on single responsibilities
 - Use the ADK skill framework for consistent request/response handling
 - Implement proper error handling with meaningful error messages
@@ -123,6 +134,7 @@ docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest
 ## Environment Management
 
 Projects may include environment configuration:
+
 - **Flox**: Environment configuration in `.flox/env/manifest.toml`
 - **DevContainer**: Development container configuration in `.devcontainer/`
 - **Task Runner**: Uses Task (https://taskfile.dev) for build automation
@@ -130,6 +142,7 @@ Projects may include environment configuration:
 ### Development Environment Setup
 
 Standard development environment required:
+
 - Go 1.25+ (or version specified in agent.yaml)
 - Task runner (`go install github.com/go-task/task/v3/cmd/task@latest`)
 - Docker (for containerized operations)
@@ -154,6 +167,7 @@ Standard development environment required:
 ## Deployment
 
 Generated agents include Docker configuration and can be deployed to:
+
 - Kubernetes (if deployment config included)
 - Google Cloud Run (if deployment config included)
 - Any container platform supporting Docker images

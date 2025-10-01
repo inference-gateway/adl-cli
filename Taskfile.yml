@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 vars:
   APP_NAME: adl
@@ -32,6 +32,11 @@ tasks:
     desc: Format and vet code
     cmd: |
       go fmt ./...
+
+  format:
+    desc: Run prettier formatter
+    cmd: |
+      prettier . --write
 
   vet:
     desc: Run go vet
@@ -81,7 +86,7 @@ tasks:
   release:
     desc: Build release binaries for multiple platforms
     cmds:
-     - GORELEASER_CURRENT_TAG=v{{.VERSION}} goreleaser release --snapshot --clean --skip=publish
+      - GORELEASER_CURRENT_TAG=v{{.VERSION}} goreleaser release --snapshot --clean --skip=publish
 
   docker:build:
     desc: Build Docker image

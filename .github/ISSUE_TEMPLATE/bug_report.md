@@ -1,10 +1,10 @@
 ---
 name: Bug report
 about: Create a bug report
-title: '[BUG] '
+title: "[BUG] "
 labels: bug
 type: bug
-assignees: ''
+assignees: ""
 ---
 
 ## Summary
