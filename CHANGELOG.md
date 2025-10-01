@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.22.1](https://github.com/inference-gateway/adl-cli/compare/v0.22.0...v0.22.1) (2025-10-01)
+
+### 🐛 Bug Fixes
+
+* Correct port reference for A2A artifacts server logging ([416c668](https://github.com/inference-gateway/adl-cli/commit/416c6685b824ea0f6428d90548df907ffc110d29))
+
 ## [0.22.0](https://github.com/inference-gateway/adl-cli/compare/v0.21.7...v0.22.0) (2025-10-01)
 
 ### ✨ Features
