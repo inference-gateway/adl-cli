@@ -122,6 +122,21 @@ The following custom configuration variables are available:
 | **Storage** | `A2A_QUEUE_URL` | Redis connection URL (when using Redis) | - |
 | **Storage** | `A2A_QUEUE_MAX_SIZE` | Maximum queue size | `100` |
 | **Storage** | `A2A_QUEUE_CLEANUP_INTERVAL` | Task cleanup interval | `30s` |
+{{- if and .ADL.Spec.Artifacts .ADL.Spec.Artifacts.Enabled }}
+| **Artifacts** | `A2A_ARTIFACT_STORAGE_PROVIDER` | Storage backend (`filesystem` or `minio`) | `filesystem` |
+| **Artifacts** | `A2A_ARTIFACT_STORAGE_BASE_PATH` | Base path for artifact storage | `./artifacts` |
+| **Artifacts** | `A2A_ARTIFACT_STORAGE_BASE_URL` | Public URL for accessing artifacts | - |
+| **Artifacts** | `A2A_ARTIFACT_STORAGE_MAX_FILE_SIZE` | Maximum file size for uploads | `100MB` |
+| **Artifacts** | `A2A_ARTIFACT_RETENTION_MAX_ARTIFACTS` | Max artifacts to keep (0 = unlimited) | `100` |
+| **Artifacts** | `A2A_ARTIFACT_RETENTION_MAX_AGE` | Max age of artifacts (0 = no expiration) | `720h` |
+| **Artifacts** | `A2A_ARTIFACT_RETENTION_CLEANUP_INTERVAL` | Cleanup frequency (0 = manual only) | `24h` |
+| **MinIO** | `A2A_ARTIFACT_MINIO_ENDPOINT` | MinIO server endpoint | `localhost:9000` |
+| **MinIO** | `A2A_ARTIFACT_MINIO_ACCESS_KEY` | MinIO access key | - |
+| **MinIO** | `A2A_ARTIFACT_MINIO_SECRET_KEY` | MinIO secret key | - |
+| **MinIO** | `A2A_ARTIFACT_MINIO_BUCKET` | MinIO bucket name | `artifacts` |
+| **MinIO** | `A2A_ARTIFACT_MINIO_REGION` | MinIO region | `us-east-1` |
+| **MinIO** | `A2A_ARTIFACT_MINIO_USE_SSL` | Use SSL for MinIO connection | `false` |
+{{- end }}
 {{- if and .ADL.Spec.Server.Auth .ADL.Spec.Server.Auth.Enabled }}
 | **Authentication** | `A2A_AUTH_ENABLE` | Enable OIDC authentication | `true` |
 | **Authentication** | `A2A_AUTH_ISSUER_URL` | OIDC issuer URL | - |

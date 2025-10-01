@@ -122,35 +122,9 @@ type Language struct {
 	Rust       *RustConfig       `yaml:"rust,omitempty" json:"rust,omitempty"`
 }
 
-// ArtifactStorageProvider represents supported storage backends
-type ArtifactsStorageProvider string
-
-const (
-	ArtifactStorageFilesystem ArtifactsStorageProvider = "filesystem"
-	ArtifactStorageMinio      ArtifactsStorageProvider = "minio"
-)
-
-type ArtifactsStorageConfig struct {
-	Enable     bool    `yaml:"enable,omitempty" json:"enable,omitempty"`
-	Endpoint   string  `yaml:"endpoint,omitempty" json:"endpoint,omitempty"`
-	BucketName string  `yaml:"bucketName,omitempty" json:"bucketName,omitempty"`
-	UseSSL     bool    `yaml:"useSSL,omitempty" json:"useSSL,omitempty"`
-	BaseURL    string  `yaml:"baseURL,omitempty" json:"baseURL,omitempty"`
-	BasePath   string  `yaml:"basePath,omitempty" json:"basePath,omitempty"`
-	SecretKey  *string `yaml:"-" json:"-"`
-	AccessKey  *string `yaml:"-" json:"-"`
-}
-
-type ArtifactsRetentionConfig struct {
-	MaxArtifacts    int           `yaml:"maxArtifacts,omitempty" json:"maxArtifacts,omitempty"`
-	MaxAge          time.Duration `yaml:"maxAge,omitempty" json:"maxAge,omitempty"`
-	CleanupInterval time.Duration `yaml:"cleanupInterval,omitempty" json:"cleanupInterval,omitempty"`
-}
-
+// ArtifactsConfig for artifact storage settings
 type ArtifactsConfig struct {
-	Provider  ArtifactsStorageProvider  `yaml:"provider" json:"provider"`
-	Storage   *ArtifactsStorageConfig   `yaml:"storage,omitempty" json:"storage,omitempty"`
-	Retention *ArtifactsRetentionConfig `yaml:"retention,omitempty" json:"retention,omitempty"`
+	Enabled bool `yaml:"enabled" json:"enabled"`
 }
 
 // SCM contains source control management configuration

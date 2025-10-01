@@ -204,8 +204,7 @@ type adlData struct {
 			Temperature  float64 `yaml:"temperature,omitempty"`
 		} `yaml:"agent,omitempty"`
 		Artifacts *struct {
-			Provider string                 `yaml:"provider"`
-			Config   map[string]interface{} `yaml:"config,omitempty"`
+			Enabled bool `yaml:"enabled"`
 		} `yaml:"artifacts,omitempty"`
 		Services []string `yaml:"services,omitempty"`
 		Skills       []struct {
@@ -324,20 +323,15 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 
 	fmt.Println("\n📂 Artifacts Configuration")
 	fmt.Println("--------------------------")
-	enableArtifacts := conditionalPromptBool(useDefaults, "Enable artifacts server support", true)
+	enableArtifacts := conditionalPromptBool(useDefaults, "Enable artifacts support (filesystem/MinIO storage)", false)
 
 	if enableArtifacts {
 		adl.Spec.Artifacts = &struct {
-			Provider string                 `yaml:"provider"`
-			Config   map[string]interface{} `yaml:"config,omitempty"`
-		}{}
-
-		artifactsProvider := conditionalPromptChoice(useDefaults, "Artifacts provider", []string{"filesystem", "minio", "s3"}, "filesystem")
-		adl.Spec.Artifacts.Provider = artifactsProvider
-
-		if useDefaults {
-			fmt.Printf("Artifacts provider (filesystem/minio/s3) [filesystem]: filesystem\n")
+			Enabled bool `yaml:"enabled"`
+		}{
+			Enabled: true,
 		}
+		fmt.Println("ℹ️  Artifacts storage can be configured via A2A_ARTIFACT_* environment variables")
 	}
 
 	fmt.Println("\n🔌 Dependencies")
