@@ -33,6 +33,11 @@ tasks:
     cmd: |
       go fmt ./...
 
+  format:
+    desc: Run prettier formatter
+    cmd: |
+      prettier . --write
+
   vet:
     desc: Run go vet
     cmd: |
