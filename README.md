@@ -1063,48 +1063,19 @@ The ADL CLI supports multiple AI providers including OpenAI, Anthropic, DeepSeek
 
 ## Artifacts Support
 
-The ADL CLI includes built-in support for artifacts servers, enabling agents to create, store, and manage files and resources. This is essential for agents that need to persist data, generate documents, or work with binary content.
-
-### Filesystem Artifacts
-
-For simple use cases or local development, use the filesystem artifacts provider:
+Enable artifacts support to allow your agent to create, store, and manage files and resources:
 
 ```yaml
 spec:
   artifacts:
-    provider: filesystem
+    enabled: true
 ```
 
-This configuration automatically integrates a filesystem-based artifacts server into your agent, storing artifacts locally on the server's filesystem.
+Configure storage via environment variables (see generated README for A2A_ARTIFACT_* variables). Supports both filesystem and MinIO/S3 storage backends.
 
-### MinIO Artifacts
-
-For production deployments requiring object storage, use the MinIO artifacts provider:
-
-```yaml
-spec:
-  artifacts:
-    provider: minio
-    config:
-      endpoint: "localhost:9000"
-      bucketName: "agent-artifacts"
-```
-
-**Environment Variables:**
-- `ARTIFACTS_MINIO_ENDPOINT` - MinIO server endpoint (default: localhost:9000)
-- `ARTIFACTS_MINIO_ACCESS_KEY_ID` - MinIO access key (default: minioadmin)
-- `ARTIFACTS_MINIO_SECRET_ACCESS_KEY` - MinIO secret key (default: minioadmin)
-- `ARTIFACTS_MINIO_BUCKET_NAME` - Bucket for artifacts (default: artifacts)
-- `ARTIFACTS_MINIO_USE_SSL` - Enable SSL connection (default: false)
-
-**Benefits:**
-- **Scalability** - Object storage scales independently of agent instances
-- **Durability** - Built-in replication and data protection
-- **Enterprise Ready** - Compatible with AWS S3 and other S3-compatible services
-- **Multi-Access** - Multiple agent instances can share artifacts
-
-**Example Skills:**
-See `examples/go-agent-artifacts-filesystem.yaml` and `examples/go-agent-artifacts-minio.yaml` for complete examples with artifact-enabled skills.
+**Examples:**
+- `examples/go-agent-artifacts-filesystem.yaml` - Filesystem storage example
+- `examples/go-agent-artifacts-minio.yaml` - MinIO storage example
 
 ## GitHub Issue Templates
 
