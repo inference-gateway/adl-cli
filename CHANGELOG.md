@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.22.0](https://github.com/inference-gateway/adl-cli/compare/v0.21.7...v0.22.0) (2025-10-01)
+
+### ✨ Features
+
+* **artifacts:** Add artifacts server generation support  ([#80](https://github.com/inference-gateway/adl-cli/issues/80)) ([0182ce5](https://github.com/inference-gateway/adl-cli/commit/0182ce5ff898a5dc47434c12b15bd1c49efefcb4))
+
+### 🔧 Miscellaneous
+
+* Update dependencies and add Prettier formatting task ([07ae407](https://github.com/inference-gateway/adl-cli/commit/07ae40746a0c398b9d3cb433d90df4728936f448))
+* Update documentation and improve formatting across multiple files ([5e345fe](https://github.com/inference-gateway/adl-cli/commit/5e345feb9194d057bc9ab74502bdfaebc4d814d4))
+* Update README to reflect 'enterprise-ready' terminology ([4377b21](https://github.com/inference-gateway/adl-cli/commit/4377b21647d4f097892d33fc0bb7e6f5234aeac4))
+
 ## [0.21.7](https://github.com/inference-gateway/adl-cli/compare/v0.21.6...v0.21.7) (2025-09-26)
 
 ### ♻️ Improvements
