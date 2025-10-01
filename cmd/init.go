@@ -203,8 +203,11 @@ type adlData struct {
 			MaxTokens    int     `yaml:"maxTokens,omitempty"`
 			Temperature  float64 `yaml:"temperature,omitempty"`
 		} `yaml:"agent,omitempty"`
+		Artifacts *struct {
+			Enabled bool `yaml:"enabled"`
+		} `yaml:"artifacts,omitempty"`
 		Services []string `yaml:"services,omitempty"`
-		Skills       []struct {
+		Skills   []struct {
 			ID          string         `yaml:"id"`
 			Name        string         `yaml:"name"`
 			Description string         `yaml:"description"`
@@ -317,6 +320,19 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 	adl.Spec.Capabilities.Streaming = conditionalPromptBool(useDefaults, "Enable streaming", true)
 	adl.Spec.Capabilities.PushNotifications = conditionalPromptBool(useDefaults, "Enable push notifications", false)
 	adl.Spec.Capabilities.StateTransitionHistory = conditionalPromptBool(useDefaults, "Enable state transition history", false)
+
+	fmt.Println("\n📂 Artifacts Configuration")
+	fmt.Println("--------------------------")
+	enableArtifacts := conditionalPromptBool(useDefaults, "Enable artifacts support (filesystem/MinIO storage)", false)
+
+	if enableArtifacts {
+		adl.Spec.Artifacts = &struct {
+			Enabled bool `yaml:"enabled"`
+		}{
+			Enabled: true,
+		}
+		fmt.Println("ℹ️  Artifacts storage can be configured via A2A_ARTIFACT_* environment variables")
+	}
 
 	fmt.Println("\n🔌 Dependencies")
 	fmt.Println("---------------")

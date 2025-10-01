@@ -69,7 +69,7 @@ func TestInitCommandIncludesSCMDefaults(t *testing.T) {
 	}
 
 	contentStr := string(content)
-	
+
 	if !strings.Contains(contentStr, "scm:") {
 		t.Errorf("ADL file missing SCM configuration")
 	}
@@ -82,7 +82,7 @@ func TestInitCommandIncludesSCMDefaults(t *testing.T) {
 	if !strings.Contains(contentStr, "issue_templates: true") {
 		t.Errorf("ADL file missing SCM issue_templates default")
 	}
-	
+
 	t.Logf("Generated ADL content:\n%s", contentStr)
 }
 

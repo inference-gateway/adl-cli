@@ -31,6 +31,7 @@ _A command-line interface for generating enterprise-ready A2A (Agent-to-Agent) s
 - [Generated Project Structure](#generated-project-structure)
 - [Sandbox Environments](#sandbox-environments)
 - [Enterprise Features](#enterprise-features)
+- [Artifacts Support](#artifacts-support)
 - [GitHub Issue Templates](#github-issue-templates)
 - [Examples](#examples)
 - [Template System & Architecture](#template-system--architecture)
@@ -61,6 +62,7 @@ The ADL CLI helps you build enterprise-ready A2A agents quickly by generating co
 - 🏗️ **Sandbox Environments** - Flox and DevContainer support for isolated development
 - 🎣 **Post-Generation Hooks** - Customize build, format, and test commands after generation
 - 🤖 **Multi-Provider AI** - OpenAI, Anthropic, DeepSeek, Ollama, Google, Mistral, and Groq support
+- 📁 **Artifacts Support** - Integrated filesystem and MinIO object storage for artifact management
 
 ## Installation
 
@@ -1086,6 +1088,22 @@ When `github_app: true` is set, the generated CD pipeline will use GitHub App au
 ### AI Provider Support
 
 The ADL CLI supports multiple AI providers including OpenAI, Anthropic, DeepSeek, Ollama (for local LLMs), Google AI, Mistral, and Groq. Each provider requires appropriate API keys to be configured as environment variables. See the ADL examples above for configuration details.
+
+## Artifacts Support
+
+Enable artifacts support to allow your agent to create, store, and manage files and resources:
+
+```yaml
+spec:
+  artifacts:
+    enabled: true
+```
+
+Configure storage via environment variables (see generated README for A2A_ARTIFACT_* variables). Supports both filesystem and MinIO/S3 storage backends.
+
+**Examples:**
+- `examples/go-agent-artifacts-filesystem.yaml` - Filesystem storage example
+- `examples/go-agent-artifacts-minio.yaml` - MinIO storage example
 
 ## GitHub Issue Templates
 
