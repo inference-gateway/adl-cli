@@ -207,7 +207,7 @@ type adlData struct {
 			Enabled bool `yaml:"enabled"`
 		} `yaml:"artifacts,omitempty"`
 		Services []string `yaml:"services,omitempty"`
-		Skills       []struct {
+		Skills   []struct {
 			ID          string         `yaml:"id"`
 			Name        string         `yaml:"name"`
 			Description string         `yaml:"description"`

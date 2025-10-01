@@ -190,7 +190,7 @@ func TestBuildAcronymsMap(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := buildAcronymsMap(tt.customAcronyms)
-			
+
 			for i, key := range tt.expectedKeys {
 				expectedValue := tt.expectedValues[i]
 				if value, exists := result[key]; !exists {
@@ -250,9 +250,9 @@ func TestEngine_PrepareContext(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			engine := New("test")
 			ctx := Context{ADL: tt.adl}
-			
+
 			preparedCtx := engine.prepareContext(ctx)
-			
+
 			for key, expectedValue := range tt.expected {
 				if value, exists := preparedCtx.customAcronyms[key]; !exists {
 					t.Errorf("prepareContext() missing acronym %q", key)
@@ -317,13 +317,13 @@ func TestEngine_Execute_WithCustomAcronyms(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			engine := New("test")
 			ctx := Context{ADL: tt.adl}
-			
+
 			result, err := engine.Execute(tt.template, ctx)
 			if err != nil {
 				t.Errorf("Execute() error = %v", err)
 				return
 			}
-			
+
 			if result != tt.expected {
 				t.Errorf("Execute() = %q, want %q", result, tt.expected)
 			}
@@ -333,7 +333,7 @@ func TestEngine_Execute_WithCustomAcronyms(t *testing.T) {
 
 func TestGetDefaultAcronyms(t *testing.T) {
 	acronyms := getDefaultAcronyms()
-	
+
 	expectedDefaults := map[string]string{
 		"id":   "ID",
 		"api":  "API",
@@ -342,7 +342,7 @@ func TestGetDefaultAcronyms(t *testing.T) {
 		"sql":  "SQL",
 		"html": "HTML",
 	}
-	
+
 	for key, expectedValue := range expectedDefaults {
 		if value, exists := acronyms[key]; !exists {
 			t.Errorf("getDefaultAcronyms() missing default acronym %q", key)
@@ -350,7 +350,7 @@ func TestGetDefaultAcronyms(t *testing.T) {
 			t.Errorf("getDefaultAcronyms() acronym %q = %q, want %q", key, value, expectedValue)
 		}
 	}
-	
+
 	if len(acronyms) < 10 {
 		t.Errorf("getDefaultAcronyms() returned %d acronyms, expected at least 10", len(acronyms))
 	}
