@@ -35,13 +35,23 @@ FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates tzdata
 
-WORKDIR /root/
+# Create a2a group and agent user
+RUN addgroup -g 1001 a2a && \
+    adduser -D -u 1001 -G a2a agent
+
+WORKDIR /app
 
 # Copy the binary from builder stage
 COPY --from=builder /app/main .
 
 # Copy agent card
 COPY --from=builder /app/.well-known ./.well-known
+
+# Change ownership to agent user
+RUN chown -R agent:a2a /app
+
+# Switch to non-root user
+USER agent
 
 # Expose port
 EXPOSE {{ .ADL.Spec.Server.Port | default 8080 }}
