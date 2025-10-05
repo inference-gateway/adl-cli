@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.22.3](https://github.com/inference-gateway/adl-cli/compare/v0.22.2...v0.22.3) (2025-10-05)
+
+### ♻️ Improvements
+
+* **deps:** Update package versions for golangci-lint, rust tools, git, docker, and claude-code ([a2a380e](https://github.com/inference-gateway/adl-cli/commit/a2a380e69c36b4e48710a701c57fec6fdeac5db2))
+
+### 🐛 Bug Fixes
+
+* **artifacts:** Show warning instead of fatal error when artifacts server not enabled ([#82](https://github.com/inference-gateway/adl-cli/issues/82)) ([48285c9](https://github.com/inference-gateway/adl-cli/commit/48285c937239556e5311d857d216a029b853f2a6)), closes [#81](https://github.com/inference-gateway/adl-cli/issues/81)
+
 ## [0.22.2](https://github.com/inference-gateway/adl-cli/compare/v0.22.1...v0.22.2) (2025-10-05)
 
 ### ♻️ Improvements
