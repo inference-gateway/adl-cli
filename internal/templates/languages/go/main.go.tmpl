@@ -134,7 +134,9 @@ func main() {
 		NewArtifactsServerBuilder(&cfg.A2A.ArtifactsConfig, l).
 		Build()
 	if err != nil {
-		l.Fatal("failed to create artifacts server", zap.Error(err))
+		l.Warn("artifacts server could not be created - check ARTIFACTS_ENABLE environment variable", zap.Error(err))
+		l.Info("continuing without artifacts server support")
+		artifactsServer = nil
 	}
 {{- end }}
 
@@ -146,12 +148,14 @@ func main() {
 	}()
 
 {{ if and .ADL.Spec.Artifacts .ADL.Spec.Artifacts.Enabled }}
-	go func() {
-		l.Info("starting A2A artifacts server", zap.String("port", cfg.A2A.ArtifactsConfig.ServerConfig.Port))
-		if err := artifactsServer.Start(ctx); err != nil {
-			l.Fatal("artifacts server failed to start", zap.Error(err))
-		}
-	}()
+	if artifactsServer != nil {
+		go func() {
+			l.Info("starting A2A artifacts server", zap.String("port", cfg.A2A.ArtifactsConfig.ServerConfig.Port))
+			if err := artifactsServer.Start(ctx); err != nil {
+				l.Fatal("artifacts server failed to start", zap.Error(err))
+			}
+		}()
+	}
 {{- end }}
 
 	l.Info("{{ .ADL.Metadata.Name }} agent running successfully", 
@@ -165,7 +169,9 @@ func main() {
 	l.Info("shutdown signal received, gracefully stopping server...")
 	a2aServer.Stop(ctx)
 {{- if and .ADL.Spec.Artifacts .ADL.Spec.Artifacts.Enabled }}
-	artifactsServer.Stop(ctx)
+	if artifactsServer != nil {
+		artifactsServer.Stop(ctx)
+	}
 {{- end }}
 	l.Info("{{ .ADL.Metadata.Name }} agent stopped")
 }
