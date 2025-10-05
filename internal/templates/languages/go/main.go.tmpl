@@ -135,7 +135,7 @@ func main() {
 		}).
 {{- if and .ADL.Spec.Artifacts .ADL.Spec.Artifacts.Enabled }}
 		WithArtifactStorage(artifactsServer.GetStorage()).
-{{- end -}}
+{{- end }}
 		WithDefaultBackgroundTaskHandler().
 		WithDefaultStreamingTaskHandler().
 		Build()
