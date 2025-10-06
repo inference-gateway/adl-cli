@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.23.0](https://github.com/inference-gateway/adl-cli/compare/v0.22.3...v0.23.0) (2025-10-06)
+
+### ✨ Features
+
+* **artifacts:** Add automatic artifacts storage to artifact utility ([#85](https://github.com/inference-gateway/adl-cli/issues/85)) ([b9ee27c](https://github.com/inference-gateway/adl-cli/commit/b9ee27c584279107fbe843976095cfd4c366d84f))
+
 ## [0.22.3](https://github.com/inference-gateway/adl-cli/compare/v0.22.2...v0.22.3) (2025-10-05)
 
 ### ♻️ Improvements
