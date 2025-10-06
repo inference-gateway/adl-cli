@@ -114,21 +114,6 @@ func main() {
 		l.Fatal("failed to create agent", zap.Error(err))
 	}
 
-	a2aServer, err := server.NewA2AServerBuilder(cfg.A2A, l).
-		WithAgent(agent).
-		WithAgentCardFromFile(".well-known/agent-card.json", map[string]any{
-			"name":        AgentName,
-			"version":     Version,
-			"description": AgentDescription,
-			"url":         cfg.A2A.AgentURL,
-		}).
-		WithDefaultBackgroundTaskHandler().
-		WithDefaultStreamingTaskHandler().
-		Build()
-	if err != nil {
-		l.Fatal("failed to create A2A server", zap.Error(err))
-	}
-
 {{ if and .ADL.Spec.Artifacts .ADL.Spec.Artifacts.Enabled }}
 	artifactsServer, err := server.
 		NewArtifactsServerBuilder(&cfg.A2A.ArtifactsConfig, l).
@@ -139,6 +124,24 @@ func main() {
 		artifactsServer = nil
 	}
 {{- end }}
+
+	a2aServer, err := server.NewA2AServerBuilder(cfg.A2A, l).
+		WithAgent(agent).
+		WithAgentCardFromFile(".well-known/agent-card.json", map[string]any{
+			"name":        AgentName,
+			"version":     Version,
+			"description": AgentDescription,
+			"url":         cfg.A2A.AgentURL,
+		}).
+{{- if and .ADL.Spec.Artifacts .ADL.Spec.Artifacts.Enabled }}
+		WithArtifactStorage(artifactsServer.GetStorage()).
+{{- end }}
+		WithDefaultBackgroundTaskHandler().
+		WithDefaultStreamingTaskHandler().
+		Build()
+	if err != nil {
+		l.Fatal("failed to create A2A server", zap.Error(err))
+	}
 
 	go func() {
 		l.Info("starting A2A server", zap.String("port", cfg.A2A.ServerConfig.Port))
