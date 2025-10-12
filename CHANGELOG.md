@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.23.2](https://github.com/inference-gateway/adl-cli/compare/v0.23.1...v0.23.2) (2025-10-12)
+
+### 🔧 Miscellaneous
+
+* **deps:** Update go-task and claude-code versions to remove caret notation ([f3bcf36](https://github.com/inference-gateway/adl-cli/commit/f3bcf361a6042d4daafdf5cac6dbcdbcf08f0b06))
+
 ## [0.23.1](https://github.com/inference-gateway/adl-cli/compare/v0.23.0...v0.23.1) (2025-10-11)
 
 ### 🔧 Miscellaneous
