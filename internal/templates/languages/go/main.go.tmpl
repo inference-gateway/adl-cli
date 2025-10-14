@@ -55,8 +55,6 @@ func main() {
 
 	l.Info("starting " + AgentName + " agent (version: " + Version + ", environment: " + cfg.Environment + ")")
 
-	toolBox := server.NewDefaultToolBox()
-
 	{{- if .ADL.Spec.Services }}
 	{{- $anySvcUsed := false }}
 	{{- range $serviceName, $svc := .ADL.Spec.Services }}
@@ -90,6 +88,9 @@ func main() {
 	{{- end }}
 	{{- end }}
 
+	// Create toolbox for skills
+	toolBox := server.NewToolBox()
+
 	{{- range .ADL.Spec.Skills }}
 
 	// Register {{ .Name }} skill
@@ -106,6 +107,7 @@ func main() {
 	agent, err := server.NewAgentBuilder(l).
 		WithConfig(&cfg.A2A.AgentConfig).
 		WithLLMClient(llmClient).
+		WithDefaultToolBox().
 		WithToolBox(toolBox).
 		WithMaxChatCompletion(cfg.A2A.AgentConfig.MaxChatCompletionIterations).
 		WithSystemPrompt(`{{- if and .ADL.Spec.Agent .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt }}{{- else }}You are a helpful AI assistant.{{- end }}`).
@@ -115,27 +117,39 @@ func main() {
 	}
 
 {{ if and .ADL.Spec.Artifacts .ADL.Spec.Artifacts.Enabled }}
+	artifactService, err := server.NewArtifactService(&cfg.A2A.ArtifactsConfig, l)
+	if err != nil {
+		l.Warn("artifact service could not be created - check ARTIFACTS_ENABLE environment variable", zap.Error(err))
+		l.Info("continuing without artifact service support")
+		artifactService = nil
+	}
+
 	artifactsServer, err := server.
 		NewArtifactsServerBuilder(&cfg.A2A.ArtifactsConfig, l).
 		Build()
 	if err != nil {
-		l.Warn("artifacts server could not be created - check ARTIFACTS_ENABLE environment variable", zap.Error(err))
-		l.Info("continuing without artifacts server support")
+		l.Warn("artifacts server could not be created", zap.Error(err))
+		l.Info("continuing without artifacts server")
 		artifactsServer = nil
 	}
 {{- end }}
 
-	a2aServer, err := server.NewA2AServerBuilder(cfg.A2A, l).
+	serverBuilder := server.NewA2AServerBuilder(cfg.A2A, l).
 		WithAgent(agent).
 		WithAgentCardFromFile(".well-known/agent-card.json", map[string]any{
 			"name":        AgentName,
 			"version":     Version,
 			"description": AgentDescription,
 			"url":         cfg.A2A.AgentURL,
-		}).
+		})
+
 {{- if and .ADL.Spec.Artifacts .ADL.Spec.Artifacts.Enabled }}
-		WithArtifactStorage(artifactsServer.GetStorage()).
+	if artifactService != nil {
+		serverBuilder = serverBuilder.WithArtifactService(artifactService)
+	}
 {{- end }}
+
+	a2aServer, err := serverBuilder.
 		WithDefaultBackgroundTaskHandler().
 		WithDefaultStreamingTaskHandler().
 		Build()
