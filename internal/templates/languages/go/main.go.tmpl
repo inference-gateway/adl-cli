@@ -88,8 +88,8 @@ func main() {
 	{{- end }}
 	{{- end }}
 
-	// Create toolbox for skills
-	toolBox := server.NewToolBox()
+	// Create toolbox with default tools (like input_required, create_artifact etc)
+	toolBox := server.NewDefaultToolBox(&cfg.A2A.AgentConfig.ToolBoxConfig)
 
 	{{- range .ADL.Spec.Skills }}
 
