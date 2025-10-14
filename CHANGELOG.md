@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.23.4](https://github.com/inference-gateway/adl-cli/compare/v0.23.3...v0.23.4) (2025-10-14)
+
+### 🐛 Bug Fixes
+
+* **template:** Correct indentation in artifact service condition ([9151467](https://github.com/inference-gateway/adl-cli/commit/9151467c6dd1b8a9afde7afb7672a4b6c04e520d))
+
 ## [0.23.3](https://github.com/inference-gateway/adl-cli/compare/v0.23.2...v0.23.3) (2025-10-14)
 
 ### 🔧 Miscellaneous
