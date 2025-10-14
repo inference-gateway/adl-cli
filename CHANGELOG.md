@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.23.5](https://github.com/inference-gateway/adl-cli/compare/v0.23.4...v0.23.5) (2025-10-14)
+
+### 🐛 Bug Fixes
+
+* **template:** Update toolbox initialization to use default tools ([d915a06](https://github.com/inference-gateway/adl-cli/commit/d915a06d7169f0a2f60824b160cc0612058296fe))
+
+## [0.23.4](https://github.com/inference-gateway/adl-cli/compare/v0.23.3...v0.23.4) (2025-10-14)
+
+### 🐛 Bug Fixes
+
+* **template:** Correct indentation in artifact service condition ([9151467](https://github.com/inference-gateway/adl-cli/commit/9151467c6dd1b8a9afde7afb7672a4b6c04e520d))
+
+## [0.23.3](https://github.com/inference-gateway/adl-cli/compare/v0.23.2...v0.23.3) (2025-10-14)
+
+### 🔧 Miscellaneous
+
+* **deps:** Update adk dependency version to v0.15.0 and refactor toolbox initialization ([364c012](https://github.com/inference-gateway/adl-cli/commit/364c012e4491ee4f0bac46a2dfc282ebf9bd296a))
+
+## [0.23.2](https://github.com/inference-gateway/adl-cli/compare/v0.23.1...v0.23.2) (2025-10-12)
+
+### 🔧 Miscellaneous
+
+* **deps:** Update go-task and claude-code versions to remove caret notation ([f3bcf36](https://github.com/inference-gateway/adl-cli/commit/f3bcf361a6042d4daafdf5cac6dbcdbcf08f0b06))
+
+## [0.23.1](https://github.com/inference-gateway/adl-cli/compare/v0.23.0...v0.23.1) (2025-10-11)
+
+### 🔧 Miscellaneous
+
+* **deps:** Update adk dependency version to v0.14.0 ([3cf69d9](https://github.com/inference-gateway/adl-cli/commit/3cf69d921b62be5136fb3f234d2b38f9ca95224f))
+
+## [0.23.0](https://github.com/inference-gateway/adl-cli/compare/v0.22.3...v0.23.0) (2025-10-06)
+
+### ✨ Features
+
+* **artifacts:** Add automatic artifacts storage to artifact utility ([#85](https://github.com/inference-gateway/adl-cli/issues/85)) ([b9ee27c](https://github.com/inference-gateway/adl-cli/commit/b9ee27c584279107fbe843976095cfd4c366d84f))
+
 ## [0.22.3](https://github.com/inference-gateway/adl-cli/compare/v0.22.2...v0.22.3) (2025-10-05)
 
 ### ♻️ Improvements
