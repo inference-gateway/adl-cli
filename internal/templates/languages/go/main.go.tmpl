@@ -107,7 +107,6 @@ func main() {
 	agent, err := server.NewAgentBuilder(l).
 		WithConfig(&cfg.A2A.AgentConfig).
 		WithLLMClient(llmClient).
-		WithDefaultToolBox().
 		WithToolBox(toolBox).
 		WithMaxChatCompletion(cfg.A2A.AgentConfig.MaxChatCompletionIterations).
 		WithSystemPrompt(`{{- if and .ADL.Spec.Agent .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt }}{{- else }}You are a helpful AI assistant.{{- end }}`).
