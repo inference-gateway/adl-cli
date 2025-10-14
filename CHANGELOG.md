@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.23.5](https://github.com/inference-gateway/adl-cli/compare/v0.23.4...v0.23.5) (2025-10-14)
+
+### 🐛 Bug Fixes
+
+* **template:** Update toolbox initialization to use default tools ([d915a06](https://github.com/inference-gateway/adl-cli/commit/d915a06d7169f0a2f60824b160cc0612058296fe))
+
 ## [0.23.4](https://github.com/inference-gateway/adl-cli/compare/v0.23.3...v0.23.4) (2025-10-14)
 
 ### 🐛 Bug Fixes
