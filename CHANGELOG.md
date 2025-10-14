@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.23.6](https://github.com/inference-gateway/adl-cli/compare/v0.23.5...v0.23.6) (2025-10-14)
+
+### 🐛 Bug Fixes
+
+* **template:** Remove default toolbox initialization in agent builder ([d041470](https://github.com/inference-gateway/adl-cli/commit/d041470d1c9de4f4088fb97febca7cf4605dc306))
+
 ## [0.23.5](https://github.com/inference-gateway/adl-cli/compare/v0.23.4...v0.23.5) (2025-10-14)
 
 ### 🐛 Bug Fixes
