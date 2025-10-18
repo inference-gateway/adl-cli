@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.23.8](https://github.com/inference-gateway/adl-cli/compare/v0.23.7...v0.23.8) (2025-10-18)
+
+### 🔧 Miscellaneous
+
+* **deps:** Update adk dependency version to v0.15.2 ([67825db](https://github.com/inference-gateway/adl-cli/commit/67825db269e2be469f701ee15c012256a8388613))
+* **deps:** Update claude-code version to 2.0.15 ([22d4317](https://github.com/inference-gateway/adl-cli/commit/22d431711556ad6343688f6d982fa143f201d484))
+* **deps:** Update dependencies in manifest.toml to specific versions ([68b443a](https://github.com/inference-gateway/adl-cli/commit/68b443a58e54529c347f375cd8c71e7bea4d217b))
+
 ## [0.23.7](https://github.com/inference-gateway/adl-cli/compare/v0.23.6...v0.23.7) (2025-10-17)
 
 ### 🔧 Miscellaneous
