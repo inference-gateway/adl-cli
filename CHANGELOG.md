@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.23.9](https://github.com/inference-gateway/adl-cli/compare/v0.23.8...v0.23.9) (2025-10-18)
+
+### 🐛 Bug Fixes
+
+* **config:** Ensure default values are set correctly for boolean and float64 types ([7a52c54](https://github.com/inference-gateway/adl-cli/commit/7a52c5477676e51a40005084acdf254e8afb729c))
+
 ## [0.23.8](https://github.com/inference-gateway/adl-cli/compare/v0.23.7...v0.23.8) (2025-10-18)
 
 ### 🔧 Miscellaneous
