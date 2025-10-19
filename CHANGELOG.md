@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.23.11](https://github.com/inference-gateway/adl-cli/compare/v0.23.10...v0.23.11) (2025-10-19)
+
+### 🐛 Bug Fixes
+
+* **docs:** Update terminology from production-ready to enterprise-ready for clarity ([0ff72e8](https://github.com/inference-gateway/adl-cli/commit/0ff72e83101afac8bef60353ddbac7ca4e438357))
+
 ## [0.23.10](https://github.com/inference-gateway/adl-cli/compare/v0.23.9...v0.23.10) (2025-10-19)
 
 ### 🐛 Bug Fixes
