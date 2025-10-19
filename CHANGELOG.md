@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.23.10](https://github.com/inference-gateway/adl-cli/compare/v0.23.9...v0.23.10) (2025-10-19)
+
+### 🐛 Bug Fixes
+
+* **artifacts:** Change invalid Go duration format from days to hours in the docs ([#87](https://github.com/inference-gateway/adl-cli/issues/87)) ([875bd95](https://github.com/inference-gateway/adl-cli/commit/875bd95064354c0d0fe3182c453f6d444020bc73)), closes [#86](https://github.com/inference-gateway/adl-cli/issues/86)
+
 ## [0.23.9](https://github.com/inference-gateway/adl-cli/compare/v0.23.8...v0.23.9) (2025-10-18)
 
 ### 🐛 Bug Fixes
