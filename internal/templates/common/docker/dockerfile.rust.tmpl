@@ -34,10 +34,11 @@ COPY --from=builder /app/target/release/{{ .ADL.Spec.Language.Rust.PackageName }
 # Copy agent card
 COPY --from=builder /app/.well-known ./.well-known
 
-# Create non-root user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-RUN chown -R appuser:appuser /app
-USER appuser
+# Create a2a group and agent user
+RUN groupadd -g 1001 a2a && \
+    useradd -r -u 1001 -g a2a agent
+RUN chown -R agent:a2a /app
+USER agent
 
 # Expose port
 EXPOSE {{ .ADL.Spec.Server.Port | default 8080 }}
