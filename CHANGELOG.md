@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.24.2](https://github.com/inference-gateway/adl-cli/compare/v0.24.1...v0.24.2) (2025-11-14)
+
+### 🐛 Bug Fixes
+
+* **templates:** improve documentation wording and formatting ([#91](https://github.com/inference-gateway/adl-cli/issues/91)) ([999d95b](https://github.com/inference-gateway/adl-cli/commit/999d95b32cd2f19c6120179cf0f7cf07693b0b7d))
+
 ## [0.24.1](https://github.com/inference-gateway/adl-cli/compare/v0.24.0...v0.24.1) (2025-11-14)
 
 ### 🐛 Bug Fixes
