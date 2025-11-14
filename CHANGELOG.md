@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.24.1](https://github.com/inference-gateway/adl-cli/compare/v0.24.0...v0.24.1) (2025-11-14)
+
+### 🐛 Bug Fixes
+
+* **templates:** improve AGENTS.md template formatting and accuracy ([#90](https://github.com/inference-gateway/adl-cli/issues/90)) ([7ad0bfa](https://github.com/inference-gateway/adl-cli/commit/7ad0bfa2d8eb0fbebc28381c3682dc3cfe37fa21))
+
 ## [0.24.0](https://github.com/inference-gateway/adl-cli/compare/v0.23.11...v0.24.0) (2025-11-14)
 
 ### ✨ Features
