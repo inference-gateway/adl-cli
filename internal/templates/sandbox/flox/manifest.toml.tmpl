@@ -6,7 +6,7 @@ go.pkg-path = "go"
 go.version = "{{ .ADL.Spec.Language.Go.Version }}"
 
 golangci-lint.pkg-path = "golangci-lint"
-golangci-lint.version = "2.5.0"
+golangci-lint.version = "2.6.0"
 golangci-lint.pkg-group = "common"
 
 {{- else if eq .Language "rust" }}
@@ -30,7 +30,8 @@ rust-analyzer.pkg-path = "rust-analyzer"
 rust-analyzer.version = "2025-08-25"
 rust-analyzer.pkg-group = "rust-analyzer"
 {{- else if eq .Language "typescript" }}
-nodejs = { version = "20" }
+nodejs_24.pkg-path = "nodejs_24"
+nodejs_24.version = "14.11.0"
 {{- end }}
 
 go-task.pkg-path = "go-task"
@@ -42,13 +43,13 @@ git.version = "2.51.0"
 git.pkg-group = "common"
 
 docker.pkg-path = "docker"
-docker.version = "28.4.0"
+docker.version = "28.5.1"
 docker.pkg-group = "common"
 {{- if .EnableAI }}
 
 claude-code.pkg-path = "claude-code"
 claude-code.pkg-group = "common"
-claude-code.version = "2.0.15"
+claude-code.version = "2.0.30"
 {{- end }}
 
 [hook]
