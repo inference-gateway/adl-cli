@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.24.0](https://github.com/inference-gateway/adl-cli/compare/v0.23.11...v0.24.0) (2025-11-14)
+
+### ✨ Features
+
+* **security:** Add non-root user support to generated Dockerfiles ([#84](https://github.com/inference-gateway/adl-cli/issues/84)) ([804d85b](https://github.com/inference-gateway/adl-cli/commit/804d85b7a00f68620dcc3a686d4bfdd518d81f98))
+
+### 🔧 Miscellaneous
+
+* **deps:** Update Flox dependencies and template versions ([#89](https://github.com/inference-gateway/adl-cli/issues/89)) ([f220932](https://github.com/inference-gateway/adl-cli/commit/f220932c722a3558e1956e1bbfe631869db55e36))
+
 ## [0.23.11](https://github.com/inference-gateway/adl-cli/compare/v0.23.10...v0.23.11) (2025-10-19)
 
 ### 🐛 Bug Fixes
