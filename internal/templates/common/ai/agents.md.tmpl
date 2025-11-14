@@ -11,126 +11,129 @@ This file describes the agents available in this A2A (Agent-to-Agent) system.
 This agent is built using the Agent Definition Language (ADL) and provides A2A communication capabilities.
 
 ## Agent Capabilities
-
-{{ if .ADL.Spec.Capabilities }}
-{{ if .ADL.Spec.Capabilities.Streaming }}
+{{- if .ADL.Spec.Capabilities }}
+{{- if .ADL.Spec.Capabilities.Streaming }}
 - **Streaming**: ✅ Real-time response streaming supported
-{{ else }}
+{{- else }}
 - **Streaming**: ❌ Real-time response streaming not supported
-{{ end }}
-{{ if .ADL.Spec.Capabilities.PushNotifications }}
+{{- end }}
+{{- if .ADL.Spec.Capabilities.PushNotifications }}
 - **Push Notifications**: ✅ Server-sent events for real-time updates
-{{ else }}
+{{- else }}
 - **Push Notifications**: ❌ Server-sent events not supported
-{{ end }}
-{{ if .ADL.Spec.Capabilities.StateTransitionHistory }}
+{{- end }}
+{{- if .ADL.Spec.Capabilities.StateTransitionHistory }}
 - **State History**: ✅ Tracks agent state transitions over time
-{{ else }}
+{{- else }}
 - **State History**: ❌ State transition history not tracked
-{{ end }}
-{{ else }}
+{{- end }}
+{{- else }}
 - **Streaming**: ❌ Real-time response streaming not supported
 - **Push Notifications**: ❌ Server-sent events not supported
 - **State History**: ❌ State transition history not tracked
-{{ end }}
+{{- end }}
 
 ## AI Configuration
+{{- if .ADL.Spec.Agent }}
+{{- if .ADL.Spec.Agent.Provider }}
 
-{{ if .ADL.Spec.Agent }}
-{{ if .ADL.Spec.Agent.Provider }}
 **AI Provider**: {{ .ADL.Spec.Agent.Provider }}
-{{ if .ADL.Spec.Agent.Model }}
+{{- if .ADL.Spec.Agent.Model }}
 **Model**: {{ .ADL.Spec.Agent.Model }}
-{{ end }}
-{{ end }}
+{{- end }}
+{{- end }}
+{{- if .ADL.Spec.Agent.SystemPrompt }}
 
-{{ if .ADL.Spec.Agent.SystemPrompt }}
 **System Prompt**: {{ .ADL.Spec.Agent.SystemPrompt }}
-{{ end }}
+{{- end }}
 
 **Configuration:**
-{{ if .ADL.Spec.Agent.MaxTokens }}
+{{- if .ADL.Spec.Agent.MaxTokens }}
 - Max Tokens: {{ .ADL.Spec.Agent.MaxTokens }}
-{{ end }}
-{{ if .ADL.Spec.Agent.Temperature }}
+{{- end }}
+{{- if .ADL.Spec.Agent.Temperature }}
 - Temperature: {{ .ADL.Spec.Agent.Temperature }}
-{{ end }}
-{{ else }}
+{{- end }}
+{{- else }}
+
 No AI provider configured - this is a minimal agent.
-{{ end }}
+{{- end }}
 
 ## Skills
+{{- if .ADL.Spec.Skills }}
 
-{{ if .ADL.Spec.Skills }}
 This agent provides {{ len .ADL.Spec.Skills }} skills:
+{{- range .ADL.Spec.Skills }}
 
-{{ range .ADL.Spec.Skills }}
 ### {{ .Name }}
 - **Description**: {{ .Description }}
-{{ if .Tags }}- **Tags**: {{ join ", " .Tags }}{{ end }}
+{{- if .Tags }}
+- **Tags**: {{ join ", " .Tags }}
+{{- end }}
 - **Input Schema**: Defined in agent configuration
 - **Output Schema**: Defined in agent configuration
+{{- end }}
+{{- else }}
 
-{{ end }}
-{{ else }}
 No skills defined - this agent provides basic A2A communication without specialized capabilities.
-{{ end }}
+{{- end }}
 
 ## Server Configuration
 
 **Port**: {{ .ADL.Spec.Server.Port }}
-{{ if .ADL.Spec.Server.Debug }}
+{{- if .ADL.Spec.Server.Debug }}
 **Debug Mode**: ✅ Enabled
-{{ else }}
+{{- else }}
 **Debug Mode**: ❌ Disabled
-{{ end }}
-
-{{ if .ADL.Spec.Server.Auth }}
-{{ if .ADL.Spec.Server.Auth.Enabled }}
+{{- end }}
+{{- if .ADL.Spec.Server.Auth }}
+{{- if .ADL.Spec.Server.Auth.Enabled }}
 **Authentication**: ✅ Required
-{{ else }}
+{{- else }}
 **Authentication**: ❌ Not required
-{{ end }}
-{{ else }}
+{{- end }}
+{{- else }}
 **Authentication**: ❌ Not required
-{{ end }}
+{{- end }}
 
 ## API Endpoints
 
 The agent exposes the following HTTP endpoints:
 
 - `GET /.well-known/agent-card.json` - Agent metadata and capabilities
-- `POST /skills/{skill_name}` - Execute a specific skill{{ if .ADL.Spec.Capabilities.Streaming }}
-- `GET /skills/{skill_name}/stream` - Stream skill execution results{{ end }}{{ if .ADL.Spec.Capabilities.PushNotifications }}
-- `GET /events` - Server-sent events for notifications{{ end }}{{ if .ADL.Spec.Capabilities.StateTransitionHistory }}
-- `GET /history` - Retrieve agent state transition history{{ end }}
+- `POST /a2a` - JSON-RPC endpoint for all A2A operations (skill execution, streaming, etc.)
 
 ## Environment Setup
 
 ### Required Environment Variables
 
 Key environment variables you'll need to configure:
-{{ if .ADL.Spec.Agent }}
-{{ if .ADL.Spec.Agent.Provider }}
-- `{{ upper .ADL.Spec.Agent.Provider }}_API_KEY` - API key for {{ .ADL.Spec.Agent.Provider }}
-{{ end }}
-{{ end }}
-- `PORT` - Server port (default: {{ .ADL.Spec.Server.Port }})
+{{- if .ADL.Spec.Agent }}
+{{- if .ADL.Spec.Agent.Provider }}
+- `AGENT_CLIENT_PROVIDER` - LLM provider ({{ .ADL.Spec.Agent.Provider }})
+{{- if .ADL.Spec.Agent.Model }}
+- `AGENT_CLIENT_MODEL` - Model name ({{ .ADL.Spec.Agent.Model }})
+{{- end }}
+- `AGENT_CLIENT_API_KEY` - API key for your LLM provider
+{{- end }}
+{{- end }}
+- `PORT` - Server port (configured: {{ .ADL.Spec.Server.Port }})
 
 ### Development Environment
-{{ if .ADL.Spec.Sandbox }}
-{{ if .ADL.Spec.Sandbox.Flox }}
+{{- if .ADL.Spec.Sandbox }}
+{{- if .ADL.Spec.Sandbox.Flox }}
 **Flox Environment**: ✅ Configured for reproducible development setup
-{{ end }}
-{{ if .ADL.Spec.Sandbox.DevContainer }}
+{{- end }}
+{{- if .ADL.Spec.Sandbox.DevContainer }}
 **DevContainer**: ✅ VS Code DevContainer configuration available
-{{ end }}
-{{ end }}
+{{- end }}
+{{- end }}
 
 ## Usage
 
 ### Starting the Agent
-{{ if eq .Language "go" }}
+{{- if eq .Language "go" }}
+
 ```bash
 # Install dependencies
 go mod download
@@ -141,9 +144,10 @@ go run main.go
 # Or use Task
 task run
 ```
-{{ else if eq .Language "rust" }}
+{{- else if eq .Language "rust" }}
+
 ```bash
-# Install dependencies  
+# Install dependencies
 cargo build
 
 # Run the agent
@@ -152,7 +156,8 @@ cargo run
 # Or use Task
 task run
 ```
-{{ else if eq .Language "typescript" }}
+{{- else if eq .Language "typescript" }}
+
 ```bash
 # Install dependencies
 npm install
@@ -163,7 +168,7 @@ npm start
 # Or use Task
 task run
 ```
-{{ end }}
+{{- end }}
 
 ### Communicating with the Agent
 
@@ -172,33 +177,29 @@ The agent implements the A2A protocol and can be communicated with via HTTP requ
 ```bash
 # Get agent information
 curl http://localhost:{{ .ADL.Spec.Server.Port }}/.well-known/agent-card.json
-
-{{ if .ADL.Spec.Skills }}
-{{ range .ADL.Spec.Skills }}
-# Execute {{ .Name }} skill
-curl -X POST http://localhost:{{ $.ADL.Spec.Server.Port }}/skills/{{ .Name }} \
-  -H "Content-Type: application/json" \
-  -d '{"input": "your_input_here"}'
-{{ end }}
-{{ end }}
 ```
 
-## Deployment
+Refer to the main README.md for specific skill execution examples and input schemas.
 
-{{ if .ADL.Spec.Deployment }}
-{{ if eq .ADL.Spec.Deployment.Type "kubernetes" }}
+## Deployment
+{{- if .ADL.Spec.Deployment }}
+{{- if eq .ADL.Spec.Deployment.Type "kubernetes" }}
+
 **Deployment Type**: Kubernetes
 - Kubernetes manifests available in `k8s/` directory
 - Use `kubectl apply -f k8s/` to deploy
-{{ end }}
-{{ else }}
+{{- end }}
+{{- else }}
+
 **Deployment Type**: Manual
 - Build and run the agent binary directly
 - Use provided Dockerfile for containerized deployment
-{{ end }}
+{{- end }}
 
-{{ if eq .Language "go" }}
+{{- if eq .Language "go" }}
+
 ### Docker Deployment
+
 ```bash
 # Build image
 docker build -t {{ .ADL.Metadata.Name }} .
@@ -206,17 +207,10 @@ docker build -t {{ .ADL.Metadata.Name }} .
 # Run container
 docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Metadata.Name }}
 ```
-{{ else if eq .Language "rust" }}
-### Docker Deployment
-```bash
-# Build image
-docker build -t {{ .ADL.Metadata.Name }} .
+{{- else if eq .Language "rust" }}
 
-# Run container  
-docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Metadata.Name }}
-```
-{{ else if eq .Language "typescript" }}
 ### Docker Deployment
+
 ```bash
 # Build image
 docker build -t {{ .ADL.Metadata.Name }} .
@@ -224,58 +218,73 @@ docker build -t {{ .ADL.Metadata.Name }} .
 # Run container
 docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Metadata.Name }}
 ```
-{{ end }}
+{{- else if eq .Language "typescript" }}
+
+### Docker Deployment
+
+```bash
+# Build image
+docker build -t {{ .ADL.Metadata.Name }} .
+
+# Run container
+docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Metadata.Name }}
+```
+{{- end }}
 
 ## Development
 
 ### Project Structure
-{{ if eq .Language "go" }}
+{{- if eq .Language "go" }}
+
 ```
 .
-├── main.go              # Server entry point
-├── skills/              # Business logic skills
-{{ range .ADL.Spec.Skills }}
-│   └── {{ .Name }}.go   # {{ .Description }}
-{{ end }}
-├── .well-known/         # Agent configuration
-│   └── agent-card.json  # Agent metadata
-├── go.mod               # Go module definition
-└── README.md            # Project documentation
+├── main.go                       # Server entry point
+├── skills/                       # Business logic skills
+{{- range .ADL.Spec.Skills }}
+│   └── {{ printf "%-25s" (printf "%s.go" .Name) }} # {{ .Description }}
+{{- end }}
+├── .well-known/                  # Agent configuration
+│   └── agent-card.json           # Agent metadata
+├── go.mod                        # Go module definition
+└── README.md                     # Project documentation
 ```
-{{ else if eq .Language "rust" }}
-```
-.
-├── src/
-│   ├── main.rs          # Server entry point
-│   └── skills/          # Business logic skills
-{{ range .ADL.Spec.Skills }}
-│       ├── {{ .Name }}.rs # {{ .Description }}
-{{ end }}
-│       └── mod.rs       # Skills module
-├── .well-known/         # Agent configuration  
-│   └── agent-card.json  # Agent metadata
-├── Cargo.toml           # Rust package definition
-└── README.md            # Project documentation
-```
-{{ else if eq .Language "typescript" }}
+{{- else if eq .Language "rust" }}
+
 ```
 .
-├── src/
-│   ├── index.ts         # Server entry point
-│   └── skills/          # Business logic skills
-{{ range .ADL.Spec.Skills }}
-│       └── {{ .Name }}.ts # {{ .Description }}
-{{ end }}
-├── .well-known/         # Agent configuration
-│   └── agent-card.json  # Agent metadata
-├── package.json         # Node.js package definition
-├── tsconfig.json        # TypeScript configuration
-└── README.md            # Project documentation
+├── src/                          # Source directory
+│   ├── main.rs                   # Server entry point
+│   └── skills/                   # Business logic skills
+{{- range .ADL.Spec.Skills }}
+│       ├── {{ printf "%-21s" (printf "%s.rs" .Name) }} # {{ .Description }}
+{{- end }}
+│       └── mod.rs                # Skills module
+├── .well-known/                  # Agent configuration
+│   └── agent-card.json           # Agent metadata
+├── Cargo.toml                    # Rust package definition
+└── README.md                     # Project documentation
 ```
-{{ end }}
+{{- else if eq .Language "typescript" }}
+
+```
+.
+├── src/                          # Source directory
+│   ├── index.ts                  # Server entry point
+│   └── skills/                   # Business logic skills
+{{- range .ADL.Spec.Skills }}
+│       └── {{ printf "%-21s" (printf "%s.ts" .Name) }} # {{ .Description }}
+{{- end }}
+├── .well-known/                  # Agent configuration
+│   └── agent-card.json           # Agent metadata
+├── package.json                  # Node.js package definition
+├── tsconfig.json                 # TypeScript configuration
+└── README.md                     # Project documentation
+```
+{{- end }}
 
 ### Testing
-{{ if eq .Language "go" }}
+{{- if eq .Language "go" }}
+
 ```bash
 # Run tests
 task test
@@ -284,7 +293,8 @@ go test ./...
 # Run with coverage
 task test:coverage
 ```
-{{ else if eq .Language "rust" }}
+{{- else if eq .Language "rust" }}
+
 ```bash
 # Run tests
 task test
@@ -293,7 +303,8 @@ cargo test
 # Run with coverage
 task test:coverage
 ```
-{{ else if eq .Language "typescript" }}
+{{- else if eq .Language "typescript" }}
+
 ```bash
 # Run tests
 task test
@@ -302,7 +313,7 @@ npm test
 # Run with coverage
 task test:coverage
 ```
-{{ end }}
+{{- end }}
 
 ## Contributing
 
