@@ -57,7 +57,7 @@ docker run -p {{ .ADL.Spec.Server.Port | default 8080 }}:{{ .ADL.Spec.Server.Por
 - ✅ State transition history
 {{- end }}
 {{- end }}
-- ✅ Production ready
+- ✅ Enterprise-ready
 - ✅ Minimal dependencies
 
 ## Endpoints
@@ -71,7 +71,7 @@ docker run -p {{ .ADL.Spec.Server.Port | default 8080 }}:{{ .ADL.Spec.Server.Por
 | Skill | Description | Parameters |
 |-------|-------------|------------|
 {{- range .ADL.Spec.Skills }}
-| `{{ .Name }}` | {{ .Description }} | {{- if .Schema.properties }}{{- $props := list }}{{- range $key, $value := .Schema.properties }}{{- $props = append $props $key }}{{- end }}{{ $props | join ", " }}{{- else }}None{{- end }} |
+| `{{ .Name }}` | {{ .Description }} | {{- if .Schema.properties }}{{- $props := list }}{{- range $key, $value := .Schema.properties }}{{- $props = append $props $key }}{{- end }} {{ $props | join ", " }} {{- else }} None {{- end }} |
 {{- end }}
 
 ## Configuration
