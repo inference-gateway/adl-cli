@@ -23,8 +23,8 @@ func SetVersion(v string) {
 var rootCmd = &cobra.Command{
 	Use:     "adl",
 	Version: version,
-	Short:   "A CLI for generating production-ready A2A agents",
-	Long: `ADL CLI is a command-line tool that helps you build production-ready A2A servers
+	Short:   "A CLI for generating enterprise-ready A2A agents",
+	Long: `ADL CLI is a command-line tool that helps you build enterprise-ready A2A servers
 from YAML Agent Definition Language (ADL) files.
 
 It generates complete project scaffolding with business logic placeholders,

@@ -41,7 +41,7 @@ spec:
       outputPath: "/tmp/reports"
       templateDir: "/app/templates"
       maxFileSizeMB: "50"
-      retention: "30d"
+      retention: "720h"
   services:
     database:
       type: service

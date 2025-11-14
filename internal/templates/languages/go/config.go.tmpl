@@ -27,8 +27,10 @@ type Config struct {
 type {{ $sectionName | toPascalCase }}Config struct {
 	{{- range $key, $value := $sectionConfig }}
 	{{- $type := "string" }}
+	{{- $isBool := false }}
 	{{- if kindIs "bool" $value }}
 		{{- $type = "bool" }}
+		{{- $isBool = true }}
 	{{- else if kindIs "float64" $value }}
 		{{- if contains "." (toString $value) }}
 			{{- $type = "float64" }}
@@ -36,7 +38,7 @@ type {{ $sectionName | toPascalCase }}Config struct {
 			{{- $type = "int" }}
 		{{- end }}
 	{{- end }}
-	{{ $key | toPascalCase }} {{ $type }} `env:"{{ $key | toUpperSnakeCase }}{{- if $value }},default={{ $value }}{{- end }}"`
+	{{ $key | toPascalCase }} {{ $type }} `env:"{{ $key | toUpperSnakeCase }}{{- if or $value $isBool }},default={{ $value }}{{- end }}"`
 	{{- end }}
 }
 {{- end }}

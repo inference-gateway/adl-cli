@@ -301,7 +301,7 @@ The `--deployment` flag generates platform-specific deployment configurations:
   - Uses direct gcloud commands for truly serverless deployment (no Kubernetes required)
   - Automatic container building with Docker or Cloud Build integration
 - **Kubernetes Deployment**: Creates `k8s/deployment.yaml` with standard Kubernetes manifests
-  - Production-ready configurations with resource limits and health checks
+  - Enterprise-ready configurations with resource limits and health checks
   - ConfigMap and Secret integration for environment variables
   - Service and Ingress configurations for load balancing
 
