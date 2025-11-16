@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.25.0](https://github.com/inference-gateway/adl-cli/compare/v0.24.4...v0.25.0) (2025-11-16)
+
+### ✨ Features
+
+* **config:** Add support for config subsection injection in skills ([#92](https://github.com/inference-gateway/adl-cli/issues/92)) ([6e8ff1a](https://github.com/inference-gateway/adl-cli/commit/6e8ff1a4df333a881167a2657d8335cd6fa35fe2))
+
 ## [0.24.4](https://github.com/inference-gateway/adl-cli/compare/v0.24.3...v0.24.4) (2025-11-16)
 
 ### 🔧 Miscellaneous
