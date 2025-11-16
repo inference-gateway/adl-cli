@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.24.4](https://github.com/inference-gateway/adl-cli/compare/v0.24.3...v0.24.4) (2025-11-16)
+
+### 🔧 Miscellaneous
+
+* **deps:** Make range less tight ([3a8b50c](https://github.com/inference-gateway/adl-cli/commit/3a8b50c15487f68d8e3ec2a8b74004016728373c))
+
 ## [0.24.3](https://github.com/inference-gateway/adl-cli/compare/v0.24.2...v0.24.3) (2025-11-16)
 
 ### 🔧 Miscellaneous
