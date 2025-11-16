@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.24.3](https://github.com/inference-gateway/adl-cli/compare/v0.24.2...v0.24.3) (2025-11-16)
+
+### 🔧 Miscellaneous
+
+* **deps:** Update Flox dependencies and use semantic versioning ranges ([cad1da9](https://github.com/inference-gateway/adl-cli/commit/cad1da9a34e754ba921c5855e2a4ae81d9060dc0))
+
 ## [0.24.2](https://github.com/inference-gateway/adl-cli/compare/v0.24.1...v0.24.2) (2025-11-14)
 
 ### 🐛 Bug Fixes
