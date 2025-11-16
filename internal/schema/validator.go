@@ -79,10 +79,21 @@ func (v *Validator) validateServiceReferences(adl *ADL) error {
 	}
 
 	definedServices["logger"] = true
+	definedServices["config"] = true
+
+	definedConfigSections := make(map[string]bool)
+	for configSection := range adl.Spec.Config {
+		definedConfigSections[configSection] = true
+	}
 
 	for _, skill := range adl.Spec.Skills {
 		for _, injectedService := range skill.Inject {
-			if !definedServices[injectedService] {
+			if len(injectedService) > 7 && injectedService[:7] == "config." {
+				configSection := injectedService[7:]
+				if !definedConfigSections[configSection] {
+					return fmt.Errorf("skill '%s' injects config section '%s' that is not defined in spec.config", skill.ID, configSection)
+				}
+			} else if !definedServices[injectedService] {
 				return fmt.Errorf("skill '%s' injects service '%s' that is not defined in spec.services", skill.ID, injectedService)
 			}
 		}
@@ -327,7 +338,7 @@ const adlSchema = `{
                 "type": "array",
                 "items": {
                   "type": "string",
-                  "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+                  "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z_][a-zA-Z0-9_]*)*$"
                 }
               }
             }

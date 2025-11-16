@@ -94,7 +94,7 @@ func main() {
 	{{- range .ADL.Spec.Skills }}
 
 	// Register {{ .Name }} skill
-	{{ .Name | toCamelCase }}Skill := skills.New{{ .Name | toPascalCase }}Skill({{ range $index, $svc := .Inject }}{{ if $index }}, {{ end }}{{ if eq $svc "logger" }}l{{ else }}{{ $svc | toCamelCase }}Svc{{ end }}{{ end }})
+	{{ .Name | toCamelCase }}Skill := skills.New{{ .Name | toPascalCase }}Skill({{ range $index, $svc := .Inject }}{{ if $index }}, {{ end }}{{ if eq $svc "logger" }}l{{ else if eq $svc "config" }}&cfg{{ else if hasPrefix "config." $svc }}&cfg.{{ $svc | trimPrefix "config." | toPascalCase }}{{ else }}{{ $svc | toCamelCase }}Svc{{ end }}{{ end }})
 	toolBox.AddTool({{ .Name | toCamelCase }}Skill)
 	l.Info("registered skill: {{ .Name }} ({{ .Description }})")
 	{{- end }}

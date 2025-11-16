@@ -8,6 +8,10 @@ import (
 {{- range $depID := .Inject }}
 {{- if eq $depID "logger" }}
 	zap "go.uber.org/zap"
+{{- else if eq $depID "config" }}
+	config "{{ $.GoModule }}/config"
+{{- else if hasPrefix "config." $depID }}
+	config "{{ $.GoModule }}/config"
 {{- else }}
 	{{ $depID | toCamelCase }} "{{ $.GoModule }}/internal/{{ $depID | toSnakeCase }}"
 {{- end }}
@@ -19,6 +23,10 @@ type {{ .Name | toPascalCase }}Skill struct {
 {{- range $depID := .Inject }}
 {{- if eq $depID "logger" }}
 	{{ $depID | toCamelCase }} *zap.Logger
+{{- else if eq $depID "config" }}
+	{{ $depID | toCamelCase }} *config.Config
+{{- else if hasPrefix "config." $depID }}
+	{{ $depID | trimPrefix "config." | toCamelCase }} *config.{{ $depID | trimPrefix "config." | toPascalCase }}Config
 {{- else }}
 {{- $svc := index $.ServiceMap $depID }}
 	{{ $depID | toCamelCase }} {{ $depID | toCamelCase }}.{{ $svc.Interface }}
@@ -27,10 +35,14 @@ type {{ .Name | toPascalCase }}Skill struct {
 }
 
 // New{{ .Name | toPascalCase }}Skill creates a new {{ .Name }} skill
-func New{{ .Name | toPascalCase }}Skill({{ range $index, $depID := .Inject }}{{ if $index }}, {{ end }}{{- if eq $depID "logger" }}{{ $depID | toCamelCase }} *zap.Logger{{- else }}{{- $svc := index $.ServiceMap $depID }}{{ $depID | toCamelCase }} {{ $depID | toCamelCase }}.{{ $svc.Interface }}{{- end }}{{ end }}) server.Tool {
+func New{{ .Name | toPascalCase }}Skill({{ range $index, $depID := .Inject }}{{ if $index }}, {{ end }}{{- if eq $depID "logger" }}{{ $depID | toCamelCase }} *zap.Logger{{- else if eq $depID "config" }}{{ $depID | toCamelCase }} *config.Config{{- else if hasPrefix "config." $depID }}{{ $depID | trimPrefix "config." | toCamelCase }} *config.{{ $depID | trimPrefix "config." | toPascalCase }}Config{{- else }}{{- $svc := index $.ServiceMap $depID }}{{ $depID | toCamelCase }} {{ $depID | toCamelCase }}.{{ $svc.Interface }}{{- end }}{{ end }}) server.Tool {
 	skill := &{{ .Name | toPascalCase }}Skill{
 {{- range $depID := .Inject }}
+{{- if hasPrefix "config." $depID }}
+		{{ $depID | trimPrefix "config." | toCamelCase }}: {{ $depID | trimPrefix "config." | toCamelCase }},
+{{- else }}
 		{{ $depID | toCamelCase }}: {{ $depID | toCamelCase }},
+{{- end }}
 {{- end }}
 	}
 	return server.NewBasicTool(
