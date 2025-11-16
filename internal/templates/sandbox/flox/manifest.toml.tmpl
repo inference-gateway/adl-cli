@@ -6,7 +6,7 @@ go.pkg-path = "go"
 go.version = "{{ .ADL.Spec.Language.Go.Version }}"
 
 golangci-lint.pkg-path = "golangci-lint"
-golangci-lint.version = "2.6.0"
+golangci-lint.version = "^2.6.0"
 golangci-lint.pkg-group = "common"
 
 {{- else if eq .Language "rust" }}
