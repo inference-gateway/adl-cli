@@ -576,6 +576,104 @@ type CacheConfig struct {
 - `CACHE_MAX_ENTRIES="1000"`
 - `CACHE_TTL="3600"`
 
+### Config Subsection Injection
+
+In addition to injecting entire configuration objects, you can inject specific config subsections directly into skills using dotted notation. This provides type-safe access to focused configuration scopes.
+
+**Example ADL Configuration:**
+
+```yaml
+spec:
+  config:
+    database:
+      connectionString: "postgresql://localhost:5432/db"
+      maxConnections: "10"
+      timeout: "30s"
+    email:
+      apiKey: ""
+      fromAddress: "noreply@example.com"
+      provider: "sendgrid"
+  services:
+    database:
+      type: service
+      interface: DatabaseService
+      factory: NewDatabaseService
+      description: PostgreSQL database service
+  skills:
+    - name: export_report
+      description: "Export data and email report"
+      inject:
+        - logger
+        - database
+        - config.email  # Inject only the email config subsection
+      schema:
+        type: object
+        properties:
+          recipient:
+            type: string
+        required: [recipient]
+```
+
+**Generated Skill Code:**
+
+```go
+type ExportReportSkill struct {
+    logger   *zap.Logger
+    database database.DatabaseService
+    email    *config.EmailConfig  // Type-safe access to email config only
+}
+
+func NewExportReportSkill(
+    logger *zap.Logger,
+    database database.DatabaseService,
+    email *config.EmailConfig,
+) server.Tool {
+    skill := &ExportReportSkill{
+        logger:   logger,
+        database: database,
+        email:    email,
+    }
+    // ...
+}
+
+func (s *ExportReportSkill) ExportReportHandler(ctx context.Context, args map[string]any) (string, error) {
+    // Direct access to email config subsection
+    apiKey := s.email.APIKey
+    fromAddress := s.email.FromAddress
+    provider := s.email.Provider
+
+    // ... implementation
+}
+```
+
+**Main Registration:**
+
+```go
+// In main.go - config subsection is passed directly
+exportReportSkill := skills.NewExportReportSkill(l, databaseSvc, &cfg.Email)
+toolBox.AddTool(exportReportSkill)
+```
+
+**Benefits of Config Subsection Injection:**
+
+- **Scoped Access**: Skills only receive the configuration they need, following principle of least privilege
+- **Type Safety**: Compile-time validation ensures config fields exist
+- **Clear Dependencies**: Explicit declaration of which config sections each skill requires
+- **Easier Testing**: Mock specific config subsections without full config object
+- **Better Separation**: Skills don't have access to unrelated configuration
+- **Auto-Validation**: ADL CLI validates that injected config sections exist in `spec.config`
+
+**Injection Patterns:**
+
+```yaml
+inject:
+  - logger                 # Built-in logger service
+  - config                 # Entire config object (*config.Config)
+  - config.database        # Database config subsection (*config.DatabaseConfig)
+  - config.email           # Email config subsection (*config.EmailConfig)
+  - myService              # Custom service from spec.services
+```
+
 ### Service Architecture
 
 The service injection system generates:
