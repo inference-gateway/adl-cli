@@ -216,9 +216,10 @@ type adlData struct {
 			Inject      []string       `yaml:"inject,omitempty"`
 		} `yaml:"skills,omitempty"`
 		Server struct {
-			Port  int  `yaml:"port"`
-			Debug bool `yaml:"debug"`
-			Auth  *struct {
+			Port   int    `yaml:"port"`
+			Scheme string `yaml:"scheme,omitempty"`
+			Debug  bool   `yaml:"debug"`
+			Auth   *struct {
 				Enabled bool `yaml:"enabled"`
 			} `yaml:"auth,omitempty"`
 		} `yaml:"server"`
@@ -484,6 +485,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 	} else {
 		adl.Spec.Server.Port = 8080
 	}
+	adl.Spec.Server.Scheme = conditionalPrompt(useDefaults, "Server scheme (http/https)", "http")
 	adl.Spec.Server.Debug = conditionalPromptBool(useDefaults, "Enable debug mode", false)
 
 	authEnabled := conditionalPromptBool(useDefaults, "Enable server authentication", false)
@@ -531,7 +533,11 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 			adl.Spec.Card.DefaultOutputModes = modes
 		}
 
-		cardURL := conditionalPrompt(useDefaults, "Agent service URL", fmt.Sprintf("https://%s.example.com:%d", adl.Metadata.Name, adl.Spec.Server.Port))
+		scheme := adl.Spec.Server.Scheme
+		if scheme == "" {
+			scheme = "http"
+		}
+		cardURL := conditionalPrompt(useDefaults, "Agent service URL", fmt.Sprintf("%s://%s.example.com:%d", scheme, adl.Metadata.Name, adl.Spec.Server.Port))
 		adl.Spec.Card.URL = cardURL
 	}
 

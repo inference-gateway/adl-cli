@@ -83,6 +83,7 @@ spec:
         required: [domains]
   server:
     port: 8080
+    scheme: http
     debug: false
     auth:
       enabled: false

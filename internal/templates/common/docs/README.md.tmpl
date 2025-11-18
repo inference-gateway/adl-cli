@@ -42,6 +42,20 @@ docker build -t {{ .ADL.Metadata.Name }} .
 docker run -p {{ .ADL.Spec.Server.Port | default 8080 }}:{{ .ADL.Spec.Server.Port | default 8080 }} {{ .ADL.Metadata.Name }}
 ```
 
+## Quick Install
+
+Add this agent to your Inference Gateway CLI:
+
+```bash
+infer agents add {{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Scheme | default "http" }}://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}{{- if and .ADL.Spec.SCM (eq .ADL.Spec.SCM.Provider "github") .ADL.Spec.SCM.URL }} \
+{{- $url := .ADL.Spec.SCM.URL | trimSuffix ".git" | trimPrefix "https://github.com/" | trimPrefix "git@github.com:" }}
+  --oci ghcr.io/{{ $url }}:latest \
+{{- end }}
+  --run{{- if and .ADL.Spec.Agent .ADL.Spec.Agent.Model }} \
+  --model {{ .ADL.Spec.Agent.Provider }}/{{ .ADL.Spec.Agent.Model }}
+{{- end }}
+```
+
 ## Features
 
 - ✅ A2A protocol compliant
@@ -96,7 +110,7 @@ The following custom configuration variables are available:
 |----------|----------|-------------|---------|
 | **Server** | `A2A_PORT` | Server port | `{{ .ADL.Spec.Server.Port | default 8080 }}` |
 | **Server** | `A2A_DEBUG` | Enable debug mode | `{{ .ADL.Spec.Server.Debug | default false }}` |
-| **Server** | `A2A_AGENT_URL` | Agent URL for internal references | `http://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}` |
+| **Server** | `A2A_AGENT_URL` | Agent URL for internal references | `{{ .ADL.Spec.Server.Scheme | default "http" }}://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}` |
 | **Server** | `A2A_STREAMING_STATUS_UPDATE_INTERVAL` | Streaming status update frequency | `1s` |
 | **Server** | `A2A_SERVER_READ_TIMEOUT` | HTTP server read timeout | `120s` |
 | **Server** | `A2A_SERVER_WRITE_TIMEOUT` | HTTP server write timeout | `120s` |
@@ -171,15 +185,15 @@ task fmt
 Use the [A2A Debugger](https://github.com/inference-gateway/a2a-debugger) to test and debug your A2A agent during development. It provides a web interface for sending requests to your agent and inspecting responses, making it easier to troubleshoot issues and validate your implementation.
 
 ```bash
-docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest --server-url http://localhost:8080 tasks submit "What are your skills?"
+docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest --server-url {{ .ADL.Spec.Server.Scheme | default "http" }}://localhost:{{ .ADL.Spec.Server.Port | default 8080 }} tasks submit "What are your skills?"
 ```
 
 ```bash
-docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest --server-url http://localhost:8080 tasks list
+docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest --server-url {{ .ADL.Spec.Server.Scheme | default "http" }}://localhost:{{ .ADL.Spec.Server.Port | default 8080 }} tasks list
 ```
 
 ```bash
-docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest --server-url http://localhost:8080 tasks get <task ID>
+docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest --server-url {{ .ADL.Spec.Server.Scheme | default "http" }}://localhost:{{ .ADL.Spec.Server.Port | default 8080 }} tasks get <task ID>
 ```
 
 ## Deployment

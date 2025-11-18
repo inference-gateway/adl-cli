@@ -136,6 +136,7 @@ spec:
         required: [report_type, date_range, format]
   server:
     port: 8443
+    scheme: https
     debug: false
     auth:
       enabled: true

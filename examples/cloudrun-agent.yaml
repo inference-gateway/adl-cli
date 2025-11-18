@@ -34,6 +34,7 @@ spec:
         required: ["name"]
   server:
     port: 8080
+    scheme: http
     debug: false
   language:
     go:
