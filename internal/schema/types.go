@@ -86,9 +86,10 @@ type Skill struct {
 
 // Server configuration
 type Server struct {
-	Port  int         `yaml:"port" json:"port"`
-	Debug bool        `yaml:"debug" json:"debug"`
-	Auth  *AuthConfig `yaml:"auth,omitempty" json:"auth,omitempty"`
+	Port   int         `yaml:"port" json:"port"`
+	Scheme string      `yaml:"scheme,omitempty" json:"scheme,omitempty"`
+	Debug  bool        `yaml:"debug" json:"debug"`
+	Auth   *AuthConfig `yaml:"auth,omitempty" json:"auth,omitempty"`
 }
 
 // AuthConfig for server authentication

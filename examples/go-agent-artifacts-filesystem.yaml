@@ -64,6 +64,7 @@ spec:
         required: [id]
   server:
     port: 8443
+    scheme: https
     debug: false
     auth:
       enabled: true
