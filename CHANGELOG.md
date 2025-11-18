@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.26.0](https://github.com/inference-gateway/adl-cli/compare/v0.25.0...v0.26.0) (2025-11-18)
+
+### ✨ Features
+
+* **server:** Add scheme option to specify HTTP or HTTPS ([#93](https://github.com/inference-gateway/adl-cli/issues/93)) ([696f303](https://github.com/inference-gateway/adl-cli/commit/696f3035961af0b7af60063d29a8fd53988a31a9))
+
 ## [0.25.0](https://github.com/inference-gateway/adl-cli/compare/v0.24.4...v0.25.0) (2025-11-16)
 
 ### ✨ Features
