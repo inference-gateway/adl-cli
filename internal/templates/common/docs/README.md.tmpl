@@ -46,14 +46,15 @@ docker run -p {{ .ADL.Spec.Server.Port | default 8080 }}:{{ .ADL.Spec.Server.Por
 
 Add this agent to your Inference Gateway CLI:
 
+**Note:** Port {{ .ADL.Spec.Server.Port | default 8080 }} might be reserved on your system. If you encounter conflicts, use an available port (e.g., 8081, 8082) and update the command accordingly.
+
 ```bash
 infer agents add {{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Scheme | default "http" }}://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}{{- if and .ADL.Spec.SCM (eq .ADL.Spec.SCM.Provider "github") .ADL.Spec.SCM.URL }} \
 {{- $url := .ADL.Spec.SCM.URL | trimSuffix ".git" | trimPrefix "https://github.com/" | trimPrefix "git@github.com:" }}
   --oci ghcr.io/{{ $url }}:latest \
 {{- end }}
-  --run{{- if and .ADL.Spec.Agent .ADL.Spec.Agent.Model }} \
-  --model {{ .ADL.Spec.Agent.Provider }}/{{ .ADL.Spec.Agent.Model }}
-{{- end }}
+  --run \
+  --model {{ if and .ADL.Spec.Agent .ADL.Spec.Agent.Provider .ADL.Spec.Agent.Model }}{{ .ADL.Spec.Agent.Provider }}/{{ .ADL.Spec.Agent.Model }}{{ else }}openai/gpt-4o-mini{{ end }}
 ```
 
 ## Features
