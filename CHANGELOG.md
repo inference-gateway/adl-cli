@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.26.2](https://github.com/inference-gateway/adl-cli/compare/v0.26.1...v0.26.2) (2025-12-12)
+
+### 📚 Documentation
+
+* Add installation guide to the github release notes ([4bc45bf](https://github.com/inference-gateway/adl-cli/commit/4bc45bf80e009b6ad206316f87d6d3d1815e13a9))
+
 ## [0.26.1](https://github.com/inference-gateway/adl-cli/compare/v0.26.0...v0.26.1) (2025-12-12)
 
 ### 🐛 Bug Fixes
