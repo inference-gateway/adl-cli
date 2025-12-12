@@ -78,6 +78,18 @@ plugins:
           name: checksums.txt
       releasedLabels: ["released"]
       releaseNameTemplate: "🚀 Version ${nextRelease.version}"
+      releaseBodyTemplate: |
+        ## What's Changed
+
+        <%= nextRelease.notes %>
+
+        ## 📦 Installation
+
+        ```bash
+        curl -fsSL https://raw.githubusercontent.com/inference-gateway/adl-cli/main/install.sh | bash
+        ```
+
+        For more installation options, see the [README](https://github.com/inference-gateway/adl-cli#installation).
       successCommentCondition: "false"
       labels:
         - "release"
