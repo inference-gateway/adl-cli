@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.26.1](https://github.com/inference-gateway/adl-cli/compare/v0.26.0...v0.26.1) (2025-12-12)
+
+### 🐛 Bug Fixes
+
+* **docs:** Fix wrong environment variables without a proper A2A_ prefix ([e842d6f](https://github.com/inference-gateway/adl-cli/commit/e842d6ffb7f75bdf3a4c9da4a0917630415d1e87))
+
 ## [0.26.0](https://github.com/inference-gateway/adl-cli/compare/v0.25.0...v0.26.0) (2025-11-18)
 
 ### ✨ Features
