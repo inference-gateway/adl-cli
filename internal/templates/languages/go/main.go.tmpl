@@ -118,7 +118,7 @@ func main() {
 {{ if and .ADL.Spec.Artifacts .ADL.Spec.Artifacts.Enabled }}
 	artifactService, err := server.NewArtifactService(&cfg.A2A.ArtifactsConfig, l)
 	if err != nil {
-		l.Warn("artifact service could not be created - check ARTIFACTS_ENABLE environment variable", zap.Error(err))
+		l.Warn("artifact service could not be created - check A2A_ARTIFACTS_ENABLE environment variable", zap.Error(err))
 		l.Info("continuing without artifact service support")
 		artifactService = nil
 	}
