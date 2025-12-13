@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.26.4](https://github.com/inference-gateway/adl-cli/compare/v0.26.3...v0.26.4) (2025-12-13)
+
+### 🔧 Miscellaneous
+
+* **deps:** Bump ADK to 0.16.2 ([a5f74ef](https://github.com/inference-gateway/adl-cli/commit/a5f74ef2caadd1ebc416b2d0acd877f40042ba9d))
+
 ## [0.26.3](https://github.com/inference-gateway/adl-cli/compare/v0.26.2...v0.26.3) (2025-12-13)
 
 ### 🔧 Miscellaneous
