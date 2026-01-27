@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.27.1](https://github.com/inference-gateway/adl-cli/compare/v0.27.0...v0.27.1) (2026-01-27)
+
+### 🔧 Miscellaneous
+
+* **deps:** Update language and tool versions ([1344fdc](https://github.com/inference-gateway/adl-cli/commit/1344fdc4cbc8a46e2fdeb41760dd91ddbce094b1))
+* Update semantic-release version ([06fe1cb](https://github.com/inference-gateway/adl-cli/commit/06fe1cb42dd810eb5682460757a371dae19d9d2b))
+
 ## [0.27.0](https://github.com/inference-gateway/adl-cli/compare/v0.26.4...v0.27.0) (2026-01-27)
 
 ### ✨ Features
