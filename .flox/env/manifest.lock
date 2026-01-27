@@ -5,23 +5,23 @@
     "install": {
       "claude-code": {
         "pkg-path": "claude-code",
-        "version": "^2.0.37"
+        "version": "^2.1.15"
       },
       "go": {
         "pkg-path": "go",
-        "version": "^1.25.2"
+        "version": "^1.25.5"
       },
       "go-task": {
         "pkg-path": "go-task",
-        "version": "^3.45.4"
+        "version": "^3.45.5"
       },
       "golangci-lint": {
         "pkg-path": "golangci-lint",
-        "version": "^2.6.0"
+        "version": "^2.8.0"
       },
       "goreleaser": {
         "pkg-path": "goreleaser",
-        "version": "^2.12.7"
+        "version": "^2.13.3"
       },
       "prettier": {
         "pkg-path": "prettier",
@@ -37,28 +37,27 @@
     {
       "attr_path": "claude-code",
       "broken": false,
-      "derivation": "/nix/store/sz58zlpxjdjc592dbxjinpri2kniy29c-claude-code-2.0.37.drv",
+      "derivation": "/nix/store/2126w8mb2pz2511zpq0rs5iw8djh0hvk-claude-code-2.1.15.drv",
       "description": "Agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster",
       "install_id": "claude-code",
       "license": "Unfree",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "claude-code-2.0.37",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "claude-code-2.1.15",
       "pname": "claude-code",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T16:41:15.731806Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T04:35:12.583013Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": true,
-      "version": "2.0.37",
+      "version": "2.1.15",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/ax3qwwal726crahj7y8a9prk2szc1pw1-claude-code-2.0.37"
+        "out": "/nix/store/baj04qi4p8sxw3dmjd5dfg78kcgdsnmc-claude-code-2.1.15"
       },
       "system": "aarch64-darwin",
       "group": "toplevel",
@@ -67,28 +66,27 @@
     {
       "attr_path": "claude-code",
       "broken": false,
-      "derivation": "/nix/store/88fhg5v0zxmyqvwkg1r266c0rfdyd407-claude-code-2.0.37.drv",
+      "derivation": "/nix/store/gs6xg1hi3nii2ghx04aqpf4pr0gpaw3n-claude-code-2.1.15.drv",
       "description": "Agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster",
       "install_id": "claude-code",
       "license": "Unfree",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "claude-code-2.0.37",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "claude-code-2.1.15",
       "pname": "claude-code",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T17:18:25.745127Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T05:16:57.666170Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": true,
-      "version": "2.0.37",
+      "version": "2.1.15",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/wnz6ck9z5jgbd9nlyrdw7pwcf842kil4-claude-code-2.0.37"
+        "out": "/nix/store/v1k7d8ff332fgz6wp23z49frdzg77zsv-claude-code-2.1.15"
       },
       "system": "aarch64-linux",
       "group": "toplevel",
@@ -97,28 +95,27 @@
     {
       "attr_path": "claude-code",
       "broken": false,
-      "derivation": "/nix/store/lsc2cn3mmk9vzk21fk4g0rrn156ida51-claude-code-2.0.37.drv",
+      "derivation": "/nix/store/wx8x23qcdpaxfi268fvh7dphqvjd67rj-claude-code-2.1.15.drv",
       "description": "Agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster",
       "install_id": "claude-code",
       "license": "Unfree",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "claude-code-2.0.37",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "claude-code-2.1.15",
       "pname": "claude-code",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T17:52:16.953152Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T05:56:06.318545Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": true,
-      "version": "2.0.37",
+      "version": "2.1.15",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/px034m72kd6r9rgkljpc1w4slvwmsc4r-claude-code-2.0.37"
+        "out": "/nix/store/1fcffqcsdsninywam44m2p1503478kns-claude-code-2.1.15"
       },
       "system": "x86_64-darwin",
       "group": "toplevel",
@@ -127,28 +124,27 @@
     {
       "attr_path": "claude-code",
       "broken": false,
-      "derivation": "/nix/store/idbn5c3psrl720ij1l7hqc80ra8yjgx3-claude-code-2.0.37.drv",
+      "derivation": "/nix/store/sh7lghh0jr8s8fx3v9wmdywz1da4b912-claude-code-2.1.15.drv",
       "description": "Agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster",
       "install_id": "claude-code",
       "license": "Unfree",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "claude-code-2.0.37",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "claude-code-2.1.15",
       "pname": "claude-code",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T18:31:37.063852Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T06:51:07.361849Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": true,
-      "version": "2.0.37",
+      "version": "2.1.15",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/naj3abmnkp0dzznz8namssf0hk53db9w-claude-code-2.0.37"
+        "out": "/nix/store/9i4x5jffhka4yvhyzmgd593rkbjvhjks-claude-code-2.1.15"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
@@ -157,28 +153,27 @@
     {
       "attr_path": "go",
       "broken": false,
-      "derivation": "/nix/store/v7qj03wniy60xgg9jkn8mwzi2ds413n9-go-1.25.3.drv",
+      "derivation": "/nix/store/h19kjqi10ynjk0i6scllhv82gx45p58w-go-1.25.5.drv",
       "description": "Go Programming language",
       "install_id": "go",
       "license": "BSD-3-Clause",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "go-1.25.3",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "go-1.25.5",
       "pname": "go",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T16:41:16.752290Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T04:35:13.563455Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "1.25.3",
+      "version": "1.25.5",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/pkb0xf89mjr3j7b8lvz0vsm4c44vckyh-go-1.25.3"
+        "out": "/nix/store/wh88zz6r1ihcp2mm7ys1f2anp8aga6n2-go-1.25.5"
       },
       "system": "aarch64-darwin",
       "group": "toplevel",
@@ -187,28 +182,27 @@
     {
       "attr_path": "go",
       "broken": false,
-      "derivation": "/nix/store/wsk4ha7hjm8zmxg0a825kiari38rkx83-go-1.25.3.drv",
+      "derivation": "/nix/store/32f3plvjz6apyxgi010l0c0ngqydzbyj-go-1.25.5.drv",
       "description": "Go Programming language",
       "install_id": "go",
       "license": "BSD-3-Clause",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "go-1.25.3",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "go-1.25.5",
       "pname": "go",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T17:18:27.531772Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T05:16:59.460254Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "1.25.3",
+      "version": "1.25.5",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/ybh1p0f6sd3i7b66chf3gd8b1yy41p0c-go-1.25.3"
+        "out": "/nix/store/k3knzdi0v21bf2m7vcxpdy1jnqg1h0zk-go-1.25.5"
       },
       "system": "aarch64-linux",
       "group": "toplevel",
@@ -217,28 +211,27 @@
     {
       "attr_path": "go",
       "broken": false,
-      "derivation": "/nix/store/h4pfi85jzljix176qkxvcc6rs0pbchhq-go-1.25.3.drv",
+      "derivation": "/nix/store/5m70w19x64mr74nzlmlmv2mia2k6mykd-go-1.25.5.drv",
       "description": "Go Programming language",
       "install_id": "go",
       "license": "BSD-3-Clause",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "go-1.25.3",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "go-1.25.5",
       "pname": "go",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T17:52:17.868514Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T05:56:07.260633Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "1.25.3",
+      "version": "1.25.5",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/w7nnzc7a6r1s3pg6lmiqwcsabrj17q08-go-1.25.3"
+        "out": "/nix/store/bwdahzajhqd5x14dbvkqww5f1wpsxif3-go-1.25.5"
       },
       "system": "x86_64-darwin",
       "group": "toplevel",
@@ -247,28 +240,27 @@
     {
       "attr_path": "go",
       "broken": false,
-      "derivation": "/nix/store/d9bwxq0nqb37n9r6aib5sk1zvdyc392g-go-1.25.3.drv",
+      "derivation": "/nix/store/3xvlqyw28f7hk7qmk3f18pzi6c7ymzy8-go-1.25.5.drv",
       "description": "Go Programming language",
       "install_id": "go",
       "license": "BSD-3-Clause",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "go-1.25.3",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "go-1.25.5",
       "pname": "go",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T18:31:38.924433Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T06:51:09.344245Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "1.25.3",
+      "version": "1.25.5",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/rq8lpjjzfymaznpsfvrymhqrvfg854ms-go-1.25.3"
+        "out": "/nix/store/zzvsjgylnphvhms3lgr2qlwdxmc68z66-go-1.25.5"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
@@ -277,28 +269,27 @@
     {
       "attr_path": "go-task",
       "broken": false,
-      "derivation": "/nix/store/w5wqwqqbvqnzzbzm397jzdx11c3l9yp2-go-task-3.45.4.drv",
+      "derivation": "/nix/store/bxzvbl0vwkn5fwq4l8gvbbw1qjnkxdmq-go-task-3.45.5.drv",
       "description": "Task runner / simpler Make alternative written in Go",
       "install_id": "go-task",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "go-task-3.45.4",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "go-task-3.45.5",
       "pname": "go-task",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T16:41:16.774963Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T04:35:13.582849Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "3.45.4",
+      "version": "3.45.5",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/1l1dwhw28y0r0d87sz6kzshdvykr5hyv-go-task-3.45.4"
+        "out": "/nix/store/siijbf12pnf32gx7mjixfbv9388h2wrl-go-task-3.45.5"
       },
       "system": "aarch64-darwin",
       "group": "toplevel",
@@ -307,28 +298,27 @@
     {
       "attr_path": "go-task",
       "broken": false,
-      "derivation": "/nix/store/3wyykgdkpbnjnrrycflsnri6fydslzkv-go-task-3.45.4.drv",
+      "derivation": "/nix/store/vrn3g6lyfbw2cr2vy5lcypz81ijji9x6-go-task-3.45.5.drv",
       "description": "Task runner / simpler Make alternative written in Go",
       "install_id": "go-task",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "go-task-3.45.4",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "go-task-3.45.5",
       "pname": "go-task",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T17:18:27.558244Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T05:16:59.487980Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "3.45.4",
+      "version": "3.45.5",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/s58zai5hj16wlksrkhp94vdp51qimnxv-go-task-3.45.4"
+        "out": "/nix/store/bz644gcz6r6z0ih6r7njxj9disqzf1z6-go-task-3.45.5"
       },
       "system": "aarch64-linux",
       "group": "toplevel",
@@ -337,28 +327,27 @@
     {
       "attr_path": "go-task",
       "broken": false,
-      "derivation": "/nix/store/j23lqisdr7a44i6cz65hiy954a6q57rw-go-task-3.45.4.drv",
+      "derivation": "/nix/store/yqxxsy6mwrzqlzsw41x15mg7v0d19qdc-go-task-3.45.5.drv",
       "description": "Task runner / simpler Make alternative written in Go",
       "install_id": "go-task",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "go-task-3.45.4",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "go-task-3.45.5",
       "pname": "go-task",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T17:52:17.887666Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T05:56:07.280745Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "3.45.4",
+      "version": "3.45.5",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/as9sj4v1adzplyzds719sjxidvrwysyy-go-task-3.45.4"
+        "out": "/nix/store/qb65b2d47v84cj48ldppv2mwnqkla52z-go-task-3.45.5"
       },
       "system": "x86_64-darwin",
       "group": "toplevel",
@@ -367,28 +356,27 @@
     {
       "attr_path": "go-task",
       "broken": false,
-      "derivation": "/nix/store/pcxvlzvwl4rj0mk3ihvaqkk0adlg8r6h-go-task-3.45.4.drv",
+      "derivation": "/nix/store/fyz34l41q9fjp76bgwa1liib6nwfpsfa-go-task-3.45.5.drv",
       "description": "Task runner / simpler Make alternative written in Go",
       "install_id": "go-task",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "go-task-3.45.4",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "go-task-3.45.5",
       "pname": "go-task",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T18:31:38.952067Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T06:51:09.373864Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "3.45.4",
+      "version": "3.45.5",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/ci8q0hyph46x7n9sq5wz7v2799ny6q40-go-task-3.45.4"
+        "out": "/nix/store/hwhz6lp5y525yf4jr92q83n2y4swapby-go-task-3.45.5"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
@@ -397,28 +385,27 @@
     {
       "attr_path": "golangci-lint",
       "broken": false,
-      "derivation": "/nix/store/xrcc2a8dmpx7i7yz3zhhryybacvr7lrk-golangci-lint-2.6.1.drv",
+      "derivation": "/nix/store/9dzx5i1f23r2x2iyz5qyya8ndgy895an-golangci-lint-2.8.0.drv",
       "description": "Fast linters Runner for Go",
       "install_id": "golangci-lint",
       "license": "GPL-3.0-or-later",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "golangci-lint-2.6.1",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "golangci-lint-2.8.0",
       "pname": "golangci-lint",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T16:41:16.802710Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T04:35:13.612017Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "2.6.1",
+      "version": "2.8.0",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/cy50a617i5l0y6gijczcs032xd7pa27x-golangci-lint-2.6.1"
+        "out": "/nix/store/ci7qq9jsgk0v1f0pzs7kb0v9rk5zwyck-golangci-lint-2.8.0"
       },
       "system": "aarch64-darwin",
       "group": "toplevel",
@@ -427,28 +414,27 @@
     {
       "attr_path": "golangci-lint",
       "broken": false,
-      "derivation": "/nix/store/mbfih0b4vbda5klbgpgich0x3l8dx5wh-golangci-lint-2.6.1.drv",
+      "derivation": "/nix/store/57wca9gb93w88byllnrgvdnv84y7yfbp-golangci-lint-2.8.0.drv",
       "description": "Fast linters Runner for Go",
       "install_id": "golangci-lint",
       "license": "GPL-3.0-or-later",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "golangci-lint-2.6.1",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "golangci-lint-2.8.0",
       "pname": "golangci-lint",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T17:18:27.618293Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T05:16:59.545793Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "2.6.1",
+      "version": "2.8.0",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/i4m413580nj7n2z1c4scv6wprvyf6n4x-golangci-lint-2.6.1"
+        "out": "/nix/store/ly2sk4i2qj8gfb0l7m5sxvyv7c8rn273-golangci-lint-2.8.0"
       },
       "system": "aarch64-linux",
       "group": "toplevel",
@@ -457,28 +443,27 @@
     {
       "attr_path": "golangci-lint",
       "broken": false,
-      "derivation": "/nix/store/jd9ar146vg9q6jkwdch4bxxvhs81cgy6-golangci-lint-2.6.1.drv",
+      "derivation": "/nix/store/igmhc65kmlam8clqq41wzfsx77zaljcx-golangci-lint-2.8.0.drv",
       "description": "Fast linters Runner for Go",
       "install_id": "golangci-lint",
       "license": "GPL-3.0-or-later",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "golangci-lint-2.6.1",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "golangci-lint-2.8.0",
       "pname": "golangci-lint",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T17:52:17.916916Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T05:56:07.310346Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "2.6.1",
+      "version": "2.8.0",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/zciljzhgs4wa9psdfp42jykw15r5p4l1-golangci-lint-2.6.1"
+        "out": "/nix/store/r1m8175dhby0agi1r43ic2scrphsjnlb-golangci-lint-2.8.0"
       },
       "system": "x86_64-darwin",
       "group": "toplevel",
@@ -487,28 +472,27 @@
     {
       "attr_path": "golangci-lint",
       "broken": false,
-      "derivation": "/nix/store/nxwc29nhmsain7s5rhs7m258nak5l70s-golangci-lint-2.6.1.drv",
+      "derivation": "/nix/store/y02farjzw0ix3fqpcd11qhb88zc5p8rk-golangci-lint-2.8.0.drv",
       "description": "Fast linters Runner for Go",
       "install_id": "golangci-lint",
       "license": "GPL-3.0-or-later",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "golangci-lint-2.6.1",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "golangci-lint-2.8.0",
       "pname": "golangci-lint",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T18:31:39.010012Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T06:51:09.434737Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "2.6.1",
+      "version": "2.8.0",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/wi22pwgwdbxky7nbaa5b89bg0z26byvk-golangci-lint-2.6.1"
+        "out": "/nix/store/kj9ibnlg1p3macpcw8lm4rhpcwgfjal1-golangci-lint-2.8.0"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
@@ -517,28 +501,27 @@
     {
       "attr_path": "goreleaser",
       "broken": false,
-      "derivation": "/nix/store/kgl0mkw4fw0y3hx40f58wi6vbhld2gk2-goreleaser-2.12.7.drv",
+      "derivation": "/nix/store/pyavapj0x4hkk4q64wzm5bd1bdb81w0b-goreleaser-2.13.3.drv",
       "description": "Deliver Go binaries as fast and easily as possible",
       "install_id": "goreleaser",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "goreleaser-2.12.7",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "goreleaser-2.13.3",
       "pname": "goreleaser",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T16:41:16.825329Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T04:35:13.636151Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "2.12.7",
+      "version": "2.13.3",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/vwhmpc59cv9iwiy6qm1rbvlyls527dj8-goreleaser-2.12.7"
+        "out": "/nix/store/04l59s6yaxfn4mx6m0wcvkk4skzawd9y-goreleaser-2.13.3"
       },
       "system": "aarch64-darwin",
       "group": "toplevel",
@@ -547,28 +530,27 @@
     {
       "attr_path": "goreleaser",
       "broken": false,
-      "derivation": "/nix/store/42jwvr6m8j1y8sxnc5c4kkh683574m27-goreleaser-2.12.7.drv",
+      "derivation": "/nix/store/snac99mlf7054r7cr1jnrhimwmdays17-goreleaser-2.13.3.drv",
       "description": "Deliver Go binaries as fast and easily as possible",
       "install_id": "goreleaser",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "goreleaser-2.12.7",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "goreleaser-2.13.3",
       "pname": "goreleaser",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T17:18:27.666146Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T05:16:59.584472Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "2.12.7",
+      "version": "2.13.3",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/rqr0l64r2n5yk3rznysd98ckhiv54bsk-goreleaser-2.12.7"
+        "out": "/nix/store/4b8y96z5wsn04glwhqy9nl4jj2x12ic0-goreleaser-2.13.3"
       },
       "system": "aarch64-linux",
       "group": "toplevel",
@@ -577,28 +559,27 @@
     {
       "attr_path": "goreleaser",
       "broken": false,
-      "derivation": "/nix/store/hlcwpf6si1znga4bjz4xyxzd7kqgwvh4-goreleaser-2.12.7.drv",
+      "derivation": "/nix/store/fhw1l1kj2psdriyw9c2rljpm5qah69nc-goreleaser-2.13.3.drv",
       "description": "Deliver Go binaries as fast and easily as possible",
       "install_id": "goreleaser",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "goreleaser-2.12.7",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "goreleaser-2.13.3",
       "pname": "goreleaser",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T17:52:17.940597Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T05:56:07.336302Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "2.12.7",
+      "version": "2.13.3",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/ml5sjhz8xq3i6rcz14c9jpfljglxdq4n-goreleaser-2.12.7"
+        "out": "/nix/store/f0x8i0j9bqmif4jx79z28kxqz8ak694h-goreleaser-2.13.3"
       },
       "system": "x86_64-darwin",
       "group": "toplevel",
@@ -607,28 +588,27 @@
     {
       "attr_path": "goreleaser",
       "broken": false,
-      "derivation": "/nix/store/hidwm77x6yjifnf4cvij7r1hx8m8mjki-goreleaser-2.12.7.drv",
+      "derivation": "/nix/store/74v6yn2w53pv46yghwzy3z5nyzhvjs1y-goreleaser-2.13.3.drv",
       "description": "Deliver Go binaries as fast and easily as possible",
       "install_id": "goreleaser",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "name": "goreleaser-2.12.7",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
+      "name": "goreleaser-2.13.3",
       "pname": "goreleaser",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T18:31:39.050659Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T06:51:09.477440Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "2.12.7",
+      "version": "2.13.3",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/r6qmmcj01kxy6kg7lyj98kva87x8mb1p-goreleaser-2.12.7"
+        "out": "/nix/store/i4ilqzqm4qagpc0wvhi99byx714cm5bb-goreleaser-2.13.3"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
@@ -637,19 +617,18 @@
     {
       "attr_path": "prettier",
       "broken": false,
-      "derivation": "/nix/store/44j16zcpawgi42a1absxixm3l9jipm4f-prettier-3.6.2.drv",
+      "derivation": "/nix/store/60r605chwcndyk629xhrym17q85i11ya-prettier-3.6.2.drv",
       "description": "Code formatter",
       "install_id": "prettier",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
       "name": "prettier-3.6.2",
       "pname": "prettier",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T16:41:53.996731Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T04:35:52.316246Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -658,7 +637,7 @@
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/cab2xm8x4f8v2s9g3i3hnkbn7s3ypcm0-prettier-3.6.2"
+        "out": "/nix/store/dc55gdzvxndv365gjxycar452f8nzvxp-prettier-3.6.2"
       },
       "system": "aarch64-darwin",
       "group": "toplevel",
@@ -667,19 +646,18 @@
     {
       "attr_path": "prettier",
       "broken": false,
-      "derivation": "/nix/store/p7rb1cbrs0l0nmp8x0yawx89dbyn80s3-prettier-3.6.2.drv",
+      "derivation": "/nix/store/skdwdi84504g7a27i9ccf7im2xgrgcf9-prettier-3.6.2.drv",
       "description": "Code formatter",
       "install_id": "prettier",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
       "name": "prettier-3.6.2",
       "pname": "prettier",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T17:19:23.199081Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T05:17:54.775545Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -688,7 +666,7 @@
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/mv54p1s3vhibi9zpj8k63qn6253arqvd-prettier-3.6.2"
+        "out": "/nix/store/zl13fpjn7wa2r5zqvmzh6abiawz35xsh-prettier-3.6.2"
       },
       "system": "aarch64-linux",
       "group": "toplevel",
@@ -697,19 +675,18 @@
     {
       "attr_path": "prettier",
       "broken": false,
-      "derivation": "/nix/store/26hlp9wbc5qcajjf78xcmyh3dfcwfzn1-prettier-3.6.2.drv",
+      "derivation": "/nix/store/f729mma57fvmhcmqvhmy4qkdbbc14zjh-prettier-3.6.2.drv",
       "description": "Code formatter",
       "install_id": "prettier",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
       "name": "prettier-3.6.2",
       "pname": "prettier",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T17:52:54.778669Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T05:56:43.597195Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -718,7 +695,7 @@
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/225c2nsgzqx0983axw3w0hshknaw71hc-prettier-3.6.2"
+        "out": "/nix/store/hwc2ma0qxzjppzwy10ljxky48s23blng-prettier-3.6.2"
       },
       "system": "x86_64-darwin",
       "group": "toplevel",
@@ -727,19 +704,18 @@
     {
       "attr_path": "prettier",
       "broken": false,
-      "derivation": "/nix/store/cl5acbyd1fa34lg8y0n82gpq05s4inmz-prettier-3.6.2.drv",
+      "derivation": "/nix/store/2rwdcp9fzq13n0fxv6n158zgmch9n09m-prettier-3.6.2.drv",
       "description": "Code formatter",
       "install_id": "prettier",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=c5296fdd05cfa2c187990dd909864da9658df755",
       "name": "prettier-3.6.2",
       "pname": "prettier",
-      "rev": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
-      "rev_count": 895122,
-      "rev_date": "2025-11-12T20:02:36Z",
-      "scrape_date": "2025-11-14T18:32:38.944844Z",
+      "rev": "c5296fdd05cfa2c187990dd909864da9658df755",
+      "rev_count": 933481,
+      "rev_date": "2026-01-23T12:18:02Z",
+      "scrape_date": "2026-01-26T06:52:08.633493Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -748,7 +724,7 @@
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/167wwybss5ab3bpp2qn29jfjabghraqy-prettier-3.6.2"
+        "out": "/nix/store/0xf3ga1c7hapnxk75f6b98qhw4nnggn8-prettier-3.6.2"
       },
       "system": "x86_64-linux",
       "group": "toplevel",

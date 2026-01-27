@@ -19,12 +19,12 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v6.0.0
       with:
-        go-version: {{ if and .ADL.Spec.Language.Go .ADL.Spec.Language.Go.Version }}{{ .ADL.Spec.Language.Go.Version }}{{ else }}1.25{{ end }}
+        go-version-file: go.mod
         cache: true
 
     - name: Install golangci-lint
       run: |
-        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v2.4.0
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v2.8.0
 
     - name: Install Task
       uses: arduino/setup-task@v2
