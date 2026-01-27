@@ -2,13 +2,13 @@
 
 # {{ .ADL.Metadata.Name | title }}
 
-{{- if .GenerateCI }}
-{{- if and .ADL.Spec.SCM (eq .ADL.Spec.SCM.Provider "github") .ADL.Spec.SCM.URL }}
-{{- $url := .ADL.Spec.SCM.URL | trimSuffix ".git" | trimPrefix "https://github.com/" | trimPrefix "git@github.com:" }}
+{{ if .GenerateCI -}}
+{{ if and .ADL.Spec.SCM (eq .ADL.Spec.SCM.Provider "github") .ADL.Spec.SCM.URL -}}
+{{ $url := .ADL.Spec.SCM.URL | trimSuffix ".git" | trimPrefix "https://github.com/" | trimPrefix "git@github.com:" -}}
 [![CI](https://github.com/{{ $url }}/workflows/CI/badge.svg)](https://github.com/{{ $url }}/actions/workflows/ci.yml)
-{{- end }}
-{{- end }}
-{{- if eq .Language "go" }}
+{{ end -}}
+{{ end -}}
+{{ if eq .Language "go" -}}
 [![Go Version](https://img.shields.io/badge/Go-{{ .ADL.Spec.Language.Go.Version }}+-00ADD8?style=flat&logo=go)](https://golang.org)
 {{- else if eq .Language "rust" }}
 [![Rust Version](https://img.shields.io/badge/Rust-{{ .ADL.Spec.Language.Rust.Version }}+-000000?style=flat&logo=rust)](https://rust-lang.org)
@@ -215,6 +215,7 @@ docker build \
 ```
 
 **Available Build Arguments:**
+
 - `VERSION` - Agent version (default: `{{ .ADL.Metadata.Version }}`)
 - `AGENT_NAME` - Agent name (default: `{{ .ADL.Metadata.Name }}`)
 - `AGENT_DESCRIPTION` - Agent description (default: `{{ .ADL.Metadata.Description }}`)

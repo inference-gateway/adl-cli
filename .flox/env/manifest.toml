@@ -13,6 +13,8 @@ go-task.pkg-path = "go-task"
 go-task.version = "^3.45.5"
 prettier.pkg-path = "prettier"
 prettier.version = "^3.6.2"
+markdownlint-cli.pkg-path = "markdownlint-cli"
+markdownlint-cli.version = "0.47.0"
 
 [hook]
 on-activate = """

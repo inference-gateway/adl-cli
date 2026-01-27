@@ -17,7 +17,7 @@ This file provides comprehensive guidance for AI agents working with the ADL CLI
 ## Architecture and Structure
 
 ### Project Layout
-```
+```text
 adl-cli/
 ├── cmd/                    # CLI command implementations
 │   ├── root.go            # Main CLI setup
@@ -178,7 +178,7 @@ adl generate --file examples/go-agent.yaml --output test-output/go-agent --overw
 
 ### Commit Messages
 Use conventional commits format:
-```
+```text
 type(scope): Description
 
 feat(generator): Add CloudRun deployment support
@@ -218,7 +218,7 @@ When modifying templates:
 - **`internal/generator/generator.go`**: File generation logic
 
 ### Template Structure
-```
+```text
 internal/templates/
 ├── common/              # Cross-language templates
 │   ├── ai/             # AI assistant instructions

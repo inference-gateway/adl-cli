@@ -102,7 +102,7 @@ We welcome several types of contributions:
 
 Use clear, descriptive commit messages:
 
-```
+```text
 feat: add TypeScript template support
 
 - Add TypeScript template with Express.js framework

@@ -687,7 +687,7 @@ The service injection system generates:
 
 ### Generated Structure
 
-```
+```text
 my-agent/
 ├── config/
 │   └── config.go                    # Type-safe configuration with env mapping
@@ -779,7 +779,7 @@ The ADL CLI generates project scaffolding tailored to your chosen language:
 
 ### Go Project Structure
 
-```
+```text
 my-go-agent/
 ├── main.go                    # Main server setup
 ├── go.mod                     # Go module definition
@@ -823,7 +823,7 @@ my-go-agent/
 
 ### Rust Project Structure
 
-```
+```text
 my-rust-agent/
 ├── src/
 │   ├── main.rs                # Main application entry point
@@ -932,7 +932,7 @@ gh workflow run cd.yml
 
 **Container Registry**: Published images are available at:
 
-```
+```text
 ghcr.io/your-org/your-agent:latest
 ghcr.io/your-org/your-agent:v1.0.0
 ghcr.io/your-org/your-agent:1.0
