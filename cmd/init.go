@@ -570,7 +570,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 		}{}
 		defaultModule := getDefaultGoModule(adl.Metadata.Name)
 		adl.Spec.Language.Go.Module = promptWithConfig("go-module", useDefaults, "Go module", defaultModule)
-		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.25")
+		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.25.5")
 
 	case "rust":
 		adl.Spec.Language.Rust = &struct {
@@ -588,17 +588,16 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 			NodeVersion string `yaml:"nodeVersion"`
 		}{}
 		adl.Spec.Language.TypeScript.PackageName = promptWithConfig("typescript-name", useDefaults, "TypeScript package name", adl.Metadata.Name)
-		adl.Spec.Language.TypeScript.NodeVersion = "20"
+		adl.Spec.Language.TypeScript.NodeVersion = "24"
 
 	default:
-		// Default to Go
 		adl.Spec.Language.Go = &struct {
 			Module  string `yaml:"module"`
 			Version string `yaml:"version"`
 		}{}
 		defaultModule := getDefaultGoModule(adl.Metadata.Name)
 		adl.Spec.Language.Go.Module = promptWithConfig("go-module", useDefaults, "Go module", defaultModule)
-		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.25")
+		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.25.5")
 	}
 
 	fmt.Println("\n🏗️ Sandbox Configuration")
