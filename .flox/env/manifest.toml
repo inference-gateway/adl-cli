@@ -17,7 +17,12 @@ prettier.version = "^3.6.2"
 [hook]
 on-activate = """
   export GOENV="$FLOX_ENV_CACHE/goenv"
+  export PATH="$(go env GOPATH)/bin:$PATH"
   go get .
+
+  if [ ! -f "$(go env GOPATH)/bin/infer" ]; then
+    curl -sSL https://raw.githubusercontent.com/inference-gateway/cli/main/install.sh | bash -s -- --install-dir "$(go env GOPATH)/bin"
+  fi
 
   source <(goreleaser completion zsh)
   source <(task --completion zsh)
