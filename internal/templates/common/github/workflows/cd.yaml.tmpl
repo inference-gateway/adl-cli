@@ -43,7 +43,7 @@ jobs:
 {{- end }}
 
       - name: Checkout code
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6
         with:
           ref: ${{`{{ github.ref }}`}}
           fetch-depth: 0
@@ -56,7 +56,7 @@ jobs:
 
 {{- if eq .Language "go" }}
       - name: Set up Go
-        uses: actions/setup-go@v6.0.0
+        uses: actions/setup-go@v6.2.0
         with:
           go-version-file: go.mod
           cache: true
@@ -110,7 +110,7 @@ jobs:
         run: task build
 {{- else if eq .Language "typescript" }}
       - name: Set up Node.js
-        uses: actions/setup-node@v4.1.0
+        uses: actions/setup-node@v6.2.0
         with:
           node-version: {{ if and .ADL.Spec.Language.TypeScript .ADL.Spec.Language.TypeScript.NodeVersion }}{{ .ADL.Spec.Language.TypeScript.NodeVersion }}{{ else }}18{{ end }}
           cache: 'npm'
@@ -155,7 +155,7 @@ jobs:
           password: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
       - name: Set up Node.js for semantic-release
-        uses: actions/setup-node@v4.4.0
+        uses: actions/setup-node@v6.2.0
         with:
           node-version: 22
 
@@ -223,7 +223,7 @@ jobs:
     if: needs.release.outputs.new_release_published == 'true'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6
         with:
           ref: ${{`{{ github.ref }}`}}
           fetch-depth: 0
