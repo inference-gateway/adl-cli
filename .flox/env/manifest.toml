@@ -21,7 +21,7 @@ on-activate = """
   go get .
 
   if [ ! -f "$(go env GOPATH)/bin/infer" ]; then
-    curl -sSL https://raw.githubusercontent.com/inference-gateway/cli/main/install.sh | bash -s -- --install-dir "$(go env GOPATH)/bin"
+    curl -sSL https://raw.githubusercontent.com/inference-gateway/cli/main/install.sh | bash -s -- --version v0.100.3 --install-dir $HOME/.local/bin
   fi
 
   source <(goreleaser completion zsh)

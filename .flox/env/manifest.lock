@@ -29,7 +29,7 @@
       }
     },
     "hook": {
-      "on-activate": "  export GOENV=\"$FLOX_ENV_CACHE/goenv\"\n  export PATH=\"$(go env GOPATH)/bin:$PATH\"\n  go get .\n\n  if [ ! -f \"$(go env GOPATH)/bin/infer\" ]; then\n    curl -sSL https://raw.githubusercontent.com/inference-gateway/cli/main/install.sh | bash -s -- --install-dir \"$(go env GOPATH)/bin\"\n  fi\n\n  source <(goreleaser completion zsh)\n  source <(task --completion zsh)\n"
+      "on-activate": "  export GOENV=\"$FLOX_ENV_CACHE/goenv\"\n  export PATH=\"$(go env GOPATH)/bin:$PATH\"\n  go get .\n\n  if [ ! -f \"$(go env GOPATH)/bin/infer\" ]; then\n    curl -sSL https://raw.githubusercontent.com/inference-gateway/cli/main/install.sh | bash -s -- --version v0.100.3 --install-dir $HOME/.local/bin\n  fi\n\n  source <(goreleaser completion zsh)\n  source <(task --completion zsh)\n"
     },
     "options": {}
   },
