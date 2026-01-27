@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.27.0](https://github.com/inference-gateway/adl-cli/compare/v0.26.4...v0.27.0) (2026-01-27)
+
+### ✨ Features
+
+* **ci:** Setup infer workflow ([#96](https://github.com/inference-gateway/adl-cli/issues/96)) ([c275df1](https://github.com/inference-gateway/adl-cli/commit/c275df14a1f7cedbdc5a4b46750e400ea20264e8))
+
+### 🐛 Bug Fixes
+
+* **ci:** Use repository name ([bf1ab30](https://github.com/inference-gateway/adl-cli/commit/bf1ab30e2469fc7b7dbba60822cd7d06e6bec262))
+
+### 👷 CI
+
+* Add markdownlint to CI workflow ([3a2210a](https://github.com/inference-gateway/adl-cli/commit/3a2210a36d824203bd48a18a5f41a2d87afd97fb))
+
+### 📚 Documentation
+
+* Update AGENTS.md with comprehensive project guide ([22c181b](https://github.com/inference-gateway/adl-cli/commit/22c181b8140c2d4afc0f5a815bbdc7f9cae09e46))
+
+### 🔧 Miscellaneous
+
+* Add infer CLI configuration and shortcuts ([61a16ed](https://github.com/inference-gateway/adl-cli/commit/61a16ed762865036f9429c0ef8c5f8792d66c13d))
+* Add markdownlint and fix markdown issues ([a549857](https://github.com/inference-gateway/adl-cli/commit/a549857c505d26a125ceb4aa5cc5eeca7d762510))
+* **ci:** Update Claude Code Action to latest main branch format ([80f6584](https://github.com/inference-gateway/adl-cli/commit/80f6584af5b778902ea1dd76b7bfea726fc5c656))
+* **deps:** Bump ADK version to 0.17.0 ([c2ede06](https://github.com/inference-gateway/adl-cli/commit/c2ede06cb5a257809d066b7f0bd99c5f93fc61af))
+* **deps:** Bump zap logger version to 1.27.1 ([8a51596](https://github.com/inference-gateway/adl-cli/commit/8a51596bb684dd88542e85c0cb0206009feffcbd))
+* **deps:** Update Go dependencies and template versions ([0c04329](https://github.com/inference-gateway/adl-cli/commit/0c043291432efe26e433bbebd679735c71c99861))
+* **deps:** Use the latest version of infer cli ([0dc9486](https://github.com/inference-gateway/adl-cli/commit/0dc94867121a6ea08bf56e008a80b936f4507613))
+* Update GitHub Actions versions ([0c4af9f](https://github.com/inference-gateway/adl-cli/commit/0c4af9fe504e667d885b399d97e75c78445b6388))
+
 ## [0.26.4](https://github.com/inference-gateway/adl-cli/compare/v0.26.3...v0.26.4) (2025-12-13)
 
 ### 🔧 Miscellaneous
