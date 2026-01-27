@@ -51,7 +51,7 @@ tasks:
   lint:md:
     desc: Run markdownlint
     cmds:
-      - markdownlint '**/*.md' --ignore node_modules
+      - markdownlint '**/*.md' --ignore CHANGELOG.md
 
   mod:
     desc: Download dependencies
