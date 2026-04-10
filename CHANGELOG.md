@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.27.2](https://github.com/inference-gateway/adl-cli/compare/v0.27.1...v0.27.2) (2026-04-10)
+
+### 👷 CI
+
+* Bump action versions ([eff755b](https://github.com/inference-gateway/adl-cli/commit/eff755bc073413370a328369e55449091d6b1d3b))
+
+### 🔧 Miscellaneous
+
+* Bump dev dependecies for the generated code ([515a1c8](https://github.com/inference-gateway/adl-cli/commit/515a1c8b2be156fe2d02feea9659bb60251242a7))
+* Bump go version to 1.26.1 ([2128833](https://github.com/inference-gateway/adl-cli/commit/21288335039b05858e282df74939d749da1f1ec1))
+* **deps:** Bump dev dependecies ([c44c56f](https://github.com/inference-gateway/adl-cli/commit/c44c56fb6f6760cbb36ed7f23a52d0bd19d5ff7e))
+
 ## [0.27.1](https://github.com/inference-gateway/adl-cli/compare/v0.27.0...v0.27.1) (2026-01-27)
 
 ### 🔧 Miscellaneous
