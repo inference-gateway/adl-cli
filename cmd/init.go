@@ -570,7 +570,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 		}{}
 		defaultModule := getDefaultGoModule(adl.Metadata.Name)
 		adl.Spec.Language.Go.Module = promptWithConfig("go-module", useDefaults, "Go module", defaultModule)
-		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.25.5")
+		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.26.1")
 
 	case "rust":
 		adl.Spec.Language.Rust = &struct {
@@ -597,7 +597,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 		}{}
 		defaultModule := getDefaultGoModule(adl.Metadata.Name)
 		adl.Spec.Language.Go.Module = promptWithConfig("go-module", useDefaults, "Go module", defaultModule)
-		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.25.5")
+		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.26.1")
 	}
 
 	fmt.Println("\n🏗️ Sandbox Configuration")

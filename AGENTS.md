@@ -430,5 +430,5 @@ adl generate --file agent.yaml --output test-minimal
 
 **Last Updated**: Based on project analysis on January 27, 2026  
 **Project Version**: 0.26.4 (from Taskfile.yml)  
-**Go Version**: 1.25.5 (from go.mod)  
+**Go Version**: 1.26.1 (from go.mod)  
 **Main Branch**: main
