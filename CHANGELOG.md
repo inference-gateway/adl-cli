@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.27.4](https://github.com/inference-gateway/adl-cli/compare/v0.27.3...v0.27.4) (2026-04-10)
+
+### 👷 CI
+
+* **deps:** Bump golangci-lint to v2.11.4 ([91aa2c3](https://github.com/inference-gateway/adl-cli/commit/91aa2c3a1fcfbae3fa1066ae071f48139559476d))
+
 ## [0.27.3](https://github.com/inference-gateway/adl-cli/compare/v0.27.2...v0.27.3) (2026-04-10)
 
 ### 🔧 Miscellaneous
