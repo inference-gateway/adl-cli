@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.27.3](https://github.com/inference-gateway/adl-cli/compare/v0.27.2...v0.27.3) (2026-04-10)
+
+### 🔧 Miscellaneous
+
+* **deps:** Default to go 1.26.1 ([b0d872d](https://github.com/inference-gateway/adl-cli/commit/b0d872da7a6958661d6e82dbc77a7f2e99f8f2ba))
+
 ## [0.27.2](https://github.com/inference-gateway/adl-cli/compare/v0.27.1...v0.27.2) (2026-04-10)
 
 ### 👷 CI
