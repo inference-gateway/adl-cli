@@ -23,7 +23,7 @@ spec:
   language:
     go:
       module: "github.com/example/test-agent"
-      version: "1.25"
+      version: "1.26"
 `
 
 	tmpFile, err := os.CreateTemp("", "test-adl-*.yaml")
@@ -72,7 +72,7 @@ spec:
   language:
     go:
       module: "github.com/example/test-agent"
-      version: "1.25"
+      version: "1.26"
 `
 
 	tmpFile, err := os.CreateTemp("", "test-adl-agent-*.yaml")

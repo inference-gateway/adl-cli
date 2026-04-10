@@ -31,7 +31,7 @@ func TestGenerator_Generate(t *testing.T) {
 			Language: &schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-agent",
-					Version: "1.25",
+					Version: "1.26",
 				},
 			},
 		},
@@ -90,7 +90,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Language: &schema.Language{
 						Go: &schema.GoConfig{
 							Module:  "github.com/example/test-agent",
-							Version: "1.25",
+							Version: "1.26",
 						},
 					},
 				},
@@ -114,7 +114,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Language: &schema.Language{
 						Go: &schema.GoConfig{
 							Module:  "github.com/example/test-agent",
-							Version: "1.25",
+							Version: "1.26",
 						},
 					},
 				},
@@ -167,7 +167,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					},
 					Language: &schema.Language{
 						Go: &schema.GoConfig{
-							Version: "1.25",
+							Version: "1.26",
 						},
 					},
 				},
@@ -197,7 +197,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Language: &schema.Language{
 						Go: &schema.GoConfig{
 							Module:  "github.com/example/test-agent",
-							Version: "1.25",
+							Version: "1.26",
 						},
 					},
 				},
@@ -227,7 +227,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Language: &schema.Language{
 						Go: &schema.GoConfig{
 							Module:  "github.com/example/test-agent",
-							Version: "1.25",
+							Version: "1.26",
 						},
 						TypeScript: &schema.TypeScriptConfig{
 							PackageName: "test-agent",
@@ -276,7 +276,7 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 			Language: &schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-agent",
-					Version: "1.25",
+					Version: "1.26",
 				},
 			},
 			Skills: []schema.Skill{
@@ -419,7 +419,7 @@ func TestGenerator_generateCD(t *testing.T) {
 			Language: &schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-cd-agent",
-					Version: "1.25",
+					Version: "1.26",
 				},
 			},
 			SCM: &schema.SCM{
@@ -450,7 +450,7 @@ func TestGenerator_generateCD(t *testing.T) {
 			Language: &schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-github-app-agent",
-					Version: "1.25",
+					Version: "1.26",
 				},
 			},
 			SCM: &schema.SCM{
@@ -656,7 +656,7 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 			Language: &schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-agent",
-					Version: "1.25",
+					Version: "1.26",
 				},
 			},
 			SCM: &schema.SCM{
@@ -688,7 +688,7 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 			Language: &schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-agent-no-templates",
-					Version: "1.25",
+					Version: "1.26",
 				},
 			},
 			SCM: &schema.SCM{

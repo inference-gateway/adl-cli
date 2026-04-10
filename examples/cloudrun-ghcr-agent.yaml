@@ -36,7 +36,7 @@ spec:
   language:
     go:
       module: github.com/example/ghcr-example
-      version: "1.25"
+      version: "1.26"
   scm:
     provider: github
     url: "https://github.com/example/ghcr-example"

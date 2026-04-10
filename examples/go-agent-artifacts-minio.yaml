@@ -84,7 +84,7 @@ spec:
   language:
     go:
       module: "github.com/inference-gateway/adl-cli/examples/go-agent-minio-artifacts"
-      version: "1.25"
+      version: "1.26"
   scm:
     provider: github
     url: "https://github.com/inference-gateway/adl-cli"

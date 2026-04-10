@@ -106,7 +106,7 @@ Generated services go to `internal/<service>/` with interface and factory functi
 
 ## Important Notes
 
-- Go 1.25+ required
+- Go 1.26+ required
 - Templates use Go `text/template` with Sprig v3 functions
 - ADL schema version: `adl.dev/v1`
 - Supports Go, Rust (TypeScript planned)

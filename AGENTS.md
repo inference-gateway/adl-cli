@@ -7,7 +7,7 @@ This file provides comprehensive guidance for AI agents working with the ADL CLI
 **ADL CLI** (Agent Definition Language Command Line Interface) is a Go-based tool for generating enterprise-ready A2A (Agent-to-Agent) servers from YAML-based Agent Definition Language (ADL) files. It eliminates boilerplate code and ensures consistent patterns across agent implementations.
 
 ### Key Technologies
-- **Language**: Go 1.25+
+- **Language**: Go 1.26+
 - **Framework**: Cobra CLI framework
 - **Templating**: Go templates with Sprig functions
 - **Build System**: Taskfile for automation
@@ -51,7 +51,7 @@ adl-cli/
 ## Development Environment Setup
 
 ### Prerequisites
-- Go 1.25+ (as specified in `go.mod`)
+- Go 1.26+ (as specified in `go.mod`)
 - [Task](https://taskfile.dev/) for build automation
 - Docker (for container operations)
 - Git for version control
@@ -313,7 +313,7 @@ spec:
   language:
     go:
       module: "github.com/user/agent"
-      version: "1.25"
+      version: "1.26"
 ```
 
 ### Generation Features
