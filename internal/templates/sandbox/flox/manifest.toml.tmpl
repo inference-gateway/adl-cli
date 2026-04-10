@@ -6,49 +6,49 @@ go.pkg-path = "go"
 go.version = "{{ .ADL.Spec.Language.Go.Version }}"
 
 golangci-lint.pkg-path = "golangci-lint"
-golangci-lint.version = "^2.8.0"
+golangci-lint.version = "^2.11.4"
 golangci-lint.pkg-group = "common"
 
 {{- else if eq .Language "rust" }}
 cargo.pkg-path = "cargo"
-cargo.version = "^1.92.0"
+cargo.version = "^1.94.0"
 cargo.pkg-group = "rust-toolchain"
 
 rustc.pkg-path = "rustc"
-rustc.version = "^1.92.0"
+rustc.version = "^1.94.0"
 rustc.pkg-group = "rust-toolchain"
 
 clippy.pkg-path = "clippy"
-clippy.version = "^1.92.0"
+clippy.version = "^1.94.0"
 clippy.pkg-group = "rust-toolchain"
 
 rustfmt.pkg-path = "rustfmt"
-rustfmt.version = "^1.92.0"
+rustfmt.version = "^1.94.0"
 rustfmt.pkg-group = "rust-toolchain"
 
 rust-analyzer.pkg-path = "rust-analyzer"
-rust-analyzer.version = "2026-01-19"
+rust-analyzer.version = "2026-03-30"
 rust-analyzer.pkg-group = "rust-analyzer"
 {{- else if eq .Language "typescript" }}
 nodejs_24.pkg-path = "nodejs_24"
-nodejs_24.version = "^14.13.0"
+nodejs_24.version = "^14.14.0"
 {{- end }}
 
 go-task.pkg-path = "go-task"
-go-task.version = "^3.45.5"
+go-task.version = "^3.48.0"
 go-task.pkg-group = "common"
 
 git.pkg-path = "git"
-git.version = "^2.51.0"
+git.version = "^2.53.0"
 git.pkg-group = "common"
 
 docker.pkg-path = "docker"
-docker.version = "^29.1.5"
+docker.version = "^29.3.1"
 docker.pkg-group = "common"
 {{- if .EnableAI }}
 
 claude-code.pkg-path = "claude-code"
-claude-code.version = "^2.1.15"
+claude-code.version = "^2.1.92"
 claude-code.pkg-group = "common"
 {{- end }}
 
