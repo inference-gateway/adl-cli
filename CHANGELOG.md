@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.27.5](https://github.com/inference-gateway/adl-cli/compare/v0.27.4...v0.27.5) (2026-04-17)
+
+### 👷 CI
+
+* **deps:** Bump create-github-app-token to version 3.1.1 ([b584208](https://github.com/inference-gateway/adl-cli/commit/b5842084863323bf56bce9569935d81f0371351f))
+
+### 🔧 Miscellaneous
+
+* **deps:** Bump ADK to 0.17.1 ([4eef9a5](https://github.com/inference-gateway/adl-cli/commit/4eef9a586fe159e4ff0ff0ec0548b048d25d7fdc))
+* **deps:** Bump claude-code and goreleaser dev dependecies ([d833adc](https://github.com/inference-gateway/adl-cli/commit/d833adc1141c6563250a568c66b9e94285e4e226))
+* Ensure consistent go versions ([ecb7a0b](https://github.com/inference-gateway/adl-cli/commit/ecb7a0b7fa38c255cebd70d94a5de8182cc8fdd1))
+
 ## [0.27.4](https://github.com/inference-gateway/adl-cli/compare/v0.27.3...v0.27.4) (2026-04-10)
 
 ### 👷 CI
