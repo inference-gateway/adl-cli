@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.27.8](https://github.com/inference-gateway/adl-cli/compare/v0.27.7...v0.27.8) (2026-04-17)
+
+### 🔧 Miscellaneous
+
+* **deps:** Bump docker to latest ([ab0f73a](https://github.com/inference-gateway/adl-cli/commit/ab0f73a793ef3afa04aa7b571a84079dc06b59a7))
+
 ## [0.27.7](https://github.com/inference-gateway/adl-cli/compare/v0.27.6...v0.27.7) (2026-04-17)
 
 ### 🔧 Miscellaneous
