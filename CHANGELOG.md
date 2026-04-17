@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.27.6](https://github.com/inference-gateway/adl-cli/compare/v0.27.5...v0.27.6) (2026-04-17)
+
+### 🐛 Bug Fixes
+
+* **ci:** Warning Input 'app-id' has been deprecated with message: Use 'client-id' instead ([081b57a](https://github.com/inference-gateway/adl-cli/commit/081b57af5231ea7f7da3ad9b43e948d755b1802a))
+
 ## [0.27.5](https://github.com/inference-gateway/adl-cli/compare/v0.27.4...v0.27.5) (2026-04-17)
 
 ### 👷 CI
