@@ -22,10 +22,9 @@ jobs:
         node-version: {{ if and .ADL.Spec.Language.TypeScript .ADL.Spec.Language.TypeScript.NodeVersion }}{{ .ADL.Spec.Language.TypeScript.NodeVersion }}{{ else }}18{{ end }}
         cache: 'npm'
     
-    - name: Install Task
-      uses: arduino/setup-task@v2
-      with:
-        version: 3.x
+      - name: Install task
+        run: |
+          curl -s https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin v3.48.0
     
     - name: Install dependencies
       run: npm ci
