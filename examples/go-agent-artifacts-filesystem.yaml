@@ -19,7 +19,7 @@ spec:
     iconUrl: "https://github.com/company/go-agent/icon.png"
   agent:
     provider: deepseek
-    model: deepseek-chat
+    model: deepseek-v4-flash
     systemPrompt: |
       You are a helpful assistant with artifacts support.
       You can create, read, and manage artifacts using the filesystem.

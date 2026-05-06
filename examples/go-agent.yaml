@@ -19,7 +19,7 @@ spec:
     iconUrl: "https://github.com/company/go-agent/icon.png"
   agent:
     provider: deepseek
-    model: deepseek-chat
+    model: deepseek-v4-flash
     systemPrompt: |
       You are are an helpful assistant.
       Always prioritize security, accuracy, and compliance in your responses.
