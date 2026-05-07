@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.27.9](https://github.com/inference-gateway/adl-cli/compare/v0.27.8...v0.27.9) (2026-05-07)
+
+### ♻️ Improvements
+
+* Rename all instances of deepseek-chat to deepseek-v4-flash ([15a366c](https://github.com/inference-gateway/adl-cli/commit/15a366c688b39d5e2265f6d9ef458e55f131f7cb))
+
+### 👷 CI
+
+* **deps:** Bump golangci-lint to latest ([e8a58fd](https://github.com/inference-gateway/adl-cli/commit/e8a58fd754c90749fb5b47eb92b721069f114c18))
+* Update golangci-lint installation script to use the latest version 2.12.2 ([c2169e3](https://github.com/inference-gateway/adl-cli/commit/c2169e30a179f38d4e50d21398855be7e8d8f4d0))
+
+### 🔧 Miscellaneous
+
+* **deps:** Update task installation method to use the latest version 3.48.0 across CI/CD workflows ([c8e8777](https://github.com/inference-gateway/adl-cli/commit/c8e8777b75e10eddf197bee56dcc6ec460916d6b))
+
 ## [0.27.8](https://github.com/inference-gateway/adl-cli/compare/v0.27.7...v0.27.8) (2026-04-17)
 
 ### 🔧 Miscellaneous
