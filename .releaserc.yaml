@@ -52,7 +52,12 @@ plugins:
   - - "@semantic-release/exec"
     - prepareCmd: |
         sed -i "s/VERSION: [0-9]\\+\\.[0-9]\\+\\.[0-9]\\+.*/VERSION: ${nextRelease.version}/" Taskfile.yml
-        sed -i.bak 's|version = "[0-9]\+\.[0-9]\+\.[0-9]\+";|version = "${nextRelease.version}";|' flake.nix && rm flake.nix.bak
+        sed -i.bak 's|version = "[^"]*";|version = "${nextRelease.version}";|' flake.nix && rm flake.nix.bak
+        sed -i.bak 's|vendorHash = "[^"]*";|vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";|' flake.nix && rm flake.nix.bak
+        NEW_HASH=$(nix build .#adl 2>&1 | awk '/got:/ {print $2; exit}')
+        if [ -z "$NEW_HASH" ]; then echo "ERROR: could not extract vendorHash from nix build output"; exit 1; fi
+        sed -i.bak "s|vendorHash = \"sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\";|vendorHash = \"$NEW_HASH\";|" flake.nix && rm flake.nix.bak
+        echo "Updated vendorHash to $NEW_HASH"
 
   - - "@semantic-release/git"
     - assets:
