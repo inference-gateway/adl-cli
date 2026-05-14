@@ -1,6 +1,11 @@
 version = 1
 
 [install]
+{{- if and .Metadata.CLIVersion (ne .Metadata.CLIVersion "dev") }}
+adl.flake = "github:inference-gateway/adl-cli/v{{ .Metadata.CLIVersion }}"
+{{- else }}
+adl.flake = "github:inference-gateway/adl-cli"
+{{- end }}
 {{- if eq .Language "go" }}
 go.pkg-path = "go"
 go.version = "{{ .ADL.Spec.Language.Go.Version }}"
