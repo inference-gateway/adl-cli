@@ -22,13 +22,13 @@ jobs:
         go-version-file: go.mod
         cache: true
 
-      - name: Install golangci-lint
-        run: |
-          curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b "$(go env GOPATH)/bin" v2.12.2
+    - name: Install golangci-lint
+      run: |
+        curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b "$(go env GOPATH)/bin" v2.12.2
 
-      - name: Install task
-        run: |
-          curl -s https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin v3.48.0
+    - name: Install task
+      run: |
+        curl -s https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin v3.48.0
 
     - name: Install ADL CLI
       run: |
