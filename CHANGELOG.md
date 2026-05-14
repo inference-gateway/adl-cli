@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.27.10](https://github.com/inference-gateway/adl-cli/compare/v0.27.9...v0.27.10) (2026-05-14)
+
+### 👷 CI
+
+* Enable display report for Claude Code action ([ef96285](https://github.com/inference-gateway/adl-cli/commit/ef96285c4f370e30336b98be4f187e2759a42e90))
+* Update create-github-app-token action to v3.2.0 ([3478cfb](https://github.com/inference-gateway/adl-cli/commit/3478cfb5799ffe84d39786ec14497ae277d401ac))
+
+### 🔧 Miscellaneous
+
+* Add CODEOWNERS file for repository ownership ([f011b01](https://github.com/inference-gateway/adl-cli/commit/f011b01a0d0091d98057adcc614c9641d3a00a44))
+* **dev-deps:** Add infer to flox manifest ([1c16f61](https://github.com/inference-gateway/adl-cli/commit/1c16f614b702be6cebf9949e67564635c9c62544))
+* Remove outdated issue templates for bug reports, feature requests, and refactor requests ([fc857f4](https://github.com/inference-gateway/adl-cli/commit/fc857f484d73803513170ae84629f520ab000b06))
+
 ## [0.27.9](https://github.com/inference-gateway/adl-cli/compare/v0.27.8...v0.27.9) (2026-05-07)
 
 ### ♻️ Improvements
