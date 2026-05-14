@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.27.11](https://github.com/inference-gateway/adl-cli/compare/v0.27.10...v0.27.11) (2026-05-14)
+
+### 👷 CI
+
+* **dependabot:** Add dependabot to help with dependecies upgrades ([0a58e20](https://github.com/inference-gateway/adl-cli/commit/0a58e2076d41b2f523b6544b0e3bd818ecc97ba9))
+* **deps:** Bump the github-actions group with 4 updates ([#99](https://github.com/inference-gateway/adl-cli/issues/99)) ([e867db0](https://github.com/inference-gateway/adl-cli/commit/e867db079cfaf500eb414e54c007e8fc043b34f0))
+
 ## [0.27.10](https://github.com/inference-gateway/adl-cli/compare/v0.27.9...v0.27.10) (2026-05-14)
 
 ### 👷 CI
