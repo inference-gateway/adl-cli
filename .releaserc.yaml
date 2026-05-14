@@ -52,11 +52,18 @@ plugins:
   - - "@semantic-release/exec"
     - prepareCmd: |
         sed -i "s/VERSION: [0-9]\\+\\.[0-9]\\+\\.[0-9]\\+.*/VERSION: ${nextRelease.version}/" Taskfile.yml
+        sed -i.bak 's|version = "[^"]*";|version = "${nextRelease.version}";|' flake.nix && rm flake.nix.bak
+        sed -i.bak 's|vendorHash = "[^"]*";|vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";|' flake.nix && rm flake.nix.bak
+        NEW_HASH=$(nix build .#adl 2>&1 | awk '/got:/ {print $2; exit}')
+        if [ -z "$NEW_HASH" ]; then echo "ERROR: could not extract vendorHash from nix build output"; exit 1; fi
+        sed -i.bak "s|vendorHash = \"sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\";|vendorHash = \"$NEW_HASH\";|" flake.nix && rm flake.nix.bak
+        echo "Updated vendorHash to $NEW_HASH"
 
   - - "@semantic-release/git"
     - assets:
         - CHANGELOG.md
         - Taskfile.yml
+        - flake.nix
       message: "chore(release): 🔖 ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
 
   - - "@semantic-release/exec"
@@ -85,9 +92,36 @@ plugins:
 
         ## 📦 Installation
 
+        ### Quick Install (Recommended)
+
         ```bash
         curl -fsSL https://raw.githubusercontent.com/inference-gateway/adl-cli/main/install.sh | bash
         ```
+
+        Or pin a specific version:
+
+        ```bash
+        curl -fsSL https://raw.githubusercontent.com/inference-gateway/adl-cli/main/install.sh | bash -s -- --version <%= nextRelease.gitTag %>
+        ```
+
+        ### Nix Flake
+
+        Run directly without installing:
+
+        ```bash
+        nix run github:inference-gateway/adl-cli/<%= nextRelease.gitTag %>
+        ```
+
+        Or pin it in a [Flox](https://flox.dev) manifest (`.flox/env/manifest.toml`):
+
+        ```toml
+        [install]
+        adl.flake = "github:inference-gateway/adl-cli/<%= nextRelease.gitTag %>"
+        ```
+
+        ### Binary Download
+
+        Download the appropriate binary for your platform from the assets below.
 
         For more installation options, see the [README](https://github.com/inference-gateway/adl-cli#installation).
       successCommentCondition: "false"

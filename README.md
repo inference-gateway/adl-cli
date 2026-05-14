@@ -102,6 +102,49 @@ go install .
 go install github.com/inference-gateway/adl-cli@latest
 ```
 
+### Nix Flake
+
+Run the latest version directly without installing:
+
+```bash
+nix run github:inference-gateway/adl-cli
+```
+
+Or pin a specific version:
+
+```bash
+nix run github:inference-gateway/adl-cli/v0.27.13
+```
+
+Build and add it to your profile:
+
+```bash
+nix profile install github:inference-gateway/adl-cli/v0.27.13
+```
+
+Enter a development shell with `go`, `go-task`, `golangci-lint`, `gopls`, and
+`goreleaser` available:
+
+```bash
+nix develop github:inference-gateway/adl-cli
+```
+
+### Flox
+
+Pin `adl` to a specific version inside a [Flox](https://flox.dev) environment by
+adding it to your `.flox/env/manifest.toml`:
+
+```toml
+[install]
+adl.flake = "github:inference-gateway/adl-cli/v0.27.13"
+```
+
+Then activate the environment:
+
+```bash
+flox activate
+```
+
 ### Pre-built Binaries
 
 Download pre-built binaries from the [releases page](https://github.com/inference-gateway/adl-cli/releases).
