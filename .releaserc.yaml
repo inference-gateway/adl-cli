@@ -52,11 +52,13 @@ plugins:
   - - "@semantic-release/exec"
     - prepareCmd: |
         sed -i "s/VERSION: [0-9]\\+\\.[0-9]\\+\\.[0-9]\\+.*/VERSION: ${nextRelease.version}/" Taskfile.yml
+        sed -i.bak 's|version = "[0-9]\+\.[0-9]\+\.[0-9]\+";|version = "${nextRelease.version}";|' flake.nix && rm flake.nix.bak
 
   - - "@semantic-release/git"
     - assets:
         - CHANGELOG.md
         - Taskfile.yml
+        - flake.nix
       message: "chore(release): 🔖 ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
 
   - - "@semantic-release/exec"
@@ -85,9 +87,36 @@ plugins:
 
         ## 📦 Installation
 
+        ### Quick Install (Recommended)
+
         ```bash
         curl -fsSL https://raw.githubusercontent.com/inference-gateway/adl-cli/main/install.sh | bash
         ```
+
+        Or pin a specific version:
+
+        ```bash
+        curl -fsSL https://raw.githubusercontent.com/inference-gateway/adl-cli/main/install.sh | bash -s -- --version <%= nextRelease.gitTag %>
+        ```
+
+        ### Nix Flake
+
+        Run directly without installing:
+
+        ```bash
+        nix run github:inference-gateway/adl-cli/<%= nextRelease.gitTag %>
+        ```
+
+        Or pin it in a [Flox](https://flox.dev) manifest (`.flox/env/manifest.toml`):
+
+        ```toml
+        [install]
+        adl.flake = "github:inference-gateway/adl-cli/<%= nextRelease.gitTag %>"
+        ```
+
+        ### Binary Download
+
+        Download the appropriate binary for your platform from the assets below.
 
         For more installation options, see the [README](https://github.com/inference-gateway/adl-cli#installation).
       successCommentCondition: "false"
