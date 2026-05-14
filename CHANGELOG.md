@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.27.13](https://github.com/inference-gateway/adl-cli/compare/v0.27.12...v0.27.13) (2026-05-14)
+
+### 🔧 Miscellaneous
+
+* **deps:** Bump setup-node action ([7f6a5c2](https://github.com/inference-gateway/adl-cli/commit/7f6a5c28ab7fe77aa60b8fadc9408e31ff66cde5))
+
 ## [0.27.12](https://github.com/inference-gateway/adl-cli/compare/v0.27.11...v0.27.12) (2026-05-14)
 
 ### 🐛 Bug Fixes
