@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.28.0](https://github.com/inference-gateway/adl-cli/compare/v0.27.13...v0.28.0) (2026-05-14)
+
+### ✨ Features
+
+* **nix:** Add flake.nix for pinned installs via Nix and Flox ([#101](https://github.com/inference-gateway/adl-cli/issues/101)) ([780de1b](https://github.com/inference-gateway/adl-cli/commit/780de1bd59615b6b729497522d8e0d9c99b5816b)), closes [#100](https://github.com/inference-gateway/adl-cli/issues/100)
+
+### 🐛 Bug Fixes
+
+* **ci:** Add the correct vendor hash ([7d55def](https://github.com/inference-gateway/adl-cli/commit/7d55deff95391cedb61f3933b693bf8506d50dfc))
+* **ci:** Install Nix in release workflow so vendorHash auto-compute works ([f429676](https://github.com/inference-gateway/adl-cli/commit/f42967650e24b2ddd58c12128caa75a8c40d4b0a))
+* **ci:** Move setup node after nix install so we get NodeJS 24 and not 22 ([de68003](https://github.com/inference-gateway/adl-cli/commit/de680031e525ce53300a9b92ff56eb4dc0bea63b))
+* **ci:** Rename adl-cli to adl after installation ([05cdcaf](https://github.com/inference-gateway/adl-cli/commit/05cdcaff4a64ac55845dcd635db1e57b1f1fb7e6))
+
+### 🔧 Miscellaneous
+
+* **deps:** Bump claude-code and go to latest ([5db7b9c](https://github.com/inference-gateway/adl-cli/commit/5db7b9cf0b9124e3183e1bd6faf3845b923c0c96))
+* Ran flox activate - some leftovers ([243bca0](https://github.com/inference-gateway/adl-cli/commit/243bca0850e6592dfa7f4c229917c59526f9226f))
+
 ## [0.27.13](https://github.com/inference-gateway/adl-cli/compare/v0.27.12...v0.27.13) (2026-05-14)
 
 ### 🔧 Miscellaneous
