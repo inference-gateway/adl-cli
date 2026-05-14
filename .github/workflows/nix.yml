@@ -1,0 +1,49 @@
+---
+name: Nix
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - flake.nix
+      - flake.lock
+      - go.mod
+      - go.sum
+      - .github/workflows/nix.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - flake.nix
+      - flake.lock
+      - go.mod
+      - go.sum
+      - .github/workflows/nix.yml
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v22
+
+      - name: Validate flake builds
+        run: |
+          sed -i.bak 's|vendorHash = "[^"]*";|vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";|' flake.nix && rm flake.nix.bak
+          NEW_HASH=$(nix build .#adl 2>&1 | awk '/got:/ {print $2; exit}')
+          if [ -z "$NEW_HASH" ]; then
+            echo "ERROR: could not extract vendorHash from nix build output"
+            exit 1
+          fi
+          sed -i.bak "s|vendorHash = \"sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\";|vendorHash = \"$NEW_HASH\";|" flake.nix && rm flake.nix.bak
+          echo "Computed vendorHash: $NEW_HASH"
+          nix build .#adl
+          ./result/bin/adl --version
