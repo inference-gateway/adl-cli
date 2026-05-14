@@ -1,0 +1,67 @@
+apiVersion: adl.dev/v1
+kind: Agent
+metadata:
+  name: rust-agent-redis
+  description: "Rust agent with the Redis-backed task queue feature enabled"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: true
+  card:
+    protocolVersion: "0.3.0"
+    preferredTransport: JSONRPC
+    defaultInputModes:
+      - text
+    defaultOutputModes:
+      - text
+  agent:
+    provider: deepseek
+    model: deepseek-v4-flash
+    systemPrompt: |
+      You are a helpful assistant. Use the available tools to enqueue
+      background jobs when long-running work is requested.
+    maxTokens: 4096
+    temperature: 0.3
+  skills:
+    - id: enqueue_job
+      name: enqueue_job
+      description: "Enqueue a background job for asynchronous processing"
+      tags:
+        - queue
+        - background
+      schema:
+        type: object
+        properties:
+          payload:
+            type: string
+            description: "The job payload to enqueue"
+          priority:
+            type: integer
+            description: "Job priority (1 = highest)"
+            minimum: 1
+            maximum: 10
+            default: 5
+        required:
+          - payload
+  server:
+    port: 8080
+    scheme: http
+    debug: false
+    auth:
+      enabled: false
+  language:
+    rust:
+      packageName: "rust-agent-redis"
+      version: "1.94.1"
+      edition: "2024"
+      features:
+        - redis
+  sandbox:
+    flox:
+      enabled: true
+    devcontainer:
+      enabled: false
+    dockerCompose:
+      enabled: true

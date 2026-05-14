@@ -31,17 +31,16 @@
 			"id": "{{ $skill.ID }}",
 			"name": "{{ $skill.Name }}",
 			"description": "{{ $skill.Description }}",
-			"tags": {{ $skill.Tags | toJson }},
-			{{- if $skill.Examples }}
-			"examples": {{ $skill.Examples | toJson }},
+			"tags": {{ $skill.Tags | toJson }}
+			{{- if $skill.Examples }},
+			"examples": {{ $skill.Examples | toJson }}
 			{{- end }}
-			{{- if $skill.InputModes }}
-			"inputModes": {{ $skill.InputModes | toJson }},
+			{{- if $skill.InputModes }},
+			"inputModes": {{ $skill.InputModes | toJson }}
 			{{- end }}
-			{{- if $skill.OutputModes }}
-			"outputModes": {{ $skill.OutputModes | toJson }},
+			{{- if $skill.OutputModes }},
+			"outputModes": {{ $skill.OutputModes | toJson }}
 			{{- end }}
-			"schema": {{ $skill.Schema | toJson }}
 		}
 		{{- end }}
 	]

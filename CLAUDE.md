@@ -89,6 +89,29 @@ spec:
 ```
 
 Generated services go to `internal/<service>/` with interface and factory function.
+Service injection is Go-specific; the Rust generator does not consume `spec.services`.
+
+### Rust Cargo Features
+
+Opt-in to ADK Cargo features through `spec.language.rust.features`. Each entry is
+forwarded to the `inference-gateway-adk` dependency in the generated `Cargo.toml`.
+The `redis` feature enables the ADK's Redis-backed task queue:
+
+```yaml
+spec:
+  language:
+    rust:
+      packageName: my-agent
+      version: "1.88"
+      edition: "2024"
+      features:
+        - redis
+```
+
+Runtime configuration (`A2A_QUEUE_PROVIDER`, `A2A_QUEUE_URL`, `A2A_QUEUE_NAMESPACE`)
+is documented in the generated `.env.example` — not baked into `main.rs`. When
+`spec.sandbox.dockerCompose.enabled: true` is also set, a working
+`docker-compose.yaml` with a Redis service is produced alongside the agent.
 
 ## Adding a New Language
 

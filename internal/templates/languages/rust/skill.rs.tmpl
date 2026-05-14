@@ -1,49 +1,29 @@
-use serde_json::{Value, json};
-use tracing::info;
+{{- if .Inject -}}
+use serde_json::{json, Value};
 
-/// Example tool: Get current time
-pub fn get_current_time(_args: Value) -> Result<Value, Box<dyn std::error::Error>> {
-    info!("Getting current time");
-    
-    let result = json!({
-        "time": "2025-01-02T12:00:00Z",
-        "timestamp": 1735819200
-    });
-    
-    Ok(result)
-}
+/// {{ .Description }}
+pub async fn handle(args: Value) -> anyhow::Result<String> {
+    tracing::info!(skill = {{ .ID | quote }}, "handling request");
 
-/// Example tool: Echo message
-pub fn echo_message(args: Value) -> Result<Value, Box<dyn std::error::Error>> {
-    info!("Echoing message");
-    
-    let message = args.get("message")
-        .and_then(|v| v.as_str())
-        .unwrap_or("No message provided");
-    
-    let result = json!({
-        "echo": message,
-        "length": message.len()
-    });
-    
-    Ok(result)
+    // TODO: implement {{ .ID }}
+    // Injected services: {{ range $i, $svc := .Inject }}{{ if $i }}, {{ end }}{{ $svc }}{{ end }}
+{{- if has "redis" .Inject }}
+    // The `redis` Cargo feature is enabled and A2A_QUEUE_URL / A2A_QUEUE_NAMESPACE
+    // are set in the environment. Open a connection with `redis::Client::open(...)`
+    // if your skill needs direct access to the store.
+{{- end }}
+    let _ = args;
+    Ok(json!({ "status": "ok", "skill": {{ .ID | quote }} }).to_string())
 }
+{{- else -}}
+use serde_json::{json, Value};
 
-/// Example async tool: Simulated API call
-pub async fn fetch_data(args: Value) -> Result<Value, Box<dyn std::error::Error>> {
-    info!("Fetching data");
-    
-    let endpoint = args.get("endpoint")
-        .and_then(|v| v.as_str())
-        .unwrap_or("default");
-    
-    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-    
-    let result = json!({
-        "endpoint": endpoint,
-        "data": "Sample data from endpoint",
-        "status": "success"
-    });
-    
-    Ok(result)
+/// {{ .Description }}
+pub fn handle(args: Value) -> anyhow::Result<String> {
+    tracing::info!(skill = {{ .ID | quote }}, "handling request");
+
+    // TODO: implement {{ .ID }}
+    let _ = args;
+    Ok(json!({ "status": "ok", "skill": {{ .ID | quote }} }).to_string())
 }
+{{- end }}

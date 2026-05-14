@@ -405,6 +405,12 @@ const adlSchema = `{
                 },
                 "edition": {
                   "type": "string"
+                },
+                "features": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -447,6 +453,15 @@ const adlSchema = `{
                 }
               },
               "required": ["enabled"]
+            },
+            "dockerCompose": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": ["enabled"]
             }
           }
         },
@@ -455,7 +470,49 @@ const adlSchema = `{
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["kubernetes"]
+              "enum": ["kubernetes", "cloudrun"]
+            },
+            "cloudrun": {
+              "type": "object",
+              "properties": {
+                "image": {
+                  "type": "object",
+                  "properties": {
+                    "registry": {"type": "string"},
+                    "repository": {"type": "string"},
+                    "tag": {"type": "string"},
+                    "useCloudBuild": {"type": "boolean"}
+                  }
+                },
+                "resources": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {"type": "string"},
+                    "memory": {"type": "string"}
+                  }
+                },
+                "scaling": {
+                  "type": "object",
+                  "properties": {
+                    "minInstances": {"type": "integer"},
+                    "maxInstances": {"type": "integer"},
+                    "concurrency": {"type": "integer"}
+                  }
+                },
+                "service": {
+                  "type": "object",
+                  "properties": {
+                    "timeout": {"type": "integer"},
+                    "allowUnauthenticated": {"type": "boolean"},
+                    "serviceAccount": {"type": "string"},
+                    "executionEnvironment": {"type": "string"}
+                  }
+                },
+                "environment": {
+                  "type": "object",
+                  "additionalProperties": {"type": "string"}
+                }
+              }
             }
           }
         }

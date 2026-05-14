@@ -98,6 +98,91 @@ spec:
 	}
 }
 
+func TestValidator_RustFeatures(t *testing.T) {
+	cases := []struct {
+		name    string
+		adl     string
+		wantErr bool
+	}{
+		{
+			name: "rust language with redis feature validates",
+			adl: `apiVersion: adl.dev/v1
+kind: Agent
+metadata:
+  name: redis-agent
+  description: "with redis cargo feature"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  server:
+    port: 8080
+  language:
+    rust:
+      packageName: "agent"
+      version: "1.88"
+      edition: "2024"
+      features:
+        - redis
+`,
+			wantErr: false,
+		},
+		{
+			name: "rust language without features validates",
+			adl: `apiVersion: adl.dev/v1
+kind: Agent
+metadata:
+  name: plain-rust
+  description: "no features"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  server:
+    port: 8080
+  language:
+    rust:
+      packageName: "agent"
+      version: "1.88"
+      edition: "2024"
+`,
+			wantErr: false,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			tmpFile, err := os.CreateTemp("", "adl-rust-features-*.yaml")
+			if err != nil {
+				t.Fatalf("temp file: %v", err)
+			}
+			defer func() {
+				if rmErr := os.Remove(tmpFile.Name()); rmErr != nil {
+					t.Logf("cleanup: %v", rmErr)
+				}
+			}()
+			if _, err := tmpFile.WriteString(tc.adl); err != nil {
+				t.Fatalf("write: %v", err)
+			}
+			if err := tmpFile.Close(); err != nil {
+				t.Fatalf("close: %v", err)
+			}
+
+			err = NewValidator().ValidateFile(tmpFile.Name())
+			if tc.wantErr && err == nil {
+				t.Fatalf("expected validation error, got nil")
+			}
+			if !tc.wantErr && err != nil {
+				t.Fatalf("unexpected validation error: %v", err)
+			}
+		})
+	}
+}
+
 func TestValidator_ValidateFile_Invalid(t *testing.T) {
 	invalidADL := `apiVersion: invalid
 kind: Agent

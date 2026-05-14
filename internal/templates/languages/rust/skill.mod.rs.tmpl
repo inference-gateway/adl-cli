@@ -3,5 +3,5 @@
 //! This module contains all skill implementations for the agent.
 
 {{- range .ADL.Spec.Skills }}
-pub mod {{ .Name }};
+pub mod {{ toSnakeCase .ID }};
 {{- end }}

@@ -189,6 +189,7 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		".gitignore":                  "config/gitignore",
 		".gitattributes":              "config/gitattributes",
 		".editorconfig":               "config/editorconfig",
+		".env.example":                "env.example",
 		"README.md":                   "docs/README.md",
 	}
 
@@ -208,6 +209,12 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 
 	if len(adl.Spec.Skills) > 0 {
 		files["src/skills/mod.rs"] = "skill.mod.rs"
+	}
+
+	if adl.Spec.Sandbox != nil &&
+		adl.Spec.Sandbox.DockerCompose != nil &&
+		adl.Spec.Sandbox.DockerCompose.Enabled {
+		files["docker-compose.yaml"] = "docker-compose.yaml"
 	}
 
 	r.addSandboxFiles(adl, files)

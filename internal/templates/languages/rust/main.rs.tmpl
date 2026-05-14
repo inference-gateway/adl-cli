@@ -1,149 +1,113 @@
-use inference_gateway_adk::{A2AServerBuilder, AgentBuilder, Config, AgentConfig};
-use inference_gateway_sdk::{FunctionObject, Tool, ToolType};
+use inference_gateway_adk::{A2AServerBuilder, {{ if .ADL.Spec.Agent }}AgentBuilder, {{ end }}Config};
+{{- if .ADL.Spec.Agent }}
+use inference_gateway_sdk::{ChatCompletionTool, ChatCompletionToolType, FunctionObject, FunctionParameters};
 use serde_json::{Value, json};
-use std::{env, net::SocketAddr};
-use tracing::info;
+{{- end }}
+use std::env;
+use std::net::SocketAddr;
+use tracing::{error, info};
+
+{{- if .ADL.Spec.Skills }}
 
 mod skills;
-
-const VERSION: &str = "{{ .ADL.Metadata.Version }}";
-const AGENT_NAME: &str = "{{ .ADL.Metadata.Name }}";
-const AGENT_DESCRIPTION: &str = "{{ .ADL.Metadata.Description }}";
+{{- end }}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info,tower_http=debug")),
+        )
+        .init();
 
-    info!("Starting {} agent v{}", AGENT_NAME, VERSION);
+    let mut config = Config::from_env()?;
+{{- if .ADL.Spec.Agent }}
 
-    let config = Config::from_env()?;
-    
-    let agent_config = AgentConfig {
-        provider: env::var("PROVIDER").unwrap_or_else(|_| "openai".to_string()),
-        model: env::var("MODEL").unwrap_or_else(|_| "gpt-4o-mini".to_string()),
-        api_key: env::var("INFERENCE_GATEWAY_KEY").ok(),
-        max_tokens: 8192,
-        temperature: 0.7,
-        ..Default::default()
-    };
+    let gateway_url = env::var("INFERENCE_GATEWAY_URL")
+        .unwrap_or_else(|_| "http://localhost:8080/v1".to_string());
+    if config.agent_config.base_url.is_none() {
+        config.agent_config.base_url = Some(gateway_url.clone());
+    }
+    if config.agent_config.provider.is_empty() {
+        config.agent_config.provider = {{ .ADL.Spec.Agent.Provider | quote }}.to_string();
+    }
+    if config.agent_config.model.is_empty() {
+        config.agent_config.model = {{ .ADL.Spec.Agent.Model | quote }}.to_string();
+    }
+    {{- if .ADL.Spec.Agent.MaxTokens }}
+    if config.agent_config.max_tokens == 0 {
+        config.agent_config.max_tokens = {{ .ADL.Spec.Agent.MaxTokens }};
+    }
+    {{- end }}
 
-    let tools = vec![
-        Tool {
-            r#type: ToolType::Function,
+    info!(
+        provider = %config.agent_config.provider,
+        model = %config.agent_config.model,
+        "starting {{ .ADL.Metadata.Name }} agent",
+    );
+
+    let tools: Vec<ChatCompletionTool> = vec![
+{{- range .ADL.Spec.Skills }}
+        ChatCompletionTool {
+            type_: ChatCompletionToolType::Function,
             function: FunctionObject {
-                name: "get_current_time".to_string(),
-                description: "Get the current time in UTC".to_string(),
-                parameters: json!({
-                    "type": "object",
-                    "properties": {},
-                    "required": []
-                }),
+                name: {{ .ID | quote }}.to_string(),
+                description: Some({{ .Description | quote }}.to_string()),
+                parameters: Some(FunctionParameters(
+                    json!({{ toJson .Schema }})
+                        .as_object()
+                        .expect("skill schema must be a JSON object")
+                        .clone(),
+                )),
+                strict: false,
             },
         },
-        Tool {
-            r#type: ToolType::Function,
-            function: FunctionObject {
-                name: "echo_message".to_string(),
-                description: "Echo a message back".to_string(),
-                parameters: json!({
-                    "type": "object",
-                    "properties": {
-                        "message": {
-                            "type": "string",
-                            "description": "The message to echo"
-                        }
-                    },
-                    "required": ["message"]
-                }),
-            },
-        },
-        Tool {
-            r#type: ToolType::Function,
-            function: FunctionObject {
-                name: "fetch_data".to_string(),
-                description: "Fetch data from an endpoint".to_string(),
-                parameters: json!({
-                    "type": "object",
-                    "properties": {
-                        "endpoint": {
-                            "type": "string",
-                            "description": "The endpoint to fetch data from"
-                        }
-                    },
-                    "required": []
-                }),
-            },
-        },
+{{- end }}
     ];
 
-    let agent_builder = AgentBuilder::new()
-        .with_config(&agent_config)
-        .with_system_prompt("You are a helpful AI assistant.")
+    let agent = AgentBuilder::new()
+        .with_config(&config.agent_config)
+        .with_system_prompt({{ .ADL.Spec.Agent.SystemPrompt | quote }})
         .with_toolbox(tools)
-        .with_function_tool(
-            "get_current_time".to_string(),
-            |_args: Value| {
-                info!("Getting current time");
-                let result = json!({
-                    "time": "2025-01-02T12:00:00Z",
-                    "timestamp": 1735819200
-                });
-                Ok(result.to_string())
-            },
-        )
-        .with_function_tool(
-            "echo_message".to_string(),
-            |args: Value| {
-                info!("Echoing message");
-                
-                let message = args.get("message")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("No message provided");
-                
-                let result = json!({
-                    "echo": message,
-                    "length": message.len()
-                });
-                Ok(result.to_string())
-            },
-        )
-        .with_async_function_tool(
-            "fetch_data".to_string(),
-            |args: Value| async move {
-                info!("Fetching data");
-                
-                let endpoint = args.get("endpoint")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("default");
-                
-                tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-                
-                let result = json!({
-                    "endpoint": endpoint,
-                    "data": "Sample data from endpoint",
-                    "status": "success"
-                });
-                Ok(result.to_string())
-            },
-        );
+{{- range .ADL.Spec.Skills }}
+{{- if .Inject }}
+        .with_async_function_tool({{ .ID | quote }}.to_string(), |args: Value| async move {
+            skills::{{ toSnakeCase .ID }}::handle(args).await
+        })
+{{- else }}
+        .with_function_tool({{ .ID | quote }}.to_string(), |args: Value| {
+            skills::{{ toSnakeCase .ID }}::handle(args)
+        })
+{{- end }}
+{{- end }}
+        .build()
+        .await?;
+{{- else }}
 
-    let agent = agent_builder.build().await?;
+    info!("starting {{ .ADL.Metadata.Name }} agent");
+{{- end }}
 
-    let gateway_url = env::var("GATEWAY_URL").unwrap_or_else(|_| "http://localhost:8080".to_string());
-    
     let server = A2AServerBuilder::new()
         .with_config(config)
+{{- if .ADL.Spec.Agent }}
         .with_agent(agent)
-        .with_agent_card_from_file(".well-known/agent-card.json", None)
         .with_gateway_url(gateway_url)
+{{- end }}
+        .with_agent_card_from_file(".well-known/agent-card.json", None)
+        .with_default_task_handlers()
         .build()
         .await?;
 
-    let addr: SocketAddr = "0.0.0.0:8080".parse()?;
-    info!("{} agent running on {}", AGENT_NAME, addr);
+    let port: u16 = env::var("PORT")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or({{ .ADL.Spec.Server.Port | default 8080 }});
+    let addr: SocketAddr = format!("0.0.0.0:{}", port).parse()?;
+    info!("A2A server listening on {addr}");
 
     if let Err(e) = server.serve(addr).await {
-        tracing::error!("Server failed to start: {}", e);
+        error!("server stopped: {e}");
     }
 
     Ok(())
