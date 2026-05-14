@@ -71,6 +71,7 @@
           ];
 
           postInstall = ''
+            mv $out/bin/adl-cli $out/bin/adl
             installShellCompletion --cmd adl \
               --bash <($out/bin/adl completion bash) \
               --fish <($out/bin/adl completion fish) \
