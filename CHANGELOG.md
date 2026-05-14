@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.27.12](https://github.com/inference-gateway/adl-cli/compare/v0.27.11...v0.27.12) (2026-05-14)
+
+### 🐛 Bug Fixes
+
+* Wrong indentation ([763fbce](https://github.com/inference-gateway/adl-cli/commit/763fbceaf162adc097355674c695ae4aeac203ab))
+
+### 🔧 Miscellaneous
+
+* **deps:** Update Docker actions to latest versions and remove unused dependency ([5c73d64](https://github.com/inference-gateway/adl-cli/commit/5c73d64f25e37a5ad491efc8bb5900093231b3d2))
+
 ## [0.27.11](https://github.com/inference-gateway/adl-cli/compare/v0.27.10...v0.27.11) (2026-05-14)
 
 ### 👷 CI
