@@ -551,9 +551,11 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 				filesToIgnore = append(filesToIgnore, fmt.Sprintf("internal/%s/%s.go", snakeCaseName, snakeCaseName))
 			}
 		case "rust":
-			for _, skill := range adl.Spec.Skills {
-				snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
-				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/skills/%s.rs", snakeCaseName))
+			if adl.Spec.Agent != nil {
+				for _, skill := range adl.Spec.Skills {
+					snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
+					filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/skills/%s.rs", snakeCaseName))
+				}
 			}
 		case "typescript":
 			for _, skill := range adl.Spec.Skills {

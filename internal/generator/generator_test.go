@@ -333,6 +333,10 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 			Version:     "1.0.0",
 		},
 		Spec: schema.Spec{
+			Agent: &schema.Agent{
+				Provider: "openai",
+				Model:    "gpt-4o-mini",
+			},
 			Language: &schema.Language{
 				Rust: &schema.RustConfig{
 					PackageName: "rust-agent",

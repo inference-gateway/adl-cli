@@ -7,7 +7,7 @@ use std::env;
 use std::net::SocketAddr;
 use tracing::{error, info};
 
-{{- if .ADL.Spec.Skills }}
+{{- if and .ADL.Spec.Agent .ADL.Spec.Skills }}
 
 mod skills;
 {{- end }}
@@ -21,11 +21,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .init();
 
-    let mut config = Config::from_env()?;
 {{- if .ADL.Spec.Agent }}
+    let mut config = Config::from_env()?;
 
     let gateway_url = env::var("INFERENCE_GATEWAY_URL")
-        .unwrap_or_else(|_| "http://localhost:8080/v1".to_string());
+        .unwrap_or_else(|_| "http://gateway:8080/v1".to_string());
     if config.agent_config.base_url.is_none() {
         config.agent_config.base_url = Some(gateway_url.clone());
     }
@@ -84,6 +84,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build()
         .await?;
 {{- else }}
+    let config = Config::from_env()?;
 
     info!("starting {{ .ADL.Metadata.Name }} agent");
 {{- end }}
