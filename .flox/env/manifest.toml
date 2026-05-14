@@ -15,6 +15,7 @@ prettier.pkg-path = "prettier"
 prettier.version = "^3.6.2"
 markdownlint-cli.pkg-path = "markdownlint-cli"
 markdownlint-cli.version = "0.48.0"
+infer.flake = "github:inference-gateway/cli/v0.109.6"
 
 [hook]
 on-activate = """
@@ -22,9 +23,6 @@ on-activate = """
   export PATH="$(go env GOPATH)/bin:$PATH"
   go get .
 
-  if [ ! -f "$(go env GOPATH)/bin/infer" ]; then
-    curl -sSL https://raw.githubusercontent.com/inference-gateway/cli/main/install.sh | bash -s -- --version v0.100.3 --install-dir $HOME/.local/bin
-  fi
 
   source <(goreleaser completion zsh)
   source <(task --completion zsh)
