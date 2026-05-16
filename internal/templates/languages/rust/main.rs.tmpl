@@ -3,7 +3,6 @@ use inference_gateway_adk::{A2AServerBuilder, {{ if .ADL.Spec.Agent }}AgentBuild
 use inference_gateway_sdk::{ChatCompletionTool, ChatCompletionToolType, FunctionObject, FunctionParameters};
 use serde_json::{Value, json};
 {{- end }}
-use std::env;
 use std::net::SocketAddr;
 use tracing::{error, info};
 
@@ -14,6 +13,8 @@ mod skills;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    dotenvy::dotenv().ok();
+
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
@@ -21,26 +22,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .init();
 
+    // Single source of truth: every `A2A_*` env var (including those loaded
+    // from `.env` via dotenvy) lands in `config`. Defaults for unset vars
+    // come from the ADK's `Config::default()`. The generated `.env.example`
+    // documents the ADL-spec values you most likely want to set.
+    let config: Config = envy::prefixed("A2A_").from_env()?;
+
 {{- if .ADL.Spec.Agent }}
-    let mut config = Config::from_env()?;
-
-    let gateway_url = env::var("INFERENCE_GATEWAY_URL")
-        .unwrap_or_else(|_| "http://gateway:8080/v1".to_string());
-    if config.agent_config.base_url.is_none() {
-        config.agent_config.base_url = Some(gateway_url.clone());
-    }
-    if config.agent_config.provider.is_empty() {
-        config.agent_config.provider = {{ .ADL.Spec.Agent.Provider | quote }}.to_string();
-    }
-    if config.agent_config.model.is_empty() {
-        config.agent_config.model = {{ .ADL.Spec.Agent.Model | quote }}.to_string();
-    }
-    {{- if .ADL.Spec.Agent.MaxTokens }}
-    if config.agent_config.max_tokens == 0 {
-        config.agent_config.max_tokens = {{ .ADL.Spec.Agent.MaxTokens }};
-    }
-    {{- end }}
-
     info!(
         provider = %config.agent_config.provider,
         model = %config.agent_config.model,
@@ -84,27 +72,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build()
         .await?;
 {{- else }}
-    let config = Config::from_env()?;
-
     info!("starting {{ .ADL.Metadata.Name }} agent");
 {{- end }}
 
+    let port = config.server_config.port;
     let server = A2AServerBuilder::new()
         .with_config(config)
 {{- if .ADL.Spec.Agent }}
         .with_agent(agent)
-        .with_gateway_url(gateway_url)
 {{- end }}
         .with_agent_card_from_file(".well-known/agent-card.json", None)
         .with_default_task_handlers()
         .build()
         .await?;
 
-    let port: u16 = env::var("PORT")
-        .ok()
-        .and_then(|s| s.parse().ok())
-        .unwrap_or({{ .ADL.Spec.Server.Port | default 8080 }});
-    let addr: SocketAddr = format!("0.0.0.0:{}", port).parse()?;
+    let addr: SocketAddr = format!("0.0.0.0:{port}").parse()?;
     info!("A2A server listening on {addr}");
 
     if let Err(e) = server.serve(addr).await {

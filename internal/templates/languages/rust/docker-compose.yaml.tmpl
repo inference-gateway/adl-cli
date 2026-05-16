@@ -5,12 +5,11 @@ services:
     ports:
       - "{{ .ADL.Spec.Server.Port | default 8080 }}:{{ .ADL.Spec.Server.Port | default 8080 }}"
     environment:
-      RUST_LOG: info
-      PORT: "{{ .ADL.Spec.Server.Port | default 8080 }}"
+      A2A_SERVER_PORT: "{{ .ADL.Spec.Server.Port | default 8080 }}"
       {{- if .ADL.Spec.Agent }}
-      AGENT_CLIENT_PROVIDER: "{{ .ADL.Spec.Agent.Provider }}"
-      AGENT_CLIENT_MODEL: "{{ .ADL.Spec.Agent.Model }}"
-      AGENT_CLIENT_BASE_URL: "${INFERENCE_GATEWAY_URL:-http://host.docker.internal:8080/v1}"
+      A2A_AGENT_CLIENT_PROVIDER: "{{ .ADL.Spec.Agent.Provider }}"
+      A2A_AGENT_CLIENT_MODEL: "{{ .ADL.Spec.Agent.Model }}"
+      A2A_AGENT_CLIENT_BASE_URL: "${A2A_AGENT_CLIENT_BASE_URL:-http://gateway:8080/v1}"
       {{- end }}
       {{- if has "redis" $rust.Features }}
       A2A_QUEUE_PROVIDER: redis
