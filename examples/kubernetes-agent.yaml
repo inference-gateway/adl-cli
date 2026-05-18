@@ -2,8 +2,8 @@
 apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
-  name: cloudrun-example
-  description: Example A2A agent configured for Cloud Run deployment
+  name: kubernetes-example
+  description: Example A2A agent configured for Kubernetes deployment via the inference-gateway operator
   version: "1.0.0"
 spec:
   capabilities:
@@ -14,7 +14,7 @@ spec:
     provider: deepseek
     model: deepseek-v4-flash
     systemPrompt: |
-      You are a helpful A2A agent deployed on Google Cloud Run.
+      You are a helpful A2A agent deployed on Kubernetes.
       You can process requests and provide responses efficiently.
     maxTokens: 4000
     temperature: 0.7
@@ -42,35 +42,19 @@ spec:
     debug: false
   language:
     go:
-      module: github.com/example/cloudrun-example
+      module: github.com/example/kubernetes-example
       version: "1.26.2"
   scm:
     provider: github
-    url: "https://github.com/example/cloudrun-example"
+    url: "https://github.com/example/kubernetes-example"
     issue_templates: true
   deployment:
-    type: cloudrun
-    cloudrun:
+    type: kubernetes
+    kubernetes:
       image:
-        registry: gcr.io
-        repository: cloudrun-example
+        registry: ghcr.io
+        repository: example/kubernetes-example
         tag: v1.0.0
-        useCloudBuild: true
-      resources:
-        cpu: "1"
-        memory: 512Mi
-      scaling:
-        minInstances: 0
-        maxInstances: 100
-        concurrency: 1000
-      service:
-        timeout: 3600
-        allowUnauthenticated: true
-        serviceAccount: cloudrun-example@PROJECT_ID.iam.gserviceaccount.com
-        executionEnvironment: gen2
-      environment:
-        LOG_LEVEL: info
-        ENVIRONMENT: production
   sandbox:
     devcontainer:
       enabled: true

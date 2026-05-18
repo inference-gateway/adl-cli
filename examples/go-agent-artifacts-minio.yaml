@@ -1,5 +1,5 @@
 ---
-apiVersion: adl.dev/v1
+apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: go-agent-minio-artifacts
@@ -12,9 +12,13 @@ spec:
     stateTransitionHistory: true
   card:
     protocolVersion: "0.3.0"
-    preferredTransport: "JSONRPC"
-    defaultInputModes: ["text", "voice"]
-    defaultOutputModes: ["text", "audio"]
+    preferredTransport: JSONRPC
+    defaultInputModes:
+      - text
+      - voice
+    defaultOutputModes:
+      - text
+      - audio
     url: "https://my-agent.example.com:8443"
     documentationUrl: "https://github.com/company/go-agent/docs"
     iconUrl: "https://github.com/company/go-agent/icon.png"
@@ -33,7 +37,10 @@ spec:
     - id: create_artifact
       name: create_artifact
       description: "Create a new artifact in MinIO"
-      tags: ["artifacts", "minio", "create"]
+      tags:
+        - artifacts
+        - minio
+        - create
       inject:
         - logger
       schema:
@@ -49,11 +56,16 @@ spec:
             type: string
             description: "MIME type of the artifact"
             default: "text/plain"
-        required: [name, content]
+        required:
+          - name
+          - content
     - id: read_artifact
       name: read_artifact
       description: "Read an artifact from MinIO"
-      tags: ["artifacts", "minio", "read"]
+      tags:
+        - artifacts
+        - minio
+        - read
       inject:
         - logger
       schema:
@@ -62,11 +74,15 @@ spec:
           id:
             type: string
             description: "Artifact ID to read"
-        required: [id]
+        required:
+          - id
     - id: list_artifacts
       name: list_artifacts
       description: "List available artifacts from MinIO"
-      tags: ["artifacts", "minio", "list"]
+      tags:
+        - artifacts
+        - minio
+        - list
       inject:
         - logger
       schema:

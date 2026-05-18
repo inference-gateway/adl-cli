@@ -6,7 +6,7 @@ import (
 )
 
 func TestValidator_ValidateFile(t *testing.T) {
-	validADL := `apiVersion: adl.dev/v1
+	validADL := `apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: test-agent
@@ -50,7 +50,7 @@ spec:
 }
 
 func TestValidator_ValidateFile_AgentWithoutProvider(t *testing.T) {
-	validADLWithAgent := `apiVersion: adl.dev/v1
+	validADLWithAgent := `apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: test-agent
@@ -106,7 +106,7 @@ func TestValidator_RustFeatures(t *testing.T) {
 	}{
 		{
 			name: "rust language with redis feature validates",
-			adl: `apiVersion: adl.dev/v1
+			adl: `apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: redis-agent
@@ -122,7 +122,7 @@ spec:
   language:
     rust:
       packageName: "agent"
-      version: "1.88"
+      version: "1.94.1"
       edition: "2024"
       features:
         - redis
@@ -131,7 +131,7 @@ spec:
 		},
 		{
 			name: "rust language without features validates",
-			adl: `apiVersion: adl.dev/v1
+			adl: `apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: plain-rust
@@ -147,7 +147,7 @@ spec:
   language:
     rust:
       packageName: "agent"
-      version: "1.88"
+      version: "1.94.1"
       edition: "2024"
 `,
 			wantErr: false,

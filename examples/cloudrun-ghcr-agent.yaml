@@ -1,5 +1,5 @@
 ---
-apiVersion: adl.dev/v1
+apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: ghcr-example
@@ -11,8 +11,8 @@ spec:
     pushNotifications: false
     stateTransitionHistory: true
   agent:
-    provider: openai
-    model: gpt-4o
+    provider: deepseek
+    model: deepseek-v4-flash
     systemPrompt: |
       You are a helpful A2A agent that uses GitHub Container Registry.
       Your container is pre-built and stored in GHCR.
@@ -22,14 +22,17 @@ spec:
     - id: process
       name: process
       description: Processes data with custom logic
-      tags: ["processing", "data"]
+      tags:
+        - processing
+        - data
       schema:
         type: object
         properties:
           data:
             type: string
             description: The data to process
-        required: ["data"]
+        required:
+          - data
   server:
     port: 8080
     scheme: http

@@ -279,7 +279,7 @@ task test
 
 ### ADL File Structure
 ```yaml
-apiVersion: adl.dev/v1
+apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: agent-name
@@ -291,8 +291,8 @@ spec:
     pushNotifications: false
     stateTransitionHistory: false
   agent:
-    provider: "openai"
-    model: "gpt-4o-mini"
+    provider: deepseek
+    model: deepseek-v4-flash
     systemPrompt: "You are a helpful assistant."
     maxTokens: 4096
     temperature: 0.7

@@ -7,42 +7,45 @@ metadata:
     inference-gateway.com/managed: "true"
 ---
 apiVersion: core.inference-gateway.com/v1alpha1
-kind: A2A
+kind: Agent
 metadata:
   name: {{ .ADL.Metadata.Name }}
   namespace: {{ .ADL.Metadata.Name }}-ns
 spec:
-  replicas: 1
-  image: "{{ .ADL.Metadata.Name }}:{{ .ADL.Metadata.Version | default "latest" }}"
-  timezone: "UTC"
-  port: {{ .ADL.Spec.Server.Port | default 8080 }}
-  host: "0.0.0.0"
-  readTimeout: "30s"
-  writeTimeout: "30s"
-  idleTimeout: "60s"
-  logging:
-    level: "info"
-    format: "json"
-  telemetry:
-    enabled: true
-    metrics:
-      enabled: true
-      port: 9090
-  queue:
-    enabled: true
-    maxSize: 1000
-    cleanupInterval: "5m"
-  tls:
-    enabled: false
-    secretRef: ""
+{{- $img := "" }}
+{{- if and .ADL.Spec.Deployment .ADL.Spec.Deployment.Kubernetes .ADL.Spec.Deployment.Kubernetes.Image }}
+{{- $cfg := .ADL.Spec.Deployment.Kubernetes.Image }}
+{{- $repo := $cfg.Repository | default .ADL.Metadata.Name }}
+{{- $tag := $cfg.Tag | default (.ADL.Metadata.Version | default "latest") }}
+{{- if $cfg.Registry }}
+{{- $img = printf "%s/%s:%s" $cfg.Registry $repo $tag }}
+{{- else }}
+{{- $img = printf "%s:%s" $repo $tag }}
+{{- end }}
+{{- else }}
+{{- $img = printf "%s:%s" .ADL.Metadata.Name (.ADL.Metadata.Version | default "latest") }}
+{{- end }}
+  image: "{{ $img }}"
+{{- if and .ADL.Spec.Server .ADL.Spec.Server.Port (ne (int .ADL.Spec.Server.Port) 8080) }}
+  port: {{ .ADL.Spec.Server.Port }}
+{{- end }}
   agent:
     enabled: true
-    systemPrompt: |
-{{- if .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt | nindent 6 }}{{- else }}      You are a helpful AI assistant.{{- end }}
-  resources:
-    limits:
-      memory: "256Mi"
-      cpu: "200m"
-    requests:
-      memory: "128Mi"
-      cpu: "100m"
+    llm:
+{{- if and .ADL.Spec.Agent .ADL.Spec.Agent.Provider .ADL.Spec.Agent.Model }}
+      model: "{{ .ADL.Spec.Agent.Provider }}/{{ .ADL.Spec.Agent.Model }}"
+{{- end }}
+{{- if and .ADL.Spec.Agent .ADL.Spec.Agent.MaxTokens }}
+      maxTokens: {{ .ADL.Spec.Agent.MaxTokens }}
+{{- end }}
+{{- if and .ADL.Spec.Agent .ADL.Spec.Agent.Temperature }}
+      temperature: "{{ .ADL.Spec.Agent.Temperature }}"
+{{- end }}
+      systemPrompt: |
+{{- if and .ADL.Spec.Agent .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt | nindent 8 }}{{- else }}
+        You are a helpful AI assistant.
+{{- end }}
+      # baseURL: "http://inference-gateway.inference-gateway.svc.cluster.local:8080/v1"
+      # apiKeySecretRef:
+      #   name: inference-gateway-providers-secret
+      #   key: OPENAI_API_KEY

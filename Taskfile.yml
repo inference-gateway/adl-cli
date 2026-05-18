@@ -5,6 +5,9 @@ vars:
   VERSION: 0.28.0
   BUILD_DIR: bin
   DIST_DIR: dist
+  ADL_SCHEMA_VERSION: v0.2.0
+  ADL_SCHEMA_URL: https://raw.githubusercontent.com/inference-gateway/adl/{{.ADL_SCHEMA_VERSION}}/schema/v1/schema.json
+  ADL_SCHEMA_PATH: internal/schema/schema.json
 
 tasks:
   build:
@@ -59,6 +62,42 @@ tasks:
       - go mod download
       - go mod tidy
 
+  fetch-schema:
+    desc: Fetch the canonical ADL JSON Schema from inference-gateway/adl
+    cmds:
+      - curl -fsSL -o {{.ADL_SCHEMA_PATH}} {{.ADL_SCHEMA_URL}}
+
+  verify-schema:
+    desc: Verify the committed schema matches the pinned upstream version
+    cmds:
+      - |
+        tmp=$(mktemp)
+        trap "rm -f $tmp" EXIT
+        curl -fsSL -o "$tmp" {{.ADL_SCHEMA_URL}}
+        if ! diff -u {{.ADL_SCHEMA_PATH}} "$tmp"; then
+          echo "ERROR: {{.ADL_SCHEMA_PATH}} differs from upstream {{.ADL_SCHEMA_VERSION}}."
+          echo "Run 'task fetch-schema' to sync, or bump ADL_SCHEMA_VERSION."
+          exit 1
+        fi
+
+  generate-types:
+    desc: Generate internal/schema/types.go from the canonical schema
+    cmds:
+      - |
+        tmp=$(mktemp -t adl-schema-annotated.XXXXXX)
+        trap "rm -f $tmp" EXIT
+        go run ./internal/schema/annotate {{.ADL_SCHEMA_PATH}} > "$tmp"
+        go run github.com/atombender/go-jsonschema@v0.23.1 \
+          --package schema \
+          --schema-root-type=https://adl.inference-gateway.com/schemas/agent/v1=ADL \
+          --capitalization ID --capitalization URL --capitalization SCM \
+          --capitalization CPU --capitalization API --capitalization CI --capitalization CD \
+          --capitalization CloudRun --capitalization DevContainer --capitalization TypeScript \
+          --only-models \
+          --output internal/schema/types.go \
+          "$tmp"
+      - go fmt ./internal/schema/...
+
   clean:
     desc: Clean build artifacts
     cmds:
@@ -82,6 +121,7 @@ tasks:
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-artifacts-minio.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/cloudrun-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/cloudrun-ghcr-agent.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/kubernetes-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent-redis.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent-ai.yaml
@@ -98,6 +138,7 @@ tasks:
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/go-agent-artifacts-minio.yaml --output test-output/go-agent-artifacts-minio --overwrite
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/cloudrun-agent.yaml --output test-output/cloudrun-agent --overwrite
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/cloudrun-ghcr-agent.yaml --output test-output/cloudrun-ghcr-agent --overwrite
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/kubernetes-agent.yaml --output test-output/kubernetes-agent --overwrite
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/rust-agent.yaml --output test-output/rust-agent --overwrite
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/rust-agent-redis.yaml --output test-output/rust-agent-redis --overwrite
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/rust-agent-ai.yaml --output test-output/rust-agent-ai --overwrite
@@ -113,9 +154,10 @@ tasks:
       - docker build -t {{.APP_NAME}}:{{.VERSION}} .
 
   ci:
-    desc: Run CI pipeline (fmt, lint, test, build)
+    desc: Run CI pipeline (fmt, lint, test, build, verify-schema)
     cmds:
       - task: fmt
       - task: lint
       - task: test
       - task: build
+      - task: verify-schema
