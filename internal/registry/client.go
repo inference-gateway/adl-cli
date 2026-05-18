@@ -10,14 +10,18 @@ import (
 	"time"
 )
 
-// DefaultBaseURL is the canonical skill registry endpoint used when neither
-// ADL_SKILLS_REGISTRY nor a per-skill `source:` overrides it.
+// DefaultBaseURL is the canonical skill registry endpoint used when no
+// per-skill `source:` overrides it.
 const DefaultBaseURL = "https://registry.inference-gateway.com/skills/"
 
 // EnvBaseURL is the env var that overrides DefaultBaseURL.
 const EnvBaseURL = "ADL_SKILLS_REGISTRY"
 
-// Client fetches skill markdown from the registry.
+// Client fetches SKILL.md from the default registry by id.
+//
+// `source:` overrides do NOT flow through this client; they go through
+// the GitHub Installer instead so they can pull a whole skill directory
+// (scripts, resources, …).
 type Client struct {
 	BaseURL    string
 	HTTPClient *http.Client
@@ -39,7 +43,7 @@ func NewClient(baseURL string) *Client {
 	}
 }
 
-// FetchByID retrieves a skill's markdown by id (and optional version)
+// FetchByID retrieves a skill's SKILL.md by id (and optional version)
 // from the configured BaseURL. Version "" resolves to the registry's
 // default version of that skill.
 func (c *Client) FetchByID(ctx context.Context, id, version string) ([]byte, error) {
@@ -58,19 +62,6 @@ func (c *Client) FetchByID(ctx context.Context, id, version string) ([]byte, err
 		return nil, err
 	}
 
-	return c.fetch(ctx, target)
-}
-
-// FetchURL retrieves a skill's markdown from an absolute URL, used by
-// per-skill `source:` overrides.
-func (c *Client) FetchURL(ctx context.Context, raw string) ([]byte, error) {
-	if raw == "" {
-		return nil, fmt.Errorf("skill source URL is required")
-	}
-	return c.fetch(ctx, raw)
-}
-
-func (c *Client) fetch(ctx context.Context, target string) ([]byte, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, target, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build request for %s: %w", target, err)

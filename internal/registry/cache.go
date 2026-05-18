@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
-// Cache is a simple disk-backed cache for fetched skill markdown blobs.
+// Cache is a disk-backed cache for fetched skill directories. Each
+// cached skill lives under <dir>/<id>@<ref>/ and may contain any number
+// of files (SKILL.md plus optional scripts/resources).
 type Cache struct {
 	dir string
 }
@@ -27,39 +30,80 @@ func NewCache(dir string) (*Cache, error) {
 // Dir returns the cache root directory.
 func (c *Cache) Dir() string { return c.dir }
 
-// Path returns the on-disk path that would be used for a skill id+version.
-// version may be empty to denote the registry default.
-func (c *Cache) Path(id, version string) string {
-	v := version
-	if v == "" {
-		v = "latest"
+// SkillDir returns the on-disk directory for a skill at (id, ref). An
+// empty ref resolves to "latest".
+func (c *Cache) SkillDir(id, ref string) string {
+	r := ref
+	if r == "" {
+		r = "latest"
 	}
-	return filepath.Join(c.dir, fmt.Sprintf("%s@%s.md", id, v))
+	return filepath.Join(c.dir, fmt.Sprintf("%s@%s", id, r))
 }
 
-// Get returns the cached bytes for (id, version) if present.
+// Get returns the cached file map for (id, ref) if the directory exists.
 // The boolean is false when the entry is absent.
-func (c *Cache) Get(id, version string) ([]byte, bool, error) {
-	path := c.Path(id, version)
-	data, err := os.ReadFile(path)
+func (c *Cache) Get(id, ref string) (map[string][]byte, bool, error) {
+	dir := c.SkillDir(id, ref)
+	info, err := os.Stat(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, false, nil
 		}
-		return nil, false, fmt.Errorf("failed to read skill cache entry %s: %w", path, err)
+		return nil, false, fmt.Errorf("failed to stat skill cache entry %s: %w", dir, err)
 	}
-	return data, true, nil
+	if !info.IsDir() {
+		return nil, false, fmt.Errorf("cache entry %s is not a directory", dir)
+	}
+
+	files := make(map[string][]byte)
+	if err := filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		rel, relErr := filepath.Rel(dir, path)
+		if relErr != nil {
+			return relErr
+		}
+		data, readErr := os.ReadFile(path)
+		if readErr != nil {
+			return readErr
+		}
+		files[filepath.ToSlash(rel)] = data
+		return nil
+	}); err != nil {
+		return nil, false, fmt.Errorf("failed to read skill cache entry %s: %w", dir, err)
+	}
+	if len(files) == 0 {
+		return nil, false, nil
+	}
+	return files, true, nil
 }
 
-// Put writes the bytes for (id, version) into the cache, creating the
-// cache directory as needed.
-func (c *Cache) Put(id, version string, data []byte) error {
-	if err := os.MkdirAll(c.dir, 0o755); err != nil {
+// Put writes the file map into the cache directory for (id, ref). The
+// directory is wiped first so stale entries from a previous version
+// can't bleed through.
+func (c *Cache) Put(id, ref string, files map[string][]byte) error {
+	dir := c.SkillDir(id, ref)
+	if err := os.RemoveAll(dir); err != nil {
+		return fmt.Errorf("failed to clear skill cache directory %s: %w", dir, err)
+	}
+	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return fmt.Errorf("failed to create skill cache directory: %w", err)
 	}
-	path := c.Path(id, version)
-	if err := os.WriteFile(path, data, 0o644); err != nil {
-		return fmt.Errorf("failed to write skill cache entry %s: %w", path, err)
+	for rel, data := range files {
+		if strings.HasPrefix(rel, "/") || strings.Contains(rel, "..") {
+			return fmt.Errorf("refusing to cache file with suspicious relative path: %q", rel)
+		}
+		outPath := filepath.Join(dir, filepath.FromSlash(rel))
+		if err := os.MkdirAll(filepath.Dir(outPath), 0o755); err != nil {
+			return fmt.Errorf("failed to create dir for %s: %w", rel, err)
+		}
+		if err := os.WriteFile(outPath, data, 0o644); err != nil {
+			return fmt.Errorf("failed to write skill cache entry %s: %w", outPath, err)
+		}
 	}
 	return nil
 }
