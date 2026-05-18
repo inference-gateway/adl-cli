@@ -7,9 +7,9 @@ description = "{{ .ADL.Metadata.Description }}"
 
 [dependencies]
 {{- if .ADL.Spec.Language.Rust.Features }}
-inference-gateway-adk = { version = "0.4", features = [{{- range $i, $f := .ADL.Spec.Language.Rust.Features }}{{ if $i }}, {{ end }}{{ $f | quote }}{{- end }}] }
+inference-gateway-adk = { version = "0.4.3", features = [{{- range $i, $f := .ADL.Spec.Language.Rust.Features }}{{ if $i }}, {{ end }}{{ $f | quote }}{{- end }}] }
 {{- else }}
-inference-gateway-adk = "0.4"
+inference-gateway-adk = "0.4.3"
 {{- end }}
 inference-gateway-sdk = "0.13.3"
 tokio = { version = "1", features = ["full", "signal"] }
