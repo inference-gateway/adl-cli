@@ -1,3 +1,4 @@
+---
 apiVersion: adl.dev/v1
 kind: Agent
 metadata:
