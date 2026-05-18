@@ -3,8 +3,8 @@
 # {{ .ADL.Metadata.Name | title }}
 
 {{ if .GenerateCI -}}
-{{ if and .ADL.Spec.SCM (eq .ADL.Spec.SCM.GetProvider "github") .ADL.Spec.SCM.GetURL -}}
-{{ $url := .ADL.Spec.SCM.GetURL | trimSuffix ".git" | trimPrefix "https://github.com/" | trimPrefix "git@github.com:" -}}
+{{ if and .ADL.Spec.SCM (eq .ADL.Spec.SCM.Provider "github") .ADL.Spec.SCM.URL -}}
+{{ $url := .ADL.Spec.SCM.URL | trimSuffix ".git" | trimPrefix "https://github.com/" | trimPrefix "git@github.com:" -}}
 [![CI](https://github.com/{{ $url }}/workflows/CI/badge.svg)](https://github.com/{{ $url }}/actions/workflows/ci.yml)
 {{ end -}}
 {{ end -}}
@@ -47,12 +47,12 @@ docker run -p {{ .ADL.Spec.Server.Port | default 8080 }}:{{ .ADL.Spec.Server.Por
 Add this agent to your Inference Gateway CLI:
 
 ```bash
-infer agents add {{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.GetScheme | default "http" }}://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}{{- if and .ADL.Spec.SCM (eq .ADL.Spec.SCM.GetProvider "github") .ADL.Spec.SCM.GetURL }} \
-{{- $url := .ADL.Spec.SCM.GetURL | trimSuffix ".git" | trimPrefix "https://github.com/" | trimPrefix "git@github.com:" }}
+infer agents add {{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Scheme | default "http" }}://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}{{- if and .ADL.Spec.SCM (eq .ADL.Spec.SCM.Provider "github") .ADL.Spec.SCM.URL }} \
+{{- $url := .ADL.Spec.SCM.URL | trimSuffix ".git" | trimPrefix "https://github.com/" | trimPrefix "git@github.com:" }}
   --oci ghcr.io/{{ $url }}:latest \
 {{- end }}
-  --run{{- if and .ADL.Spec.Agent .ADL.Spec.Agent.GetModel }} \
-  --model {{ .ADL.Spec.Agent.GetProvider }}/{{ .ADL.Spec.Agent.GetModel }}
+  --run{{- if and .ADL.Spec.Agent .ADL.Spec.Agent.Model }} \
+  --model {{ .ADL.Spec.Agent.Provider }}/{{ .ADL.Spec.Agent.Model }}
 {{- end }}
 ```
 
@@ -109,23 +109,23 @@ The following custom configuration variables are available:
 | Category | Variable | Description | Default |
 |----------|----------|-------------|---------|
 | **Server** | `A2A_PORT` | Server port | `{{ .ADL.Spec.Server.Port | default 8080 }}` |
-| **Server** | `A2A_DEBUG` | Enable debug mode | `{{ .ADL.Spec.Server.GetDebug | default false }}` |
-| **Server** | `A2A_AGENT_URL` | Agent URL for internal references | `{{ .ADL.Spec.Server.GetScheme | default "http" }}://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}` |
+| **Server** | `A2A_DEBUG` | Enable debug mode | `{{ .ADL.Spec.Server.Debug | default false }}` |
+| **Server** | `A2A_AGENT_URL` | Agent URL for internal references | `{{ .ADL.Spec.Server.Scheme | default "http" }}://localhost:{{ .ADL.Spec.Server.Port | default 8080 }}` |
 | **Server** | `A2A_STREAMING_STATUS_UPDATE_INTERVAL` | Streaming status update frequency | `1s` |
 | **Server** | `A2A_SERVER_READ_TIMEOUT` | HTTP server read timeout | `120s` |
 | **Server** | `A2A_SERVER_WRITE_TIMEOUT` | HTTP server write timeout | `120s` |
 | **Server** | `A2A_SERVER_IDLE_TIMEOUT` | HTTP server idle timeout | `120s` |
 | **Server** | `A2A_SERVER_DISABLE_HEALTHCHECK_LOG` | Disable logging for health check requests | `true` |
 | **Agent Metadata** | `A2A_AGENT_CARD_FILE_PATH` | Path to agent card JSON file | `.well-known/agent-card.json` |
-| **LLM Client** | `A2A_AGENT_CLIENT_PROVIDER` | LLM provider (`openai`, `anthropic`, `azure`, `ollama`, `deepseek`) | {{- if .ADL.Spec.Agent }}`{{ .ADL.Spec.Agent.GetProvider }}`{{- else }}`openai`{{- end }} |
-| **LLM Client** | `A2A_AGENT_CLIENT_MODEL` | Model to use | {{- if .ADL.Spec.Agent }}`{{ .ADL.Spec.Agent.GetModel }}`{{- else }}`gpt-4o-mini`{{- end }} |
+| **LLM Client** | `A2A_AGENT_CLIENT_PROVIDER` | LLM provider (`openai`, `anthropic`, `azure`, `ollama`, `deepseek`) | {{- if .ADL.Spec.Agent }}`{{ .ADL.Spec.Agent.Provider }}`{{- else }}`openai`{{- end }} |
+| **LLM Client** | `A2A_AGENT_CLIENT_MODEL` | Model to use | {{- if .ADL.Spec.Agent }}`{{ .ADL.Spec.Agent.Model }}`{{- else }}`gpt-4o-mini`{{- end }} |
 | **LLM Client** | `A2A_AGENT_CLIENT_API_KEY` | API key for LLM provider | - |
 | **LLM Client** | `A2A_AGENT_CLIENT_BASE_URL` | Custom LLM API endpoint | - |
 | **LLM Client** | `A2A_AGENT_CLIENT_TIMEOUT` | Timeout for LLM requests | `30s` |
 | **LLM Client** | `A2A_AGENT_CLIENT_MAX_RETRIES` | Maximum retries for LLM requests | `3` |
 | **LLM Client** | `A2A_AGENT_CLIENT_MAX_CHAT_COMPLETION_ITERATIONS` | Max chat completion rounds | `10` |
-| **LLM Client** | `A2A_AGENT_CLIENT_MAX_TOKENS` | Maximum tokens for LLM responses | {{- if and .ADL.Spec.Agent .ADL.Spec.Agent.GetMaxTokens }}`{{ .ADL.Spec.Agent.GetMaxTokens }}`{{- else }}`4096`{{- end }} |
-| **LLM Client** | `A2A_AGENT_CLIENT_TEMPERATURE` | Controls randomness of LLM output | {{- if and .ADL.Spec.Agent .ADL.Spec.Agent.GetTemperature }}`{{ .ADL.Spec.Agent.GetTemperature }}`{{- else }}`0.7`{{- end }} |
+| **LLM Client** | `A2A_AGENT_CLIENT_MAX_TOKENS` | Maximum tokens for LLM responses | {{- if and .ADL.Spec.Agent .ADL.Spec.Agent.MaxTokens }}`{{ .ADL.Spec.Agent.MaxTokens }}`{{- else }}`4096`{{- end }} |
+| **LLM Client** | `A2A_AGENT_CLIENT_TEMPERATURE` | Controls randomness of LLM output | {{- if and .ADL.Spec.Agent .ADL.Spec.Agent.Temperature }}`{{ .ADL.Spec.Agent.Temperature }}`{{- else }}`0.7`{{- end }} |
 | **Capabilities** | `A2A_CAPABILITIES_STREAMING` | Enable streaming responses | `{{ .ADL.Spec.Capabilities.Streaming | default true }}` |
 | **Capabilities** | `A2A_CAPABILITIES_PUSH_NOTIFICATIONS` | Enable push notifications | `{{ .ADL.Spec.Capabilities.PushNotifications | default false }}` |
 | **Capabilities** | `A2A_CAPABILITIES_STATE_TRANSITION_HISTORY` | Track state transitions | `{{ .ADL.Spec.Capabilities.StateTransitionHistory | default false }}` |
@@ -185,15 +185,15 @@ task fmt
 Use the [A2A Debugger](https://github.com/inference-gateway/a2a-debugger) to test and debug your A2A agent during development. It provides a web interface for sending requests to your agent and inspecting responses, making it easier to troubleshoot issues and validate your implementation.
 
 ```bash
-docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest --server-url {{ .ADL.Spec.Server.GetScheme | default "http" }}://localhost:{{ .ADL.Spec.Server.Port | default 8080 }} tasks submit "What are your skills?"
+docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest --server-url {{ .ADL.Spec.Server.Scheme | default "http" }}://localhost:{{ .ADL.Spec.Server.Port | default 8080 }} tasks submit "What are your skills?"
 ```
 
 ```bash
-docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest --server-url {{ .ADL.Spec.Server.GetScheme | default "http" }}://localhost:{{ .ADL.Spec.Server.Port | default 8080 }} tasks list
+docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest --server-url {{ .ADL.Spec.Server.Scheme | default "http" }}://localhost:{{ .ADL.Spec.Server.Port | default 8080 }} tasks list
 ```
 
 ```bash
-docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest --server-url {{ .ADL.Spec.Server.GetScheme | default "http" }}://localhost:{{ .ADL.Spec.Server.Port | default 8080 }} tasks get <task ID>
+docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest --server-url {{ .ADL.Spec.Server.Scheme | default "http" }}://localhost:{{ .ADL.Spec.Server.Port | default 8080 }} tasks get <task ID>
 ```
 
 ## Deployment
@@ -223,7 +223,7 @@ docker build \
 These values are embedded into the binary at build time using linker flags, making them accessible at runtime without requiring environment variables.
 
 {{- if .ADL.Spec.Deployment }}
-{{- if eq .ADL.Spec.Deployment.GetType "kubernetes" }}
+{{- if eq .ADL.Spec.Deployment.Type "kubernetes" }}
 
 ### Kubernetes
 
@@ -239,7 +239,7 @@ task deploy
 - kubectl configured with cluster access
 - Kubernetes cluster with appropriate permissions
 
-{{- else if eq .ADL.Spec.Deployment.GetType "cloudrun" }}
+{{- else if eq .ADL.Spec.Deployment.Type "cloudrun" }}
 
 ### Google Cloud Run
 

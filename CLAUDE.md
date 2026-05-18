@@ -151,15 +151,20 @@ task verify-schema    # CI gate: confirm committed schema matches upstream
 (see `task generate-types`) and **must not be edited by hand**. The schema is
 authoritative; bump the schema in the `adl` repo, refresh, and regenerate.
 
-Hand-written companions live alongside the generated file:
+`task generate-types` first runs `internal/schema/annotate` against the
+committed schema. The annotator emits a transient copy with
+`goJSONSchema: {pointer: false}` injected on every optional scalar / enum
+property, so `go-jsonschema` emits value types (e.g. `string`, `bool`,
+`SCMProvider`) instead of `*T` for them. Nested optional struct fields
+(`*DeploymentConfig`, `*Card`, `*Agent`, …) keep their pointers so callers
+can still nil-check for "section absent." The committed
+`internal/schema/schema.json` is never written to, so `task verify-schema`
+keeps passing.
+
+Hand-written companion (only one):
 
 - `internal/schema/metadata.go` — `GeneratedMetadata` struct used by the
   templating layer (not part of the ADL spec).
-- `internal/schema/helpers.go` — accessor methods (`GetProvider`, `GetURL`,
-  `GetDebug`, …) and constructor helpers (`StrPtr`, `BoolPtr`,
-  `SCMProviderPtr`, …). The generator emits `*T` for every optional field,
-  so these accessors give callers and Go templates a zero-default API
-  without nil-checks at every site.
 
 ## Important Notes
 

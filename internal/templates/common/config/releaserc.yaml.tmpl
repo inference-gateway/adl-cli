@@ -3,7 +3,7 @@ branches:
   - { name: main, prerelease: false, channel: latest }
   - { name: 'rc/*', prerelease: rc, channel: rc }
 
-repositoryUrl: '{{ if and .ADL.Spec.SCM .ADL.Spec.SCM.GetURL }}{{ .ADL.Spec.SCM.GetURL }}{{ else }}https://github.com/your-org/your-repo{{ end }}'
+repositoryUrl: '{{ if and .ADL.Spec.SCM .ADL.Spec.SCM.URL }}{{ .ADL.Spec.SCM.URL }}{{ else }}https://github.com/your-org/your-repo{{ end }}'
 tagFormat: 'v${version}'
 
 verifyConditions:

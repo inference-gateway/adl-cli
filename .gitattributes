@@ -1,1 +1,3 @@
 install.sh linguist-vendored=true
+internal/schema/schema.json linguist-vendored=true
+internal/schema/types.go linguist-generated=true

@@ -65,8 +65,8 @@ docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest
 ## LLM Provider Configuration
 
 The agent uses OpenAI-compatible LLM client. Configure with:
-- `A2A_AGENT_CLIENT_PROVIDER`: {{- if and .ADL.Spec.Agent .ADL.Spec.Agent.GetProvider }} `{{ .ADL.Spec.Agent.GetProvider }}`{{ else }} `openai`, `anthropic`, `azure`, `ollama`, `deepseek`{{ end }}
-- `A2A_AGENT_CLIENT_MODEL`: {{- if and .ADL.Spec.Agent .ADL.Spec.Agent.GetModel }} `{{ .ADL.Spec.Agent.GetModel }}`{{ else }} Model identifier{{ end }}
+- `A2A_AGENT_CLIENT_PROVIDER`: {{- if and .ADL.Spec.Agent .ADL.Spec.Agent.Provider }} `{{ .ADL.Spec.Agent.Provider }}`{{ else }} `openai`, `anthropic`, `azure`, `ollama`, `deepseek`{{ end }}
+- `A2A_AGENT_CLIENT_MODEL`: {{- if and .ADL.Spec.Agent .ADL.Spec.Agent.Model }} `{{ .ADL.Spec.Agent.Model }}`{{ else }} Model identifier{{ end }}
 - `A2A_AGENT_CLIENT_API_KEY`: Provider API key
 - `A2A_AGENT_CLIENT_BASE_URL`: Custom endpoint (optional)
 
@@ -155,7 +155,7 @@ Standard development environment required. Install:
 
 ## Debugging Tips
 
-- Enable debug mode: `A2A_DEBUG=true`{{ if .ADL.Spec.Server.GetDebug }} (currently enabled in agent.yaml){{ end }}
+- Enable debug mode: `A2A_DEBUG=true`{{ if .ADL.Spec.Server.Debug }} (currently enabled in agent.yaml){{ end }}
 - Check health: `GET /health`
 - View agent metadata: `GET /.well-known/agent-card.json`
 {{- if .ADL.Spec.Capabilities.Streaming }}

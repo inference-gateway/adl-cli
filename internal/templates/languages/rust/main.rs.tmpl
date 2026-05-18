@@ -36,7 +36,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let agent = AgentBuilder::new()
         .with_config(&config.agent_config)
-        .with_system_prompt({{ .ADL.Spec.Agent.GetSystemPrompt | quote }})
+        .with_system_prompt({{ .ADL.Spec.Agent.SystemPrompt | quote }})
 {{- if .ADL.Spec.Skills }}
         .with_toolbox(tools::all())
 {{- range .ADL.Spec.Skills }}

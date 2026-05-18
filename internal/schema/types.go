@@ -20,19 +20,19 @@ type ADL struct {
 
 type Agent struct {
 	// MaxTokens corresponds to the JSON schema field "maxTokens".
-	MaxTokens *int `json:"maxTokens,omitempty,omitzero" yaml:"maxTokens,omitempty" mapstructure:"maxTokens,omitempty"`
+	MaxTokens int `json:"maxTokens,omitempty,omitzero" yaml:"maxTokens,omitempty" mapstructure:"maxTokens,omitempty"`
 
 	// Model corresponds to the JSON schema field "model".
-	Model *string `json:"model,omitempty,omitzero" yaml:"model,omitempty" mapstructure:"model,omitempty"`
+	Model string `json:"model,omitempty,omitzero" yaml:"model,omitempty" mapstructure:"model,omitempty"`
 
 	// Provider corresponds to the JSON schema field "provider".
-	Provider *AgentProvider `json:"provider,omitempty,omitzero" yaml:"provider,omitempty" mapstructure:"provider,omitempty"`
+	Provider AgentProvider `json:"provider,omitempty,omitzero" yaml:"provider,omitempty" mapstructure:"provider,omitempty"`
 
 	// SystemPrompt corresponds to the JSON schema field "systemPrompt".
-	SystemPrompt *string `json:"systemPrompt,omitempty,omitzero" yaml:"systemPrompt,omitempty" mapstructure:"systemPrompt,omitempty"`
+	SystemPrompt string `json:"systemPrompt,omitempty,omitzero" yaml:"systemPrompt,omitempty" mapstructure:"systemPrompt,omitempty"`
 
 	// Temperature corresponds to the JSON schema field "temperature".
-	Temperature *float64 `json:"temperature,omitempty,omitzero" yaml:"temperature,omitempty" mapstructure:"temperature,omitempty"`
+	Temperature float64 `json:"temperature,omitempty,omitzero" yaml:"temperature,omitempty" mapstructure:"temperature,omitempty"`
 }
 
 type AgentProvider string
@@ -53,7 +53,7 @@ type ArtifactsConfig struct {
 
 type AuthConfig struct {
 	// Enabled corresponds to the JSON schema field "enabled".
-	Enabled *bool `json:"enabled,omitempty,omitzero" yaml:"enabled,omitempty" mapstructure:"enabled,omitempty"`
+	Enabled bool `json:"enabled,omitempty,omitzero" yaml:"enabled,omitempty" mapstructure:"enabled,omitempty"`
 }
 
 type Capabilities struct {
@@ -76,19 +76,19 @@ type Card struct {
 	DefaultOutputModes []string `json:"defaultOutputModes,omitempty,omitzero" yaml:"defaultOutputModes,omitempty" mapstructure:"defaultOutputModes,omitempty"`
 
 	// DocumentationURL corresponds to the JSON schema field "documentationUrl".
-	DocumentationURL *string `json:"documentationUrl,omitempty,omitzero" yaml:"documentationUrl,omitempty" mapstructure:"documentationUrl,omitempty"`
+	DocumentationURL string `json:"documentationUrl,omitempty,omitzero" yaml:"documentationUrl,omitempty" mapstructure:"documentationUrl,omitempty"`
 
 	// IconURL corresponds to the JSON schema field "iconUrl".
-	IconURL *string `json:"iconUrl,omitempty,omitzero" yaml:"iconUrl,omitempty" mapstructure:"iconUrl,omitempty"`
+	IconURL string `json:"iconUrl,omitempty,omitzero" yaml:"iconUrl,omitempty" mapstructure:"iconUrl,omitempty"`
 
 	// PreferredTransport corresponds to the JSON schema field "preferredTransport".
-	PreferredTransport *string `json:"preferredTransport,omitempty,omitzero" yaml:"preferredTransport,omitempty" mapstructure:"preferredTransport,omitempty"`
+	PreferredTransport string `json:"preferredTransport,omitempty,omitzero" yaml:"preferredTransport,omitempty" mapstructure:"preferredTransport,omitempty"`
 
 	// ProtocolVersion corresponds to the JSON schema field "protocolVersion".
-	ProtocolVersion *string `json:"protocolVersion,omitempty,omitzero" yaml:"protocolVersion,omitempty" mapstructure:"protocolVersion,omitempty"`
+	ProtocolVersion string `json:"protocolVersion,omitempty,omitzero" yaml:"protocolVersion,omitempty" mapstructure:"protocolVersion,omitempty"`
 
 	// URL corresponds to the JSON schema field "url".
-	URL *string `json:"url,omitempty,omitzero" yaml:"url,omitempty" mapstructure:"url,omitempty"`
+	URL string `json:"url,omitempty,omitzero" yaml:"url,omitempty" mapstructure:"url,omitempty"`
 }
 
 type CloudRunConfig struct {
@@ -115,7 +115,7 @@ type DeploymentConfig struct {
 	CloudRun *CloudRunConfig `json:"cloudrun,omitempty,omitzero" yaml:"cloudrun,omitempty" mapstructure:"cloudrun,omitempty"`
 
 	// Type corresponds to the JSON schema field "type".
-	Type *DeploymentConfigType `json:"type,omitempty,omitzero" yaml:"type,omitempty" mapstructure:"type,omitempty"`
+	Type DeploymentConfigType `json:"type,omitempty,omitzero" yaml:"type,omitempty" mapstructure:"type,omitempty"`
 }
 
 type DeploymentConfigType string
@@ -153,16 +153,16 @@ type Hooks struct {
 
 type ImageConfig struct {
 	// Registry corresponds to the JSON schema field "registry".
-	Registry *string `json:"registry,omitempty,omitzero" yaml:"registry,omitempty" mapstructure:"registry,omitempty"`
+	Registry string `json:"registry,omitempty,omitzero" yaml:"registry,omitempty" mapstructure:"registry,omitempty"`
 
 	// Repository corresponds to the JSON schema field "repository".
-	Repository *string `json:"repository,omitempty,omitzero" yaml:"repository,omitempty" mapstructure:"repository,omitempty"`
+	Repository string `json:"repository,omitempty,omitzero" yaml:"repository,omitempty" mapstructure:"repository,omitempty"`
 
 	// Tag corresponds to the JSON schema field "tag".
-	Tag *string `json:"tag,omitempty,omitzero" yaml:"tag,omitempty" mapstructure:"tag,omitempty"`
+	Tag string `json:"tag,omitempty,omitzero" yaml:"tag,omitempty" mapstructure:"tag,omitempty"`
 
 	// UseCloudBuild corresponds to the JSON schema field "useCloudBuild".
-	UseCloudBuild *bool `json:"useCloudBuild,omitempty,omitzero" yaml:"useCloudBuild,omitempty" mapstructure:"useCloudBuild,omitempty"`
+	UseCloudBuild bool `json:"useCloudBuild,omitempty,omitzero" yaml:"useCloudBuild,omitempty" mapstructure:"useCloudBuild,omitempty"`
 }
 
 type Language struct {
@@ -189,10 +189,10 @@ type Metadata struct {
 
 type ResourcesConfig struct {
 	// CPU corresponds to the JSON schema field "cpu".
-	CPU *string `json:"cpu,omitempty,omitzero" yaml:"cpu,omitempty" mapstructure:"cpu,omitempty"`
+	CPU string `json:"cpu,omitempty,omitzero" yaml:"cpu,omitempty" mapstructure:"cpu,omitempty"`
 
 	// Memory corresponds to the JSON schema field "memory".
-	Memory *string `json:"memory,omitempty,omitzero" yaml:"memory,omitempty" mapstructure:"memory,omitempty"`
+	Memory string `json:"memory,omitempty,omitzero" yaml:"memory,omitempty" mapstructure:"memory,omitempty"`
 }
 
 type RustConfig struct {
@@ -211,16 +211,16 @@ type RustConfig struct {
 
 type SCM struct {
 	// GithubApp corresponds to the JSON schema field "github_app".
-	GithubApp *bool `json:"github_app,omitempty,omitzero" yaml:"github_app,omitempty" mapstructure:"github_app,omitempty"`
+	GithubApp bool `json:"github_app,omitempty,omitzero" yaml:"github_app,omitempty" mapstructure:"github_app,omitempty"`
 
 	// IssueTemplates corresponds to the JSON schema field "issue_templates".
-	IssueTemplates *bool `json:"issue_templates,omitempty,omitzero" yaml:"issue_templates,omitempty" mapstructure:"issue_templates,omitempty"`
+	IssueTemplates bool `json:"issue_templates,omitempty,omitzero" yaml:"issue_templates,omitempty" mapstructure:"issue_templates,omitempty"`
 
 	// Provider corresponds to the JSON schema field "provider".
-	Provider *SCMProvider `json:"provider,omitempty,omitzero" yaml:"provider,omitempty" mapstructure:"provider,omitempty"`
+	Provider SCMProvider `json:"provider,omitempty,omitzero" yaml:"provider,omitempty" mapstructure:"provider,omitempty"`
 
 	// URL corresponds to the JSON schema field "url".
-	URL *string `json:"url,omitempty,omitzero" yaml:"url,omitempty" mapstructure:"url,omitempty"`
+	URL string `json:"url,omitempty,omitzero" yaml:"url,omitempty" mapstructure:"url,omitempty"`
 }
 
 type SCMProvider string
@@ -242,13 +242,13 @@ type SandboxConfig struct {
 
 type ScalingConfig struct {
 	// Concurrency corresponds to the JSON schema field "concurrency".
-	Concurrency *int `json:"concurrency,omitempty,omitzero" yaml:"concurrency,omitempty" mapstructure:"concurrency,omitempty"`
+	Concurrency int `json:"concurrency,omitempty,omitzero" yaml:"concurrency,omitempty" mapstructure:"concurrency,omitempty"`
 
 	// MaxInstances corresponds to the JSON schema field "maxInstances".
-	MaxInstances *int `json:"maxInstances,omitempty,omitzero" yaml:"maxInstances,omitempty" mapstructure:"maxInstances,omitempty"`
+	MaxInstances int `json:"maxInstances,omitempty,omitzero" yaml:"maxInstances,omitempty" mapstructure:"maxInstances,omitempty"`
 
 	// MinInstances corresponds to the JSON schema field "minInstances".
-	MinInstances *int `json:"minInstances,omitempty,omitzero" yaml:"minInstances,omitempty" mapstructure:"minInstances,omitempty"`
+	MinInstances int `json:"minInstances,omitempty,omitzero" yaml:"minInstances,omitempty" mapstructure:"minInstances,omitempty"`
 }
 
 type Server struct {
@@ -256,13 +256,13 @@ type Server struct {
 	Auth *AuthConfig `json:"auth,omitempty,omitzero" yaml:"auth,omitempty" mapstructure:"auth,omitempty"`
 
 	// Debug corresponds to the JSON schema field "debug".
-	Debug *bool `json:"debug,omitempty,omitzero" yaml:"debug,omitempty" mapstructure:"debug,omitempty"`
+	Debug bool `json:"debug,omitempty,omitzero" yaml:"debug,omitempty" mapstructure:"debug,omitempty"`
 
 	// Port corresponds to the JSON schema field "port".
 	Port int `json:"port" yaml:"port" mapstructure:"port"`
 
 	// Scheme corresponds to the JSON schema field "scheme".
-	Scheme *string `json:"scheme,omitempty,omitzero" yaml:"scheme,omitempty" mapstructure:"scheme,omitempty"`
+	Scheme string `json:"scheme,omitempty,omitzero" yaml:"scheme,omitempty" mapstructure:"scheme,omitempty"`
 }
 
 type Service struct {
@@ -282,17 +282,17 @@ type Service struct {
 type ServiceConfig struct {
 	// AllowUnauthenticated corresponds to the JSON schema field
 	// "allowUnauthenticated".
-	AllowUnauthenticated *bool `json:"allowUnauthenticated,omitempty,omitzero" yaml:"allowUnauthenticated,omitempty" mapstructure:"allowUnauthenticated,omitempty"`
+	AllowUnauthenticated bool `json:"allowUnauthenticated,omitempty,omitzero" yaml:"allowUnauthenticated,omitempty" mapstructure:"allowUnauthenticated,omitempty"`
 
 	// ExecutionEnvironment corresponds to the JSON schema field
 	// "executionEnvironment".
-	ExecutionEnvironment *string `json:"executionEnvironment,omitempty,omitzero" yaml:"executionEnvironment,omitempty" mapstructure:"executionEnvironment,omitempty"`
+	ExecutionEnvironment string `json:"executionEnvironment,omitempty,omitzero" yaml:"executionEnvironment,omitempty" mapstructure:"executionEnvironment,omitempty"`
 
 	// ServiceAccount corresponds to the JSON schema field "serviceAccount".
-	ServiceAccount *string `json:"serviceAccount,omitempty,omitzero" yaml:"serviceAccount,omitempty" mapstructure:"serviceAccount,omitempty"`
+	ServiceAccount string `json:"serviceAccount,omitempty,omitzero" yaml:"serviceAccount,omitempty" mapstructure:"serviceAccount,omitempty"`
 
 	// Timeout corresponds to the JSON schema field "timeout".
-	Timeout *int `json:"timeout,omitempty,omitzero" yaml:"timeout,omitempty" mapstructure:"timeout,omitempty"`
+	Timeout int `json:"timeout,omitempty,omitzero" yaml:"timeout,omitempty" mapstructure:"timeout,omitempty"`
 }
 
 type ServiceType string
@@ -313,7 +313,7 @@ type Skill struct {
 	ID string `json:"id" yaml:"id" mapstructure:"id"`
 
 	// Implementation corresponds to the JSON schema field "implementation".
-	Implementation *string `json:"implementation,omitempty,omitzero" yaml:"implementation,omitempty" mapstructure:"implementation,omitempty"`
+	Implementation string `json:"implementation,omitempty,omitzero" yaml:"implementation,omitempty" mapstructure:"implementation,omitempty"`
 
 	// Inject corresponds to the JSON schema field "inject".
 	Inject []string `json:"inject,omitempty,omitzero" yaml:"inject,omitempty" mapstructure:"inject,omitempty"`

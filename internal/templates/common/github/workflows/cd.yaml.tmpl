@@ -18,7 +18,7 @@ jobs:
       new_release_version: ${{`{{ steps.semantic.outputs.new_release_version }}`}}
       new_release_published: ${{`{{ steps.semantic.outputs.new_release_published }}`}}
     steps:
-{{- if and .ADL.Spec.SCM .ADL.Spec.SCM.GetGithubApp }}
+{{- if and .ADL.Spec.SCM .ADL.Spec.SCM.GithubApp }}
       - uses: actions/create-github-app-token@v3.2.0
         id: app-token
         with:
@@ -48,7 +48,7 @@ jobs:
           ref: ${{`{{ github.ref }}`}}
           fetch-depth: 0
           persist-credentials: false
-{{- if and .ADL.Spec.SCM .ADL.Spec.SCM.GetGithubApp }}
+{{- if and .ADL.Spec.SCM .ADL.Spec.SCM.GithubApp }}
           token: ${{`{{ steps.app-token.outputs.token }}`}}
 {{- else }}
           token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
@@ -168,29 +168,25 @@ jobs:
         id: semantic
         env:
           CI: true
-{{- if and .ADL.Spec.SCM .ADL.Spec.SCM.GetGithubApp }}
+{{- if and .ADL.Spec.SCM .ADL.Spec.SCM.GithubApp }}
           GITHUB_TOKEN: ${{`{{ steps.app-token.outputs.token }}`}}
 {{- else }}
           GITHUB_TOKEN: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 {{- end }}
           GITHUB_REPOSITORY: ${{`{{ github.repository }}`}}
         run: |
-          # Create first release if not exists - Initial Release Version 0.1.0
           if ! gh release view v0.1.0 >/dev/null 2>&1; then
             gh release create v0.1.0 --title "Initial Release" --notes "Initial Release" --target main
           fi
 
-          # Run semantic-release in dry-run first to capture version
           DRY_OUTPUT=$(semantic-release --dry-run 2>&1 || true)
 
-          # Check if there are no changes
           if $(echo "$DRY_OUTPUT" | grep -q "no new version is released"); then
             echo "No new release needed"
             echo "new_release_published=false" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          # Extract version from dry run output
           VERSION=$(echo "$DRY_OUTPUT" | grep -o "The next release version is [0-9]\+\.[0-9]\+\.[0-9]\+\(-rc\.[0-9]\+\)\?" | cut -d ' ' -f6)
           if [ -z "$VERSION" ]; then
             echo "Error: Could not determine version"
@@ -200,7 +196,6 @@ jobs:
 
           echo "new_release_version=$VERSION" >> $GITHUB_OUTPUT
 
-          # Run actual release
           if semantic-release; then
             echo "Successfully released version $VERSION"
             echo "new_release_published=true" >> $GITHUB_OUTPUT
@@ -223,7 +218,7 @@ jobs:
           ref: ${{`{{ github.ref }}`}}
           fetch-depth: 0
 
-{{- if eq .ADL.Spec.Deployment.GetType "kubernetes" }}
+{{- if eq .ADL.Spec.Deployment.Type "kubernetes" }}
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v4
@@ -231,13 +226,12 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           echo "Deploying to Kubernetes cluster..."
-          # Replace image tag with the released version
           sed -i 's|:latest|:${{`{{ needs.release.outputs.new_release_version }}`}}|g' k8s/deployment.yaml
           kubectl apply -f k8s/
         env:
           KUBECONFIG: ${{`{{ secrets.KUBECONFIG }}`}}
 
-{{- else if eq .ADL.Spec.Deployment.GetType "cloudrun" }}
+{{- else if eq .ADL.Spec.Deployment.Type "cloudrun" }}
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2

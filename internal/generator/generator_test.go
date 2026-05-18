@@ -26,7 +26,7 @@ func TestGenerator_Generate(t *testing.T) {
 			},
 			Server: schema.Server{
 				Port:  8080,
-				Debug: schema.BoolPtr(false),
+				Debug: false,
 			},
 			Language: schema.Language{
 				Go: &schema.GoConfig{
@@ -291,8 +291,8 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 		},
 		Spec: schema.Spec{
 			Agent: &schema.Agent{
-				Provider: schema.AgentProviderPtr(schema.AgentProviderOpenai),
-				Model:    schema.StrPtr("gpt-4o-mini"),
+				Provider: schema.AgentProviderOpenai,
+				Model:    "gpt-4o-mini",
 			},
 			Language: schema.Language{
 				Rust: &schema.RustConfig{
@@ -406,7 +406,7 @@ func TestGenerator_generateCD(t *testing.T) {
 			},
 			Server: schema.Server{
 				Port:  8080,
-				Debug: schema.BoolPtr(false),
+				Debug: false,
 			},
 			Language: schema.Language{
 				Go: &schema.GoConfig{
@@ -415,8 +415,8 @@ func TestGenerator_generateCD(t *testing.T) {
 				},
 			},
 			SCM: &schema.SCM{
-				Provider: schema.SCMProviderPtr(schema.SCMProviderGithub),
-				URL:      schema.StrPtr("https://github.com/example/test-cd-agent"),
+				Provider: schema.SCMProviderGithub,
+				URL:      "https://github.com/example/test-cd-agent",
 			},
 		},
 	}
@@ -437,7 +437,7 @@ func TestGenerator_generateCD(t *testing.T) {
 			},
 			Server: schema.Server{
 				Port:  8080,
-				Debug: schema.BoolPtr(false),
+				Debug: false,
 			},
 			Language: schema.Language{
 				Go: &schema.GoConfig{
@@ -446,9 +446,9 @@ func TestGenerator_generateCD(t *testing.T) {
 				},
 			},
 			SCM: &schema.SCM{
-				Provider:  schema.SCMProviderPtr(schema.SCMProviderGithub),
-				URL:       schema.StrPtr("https://github.com/example/test-github-app-agent"),
-				GithubApp: schema.BoolPtr(true),
+				Provider:  schema.SCMProviderGithub,
+				URL:       "https://github.com/example/test-github-app-agent",
+				GithubApp: true,
 			},
 		},
 	}
@@ -516,7 +516,7 @@ func TestGenerator_generateCD(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed to read .releaserc.yaml: %v", err)
 			}
-			if !containsSubstring(string(releasercContent), tt.adl.Spec.SCM.GetURL()) {
+			if !containsSubstring(string(releasercContent), tt.adl.Spec.SCM.URL) {
 				t.Errorf("expected .releaserc.yaml to contain repository URL")
 			}
 			if !containsSubstring(string(releasercContent), "@semantic-release/github") {
@@ -643,7 +643,7 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 			},
 			Server: schema.Server{
 				Port:  8080,
-				Debug: schema.BoolPtr(false),
+				Debug: false,
 			},
 			Language: schema.Language{
 				Go: &schema.GoConfig{
@@ -652,9 +652,9 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 				},
 			},
 			SCM: &schema.SCM{
-				Provider:       schema.SCMProviderPtr(schema.SCMProviderGithub),
-				URL:            schema.StrPtr("https://github.com/example/test-agent"),
-				IssueTemplates: schema.BoolPtr(true),
+				Provider:       schema.SCMProviderGithub,
+				URL:            "https://github.com/example/test-agent",
+				IssueTemplates: true,
 			},
 		},
 	}
@@ -675,7 +675,7 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 			},
 			Server: schema.Server{
 				Port:  8080,
-				Debug: schema.BoolPtr(false),
+				Debug: false,
 			},
 			Language: schema.Language{
 				Go: &schema.GoConfig{
@@ -684,9 +684,9 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 				},
 			},
 			SCM: &schema.SCM{
-				Provider:       schema.SCMProviderPtr(schema.SCMProviderGithub),
-				URL:            schema.StrPtr("https://github.com/example/test-agent-no-templates"),
-				IssueTemplates: schema.BoolPtr(false),
+				Provider:       schema.SCMProviderGithub,
+				URL:            "https://github.com/example/test-agent-no-templates",
+				IssueTemplates: false,
 			},
 		},
 	}
