@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.29.0](https://github.com/inference-gateway/adl-cli/compare/v0.28.0...v0.29.0) (2026-05-18)
+
+### ✨ Features
+
+* Rearchitect skills and tools ([#106](https://github.com/inference-gateway/adl-cli/issues/106)) ([7641a62](https://github.com/inference-gateway/adl-cli/commit/7641a624f0f0601e06e6e578c56e356651480591)), closes [inference-gateway/adl#3](https://github.com/inference-gateway/adl/issues/3)
+* **templates:** include adl flake in generated Flox manifest ([f6569bc](https://github.com/inference-gateway/adl-cli/commit/f6569bce4ae7cc8687a398d55b0351bcb3206655))
+* **templates:** Rework Rust generation for rust-adk v0.4 ([#102](https://github.com/inference-gateway/adl-cli/issues/102)) ([00455d4](https://github.com/inference-gateway/adl-cli/commit/00455d41d586f82b0a3e5de3c54456559a2d96aa))
+
+### ♻️ Improvements
+
+* **schema:** Make inference-gateway/adl the source of truth ([#108](https://github.com/inference-gateway/adl-cli/issues/108)) ([dcef8af](https://github.com/inference-gateway/adl-cli/commit/dcef8afec5710af9b7998f8bd8b1d6a742eb5483))
+
+### 🐛 Bug Fixes
+
+* Spec validator ([1721d12](https://github.com/inference-gateway/adl-cli/commit/1721d12919cdebe855303fe41792a0fcbf8bb92c))
+
+### 🔧 Miscellaneous
+
+* Add missing manifest.lock changes ([8313bab](https://github.com/inference-gateway/adl-cli/commit/8313bab4f734ab73128b61423dbad0d1207ea700))
+* **deps:** Add ADL CLI to flox dev env ([#105](https://github.com/inference-gateway/adl-cli/issues/105)) ([b15b1cc](https://github.com/inference-gateway/adl-cli/commit/b15b1cc1a0fa93744a2c10160f76036f51bac878))
+* **deps:** Bump claude-code to latest ([f567f38](https://github.com/inference-gateway/adl-cli/commit/f567f381452bead403c1d009d0f52023a1bb1571))
+* **deps:** Bump golang to latest ([#104](https://github.com/inference-gateway/adl-cli/issues/104)) ([aed7f58](https://github.com/inference-gateway/adl-cli/commit/aed7f58cb85d7063750473c537b53351d9850e3e))
+* **examples:** Add correct api version to all examples ([6d289e2](https://github.com/inference-gateway/adl-cli/commit/6d289e2496db55796c34ac6224f4b79dcefb1bb0))
+
 ## [0.28.0](https://github.com/inference-gateway/adl-cli/compare/v0.27.13...v0.28.0) (2026-05-14)
 
 ### ✨ Features
