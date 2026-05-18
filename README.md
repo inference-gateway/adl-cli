@@ -544,7 +544,7 @@ spec:
 The ADL spec distinguishes two complementary concepts:
 
 - **Tools** (`spec.tools`) are function-call entrypoints with explicit JSON schemas. They are generated as code in the target language and registered with the agent's toolbox. The model invokes them by name with structured arguments.
-- **Skills** (`spec.skills`) are markdown playbooks (with YAML frontmatter) that describe *when and how* to use the tools. Each is written to `skills/<id>.md` in the generated project, advertised on the agent card so orchestrators can discover them, and prepended to the system prompt at runtime.
+- **Skills** (`spec.skills`) are markdown playbooks (with YAML frontmatter) that describe _when and how_ to use the tools. Each is written to `skills/<id>.md` in the generated project, advertised on the agent card so orchestrators can discover them, and prepended to the system prompt at runtime.
 
 A skill entry is small:
 

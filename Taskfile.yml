@@ -53,6 +53,11 @@ tasks:
     cmds:
       - markdownlint '**/*.md' --ignore CHANGELOG.md
 
+  lint:md:fix:
+    desc: Run markdownlint
+    cmds:
+      - markdownlint '**/*.md' --ignore CHANGELOG.md --fix
+
   mod:
     desc: Download dependencies
     cmds:
