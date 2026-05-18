@@ -16,13 +16,13 @@ prettier.version = "^3.6.2"
 markdownlint-cli.pkg-path = "markdownlint-cli"
 markdownlint-cli.version = "0.48.0"
 infer.flake = "github:inference-gateway/cli/v0.109.6"
+adl.flake = "github:inference-gateway/adl-cli/v0.28.0"
 
 [hook]
 on-activate = """
   export GOENV="$FLOX_ENV_CACHE/goenv"
   export PATH="$(go env GOPATH)/bin:$PATH"
   go get .
-
 
   source <(goreleaser completion zsh)
   source <(task --completion zsh)
