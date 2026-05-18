@@ -13,8 +13,12 @@ spec:
   card:
     protocolVersion: "0.3.0"
     preferredTransport: "JSONRPC"
-    defaultInputModes: ["text", "voice"]
-    defaultOutputModes: ["text", "audio"]
+    defaultInputModes:
+      - text
+      - voice
+    defaultOutputModes:
+      - text
+      - audio
     url: "https://my-agent.example.com:8443"
     documentationUrl: "https://github.com/company/go-agent/docs"
     iconUrl: "https://github.com/company/go-agent/icon.png"
@@ -63,7 +67,10 @@ spec:
     - id: query_database
       name: query_database
       description: "Query the company database with proper authentication"
-      tags: ["database", "query", "data"]
+      tags:
+        - database
+        - query
+        - data
       inject:
         - logger
         - database
@@ -80,11 +87,16 @@ spec:
             type: integer
             description: "Maximum number of results"
             maximum: 1000
-        required: [query, table]
+        required:
+          - query
+          - table
     - id: send_notification
       name: send_notification
       description: "Send notifications to users or teams"
-      tags: ["notification", "communication", "alert"]
+      tags:
+        - notification
+        - communication
+        - alert
       inject:
         - logger
         - notifications
@@ -100,16 +112,31 @@ spec:
           priority:
             type: string
             description: "Priority level"
-            enum: ["low", "medium", "high", "critical"]
+            enum:
+              - low
+              - medium
+              - high
+              - critical
           channel:
             type: string
             description: "Notification channel"
-            enum: ["email", "slack", "teams", "webhook"]
-        required: [recipient, message, priority, channel]
+            enum:
+              - email
+              - slack
+              - teams
+              - webhook
+        required:
+          - recipient
+          - message
+          - priority
+          - channel
     - id: generate_report
       name: generate_report
       description: "Generate business reports based on data analysis"
-      tags: ["report", "analytics", "business"]
+      tags:
+        - report
+        - analytics
+        - business
       inject:
         - logger
         - database
@@ -120,7 +147,11 @@ spec:
           report_type:
             type: string
             description: "Type of report to generate"
-            enum: ["sales", "performance", "compliance", "security"]
+            enum:
+              - sales
+              - performance
+              - compliance
+              - security
           date_range:
             type: object
             properties:
@@ -133,8 +164,15 @@ spec:
           format:
             type: string
             description: "Output format"
-            enum: ["pdf", "excel", "json", "html"]
-        required: [report_type, date_range, format]
+            enum:
+              - pdf
+              - excel
+              - json
+              - html
+        required:
+          - report_type
+          - date_range
+          - format
   server:
     port: 8443
     scheme: https

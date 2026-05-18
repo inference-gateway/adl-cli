@@ -22,14 +22,17 @@ spec:
     - id: process
       name: process
       description: Processes data with custom logic
-      tags: ["processing", "data"]
+      tags:
+        - processing
+        - data
       schema:
         type: object
         properties:
           data:
             type: string
             description: The data to process
-        required: ["data"]
+        required:
+          - data
   server:
     port: 8080
     scheme: http

@@ -22,7 +22,9 @@ spec:
     - id: greet
       name: greet
       description: Greets the user with a personalized message
-      tags: ["greeting", "interaction"]
+      tags:
+        - greeting
+        - interaction
       examples:
         - "Hello there!"
         - "Hi, how can I help you today?"
@@ -32,7 +34,8 @@ spec:
           name:
             type: string
             description: The name of the person to greet
-        required: ["name"]
+        required:
+          - name
   server:
     port: 8080
     scheme: http
