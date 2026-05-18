@@ -1,5 +1,5 @@
 ---
-apiVersion: adl.dev/v1
+apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: go-agent
@@ -129,7 +129,7 @@ spec:
           - recipient
           - message
           - priority
-          - channel]
+          - channel
     - id: generate_report
       name: generate_report
       description: "Generate business reports based on data analysis"
@@ -147,7 +147,11 @@ spec:
           report_type:
             type: string
             description: "Type of report to generate"
-            enum: ["sales", "performance", "compliance", "security"]
+            enum:
+              - sales
+              - performance
+              - compliance
+              - security
           date_range:
             type: object
             properties:

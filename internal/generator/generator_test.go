@@ -11,7 +11,7 @@ import (
 
 func TestGenerator_Generate(t *testing.T) {
 	validADL := &schema.ADL{
-		APIVersion: "adl.dev/v1",
+		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 		Metadata: schema.Metadata{
 			Name:        "test-agent",
@@ -19,7 +19,7 @@ func TestGenerator_Generate(t *testing.T) {
 			Version:     "1.0.0",
 		},
 		Spec: schema.Spec{
-			Capabilities: &schema.Capabilities{
+			Capabilities: schema.Capabilities{
 				Streaming:              true,
 				PushNotifications:      false,
 				StateTransitionHistory: false,
@@ -28,7 +28,7 @@ func TestGenerator_Generate(t *testing.T) {
 				Port:  8080,
 				Debug: false,
 			},
-			Language: &schema.Language{
+			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-agent",
 					Version: "1.26.2",
@@ -71,7 +71,7 @@ func TestGenerator_validateADL(t *testing.T) {
 		{
 			name: "valid minimal ADL",
 			adl: &schema.ADL{
-				APIVersion: "adl.dev/v1",
+				APIVersion: "adl.inference-gateway.com/v1",
 				Kind:       "Agent",
 				Metadata: schema.Metadata{
 					Name:        "test-agent",
@@ -79,7 +79,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Version:     "1.0.0",
 				},
 				Spec: schema.Spec{
-					Capabilities: &schema.Capabilities{
+					Capabilities: schema.Capabilities{
 						Streaming:              true,
 						PushNotifications:      false,
 						StateTransitionHistory: false,
@@ -87,7 +87,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Server: schema.Server{
 						Port: 8080,
 					},
-					Language: &schema.Language{
+					Language: schema.Language{
 						Go: &schema.GoConfig{
 							Module:  "github.com/example/test-agent",
 							Version: "1.26.2",
@@ -97,59 +97,16 @@ func TestGenerator_validateADL(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		{
-			name: "missing capabilities",
-			adl: &schema.ADL{
-				APIVersion: "adl.dev/v1",
-				Kind:       "Agent",
-				Metadata: schema.Metadata{
-					Name:        "test-agent",
-					Description: "Test agent",
-					Version:     "1.0.0",
-				},
-				Spec: schema.Spec{
-					Server: schema.Server{
-						Port: 8080,
-					},
-					Language: &schema.Language{
-						Go: &schema.GoConfig{
-							Module:  "github.com/example/test-agent",
-							Version: "1.26.2",
-						},
-					},
-				},
-			},
-			wantErr: true,
-			errMsg:  "spec.capabilities is required",
-		},
-		{
-			name: "missing language",
-			adl: &schema.ADL{
-				APIVersion: "adl.dev/v1",
-				Kind:       "Agent",
-				Metadata: schema.Metadata{
-					Name:        "test-agent",
-					Description: "Test agent",
-					Version:     "1.0.0",
-				},
-				Spec: schema.Spec{
-					Capabilities: &schema.Capabilities{
-						Streaming:              true,
-						PushNotifications:      false,
-						StateTransitionHistory: false,
-					},
-					Server: schema.Server{
-						Port: 8080,
-					},
-				},
-			},
-			wantErr: true,
-			errMsg:  "spec.language is required for code generation",
-		},
+		// "missing capabilities" / "missing language" test cases were removed
+		// when types.go switched to schema-generated types. Capabilities and
+		// Language are required by the JSON Schema and are non-pointer struct
+		// fields after generation, so a missing-field test case is no longer
+		// expressible at the Go type level. The JSON Schema validator
+		// (internal/schema/validator.go) covers the case at parse time.
 		{
 			name: "missing Go module",
 			adl: &schema.ADL{
-				APIVersion: "adl.dev/v1",
+				APIVersion: "adl.inference-gateway.com/v1",
 				Kind:       "Agent",
 				Metadata: schema.Metadata{
 					Name:        "test-agent",
@@ -157,7 +114,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Version:     "1.0.0",
 				},
 				Spec: schema.Spec{
-					Capabilities: &schema.Capabilities{
+					Capabilities: schema.Capabilities{
 						Streaming:              true,
 						PushNotifications:      false,
 						StateTransitionHistory: false,
@@ -165,7 +122,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Server: schema.Server{
 						Port: 8080,
 					},
-					Language: &schema.Language{
+					Language: schema.Language{
 						Go: &schema.GoConfig{
 							Version: "1.26.2",
 						},
@@ -178,7 +135,7 @@ func TestGenerator_validateADL(t *testing.T) {
 		{
 			name: "invalid port",
 			adl: &schema.ADL{
-				APIVersion: "adl.dev/v1",
+				APIVersion: "adl.inference-gateway.com/v1",
 				Kind:       "Agent",
 				Metadata: schema.Metadata{
 					Name:        "test-agent",
@@ -186,7 +143,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Version:     "1.0.0",
 				},
 				Spec: schema.Spec{
-					Capabilities: &schema.Capabilities{
+					Capabilities: schema.Capabilities{
 						Streaming:              true,
 						PushNotifications:      false,
 						StateTransitionHistory: false,
@@ -194,7 +151,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Server: schema.Server{
 						Port: 0,
 					},
-					Language: &schema.Language{
+					Language: schema.Language{
 						Go: &schema.GoConfig{
 							Module:  "github.com/example/test-agent",
 							Version: "1.26.2",
@@ -208,7 +165,7 @@ func TestGenerator_validateADL(t *testing.T) {
 		{
 			name: "rust with redis cargo feature is accepted",
 			adl: &schema.ADL{
-				APIVersion: "adl.dev/v1",
+				APIVersion: "adl.inference-gateway.com/v1",
 				Kind:       "Agent",
 				Metadata: schema.Metadata{
 					Name:        "test-agent",
@@ -216,7 +173,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Version:     "1.0.0",
 				},
 				Spec: schema.Spec{
-					Capabilities: &schema.Capabilities{
+					Capabilities: schema.Capabilities{
 						Streaming:              true,
 						PushNotifications:      false,
 						StateTransitionHistory: false,
@@ -224,10 +181,10 @@ func TestGenerator_validateADL(t *testing.T) {
 					Server: schema.Server{
 						Port: 8080,
 					},
-					Language: &schema.Language{
+					Language: schema.Language{
 						Rust: &schema.RustConfig{
 							PackageName: "rust-agent",
-							Version:     "1.88",
+							Version:     "1.94.1",
 							Edition:     "2024",
 							Features:    []string{"redis"},
 						},
@@ -239,7 +196,7 @@ func TestGenerator_validateADL(t *testing.T) {
 		{
 			name: "multiple languages specified",
 			adl: &schema.ADL{
-				APIVersion: "adl.dev/v1",
+				APIVersion: "adl.inference-gateway.com/v1",
 				Kind:       "Agent",
 				Metadata: schema.Metadata{
 					Name:        "test-agent",
@@ -247,7 +204,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Version:     "1.0.0",
 				},
 				Spec: schema.Spec{
-					Capabilities: &schema.Capabilities{
+					Capabilities: schema.Capabilities{
 						Streaming:              true,
 						PushNotifications:      false,
 						StateTransitionHistory: false,
@@ -255,7 +212,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Server: schema.Server{
 						Port: 8080,
 					},
-					Language: &schema.Language{
+					Language: schema.Language{
 						Go: &schema.GoConfig{
 							Module:  "github.com/example/test-agent",
 							Version: "1.26.2",
@@ -296,7 +253,7 @@ func TestGenerator_validateADL(t *testing.T) {
 
 func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 	goADL := &schema.ADL{
-		APIVersion: "adl.dev/v1",
+		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 		Metadata: schema.Metadata{
 			Name:        "test-agent",
@@ -304,7 +261,7 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 			Version:     "1.0.0",
 		},
 		Spec: schema.Spec{
-			Language: &schema.Language{
+			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-agent",
 					Version: "1.26.2",
@@ -325,7 +282,7 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 	}
 
 	rustADL := &schema.ADL{
-		APIVersion: "adl.dev/v1",
+		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 		Metadata: schema.Metadata{
 			Name:        "rust-agent",
@@ -334,10 +291,10 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 		},
 		Spec: schema.Spec{
 			Agent: &schema.Agent{
-				Provider: "openai",
-				Model:    "gpt-4o-mini",
+				Provider: schema.AgentProviderDeepseek,
+				Model:    "deepseek-v4-flash",
 			},
-			Language: &schema.Language{
+			Language: schema.Language{
 				Rust: &schema.RustConfig{
 					PackageName: "rust-agent",
 					Version:     "1.70",
@@ -434,7 +391,7 @@ func containsSubstring(content, pattern string) bool {
 
 func TestGenerator_generateCD(t *testing.T) {
 	validADL := &schema.ADL{
-		APIVersion: "adl.dev/v1",
+		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 		Metadata: schema.Metadata{
 			Name:        "test-cd-agent",
@@ -442,7 +399,7 @@ func TestGenerator_generateCD(t *testing.T) {
 			Version:     "1.0.0",
 		},
 		Spec: schema.Spec{
-			Capabilities: &schema.Capabilities{
+			Capabilities: schema.Capabilities{
 				Streaming:              true,
 				PushNotifications:      false,
 				StateTransitionHistory: false,
@@ -451,21 +408,21 @@ func TestGenerator_generateCD(t *testing.T) {
 				Port:  8080,
 				Debug: false,
 			},
-			Language: &schema.Language{
+			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-cd-agent",
 					Version: "1.26.2",
 				},
 			},
 			SCM: &schema.SCM{
-				Provider: "github",
+				Provider: schema.SCMProviderGithub,
 				URL:      "https://github.com/example/test-cd-agent",
 			},
 		},
 	}
 
 	githubAppADL := &schema.ADL{
-		APIVersion: "adl.dev/v1",
+		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 		Metadata: schema.Metadata{
 			Name:        "test-github-app-agent",
@@ -473,7 +430,7 @@ func TestGenerator_generateCD(t *testing.T) {
 			Version:     "1.0.0",
 		},
 		Spec: schema.Spec{
-			Capabilities: &schema.Capabilities{
+			Capabilities: schema.Capabilities{
 				Streaming:              true,
 				PushNotifications:      false,
 				StateTransitionHistory: false,
@@ -482,14 +439,14 @@ func TestGenerator_generateCD(t *testing.T) {
 				Port:  8080,
 				Debug: false,
 			},
-			Language: &schema.Language{
+			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-github-app-agent",
 					Version: "1.26.2",
 				},
 			},
 			SCM: &schema.SCM{
-				Provider:  "github",
+				Provider:  schema.SCMProviderGithub,
 				URL:       "https://github.com/example/test-github-app-agent",
 				GithubApp: true,
 			},
@@ -671,7 +628,7 @@ func TestGenerator_buildGenerateCommand(t *testing.T) {
 
 func TestGenerator_IssueTemplates(t *testing.T) {
 	adlWithIssueTemplates := &schema.ADL{
-		APIVersion: "adl.dev/v1",
+		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 		Metadata: schema.Metadata{
 			Name:        "test-agent",
@@ -679,7 +636,7 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 			Version:     "1.0.0",
 		},
 		Spec: schema.Spec{
-			Capabilities: &schema.Capabilities{
+			Capabilities: schema.Capabilities{
 				Streaming:              true,
 				PushNotifications:      false,
 				StateTransitionHistory: false,
@@ -688,14 +645,14 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 				Port:  8080,
 				Debug: false,
 			},
-			Language: &schema.Language{
+			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-agent",
 					Version: "1.26.2",
 				},
 			},
 			SCM: &schema.SCM{
-				Provider:       "github",
+				Provider:       schema.SCMProviderGithub,
 				URL:            "https://github.com/example/test-agent",
 				IssueTemplates: true,
 			},
@@ -703,7 +660,7 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 	}
 
 	adlWithoutIssueTemplates := &schema.ADL{
-		APIVersion: "adl.dev/v1",
+		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 		Metadata: schema.Metadata{
 			Name:        "test-agent-no-templates",
@@ -711,7 +668,7 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 			Version:     "1.0.0",
 		},
 		Spec: schema.Spec{
-			Capabilities: &schema.Capabilities{
+			Capabilities: schema.Capabilities{
 				Streaming:              true,
 				PushNotifications:      false,
 				StateTransitionHistory: false,
@@ -720,14 +677,14 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 				Port:  8080,
 				Debug: false,
 			},
-			Language: &schema.Language{
+			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-agent-no-templates",
 					Version: "1.26.2",
 				},
 			},
 			SCM: &schema.SCM{
-				Provider:       "github",
+				Provider:       schema.SCMProviderGithub,
 				URL:            "https://github.com/example/test-agent-no-templates",
 				IssueTemplates: false,
 			},

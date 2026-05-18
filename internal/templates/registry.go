@@ -150,11 +150,11 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		"README.md":                   "docs/README.md",
 	}
 
-	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" {
+	if adl.Spec.Deployment != nil {
 		switch adl.Spec.Deployment.Type {
-		case "kubernetes":
+		case schema.DeploymentConfigTypeKubernetes:
 			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"
-		case "cloudrun":
+		case schema.DeploymentConfigTypeCloudRun:
 			// CloudRun deployment is handled via Taskfile
 		}
 	}
@@ -197,11 +197,11 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		"README.md":                   "docs/README.md",
 	}
 
-	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" {
+	if adl.Spec.Deployment != nil {
 		switch adl.Spec.Deployment.Type {
-		case "kubernetes":
+		case schema.DeploymentConfigTypeKubernetes:
 			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"
-		case "cloudrun":
+		case schema.DeploymentConfigTypeCloudRun:
 			// CloudRun deployment is handled via Taskfile
 		}
 	}
@@ -249,11 +249,11 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		"README.md":                   "docs/README.md",
 	}
 
-	if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type != "" {
+	if adl.Spec.Deployment != nil {
 		switch adl.Spec.Deployment.Type {
-		case "kubernetes":
+		case schema.DeploymentConfigTypeKubernetes:
 			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"
-		case "cloudrun":
+		case schema.DeploymentConfigTypeCloudRun:
 			// CloudRun deployment is handled via Taskfile
 		}
 	}
@@ -311,12 +311,13 @@ func (r *Registry) ListTemplates() []string {
 
 // addIssueTemplateFiles adds GitHub issue template files when enabled
 func (r *Registry) addIssueTemplateFiles(adl *schema.ADL, files map[string]string) {
-	if adl.Spec.SCM != nil && adl.Spec.SCM.IssueTemplates {
-		if adl.Spec.SCM.Provider == "github" || adl.Spec.SCM.Provider == "" {
-			files[".github/ISSUE_TEMPLATE/bug_report.md"] = "github/bug_report.md"
-			files[".github/ISSUE_TEMPLATE/feature_request.md"] = "github/feature_request.md"
-			files[".github/ISSUE_TEMPLATE/refactor_request.md"] = "github/refactor_request.md"
-		}
+	if adl.Spec.SCM == nil || !adl.Spec.SCM.IssueTemplates {
+		return
+	}
+	if adl.Spec.SCM.Provider == schema.SCMProviderGithub || adl.Spec.SCM.Provider == "" {
+		files[".github/ISSUE_TEMPLATE/bug_report.md"] = "github/bug_report.md"
+		files[".github/ISSUE_TEMPLATE/feature_request.md"] = "github/feature_request.md"
+		files[".github/ISSUE_TEMPLATE/refactor_request.md"] = "github/refactor_request.md"
 	}
 }
 

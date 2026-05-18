@@ -37,7 +37,7 @@ func TestInitCommand(t *testing.T) {
 	}
 
 	contentStr := string(content)
-	if !strings.Contains(contentStr, "apiVersion: adl.dev/v1") {
+	if !strings.Contains(contentStr, "apiVersion: adl.inference-gateway.com/v1") {
 		t.Errorf("ADL file missing apiVersion")
 	}
 	if !strings.Contains(contentStr, "kind: Agent") {

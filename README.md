@@ -207,8 +207,8 @@ adl init my-agent --defaults
 adl init my-agent \
   --name "Weather Agent" \
   --description "Provides weather information" \
-  --provider openai \
-  --model gpt-4o-mini \
+  --provider deepseek \
+  --model deepseek-v4-flash \
   --language go \
   --flox
 ```
@@ -352,10 +352,12 @@ The `--deployment` flag generates platform-specific deployment configurations:
 
 ADL files use YAML to define your agent's configuration, capabilities, and tools.
 
+The canonical schema lives in the [inference-gateway/adl](https://github.com/inference-gateway/adl) repository — that repo is the single source of truth for the ADL specification. This CLI vendors a pinned copy at `internal/schema/schema.json` (refresh with `task fetch-schema`).
+
 ### Example ADL File
 
 ```yaml
-apiVersion: adl.dev/v1
+apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: weather-agent
@@ -419,7 +421,7 @@ The complete ADL schema includes:
 ### Complete ADL Example
 
 ```yaml
-apiVersion: adl.dev/v1
+apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: advanced-agent
@@ -431,8 +433,8 @@ spec:
     pushNotifications: true
     stateTransitionHistory: true
   agent:
-    provider: openai
-    model: gpt-4o-mini
+    provider: deepseek
+    model: deepseek-v4-flash
     systemPrompt: |
       You are a helpful assistant with enterprise capabilities.
       Always prioritize security and compliance.
@@ -1574,7 +1576,7 @@ Each language has sensible defaults:
 You can customize or extend the default behavior by adding a `hooks` section to your ADL file:
 
 ```yaml
-apiVersion: adl.dev/v1
+apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: my-agent

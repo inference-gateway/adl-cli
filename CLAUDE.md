@@ -114,7 +114,7 @@ spec:
   language:
     rust:
       packageName: my-agent
-      version: "1.88"
+      version: "1.94.1"
       edition: "2024"
       features:
         - redis
@@ -130,7 +130,7 @@ is documented in the generated `.env.example` — not baked into `main.rs`. When
 1. Create `internal/templates/languages/<lang>/` with templates
 2. Add file mapping method in `registry.go` (e.g., `getRustFiles`)
 3. Add language detection in `DetectLanguageFromADL` and `detectLanguage`
-4. Add language config type in `schema/types.go` (e.g., `RustConfig`)
+4. Add the language config to `schema/v1/schema.json` in the `adl` repo (e.g., `RustConfig` under `$defs`), then `task fetch-schema` + `task generate-types` here
 5. Add example ADL file in `examples/`
 
 ## Adding a New Command
@@ -139,10 +139,49 @@ is documented in the generated `.env.example` — not baked into `main.rs`. When
 2. Register in `cmd/root.go` via `rootCmd.AddCommand()`
 3. Add tests in `cmd/<command>_test.go`
 
+## ADL Schema Source of Truth
+
+The canonical ADL JSON Schema lives in
+[`inference-gateway/adl`](https://github.com/inference-gateway/adl) under
+`schema/v1/schema.json`. This repo vendors it at `internal/schema/schema.json`
+(embedded into the binary via `//go:embed` in `internal/schema/validator.go`).
+The pinned upstream version is the `ADL_SCHEMA_VERSION` variable in
+`Taskfile.yml`.
+
+Update flow:
+
+```bash
+# bump the version in Taskfile.yml, then:
+task fetch-schema     # refresh internal/schema/schema.json from upstream
+task generate-types   # regenerate internal/schema/types.go from the schema
+task verify-schema    # CI gate: confirm committed schema matches upstream
+```
+
+`task verify-schema` runs as part of `task ci`.
+
+`internal/schema/types.go` is **generated** by `atombender/go-jsonschema`
+(see `task generate-types`) and **must not be edited by hand**. The schema is
+authoritative; bump the schema in the `adl` repo, refresh, and regenerate.
+
+`task generate-types` first runs `internal/schema/annotate` against the
+committed schema. The annotator emits a transient copy with
+`goJSONSchema: {pointer: false}` injected on every optional scalar / enum
+property, so `go-jsonschema` emits value types (e.g. `string`, `bool`,
+`SCMProvider`) instead of `*T` for them. Nested optional struct fields
+(`*DeploymentConfig`, `*Card`, `*Agent`, …) keep their pointers so callers
+can still nil-check for "section absent." The committed
+`internal/schema/schema.json` is never written to, so `task verify-schema`
+keeps passing.
+
+Hand-written companion (only one):
+
+- `internal/schema/metadata.go` — `GeneratedMetadata` struct used by the
+  templating layer (not part of the ADL spec).
+
 ## Important Notes
 
 - Go 1.26.2+ required
 - Templates use Go `text/template` with Sprig v3 functions
-- ADL schema version: `adl.dev/v1`
+- ADL schema version: `adl.inference-gateway.com/v1`
 - Supports Go, Rust (TypeScript planned)
 - Use table-driven tests with isolated mocks

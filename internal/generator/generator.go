@@ -58,9 +58,9 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 		if adl.Spec.Deployment == nil {
 			adl.Spec.Deployment = &schema.DeploymentConfig{}
 		}
-		adl.Spec.Deployment.Type = g.config.DeploymentType
+		adl.Spec.Deployment.Type = schema.DeploymentConfigType(g.config.DeploymentType)
 
-		if g.config.DeploymentType == "cloudrun" && adl.Spec.Deployment.CloudRun == nil {
+		if g.config.DeploymentType == string(schema.DeploymentConfigTypeCloudRun) && adl.Spec.Deployment.CloudRun == nil {
 			adl.Spec.Deployment.CloudRun = &schema.CloudRunConfig{
 				Resources: &schema.ResourcesConfig{
 					CPU:    "1",
@@ -141,7 +141,7 @@ func (g *Generator) parseADL(adlFile string) (*schema.ADL, error) {
 
 // validateADL validates the ADL structure for code generation requirements
 func (g *Generator) validateADL(adl *schema.ADL) error {
-	if adl.APIVersion != "adl.dev/v1" {
+	if adl.APIVersion != "adl.inference-gateway.com/v1" {
 		return fmt.Errorf("unsupported API version: %s", adl.APIVersion)
 	}
 	if adl.Kind != "Agent" {
@@ -163,14 +163,6 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 	}
 	if adl.Spec.Server.Port < 1 || adl.Spec.Server.Port > 65535 {
 		return fmt.Errorf("spec.server.port must be between 1 and 65535")
-	}
-
-	if adl.Spec.Capabilities == nil {
-		return fmt.Errorf("spec.capabilities is required")
-	}
-
-	if adl.Spec.Language == nil {
-		return fmt.Errorf("spec.language is required for code generation")
 	}
 
 	languageCount := 0
@@ -758,9 +750,9 @@ func (g *Generator) detectLanguage(adl *schema.ADL) string {
 // detectSCMProvider detects the SCM provider from ADL
 func (g *Generator) detectSCMProvider(adl *schema.ADL) string {
 	if adl.Spec.SCM != nil && adl.Spec.SCM.Provider != "" {
-		return adl.Spec.SCM.Provider
+		return string(adl.Spec.SCM.Provider)
 	}
-	return "github"
+	return string(schema.SCMProviderGithub)
 }
 
 // generateGitHubActionsWorkflow generates a GitHub Actions workflow for projects using templates

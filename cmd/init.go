@@ -272,7 +272,7 @@ type adlData struct {
 
 func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *adlData {
 	adl := &adlData{
-		APIVersion: "adl.dev/v1",
+		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 	}
 

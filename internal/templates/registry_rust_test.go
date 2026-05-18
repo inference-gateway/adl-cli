@@ -9,7 +9,7 @@ import (
 
 func minimalRustADL() *schema.ADL {
 	return &schema.ADL{
-		APIVersion: "adl.dev/v1",
+		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 		Metadata: schema.Metadata{
 			Name:        "rust-agent",
@@ -17,12 +17,12 @@ func minimalRustADL() *schema.ADL {
 			Version:     "0.1.0",
 		},
 		Spec: schema.Spec{
-			Capabilities: &schema.Capabilities{Streaming: true},
+			Capabilities: schema.Capabilities{Streaming: true},
 			Server:       schema.Server{Port: 8080},
-			Language: &schema.Language{
+			Language: schema.Language{
 				Rust: &schema.RustConfig{
 					PackageName: "rust-agent",
-					Version:     "1.88",
+					Version:     "1.94.1",
 					Edition:     "2024",
 				},
 			},
