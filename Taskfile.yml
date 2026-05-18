@@ -78,6 +78,10 @@ tasks:
       - build
     cmds:
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-artifacts-filesystem.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-artifacts-minio.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/cloudrun-agent.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/cloudrun-ghcr-agent.yaml
 
   examples:generate:
     desc: Generate all example projects
@@ -86,7 +90,11 @@ tasks:
     cmds:
       - rm -rf test-output
       - mkdir -p test-output
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/go-agent.yaml --output test-output/go-agent --overwrite --ci
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/go-agent.yaml --output test-output/go-agent --overwrite
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/go-agent-artifacts-filesystem.yaml --output test-output/go-agent-artifacts-filesystem --overwrite
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/go-agent-artifacts-minio.yaml --output test-output/go-agent-artifacts-minio --overwrite
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/cloudrun-agent.yaml --output test-output/cloudrun-agent --overwrite
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/cloudrun-ghcr-agent.yaml --output test-output/cloudrun-ghcr-agent --overwrite
 
   release:
     desc: Build release binaries for multiple platforms
