@@ -38,7 +38,7 @@ spec:
   agent:
     enabled: true
     systemPrompt: |
-{{- if .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt | nindent 6 }}{{- else }}      You are a helpful AI assistant.{{- end }}
+{{- if .ADL.Spec.Agent.GetSystemPrompt }}{{ .ADL.Spec.Agent.GetSystemPrompt | nindent 6 }}{{- else }}      You are a helpful AI assistant.{{- end }}
   resources:
     limits:
       memory: "256Mi"

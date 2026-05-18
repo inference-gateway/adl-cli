@@ -7,8 +7,8 @@ services:
     environment:
       A2A_SERVER_PORT: "{{ .ADL.Spec.Server.Port | default 8080 }}"
       {{- if .ADL.Spec.Agent }}
-      A2A_AGENT_CLIENT_PROVIDER: "{{ .ADL.Spec.Agent.Provider }}"
-      A2A_AGENT_CLIENT_MODEL: "{{ .ADL.Spec.Agent.Model }}"
+      A2A_AGENT_CLIENT_PROVIDER: "{{ .ADL.Spec.Agent.GetProvider }}"
+      A2A_AGENT_CLIENT_MODEL: "{{ .ADL.Spec.Agent.GetModel }}"
       A2A_AGENT_CLIENT_BASE_URL: "${A2A_AGENT_CLIENT_BASE_URL:-http://gateway:8080/v1}"
       {{- end }}
       {{- if has "redis" $rust.Features }}

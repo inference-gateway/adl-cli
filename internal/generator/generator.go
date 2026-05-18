@@ -55,23 +55,23 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 		if adl.Spec.Deployment == nil {
 			adl.Spec.Deployment = &schema.DeploymentConfig{}
 		}
-		adl.Spec.Deployment.Type = g.config.DeploymentType
+		adl.Spec.Deployment.Type = schema.DeploymentTypePtr(schema.DeploymentConfigType(g.config.DeploymentType))
 
-		if g.config.DeploymentType == "cloudrun" && adl.Spec.Deployment.CloudRun == nil {
+		if g.config.DeploymentType == string(schema.DeploymentConfigTypeCloudRun) && adl.Spec.Deployment.CloudRun == nil {
 			adl.Spec.Deployment.CloudRun = &schema.CloudRunConfig{
 				Resources: &schema.ResourcesConfig{
-					CPU:    "1",
-					Memory: "512Mi",
+					CPU:    schema.StrPtr("1"),
+					Memory: schema.StrPtr("512Mi"),
 				},
 				Scaling: &schema.ScalingConfig{
-					MinInstances: 0,
-					MaxInstances: 10,
-					Concurrency:  1000,
+					MinInstances: schema.IntPtr(0),
+					MaxInstances: schema.IntPtr(10),
+					Concurrency:  schema.IntPtr(1000),
 				},
 				Service: &schema.ServiceConfig{
-					Timeout:              3600,
-					AllowUnauthenticated: true,
-					ExecutionEnvironment: "gen2",
+					Timeout:              schema.IntPtr(3600),
+					AllowUnauthenticated: schema.BoolPtr(true),
+					ExecutionEnvironment: schema.StrPtr("gen2"),
 				},
 			}
 		}
@@ -162,13 +162,9 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 		return fmt.Errorf("spec.server.port must be between 1 and 65535")
 	}
 
-	if adl.Spec.Capabilities == nil {
-		return fmt.Errorf("spec.capabilities is required")
-	}
-
-	if adl.Spec.Language == nil {
-		return fmt.Errorf("spec.language is required for code generation")
-	}
+	// Capabilities and Language are required by the JSON Schema and
+	// therefore always present after a successful unmarshal — no
+	// nil-check needed here.
 
 	languageCount := 0
 	if adl.Spec.Language.Go != nil {
@@ -676,10 +672,10 @@ func (g *Generator) detectLanguage(adl *schema.ADL) string {
 
 // detectSCMProvider detects the SCM provider from ADL
 func (g *Generator) detectSCMProvider(adl *schema.ADL) string {
-	if adl.Spec.SCM != nil && adl.Spec.SCM.Provider != "" {
-		return adl.Spec.SCM.Provider
+	if provider := adl.Spec.SCM.GetProvider(); provider != "" {
+		return provider
 	}
-	return "github"
+	return string(schema.SCMProviderGithub)
 }
 
 // generateGitHubActionsWorkflow generates a GitHub Actions workflow for projects using templates

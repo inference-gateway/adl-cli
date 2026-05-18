@@ -118,7 +118,7 @@ is documented in the generated `.env.example` — not baked into `main.rs`. When
 1. Create `internal/templates/languages/<lang>/` with templates
 2. Add file mapping method in `registry.go` (e.g., `getRustFiles`)
 3. Add language detection in `DetectLanguageFromADL` and `detectLanguage`
-4. Add language config type in `schema/types.go` (e.g., `RustConfig`)
+4. Add the language config to `schema/v1/schema.json` in the `adl` repo (e.g., `RustConfig` under `$defs`), then `task fetch-schema` + `task generate-types` here
 5. Add example ADL file in `examples/`
 
 ## Adding a New Command
@@ -140,20 +140,26 @@ Update flow:
 
 ```bash
 # bump the version in Taskfile.yml, then:
-task fetch-schema     # writes internal/schema/schema.json
-task verify-schema    # CI gate: confirms the committed file matches upstream
-task generate-types   # (follow-up work) regenerates internal/schema/types.go
+task fetch-schema     # refresh internal/schema/schema.json from upstream
+task generate-types   # regenerate internal/schema/types.go from the schema
+task verify-schema    # CI gate: confirm committed schema matches upstream
 ```
 
-`task verify-schema` runs in `task ci` to catch accidental edits or drift.
+`task verify-schema` runs as part of `task ci`.
 
-Go types in `internal/schema/types.go` are currently hand-maintained and
-**must be kept in sync with `schema/v1/schema.json`** when fields are added or
-removed. A `generate-types` Taskfile target is wired up
-(`atombender/go-jsonschema`) but the generated output uses pointer-for-optional
-semantics, which would force a wider consumer refactor across templates,
-`cmd/init.go`, and `internal/generator/generator.go`; that migration is tracked
-as a follow-up.
+`internal/schema/types.go` is **generated** by `atombender/go-jsonschema`
+(see `task generate-types`) and **must not be edited by hand**. The schema is
+authoritative; bump the schema in the `adl` repo, refresh, and regenerate.
+
+Hand-written companions live alongside the generated file:
+
+- `internal/schema/metadata.go` — `GeneratedMetadata` struct used by the
+  templating layer (not part of the ADL spec).
+- `internal/schema/helpers.go` — accessor methods (`GetProvider`, `GetURL`,
+  `GetDebug`, …) and constructor helpers (`StrPtr`, `BoolPtr`,
+  `SCMProviderPtr`, …). The generator emits `*T` for every optional field,
+  so these accessors give callers and Go templates a zero-default API
+  without nil-checks at every site.
 
 ## Important Notes
 

@@ -17,9 +17,9 @@ func minimalRustADL() *schema.ADL {
 			Version:     "0.1.0",
 		},
 		Spec: schema.Spec{
-			Capabilities: &schema.Capabilities{Streaming: true},
+			Capabilities: schema.Capabilities{Streaming: true},
 			Server:       schema.Server{Port: 8080},
-			Language: &schema.Language{
+			Language: schema.Language{
 				Rust: &schema.RustConfig{
 					PackageName: "rust-agent",
 					Version:     "1.88",

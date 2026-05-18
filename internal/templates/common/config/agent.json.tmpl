@@ -2,14 +2,14 @@
 	"name": "{{ .ADL.Metadata.Name }}",
 	"version": "{{ .ADL.Metadata.Version }}",
 	"description": "{{ .ADL.Metadata.Description }}",
-	"protocolVersion": "{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.ProtocolVersion }}{{ .ADL.Spec.Card.ProtocolVersion }}{{- else }}0.3.0{{- end }}{{- else }}0.3.0{{- end }}",
-	"url": "{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.URL }}{{ .ADL.Spec.Card.URL }}{{- else }}{{- end }}{{- else }}{{- end }}",
-	"preferredTransport": "{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.PreferredTransport }}{{ .ADL.Spec.Card.PreferredTransport }}{{- else }}JSONRPC{{- end }}{{- else }}JSONRPC{{- end }}",
-	{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.DocumentationURL }}
-	"documentationUrl": "{{ .ADL.Spec.Card.DocumentationURL }}",
+	"protocolVersion": "{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.GetProtocolVersion }}{{ .ADL.Spec.Card.GetProtocolVersion }}{{- else }}0.3.0{{- end }}{{- else }}0.3.0{{- end }}",
+	"url": "{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.GetURL }}{{ .ADL.Spec.Card.GetURL }}{{- else }}{{- end }}{{- else }}{{- end }}",
+	"preferredTransport": "{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.GetPreferredTransport }}{{ .ADL.Spec.Card.GetPreferredTransport }}{{- else }}JSONRPC{{- end }}{{- else }}JSONRPC{{- end }}",
+	{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.GetDocumentationURL }}
+	"documentationUrl": "{{ .ADL.Spec.Card.GetDocumentationURL }}",
 	{{- end }}{{- end }}
-	{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.IconURL }}
-	"iconUrl": "{{ .ADL.Spec.Card.IconURL }}",
+	{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.GetIconURL }}
+	"iconUrl": "{{ .ADL.Spec.Card.GetIconURL }}",
 	{{- end }}{{- end }}
 	"defaultInputModes": {{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.DefaultInputModes }} {{ .ADL.Spec.Card.DefaultInputModes | toJson }}{{- else }} ["text"]{{- end }}{{- else }} ["text"]{{- end }},
 	"defaultOutputModes": {{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.DefaultOutputModes }} {{ .ADL.Spec.Card.DefaultOutputModes | toJson }}{{- else }} ["text"]{{- end }}{{- else }} ["text"]{{- end }},

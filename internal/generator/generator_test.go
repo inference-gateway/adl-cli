@@ -19,16 +19,16 @@ func TestGenerator_Generate(t *testing.T) {
 			Version:     "1.0.0",
 		},
 		Spec: schema.Spec{
-			Capabilities: &schema.Capabilities{
+			Capabilities: schema.Capabilities{
 				Streaming:              true,
 				PushNotifications:      false,
 				StateTransitionHistory: false,
 			},
 			Server: schema.Server{
 				Port:  8080,
-				Debug: false,
+				Debug: schema.BoolPtr(false),
 			},
-			Language: &schema.Language{
+			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-agent",
 					Version: "1.26.2",
@@ -79,7 +79,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Version:     "1.0.0",
 				},
 				Spec: schema.Spec{
-					Capabilities: &schema.Capabilities{
+					Capabilities: schema.Capabilities{
 						Streaming:              true,
 						PushNotifications:      false,
 						StateTransitionHistory: false,
@@ -87,7 +87,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Server: schema.Server{
 						Port: 8080,
 					},
-					Language: &schema.Language{
+					Language: schema.Language{
 						Go: &schema.GoConfig{
 							Module:  "github.com/example/test-agent",
 							Version: "1.26.2",
@@ -97,55 +97,12 @@ func TestGenerator_validateADL(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		{
-			name: "missing capabilities",
-			adl: &schema.ADL{
-				APIVersion: "adl.dev/v1",
-				Kind:       "Agent",
-				Metadata: schema.Metadata{
-					Name:        "test-agent",
-					Description: "Test agent",
-					Version:     "1.0.0",
-				},
-				Spec: schema.Spec{
-					Server: schema.Server{
-						Port: 8080,
-					},
-					Language: &schema.Language{
-						Go: &schema.GoConfig{
-							Module:  "github.com/example/test-agent",
-							Version: "1.26.2",
-						},
-					},
-				},
-			},
-			wantErr: true,
-			errMsg:  "spec.capabilities is required",
-		},
-		{
-			name: "missing language",
-			adl: &schema.ADL{
-				APIVersion: "adl.dev/v1",
-				Kind:       "Agent",
-				Metadata: schema.Metadata{
-					Name:        "test-agent",
-					Description: "Test agent",
-					Version:     "1.0.0",
-				},
-				Spec: schema.Spec{
-					Capabilities: &schema.Capabilities{
-						Streaming:              true,
-						PushNotifications:      false,
-						StateTransitionHistory: false,
-					},
-					Server: schema.Server{
-						Port: 8080,
-					},
-				},
-			},
-			wantErr: true,
-			errMsg:  "spec.language is required for code generation",
-		},
+		// "missing capabilities" / "missing language" test cases were removed
+		// when types.go switched to schema-generated types. Capabilities and
+		// Language are required by the JSON Schema and are non-pointer struct
+		// fields after generation, so a missing-field test case is no longer
+		// expressible at the Go type level. The JSON Schema validator
+		// (internal/schema/validator.go) covers the case at parse time.
 		{
 			name: "missing Go module",
 			adl: &schema.ADL{
@@ -157,7 +114,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Version:     "1.0.0",
 				},
 				Spec: schema.Spec{
-					Capabilities: &schema.Capabilities{
+					Capabilities: schema.Capabilities{
 						Streaming:              true,
 						PushNotifications:      false,
 						StateTransitionHistory: false,
@@ -165,7 +122,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Server: schema.Server{
 						Port: 8080,
 					},
-					Language: &schema.Language{
+					Language: schema.Language{
 						Go: &schema.GoConfig{
 							Version: "1.26.2",
 						},
@@ -186,7 +143,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Version:     "1.0.0",
 				},
 				Spec: schema.Spec{
-					Capabilities: &schema.Capabilities{
+					Capabilities: schema.Capabilities{
 						Streaming:              true,
 						PushNotifications:      false,
 						StateTransitionHistory: false,
@@ -194,7 +151,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Server: schema.Server{
 						Port: 0,
 					},
-					Language: &schema.Language{
+					Language: schema.Language{
 						Go: &schema.GoConfig{
 							Module:  "github.com/example/test-agent",
 							Version: "1.26.2",
@@ -216,7 +173,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Version:     "1.0.0",
 				},
 				Spec: schema.Spec{
-					Capabilities: &schema.Capabilities{
+					Capabilities: schema.Capabilities{
 						Streaming:              true,
 						PushNotifications:      false,
 						StateTransitionHistory: false,
@@ -224,7 +181,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Server: schema.Server{
 						Port: 8080,
 					},
-					Language: &schema.Language{
+					Language: schema.Language{
 						Rust: &schema.RustConfig{
 							PackageName: "rust-agent",
 							Version:     "1.88",
@@ -247,7 +204,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Version:     "1.0.0",
 				},
 				Spec: schema.Spec{
-					Capabilities: &schema.Capabilities{
+					Capabilities: schema.Capabilities{
 						Streaming:              true,
 						PushNotifications:      false,
 						StateTransitionHistory: false,
@@ -255,7 +212,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Server: schema.Server{
 						Port: 8080,
 					},
-					Language: &schema.Language{
+					Language: schema.Language{
 						Go: &schema.GoConfig{
 							Module:  "github.com/example/test-agent",
 							Version: "1.26.2",
@@ -304,7 +261,7 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 			Version:     "1.0.0",
 		},
 		Spec: schema.Spec{
-			Language: &schema.Language{
+			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-agent",
 					Version: "1.26.2",
@@ -334,10 +291,10 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 		},
 		Spec: schema.Spec{
 			Agent: &schema.Agent{
-				Provider: "openai",
-				Model:    "gpt-4o-mini",
+				Provider: schema.AgentProviderPtr(schema.AgentProviderOpenai),
+				Model:    schema.StrPtr("gpt-4o-mini"),
 			},
-			Language: &schema.Language{
+			Language: schema.Language{
 				Rust: &schema.RustConfig{
 					PackageName: "rust-agent",
 					Version:     "1.70",
@@ -442,24 +399,24 @@ func TestGenerator_generateCD(t *testing.T) {
 			Version:     "1.0.0",
 		},
 		Spec: schema.Spec{
-			Capabilities: &schema.Capabilities{
+			Capabilities: schema.Capabilities{
 				Streaming:              true,
 				PushNotifications:      false,
 				StateTransitionHistory: false,
 			},
 			Server: schema.Server{
 				Port:  8080,
-				Debug: false,
+				Debug: schema.BoolPtr(false),
 			},
-			Language: &schema.Language{
+			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-cd-agent",
 					Version: "1.26.2",
 				},
 			},
 			SCM: &schema.SCM{
-				Provider: "github",
-				URL:      "https://github.com/example/test-cd-agent",
+				Provider: schema.SCMProviderPtr(schema.SCMProviderGithub),
+				URL:      schema.StrPtr("https://github.com/example/test-cd-agent"),
 			},
 		},
 	}
@@ -473,25 +430,25 @@ func TestGenerator_generateCD(t *testing.T) {
 			Version:     "1.0.0",
 		},
 		Spec: schema.Spec{
-			Capabilities: &schema.Capabilities{
+			Capabilities: schema.Capabilities{
 				Streaming:              true,
 				PushNotifications:      false,
 				StateTransitionHistory: false,
 			},
 			Server: schema.Server{
 				Port:  8080,
-				Debug: false,
+				Debug: schema.BoolPtr(false),
 			},
-			Language: &schema.Language{
+			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-github-app-agent",
 					Version: "1.26.2",
 				},
 			},
 			SCM: &schema.SCM{
-				Provider:  "github",
-				URL:       "https://github.com/example/test-github-app-agent",
-				GithubApp: true,
+				Provider:  schema.SCMProviderPtr(schema.SCMProviderGithub),
+				URL:       schema.StrPtr("https://github.com/example/test-github-app-agent"),
+				GithubApp: schema.BoolPtr(true),
 			},
 		},
 	}
@@ -559,7 +516,7 @@ func TestGenerator_generateCD(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed to read .releaserc.yaml: %v", err)
 			}
-			if !containsSubstring(string(releasercContent), tt.adl.Spec.SCM.URL) {
+			if !containsSubstring(string(releasercContent), tt.adl.Spec.SCM.GetURL()) {
 				t.Errorf("expected .releaserc.yaml to contain repository URL")
 			}
 			if !containsSubstring(string(releasercContent), "@semantic-release/github") {
@@ -679,25 +636,25 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 			Version:     "1.0.0",
 		},
 		Spec: schema.Spec{
-			Capabilities: &schema.Capabilities{
+			Capabilities: schema.Capabilities{
 				Streaming:              true,
 				PushNotifications:      false,
 				StateTransitionHistory: false,
 			},
 			Server: schema.Server{
 				Port:  8080,
-				Debug: false,
+				Debug: schema.BoolPtr(false),
 			},
-			Language: &schema.Language{
+			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-agent",
 					Version: "1.26.2",
 				},
 			},
 			SCM: &schema.SCM{
-				Provider:       "github",
-				URL:            "https://github.com/example/test-agent",
-				IssueTemplates: true,
+				Provider:       schema.SCMProviderPtr(schema.SCMProviderGithub),
+				URL:            schema.StrPtr("https://github.com/example/test-agent"),
+				IssueTemplates: schema.BoolPtr(true),
 			},
 		},
 	}
@@ -711,25 +668,25 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 			Version:     "1.0.0",
 		},
 		Spec: schema.Spec{
-			Capabilities: &schema.Capabilities{
+			Capabilities: schema.Capabilities{
 				Streaming:              true,
 				PushNotifications:      false,
 				StateTransitionHistory: false,
 			},
 			Server: schema.Server{
 				Port:  8080,
-				Debug: false,
+				Debug: schema.BoolPtr(false),
 			},
-			Language: &schema.Language{
+			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-agent-no-templates",
 					Version: "1.26.2",
 				},
 			},
 			SCM: &schema.SCM{
-				Provider:       "github",
-				URL:            "https://github.com/example/test-agent-no-templates",
-				IssueTemplates: false,
+				Provider:       schema.SCMProviderPtr(schema.SCMProviderGithub),
+				URL:            schema.StrPtr("https://github.com/example/test-agent-no-templates"),
+				IssueTemplates: schema.BoolPtr(false),
 			},
 		},
 	}

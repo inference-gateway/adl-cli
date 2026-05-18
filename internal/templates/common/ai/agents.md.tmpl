@@ -35,24 +35,24 @@ This agent is built using the Agent Definition Language (ADL) and provides A2A c
 
 ## AI Configuration
 {{- if .ADL.Spec.Agent }}
-{{- if .ADL.Spec.Agent.Provider }}
+{{- if .ADL.Spec.Agent.GetProvider }}
 
-**AI Provider**: {{ .ADL.Spec.Agent.Provider }}
-{{- if .ADL.Spec.Agent.Model }}
-**Model**: {{ .ADL.Spec.Agent.Model }}
+**AI Provider**: {{ .ADL.Spec.Agent.GetProvider }}
+{{- if .ADL.Spec.Agent.GetModel }}
+**Model**: {{ .ADL.Spec.Agent.GetModel }}
 {{- end }}
 {{- end }}
-{{- if .ADL.Spec.Agent.SystemPrompt }}
+{{- if .ADL.Spec.Agent.GetSystemPrompt }}
 
-**System Prompt**: {{ .ADL.Spec.Agent.SystemPrompt }}
+**System Prompt**: {{ .ADL.Spec.Agent.GetSystemPrompt }}
 {{- end }}
 
 **Configuration:**
-{{- if .ADL.Spec.Agent.MaxTokens }}
-- Max Tokens: {{ .ADL.Spec.Agent.MaxTokens }}
+{{- if .ADL.Spec.Agent.GetMaxTokens }}
+- Max Tokens: {{ .ADL.Spec.Agent.GetMaxTokens }}
 {{- end }}
-{{- if .ADL.Spec.Agent.Temperature }}
-- Temperature: {{ .ADL.Spec.Agent.Temperature }}
+{{- if .ADL.Spec.Agent.GetTemperature }}
+- Temperature: {{ .ADL.Spec.Agent.GetTemperature }}
 {{- end }}
 {{- else }}
 
@@ -81,7 +81,7 @@ No skills defined - this agent provides basic A2A communication without speciali
 ## Server Configuration
 
 **Port**: {{ .ADL.Spec.Server.Port }}
-{{- if .ADL.Spec.Server.Debug }}
+{{- if .ADL.Spec.Server.GetDebug }}
 **Debug Mode**: ✅ Enabled
 {{- else }}
 **Debug Mode**: ❌ Disabled
@@ -110,10 +110,10 @@ The agent exposes the following HTTP endpoints:
 
 Key environment variables you'll need to configure:
 {{- if .ADL.Spec.Agent }}
-{{- if .ADL.Spec.Agent.Provider }}
-- `AGENT_CLIENT_PROVIDER` - LLM provider ({{ .ADL.Spec.Agent.Provider }})
-{{- if .ADL.Spec.Agent.Model }}
-- `AGENT_CLIENT_MODEL` - Model name ({{ .ADL.Spec.Agent.Model }})
+{{- if .ADL.Spec.Agent.GetProvider }}
+- `AGENT_CLIENT_PROVIDER` - LLM provider ({{ .ADL.Spec.Agent.GetProvider }})
+{{- if .ADL.Spec.Agent.GetModel }}
+- `AGENT_CLIENT_MODEL` - Model name ({{ .ADL.Spec.Agent.GetModel }})
 {{- end }}
 - `AGENT_CLIENT_API_KEY` - API key for your LLM provider
 {{- end }}
@@ -184,7 +184,7 @@ Refer to the main README.md for specific skill execution examples and input sche
 
 ## Deployment
 {{- if .ADL.Spec.Deployment }}
-{{- if eq .ADL.Spec.Deployment.Type "kubernetes" }}
+{{- if eq .ADL.Spec.Deployment.GetType "kubernetes" }}
 
 **Deployment Type**: Kubernetes
 - Kubernetes manifests available in `k8s/` directory

@@ -213,7 +213,7 @@ func TestEngine_PrepareContext(t *testing.T) {
 			name: "no custom acronyms",
 			adl: &schema.ADL{
 				Spec: schema.Spec{
-					Language: &schema.Language{},
+					Language: schema.Language{},
 				},
 			},
 			expected: getDefaultAcronyms(),
@@ -296,7 +296,7 @@ func TestEngine_Execute_WithCustomAcronyms(t *testing.T) {
 			template: `{{ "get_api_data" | toPascalCase }}`,
 			adl: &schema.ADL{
 				Spec: schema.Spec{
-					Language: &schema.Language{},
+					Language: schema.Language{},
 				},
 			},
 			expected: "GetAPIData\n",
