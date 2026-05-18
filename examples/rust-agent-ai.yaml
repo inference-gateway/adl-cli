@@ -18,7 +18,7 @@ spec:
       - text
   agent:
     provider: deepseek
-    model: deepeek-v4-flash
+    model: deepseek-v4-flash
     systemPrompt: |
       You are a concise, helpful assistant with access to tools.
       Use the appropriate tool when the user asks about weather or math.
