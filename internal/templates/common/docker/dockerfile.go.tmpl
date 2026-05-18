@@ -1,4 +1,4 @@
-FROM golang:1.26.2-alpine AS builder
+FROM golang:{{ .ADL.Spec.Language.Go.Version }}-alpine AS builder
 
 # Build arguments for version injection
 ARG VERSION="{{ .ADL.Metadata.Version }}"

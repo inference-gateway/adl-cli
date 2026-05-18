@@ -129,7 +129,7 @@ is documented in the generated `.env.example` — not baked into `main.rs`. When
 
 ## Important Notes
 
-- Go 1.26+ required
+- Go 1.26.2+ required
 - Templates use Go `text/template` with Sprig v3 functions
 - ADL schema version: `adl.dev/v1`
 - Supports Go, Rust (TypeScript planned)
