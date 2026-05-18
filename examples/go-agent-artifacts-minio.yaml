@@ -29,7 +29,7 @@ spec:
     temperature: 0.3
   artifacts:
     enabled: true
-  skills:
+  tools:
     - id: create_artifact
       name: create_artifact
       description: "Create a new artifact in MinIO"

@@ -1,0 +1,37 @@
+---
+name: {{ .Name }}
+description: {{ .Description }}
+{{- if .Tags }}
+tags:
+{{- range .Tags }}
+  - {{ . }}
+{{- end }}
+{{- end }}
+{{- if .Version }}
+version: {{ .Version }}
+{{- end }}
+---
+
+# {{ .Name }}
+
+TODO: Describe when and how the agent should use this skill.
+
+This is a bare scaffold — fill in the workflow, examples, and any tool
+references the agent should know about. The full body of this file is
+prepended to the agent's system prompt at runtime, so write it in the
+voice you want the model to read.
+
+## When to use
+
+Describe the user intents or task shapes that should trigger this skill.
+
+## Workflow
+
+1. ...
+2. ...
+3. ...
+
+## Tools
+
+List the tools this skill expects to use (declared under `spec.tools` in
+the ADL manifest), and the order in which they're typically invoked.

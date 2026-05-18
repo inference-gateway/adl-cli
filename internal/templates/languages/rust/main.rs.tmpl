@@ -1,14 +1,96 @@
 use inference_gateway_adk::{A2AServerBuilder, {{ if .ADL.Spec.Agent }}AgentBuilder, {{ end }}Config};
-{{- if and .ADL.Spec.Agent .ADL.Spec.Skills }}
+{{- if and .ADL.Spec.Agent .ADL.Spec.Tools }}
 use serde_json::Value;
 {{- end }}
+use std::fs;
 use std::net::SocketAddr;
-use tracing::{error, info};
+use std::path::Path;
+use tracing::{error, info, warn};
 
-{{- if and .ADL.Spec.Agent .ADL.Spec.Skills }}
+{{- if and .ADL.Spec.Agent .ADL.Spec.Tools }}
 
 mod tools;
 {{- end }}
+
+/// Load every `*.md` skill from the configured directory, strip YAML
+/// frontmatter from each, and concatenate the bodies in lexical order.
+/// The result is appended to the configured system prompt at runtime so
+/// the model can read skill playbooks alongside the agent persona.
+fn load_skills(dir: &Path) -> std::io::Result<String> {
+    if !dir.exists() {
+        return Ok(String::new());
+    }
+    let mut files: Vec<_> = fs::read_dir(dir)?
+        .filter_map(|entry| entry.ok())
+        .filter(|entry| {
+            entry
+                .path()
+                .extension()
+                .and_then(|ext| ext.to_str())
+                .map(|ext| ext.eq_ignore_ascii_case("md"))
+                .unwrap_or(false)
+        })
+        .map(|entry| entry.path())
+        .collect();
+    files.sort();
+
+    let mut out = String::new();
+    for path in files {
+        let bytes = fs::read(&path)?;
+        let body = strip_frontmatter(&bytes);
+        if body.is_empty() {
+            continue;
+        }
+        if !out.is_empty() {
+            out.push_str("\n\n");
+        }
+        out.push_str(&body);
+    }
+    Ok(out)
+}
+
+fn strip_frontmatter(content: &[u8]) -> String {
+    let bom: &[u8] = &[0xEF, 0xBB, 0xBF];
+    let mut buf = content;
+    if buf.starts_with(bom) {
+        buf = &buf[bom.len()..];
+    }
+    let trimmed = trim_leading_whitespace(buf);
+    if !trimmed.starts_with(b"---") {
+        return String::from_utf8_lossy(buf).trim_end().to_string();
+    }
+    let rest = &trimmed[3..];
+    let rest = trim_leading_newlines(rest);
+    if let Some(idx) = find_subslice(rest, b"\n---") {
+        let body = &rest[idx + 4..];
+        let body = trim_leading_newlines(body);
+        return String::from_utf8_lossy(body).trim_end().to_string();
+    }
+    String::from_utf8_lossy(buf).trim_end().to_string()
+}
+
+fn trim_leading_whitespace(buf: &[u8]) -> &[u8] {
+    let mut i = 0;
+    while i < buf.len() && matches!(buf[i], b'\r' | b'\n' | b'\t' | b' ') {
+        i += 1;
+    }
+    &buf[i..]
+}
+
+fn trim_leading_newlines(buf: &[u8]) -> &[u8] {
+    let mut i = 0;
+    while i < buf.len() && matches!(buf[i], b'\r' | b'\n') {
+        i += 1;
+    }
+    &buf[i..]
+}
+
+fn find_subslice(haystack: &[u8], needle: &[u8]) -> Option<usize> {
+    if needle.is_empty() || haystack.len() < needle.len() {
+        return None;
+    }
+    (0..=haystack.len() - needle.len()).find(|&i| &haystack[i..i + needle.len()] == needle)
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -27,6 +109,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // documents the ADL-spec values you most likely want to set.
     let config: Config = envy::prefixed("A2A_").from_env()?;
 
+    let skills_dir = std::env::var("A2A_SKILLS_DIR").unwrap_or_else(|_| "skills".to_string());
+    let skills_prompt = match load_skills(Path::new(&skills_dir)) {
+        Ok(s) => {
+            if !s.is_empty() {
+                info!(dir = %skills_dir, "loaded skills into system prompt");
+            }
+            s
+        }
+        Err(e) => {
+            warn!(error = %e, "failed to load skills, continuing without them");
+            String::new()
+        }
+    };
+
 {{- if .ADL.Spec.Agent }}
     info!(
         provider = %config.agent_config.provider,
@@ -34,12 +130,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "starting {{ .ADL.Metadata.Name }} agent",
     );
 
+    let base_system_prompt = {{ .ADL.Spec.Agent.SystemPrompt | quote }}.to_string();
+    let system_prompt = if skills_prompt.is_empty() {
+        base_system_prompt
+    } else {
+        format!("{}\n\n{}", base_system_prompt, skills_prompt)
+    };
+
     let agent = AgentBuilder::new()
         .with_config(&config.agent_config)
-        .with_system_prompt({{ .ADL.Spec.Agent.SystemPrompt | quote }})
-{{- if .ADL.Spec.Skills }}
+        .with_system_prompt(system_prompt)
+{{- if .ADL.Spec.Tools }}
         .with_toolbox(tools::all())
-{{- range .ADL.Spec.Skills }}
+{{- range .ADL.Spec.Tools }}
 {{- if .Inject }}
         .with_async_function_tool({{ .ID | quote }}.to_string(), |args: Value| async move {
             tools::{{ toSnakeCase .ID }}::handle(args).await
@@ -55,6 +158,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 {{- else }}
     info!("starting {{ .ADL.Metadata.Name }} agent");
+    let _ = skills_prompt;
 {{- end }}
 
     let port = config.server_config.port;

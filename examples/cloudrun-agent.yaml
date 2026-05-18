@@ -18,7 +18,7 @@ spec:
       You can process requests and provide responses efficiently.
     maxTokens: 4000
     temperature: 0.7
-  skills:
+  tools:
     - id: greet
       name: greet
       description: Greets the user with a personalized message

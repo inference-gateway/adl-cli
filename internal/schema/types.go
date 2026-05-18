@@ -24,6 +24,7 @@ type Spec struct {
 	Agent        *Agent                    `yaml:"agent,omitempty" json:"agent,omitempty"`
 	Config       map[string]map[string]any `yaml:"config,omitempty" json:"config,omitempty"`
 	Services     map[string]Service        `yaml:"services,omitempty" json:"services,omitempty"`
+	Tools        []Tool                    `yaml:"tools,omitempty" json:"tools,omitempty"`
 	Skills       []Skill                   `yaml:"skills,omitempty" json:"skills,omitempty"`
 	Server       Server                    `yaml:"server" json:"server"`
 	Language     *Language                 `yaml:"language,omitempty" json:"language,omitempty"`
@@ -70,8 +71,10 @@ type Service struct {
 	Description string `yaml:"description" json:"description"`
 }
 
-// Skill represents a distinct capability or function that an agent can perform
-type Skill struct {
+// Tool represents a function-call tool that the agent can invoke at
+// runtime. Tools have an explicit JSON schema for their inputs and are
+// generated as code in the target language (Go, Rust, TypeScript).
+type Tool struct {
 	ID             string         `yaml:"id" json:"id"`
 	Name           string         `yaml:"name" json:"name"`
 	Description    string         `yaml:"description" json:"description"`
@@ -82,6 +85,21 @@ type Skill struct {
 	Schema         map[string]any `yaml:"schema" json:"schema"`
 	Implementation string         `yaml:"implementation,omitempty" json:"implementation,omitempty"`
 	Inject         []string       `yaml:"inject,omitempty" json:"inject,omitempty"`
+}
+
+// Skill represents a markdown-based skill: a workflow description with
+// YAML frontmatter that is injected into the agent's system prompt at
+// runtime. Skills are either pulled from the skills registry or
+// scaffolded blank with `bare: true`, and are advertised on the agent
+// card so orchestrators can discover them.
+type Skill struct {
+	ID          string   `yaml:"id" json:"id"`
+	Version     string   `yaml:"version,omitempty" json:"version,omitempty"`
+	Source      string   `yaml:"source,omitempty" json:"source,omitempty"`
+	Bare        bool     `yaml:"bare,omitempty" json:"bare,omitempty"`
+	Name        string   `yaml:"name,omitempty" json:"name,omitempty"`
+	Description string   `yaml:"description,omitempty" json:"description,omitempty"`
+	Tags        []string `yaml:"tags,omitempty" json:"tags,omitempty"`
 }
 
 // Server configuration

@@ -207,13 +207,22 @@ type adlData struct {
 			Enabled bool `yaml:"enabled"`
 		} `yaml:"artifacts,omitempty"`
 		Services []string `yaml:"services,omitempty"`
-		Skills   []struct {
+		Tools    []struct {
 			ID          string         `yaml:"id"`
 			Name        string         `yaml:"name"`
 			Description string         `yaml:"description"`
 			Tags        []string       `yaml:"tags"`
 			Schema      map[string]any `yaml:"schema"`
 			Inject      []string       `yaml:"inject,omitempty"`
+		} `yaml:"tools,omitempty"`
+		Skills []struct {
+			ID          string   `yaml:"id"`
+			Version     string   `yaml:"version,omitempty"`
+			Source      string   `yaml:"source,omitempty"`
+			Bare        bool     `yaml:"bare,omitempty"`
+			Name        string   `yaml:"name,omitempty"`
+			Description string   `yaml:"description,omitempty"`
+			Tags        []string `yaml:"tags,omitempty"`
 		} `yaml:"skills,omitempty"`
 		Server struct {
 			Port   int    `yaml:"port"`
@@ -381,13 +390,14 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 		}
 	}
 
-	fmt.Println("\n🔧 Skills")
+	fmt.Println("\n🔧 Tools")
 	fmt.Println("---------")
-	addSkills := conditionalPromptBool(useDefaults, "Add skills to your agent", false)
+	fmt.Println("Tools are function-call entrypoints the agent can invoke (each becomes a generated handler).")
+	addTools := conditionalPromptBool(useDefaults, "Add tools to your agent", false)
 
-	if addSkills {
+	if addTools {
 		for {
-			skill := struct {
+			tool := struct {
 				ID          string         `yaml:"id"`
 				Name        string         `yaml:"name"`
 				Description string         `yaml:"description"`
@@ -396,43 +406,43 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 				Inject      []string       `yaml:"inject,omitempty"`
 			}{}
 
-			skill.Name = promptString("Skill name (e.g., 'get_weather')", "")
-			if skill.Name == "" {
+			tool.Name = promptString("Tool name (e.g., 'get_weather')", "")
+			if tool.Name == "" {
 				break
 			}
-			skill.ID = skill.Name
+			tool.ID = tool.Name
 
-			skill.Description = promptString("Skill description", "")
+			tool.Description = promptString("Tool description", "")
 
-			tagsStr := promptString("Skill tags (comma-separated, e.g., 'weather,api,data')", "")
+			tagsStr := promptString("Tool tags (comma-separated, e.g., 'weather,api,data')", "")
 			if tagsStr != "" {
-				skill.Tags = strings.Split(tagsStr, ",")
-				for i, tag := range skill.Tags {
-					skill.Tags[i] = strings.TrimSpace(tag)
+				tool.Tags = strings.Split(tagsStr, ",")
+				for i, tag := range tool.Tags {
+					tool.Tags[i] = strings.TrimSpace(tag)
 				}
 			} else {
-				skill.Tags = []string{"general"}
+				tool.Tags = []string{"general"}
 			}
 
-			skill.Schema = map[string]any{
+			tool.Schema = map[string]any{
 				"type": "object",
 				"properties": map[string]any{
 					"input": map[string]any{
 						"type":        "string",
-						"description": "Input parameter for " + skill.Name,
+						"description": "Input parameter for " + tool.Name,
 					},
 				},
 				"required": []string{"input"},
 			}
 
 			if len(adl.Spec.Services) > 0 {
-				fmt.Printf("\nAvailable services for skill '%s':\n", skill.Name)
+				fmt.Printf("\nAvailable services for tool '%s':\n", tool.Name)
 				for i, svc := range adl.Spec.Services {
 					fmt.Printf("  %d. %s\n", i+1, svc)
 				}
 
-				addSkillServices := promptBool("Inject services into this skill", false)
-				if addSkillServices {
+				addToolServices := promptBool("Inject services into this tool", false)
+				if addToolServices {
 					for {
 						svcChoice := promptString("Enter service name (or empty to finish)", "")
 						if svcChoice == "" {
@@ -449,7 +459,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 
 						if found {
 							alreadyAdded := false
-							for _, existing := range skill.Inject {
+							for _, existing := range tool.Inject {
 								if existing == svcChoice {
 									alreadyAdded = true
 									break
@@ -457,7 +467,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 							}
 
 							if !alreadyAdded {
-								skill.Inject = append(skill.Inject, svcChoice)
+								tool.Inject = append(tool.Inject, svcChoice)
 								fmt.Printf("✅ Added service: %s\n", svcChoice)
 							} else {
 								fmt.Printf("⚠️  Service %s already added\n", svcChoice)
@@ -467,6 +477,58 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 						}
 					}
 				}
+			}
+
+			adl.Spec.Tools = append(adl.Spec.Tools, tool)
+
+			if !promptBool("Add another tool", false) {
+				break
+			}
+		}
+	}
+
+	fmt.Println("\n📚 Skills")
+	fmt.Println("---------")
+	fmt.Println("Skills are markdown playbooks (with YAML frontmatter) loaded into the system prompt at startup.")
+	fmt.Println("You can pull skills from the registry, or scaffold a blank one to author yourself ('bare').")
+	addSkills := conditionalPromptBool(useDefaults, "Add markdown skills to your agent", false)
+
+	if addSkills {
+		for {
+			skill := struct {
+				ID          string   `yaml:"id"`
+				Version     string   `yaml:"version,omitempty"`
+				Source      string   `yaml:"source,omitempty"`
+				Bare        bool     `yaml:"bare,omitempty"`
+				Name        string   `yaml:"name,omitempty"`
+				Description string   `yaml:"description,omitempty"`
+				Tags        []string `yaml:"tags,omitempty"`
+			}{}
+
+			skill.ID = promptString("Skill id (kebab-case, e.g. 'data-analysis')", "")
+			if skill.ID == "" {
+				break
+			}
+
+			source := promptChoice("Source", []string{"registry", "bare"}, "registry")
+			switch source {
+			case "bare":
+				skill.Bare = true
+				defaultName := skill.ID
+				skill.Name = promptString("Skill name", defaultName)
+				if skill.Name == "" {
+					skill.Name = defaultName
+				}
+				skill.Description = promptString("Skill description", "")
+				tagsStr := promptString("Skill tags (comma-separated, optional)", "")
+				if tagsStr != "" {
+					skill.Tags = strings.Split(tagsStr, ",")
+					for i, tag := range skill.Tags {
+						skill.Tags[i] = strings.TrimSpace(tag)
+					}
+				}
+			default:
+				skill.Version = promptString("Pin to version (optional, e.g. '0.1.0')", "")
 			}
 
 			adl.Spec.Skills = append(adl.Spec.Skills, skill)

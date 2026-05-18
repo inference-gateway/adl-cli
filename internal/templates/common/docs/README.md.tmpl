@@ -80,12 +80,23 @@ infer agents add {{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Scheme | default "
 - `GET /health` - Health check endpoint
 - `POST /a2a` - A2A protocol endpoint
 
-## Available Skills
+## Available Tools
 
-| Skill | Description | Parameters |
-|-------|-------------|------------|
-{{- range .ADL.Spec.Skills }}
+| Tool | Description | Parameters |
+|------|-------------|------------|
+{{- range .ADL.Spec.Tools }}
 | `{{ .Name }}` | {{ .Description }} | {{- if .Schema.properties }}{{- $props := list }}{{- range $key, $value := .Schema.properties }}{{- $props = append $props $key }}{{- end }} {{ $props | join ", " }} {{- else }} None {{- end }} |
+{{- end }}
+
+{{- if .Skills }}
+
+## Skills (loaded into the system prompt)
+
+| Skill | Description | Source |
+|-------|-------------|--------|
+{{- range .Skills }}
+| `{{ .ID }}` | {{ .Description }} | {{ if .Bare }}bare scaffold (`skills/{{ .ID }}.md`){{ else }}registry{{ if .Version }} @ {{ .Version }}{{ end }}{{ end }} |
+{{- end }}
 {{- end }}
 
 ## Configuration

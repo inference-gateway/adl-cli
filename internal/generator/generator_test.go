@@ -310,10 +310,10 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 					Version: "1.26.2",
 				},
 			},
-			Skills: []schema.Skill{
+			Tools: []schema.Tool{
 				{
-					ID:          "search-docs",
-					Name:        "search-docs",
+					ID:          "search_docs",
+					Name:        "search_docs",
 					Description: "Search documentation",
 					Tags:        []string{"search"},
 					Schema: map[string]interface{}{
@@ -344,10 +344,10 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 					Edition:     "2021",
 				},
 			},
-			Skills: []schema.Skill{
+			Tools: []schema.Tool{
 				{
-					ID:          "process-data",
-					Name:        "process-data",
+					ID:          "process_data",
+					Name:        "process_data",
 					Description: "Process data",
 					Tags:        []string{"processing"},
 					Schema: map[string]interface{}{
@@ -365,10 +365,10 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 		wantContent  string
 	}{
 		{
-			name:         "minimal template creates specific skill file for Go",
+			name:         "minimal template creates specific tool file for Go",
 			templateName: "minimal",
 			adl:          goADL,
-			wantContent:  "skills/search_docs.go",
+			wantContent:  "tools/search_docs.go",
 		},
 		{
 			name:         "minimal template creates specific tool file for Rust",

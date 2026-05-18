@@ -17,7 +17,7 @@ spec:
       - text
     defaultOutputModes:
       - text
-  skills:
+  tools:
     - id: echo
       name: echo
       description: "Echo a message back to the caller"
@@ -32,6 +32,14 @@ spec:
             description: "The message to echo back"
         required:
           - message
+  skills:
+    - id: minimal-greeting
+      bare: true
+      name: minimal-greeting
+      description: "How to greet the caller before echoing their message"
+      tags:
+        - greeting
+        - minimal
   server:
     port: 8080
     scheme: http

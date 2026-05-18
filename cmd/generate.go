@@ -29,6 +29,7 @@ var (
 	enableFlox         bool
 	enableDevContainer bool
 	enableAI           bool
+	offlineMode        bool
 )
 
 func init() {
@@ -44,6 +45,7 @@ func init() {
 	generateCmd.Flags().BoolVar(&enableFlox, "flox", false, "Enable Flox environment")
 	generateCmd.Flags().BoolVar(&enableDevContainer, "devcontainer", false, "Enable DevContainer environment")
 	generateCmd.Flags().BoolVar(&enableAI, "ai", false, "Generate AI assistant instructions (CLAUDE.md) and add claude-code to sandbox environments")
+	generateCmd.Flags().BoolVar(&offlineMode, "offline", false, "Skip the skills registry; require every non-bare skill to already be in the local cache")
 }
 
 func runGenerate(cmd *cobra.Command, args []string) error {
@@ -77,6 +79,7 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		EnableFlox:         enableFlox,
 		EnableDevContainer: enableDevContainer,
 		EnableAI:           enableAI,
+		Offline:            offlineMode,
 		ADLFile:            adlFile,
 		OutputDir:          outputDir,
 	})

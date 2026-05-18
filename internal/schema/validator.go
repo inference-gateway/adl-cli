@@ -86,15 +86,26 @@ func (v *Validator) validateServiceReferences(adl *ADL) error {
 		definedConfigSections[configSection] = true
 	}
 
-	for _, skill := range adl.Spec.Skills {
-		for _, injectedService := range skill.Inject {
+	for _, tool := range adl.Spec.Tools {
+		for _, injectedService := range tool.Inject {
 			if len(injectedService) > 7 && injectedService[:7] == "config." {
 				configSection := injectedService[7:]
 				if !definedConfigSections[configSection] {
-					return fmt.Errorf("skill '%s' injects config section '%s' that is not defined in spec.config", skill.ID, configSection)
+					return fmt.Errorf("tool '%s' injects config section '%s' that is not defined in spec.config", tool.ID, configSection)
 				}
 			} else if !definedServices[injectedService] {
-				return fmt.Errorf("skill '%s' injects service '%s' that is not defined in spec.services", skill.ID, injectedService)
+				return fmt.Errorf("tool '%s' injects service '%s' that is not defined in spec.services", tool.ID, injectedService)
+			}
+		}
+	}
+
+	for _, skill := range adl.Spec.Skills {
+		if skill.Bare {
+			if skill.Name == "" {
+				return fmt.Errorf("skill '%s' has bare: true but is missing name", skill.ID)
+			}
+			if skill.Description == "" {
+				return fmt.Errorf("skill '%s' has bare: true but is missing description", skill.ID)
 			}
 		}
 	}
@@ -245,7 +256,7 @@ const adlSchema = `{
             "type": "string"
           }
         },
-        "skills": {
+        "tools": {
           "type": "array",
           "items": {
             "type": "object",
@@ -339,6 +350,41 @@ const adlSchema = `{
                 "items": {
                   "type": "string",
                   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z_][a-zA-Z0-9_]*)*$"
+                }
+              }
+            }
+          }
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]*$"
+              },
+              "version": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "bare": {
+                "type": "boolean"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
                 }
               }
             }

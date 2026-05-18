@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -8,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/inference-gateway/adl-cli/internal/registry"
 	"github.com/inference-gateway/adl-cli/internal/schema"
 	"github.com/inference-gateway/adl-cli/internal/templates"
 	"gopkg.in/yaml.v3"
@@ -29,6 +31,7 @@ type Config struct {
 	EnableFlox         bool
 	EnableDevContainer bool
 	EnableAI           bool
+	Offline            bool
 	ADLFile            string
 	OutputDir          string
 }
@@ -209,21 +212,35 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 		return fmt.Errorf("exactly one programming language must be defined for code generation, found %d", languageCount)
 	}
 
+	for i, tool := range adl.Spec.Tools {
+		if tool.ID == "" {
+			return fmt.Errorf("spec.tools[%d].id is required", i)
+		}
+		if tool.Name == "" {
+			return fmt.Errorf("spec.tools[%d].name is required", i)
+		}
+		if tool.Description == "" {
+			return fmt.Errorf("spec.tools[%d].description is required", i)
+		}
+		if len(tool.Tags) == 0 {
+			return fmt.Errorf("spec.tools[%d].tags is required and must have at least one tag", i)
+		}
+		if tool.Schema == nil {
+			return fmt.Errorf("spec.tools[%d].schema is required", i)
+		}
+	}
+
 	for i, skill := range adl.Spec.Skills {
 		if skill.ID == "" {
 			return fmt.Errorf("spec.skills[%d].id is required", i)
 		}
-		if skill.Name == "" {
-			return fmt.Errorf("spec.skills[%d].name is required", i)
-		}
-		if skill.Description == "" {
-			return fmt.Errorf("spec.skills[%d].description is required", i)
-		}
-		if len(skill.Tags) == 0 {
-			return fmt.Errorf("spec.skills[%d].tags is required and must have at least one tag", i)
-		}
-		if skill.Schema == nil {
-			return fmt.Errorf("spec.skills[%d].schema is required", i)
+		if skill.Bare {
+			if skill.Name == "" {
+				return fmt.Errorf("spec.skills[%d] is bare and requires name", i)
+			}
+			if skill.Description == "" {
+				return fmt.Errorf("spec.skills[%d] is bare and requires description", i)
+			}
 		}
 	}
 
@@ -235,8 +252,41 @@ func (g *Generator) detectTemplate(adl *schema.ADL) string {
 	return "minimal"
 }
 
+// resolveSkills walks spec.skills[] and produces resolved entries. Bare
+// skills get their metadata from the ADL; non-bare skills are fetched
+// from the registry (or local cache) and have their frontmatter parsed.
+func (g *Generator) resolveSkills(adl *schema.ADL) ([]*registry.ResolvedSkill, error) {
+	if len(adl.Spec.Skills) == 0 {
+		return nil, nil
+	}
+	resolver, err := registry.NewDefaultResolver()
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize skills resolver: %w", err)
+	}
+	resolver.Offline = g.config.Offline
+	return resolver.ResolveAll(context.Background(), adl.Spec.Skills)
+}
+
 // generateProject generates the complete project structure
 func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schema.ADL, outputDir string) error {
+	resolvedSkills, err := g.resolveSkills(adl)
+	if err != nil {
+		return err
+	}
+	skillsByID := make(map[string]*registry.ResolvedSkill, len(resolvedSkills))
+	skillViews := make([]templates.SkillView, 0, len(resolvedSkills))
+	for _, rs := range resolvedSkills {
+		skillsByID[rs.ID] = rs
+		skillViews = append(skillViews, templates.SkillView{
+			ID:          rs.ID,
+			Name:        rs.Name,
+			Description: rs.Description,
+			Tags:        rs.Tags,
+			Version:     rs.Version,
+			Bare:        rs.Bare,
+		})
+	}
+
 	ctx := templates.Context{
 		ADL: adl,
 		Metadata: schema.GeneratedMetadata{
@@ -249,6 +299,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		GenerateCD:      g.config.GenerateCD,
 		EnableAI:        g.config.EnableAI,
 		GenerateCommand: g.buildGenerateCommand(),
+		Skills:          skillViews,
 	}
 
 	ignoreChecker, err := NewIgnoreChecker(outputDir)
@@ -313,37 +364,37 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 					return fmt.Errorf("service %s not found in ADL spec", serviceName)
 				}
 			}
-		} else if (templateKey == "skill.go" || templateKey == "tool.rs" || templateKey == "skill.ts") && strings.Contains(fileName, "/") {
+		} else if (templateKey == "tool.go" || templateKey == "tool.rs" || templateKey == "tool.ts") && strings.Contains(fileName, "/") {
 			parts := strings.Split(fileName, "/")
 			if len(parts) >= 2 {
 				toolFileName := parts[len(parts)-1]
 				toolName := strings.TrimSuffix(toolFileName, filepath.Ext(toolFileName))
 
-				var foundSkill *schema.Skill
-				for _, skill := range adl.Spec.Skills {
-					snakeCaseSkillID := strings.ReplaceAll(skill.ID, "-", "_")
-					if snakeCaseSkillID == toolName {
-						foundSkill = &skill
+				var foundTool *schema.Tool
+				for _, tool := range adl.Spec.Tools {
+					snakeCaseToolID := strings.ReplaceAll(tool.ID, "-", "_")
+					if snakeCaseToolID == toolName {
+						foundTool = &tool
 						break
 					}
 				}
 
-				if foundSkill != nil {
-					skillContext := map[string]interface{}{
-						"ID":             foundSkill.ID,
-						"Name":           foundSkill.Name,
-						"Description":    foundSkill.Description,
-						"Tags":           foundSkill.Tags,
-						"Examples":       foundSkill.Examples,
-						"InputModes":     foundSkill.InputModes,
-						"OutputModes":    foundSkill.OutputModes,
-						"Schema":         foundSkill.Schema,
-						"Implementation": foundSkill.Implementation,
-						"Inject":         foundSkill.Inject,
+				if foundTool != nil {
+					toolContext := map[string]interface{}{
+						"ID":             foundTool.ID,
+						"Name":           foundTool.Name,
+						"Description":    foundTool.Description,
+						"Tags":           foundTool.Tags,
+						"Examples":       foundTool.Examples,
+						"InputModes":     foundTool.InputModes,
+						"OutputModes":    foundTool.OutputModes,
+						"Schema":         foundTool.Schema,
+						"Implementation": foundTool.Implementation,
+						"Inject":         foundTool.Inject,
 					}
 
 					if adl.Spec.Language.Go != nil {
-						skillContext["GoModule"] = adl.Spec.Language.Go.Module
+						toolContext["GoModule"] = adl.Spec.Language.Go.Module
 					}
 
 					serviceMap := make(map[string]interface{})
@@ -357,15 +408,36 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 							"Description": svc.Description,
 						}
 					}
-					skillContext["ServiceMap"] = serviceMap
+					toolContext["ServiceMap"] = serviceMap
 
-					content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, skillContext, ctx)
+					content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, toolContext, ctx)
 					if err != nil {
-						return fmt.Errorf("failed to execute template %s for skill %s: %w", templateKey, toolName, err)
+						return fmt.Errorf("failed to execute template %s for tool %s: %w", templateKey, toolName, err)
 					}
 				} else {
-					return fmt.Errorf("skill %s not found in ADL spec", toolName)
+					return fmt.Errorf("tool %s not found in ADL spec", toolName)
 				}
+			}
+		} else if templateKey == "skills/skill.md" {
+			skillID := strings.TrimSuffix(filepath.Base(fileName), filepath.Ext(fileName))
+			resolved, ok := skillsByID[skillID]
+			if !ok {
+				return fmt.Errorf("skill %s not found in resolved skills", skillID)
+			}
+			if resolved.Bare {
+				skillContext := map[string]interface{}{
+					"ID":          resolved.ID,
+					"Name":        resolved.Name,
+					"Description": resolved.Description,
+					"Tags":        resolved.Tags,
+					"Version":     resolved.Version,
+				}
+				content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, skillContext, ctx)
+				if err != nil {
+					return fmt.Errorf("failed to scaffold bare skill %s: %w", resolved.ID, err)
+				}
+			} else {
+				content = string(resolved.Body)
 			}
 		} else if templateKey == "service.go" {
 			return fmt.Errorf("service template reached fallback case - this should not happen")
@@ -393,14 +465,17 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 			fileType = "taskfile"
 		}
 
-		isSkillFile := (templateKey == "skill.go" || templateKey == "tool.rs" || templateKey == "tool.mod.rs" || templateKey == "skill.ts") ||
-			(strings.Contains(fileName, "/skills/") && (ext == ".go" || ext == ".ts")) ||
-			(strings.Contains(fileName, "/tools/") && ext == ".rs")
+		isSkillFile := templateKey == "skills/skill.md" ||
+			(strings.HasPrefix(fileName, "skills/") && ext == ".md")
+
+		isToolFile := (templateKey == "tool.go" || templateKey == "tool.rs" || templateKey == "tool.mod.rs" || templateKey == "tool.ts") ||
+			(strings.HasPrefix(fileName, "tools/") && ext == ".go") ||
+			(strings.HasPrefix(fileName, "src/tools/") && (ext == ".rs" || ext == ".ts"))
 
 		isServiceFile := templateKey == "service.go" ||
 			(strings.Contains(fileName, "/internal/") && strings.HasSuffix(fileName, ".go") && !strings.Contains(fileName, "/logger/"))
 
-		if fileType != "" && !isSkillFile && !isServiceFile {
+		if fileType != "" && !isSkillFile && !isToolFile && !isServiceFile {
 			header := templates.GetGeneratedFileHeader(fileType, ctx.Metadata.CLIVersion, ctx.Metadata.GeneratedAt)
 			content = header + content
 		}
@@ -542,9 +617,9 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 	case "minimal":
 		switch language {
 		case "go":
-			for _, skill := range adl.Spec.Skills {
-				snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
-				filesToIgnore = append(filesToIgnore, fmt.Sprintf("skills/%s.go", snakeCaseName))
+			for _, tool := range adl.Spec.Tools {
+				snakeCaseName := strings.ReplaceAll(tool.ID, "-", "_")
+				filesToIgnore = append(filesToIgnore, fmt.Sprintf("tools/%s.go", snakeCaseName))
 			}
 
 			for serviceName := range adl.Spec.Services {
@@ -553,20 +628,26 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 			}
 		case "rust":
 			if adl.Spec.Agent != nil {
-				for _, skill := range adl.Spec.Skills {
-					snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
+				for _, tool := range adl.Spec.Tools {
+					snakeCaseName := strings.ReplaceAll(tool.ID, "-", "_")
 					filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/tools/%s.rs", snakeCaseName))
 				}
 			}
 		case "typescript":
-			for _, skill := range adl.Spec.Skills {
-				snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
-				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/skills/%s.ts", snakeCaseName))
+			for _, tool := range adl.Spec.Tools {
+				snakeCaseName := strings.ReplaceAll(tool.ID, "-", "_")
+				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/tools/%s.ts", snakeCaseName))
 			}
 
 			for serviceName := range adl.Spec.Services {
 				snakeCaseName := strings.ReplaceAll(serviceName, "-", "_")
 				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/services/%s.ts", snakeCaseName))
+			}
+		}
+
+		for _, skill := range adl.Spec.Skills {
+			if skill.Bare {
+				filesToIgnore = append(filesToIgnore, fmt.Sprintf("skills/%s.md", skill.ID))
 			}
 		}
 	}
@@ -600,14 +681,14 @@ func generateA2aIgnoreContent(filesToIgnore []string, language string) string {
 		depsHeader = "# Rust dependency files"
 		depsList = "Cargo.lock\n"
 	case "typescript":
-		exampleFile = "src/skills/agent_skill.ts"
+		exampleFile = "src/tools/agent_tool.ts"
 		exampleGlob = "*.ts"
 		exampleDir = "node_modules/"
 		customFile = "my-custom-file.ts"
 		depsHeader = "# Node dependency files"
 		depsList = "package-lock.json\npnpm-lock.yaml\nyarn.lock\n"
 	default:
-		exampleFile = "skills/agent_skill.go"
+		exampleFile = "tools/agent_tool.go"
 		exampleGlob = "*.go"
 		exampleDir = "build/"
 		customFile = "my-custom-file.go"

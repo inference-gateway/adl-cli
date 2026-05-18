@@ -43,15 +43,20 @@ main.go                       # Entry point, sets version
     ├── generator/           # Code generation engine
     │   ├── generator.go     # Main generation logic, CI/CD generation
     │   └── ignore.go        # .adl-ignore handling
+    ├── registry/            # Skills registry client (fetch + cache + frontmatter)
+    │   ├── client.go        # HTTP client for the skills registry
+    │   ├── cache.go         # Local on-disk cache (~/.adl/skills-cache/)
+    │   ├── frontmatter.go   # YAML frontmatter parser for skill markdown
+    │   └── resolver.go      # Coordinates fetch/cache/scaffold for skills
     ├── schema/              # ADL schema definitions
-    │   ├── types.go         # All ADL type definitions (ADL, Spec, Skill, etc.)
+    │   ├── types.go         # All ADL type definitions (ADL, Spec, Tool, Skill, etc.)
     │   └── validator.go     # JSON Schema validation
     ├── prompt/              # Interactive prompts for `init` command
     └── templates/           # Template system
         ├── engine.go        # Template rendering with Sprig v3 functions
         ├── registry.go      # Template loading and file mapping per language
         ├── headers.go       # Generated file headers
-        ├── common/          # Universal templates (config, docs, CI/CD)
+        ├── common/          # Universal templates (config, docs, CI/CD, skills/)
         ├── languages/       # Language-specific templates (go/, rust/, typescript/)
         └── sandbox/         # Dev environment templates (flox/, devcontainer/)
 ```
@@ -59,20 +64,27 @@ main.go                       # Entry point, sets version
 ### Generation Flow
 
 1. **Parse & Validate**: Load ADL YAML, validate against schema, check required fields
-2. **Template Selection**: Detect language from `spec.language`, build file mapping via `registry.go`
-3. **Generate**: Render templates with ADL context, respect `.adl-ignore`, write files
-4. **Post-Process**: Run formatters (`go fmt`, `cargo fmt`), execute custom hooks
+2. **Resolve skills**: Pre-fetch every `spec.skills[]` entry from the registry (or cache); scaffold bare skills from their inline metadata
+3. **Template Selection**: Detect language from `spec.language`, build file mapping via `registry.go`
+4. **Generate**: Render templates with ADL context (including resolved skill views), respect `.adl-ignore`, write files; non-bare skill markdown bodies are written verbatim
+5. **Post-Process**: Run formatters (`go fmt`, `cargo fmt`), execute custom hooks
 
 ### Key Types (internal/schema/types.go)
 
 - `ADL` - Root structure with `apiVersion`, `kind`, `metadata`, `spec`
-- `Spec` - Contains `capabilities`, `agent`, `skills`, `services`, `server`, `language`, `deployment`
-- `Skill` - Agent capability with `id`, `name`, `schema`, `inject` (for service injection)
+- `Spec` - Contains `capabilities`, `agent`, `tools`, `skills`, `services`, `server`, `language`, `deployment`
+- `Tool` - Function-call entrypoint with `id`, `name`, `schema`, `inject` (for service injection). Generated as code in the target language.
+- `Skill` - Markdown playbook with `id` plus optional `version`/`source`/`bare`/`name`/`description`/`tags`. Generated as `skills/<id>.md`, advertised on the agent card, prepended to the system prompt at runtime.
 - `Service` - Injectable service with `interface`, `factory`, `description`
+
+### Tools vs Skills
+
+- **Tools** are functions the agent can invoke. Defined under `spec.tools`. Each one becomes code in the target language with a JSON schema.
+- **Skills** are markdown documents (YAML frontmatter + body) injected into the system prompt at startup. Defined under `spec.skills`. Either pulled from `registry.inference-gateway.com/skills/<id>[/<version>].md` (override with `ADL_SKILLS_REGISTRY`) or scaffolded blank with `bare: true`. `adl generate --offline` skips registry fetches.
 
 ### Service Injection
 
-Skills can inject services via the `inject` field. The `logger` service is built-in:
+Tools can inject services via the `inject` field. The `logger` service is built-in:
 
 ```yaml
 spec:
@@ -81,7 +93,7 @@ spec:
       type: service
       interface: DatabaseService
       factory: NewDatabaseService
-  skills:
+  tools:
     - id: query_database
       inject:
         - logger # logger is built-in

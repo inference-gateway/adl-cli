@@ -296,9 +296,12 @@ spec:
     systemPrompt: "You are a helpful assistant."
     maxTokens: 4096
     temperature: 0.7
-  skills:
-    - name: get_weather
+  tools:
+    - id: get_weather
+      name: get_weather
       description: "Get current weather"
+      tags:
+        - weather
       schema:
         type: object
         properties:
@@ -307,6 +310,14 @@ spec:
             description: "City name"
         required:
           - city
+  skills:
+    - id: weather-summary
+      bare: true
+      name: weather-summary
+      description: "When to fetch the weather, and how to phrase the reply"
+      tags:
+        - weather
+        - prompt
   server:
     port: 8080
     debug: false

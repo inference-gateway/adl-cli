@@ -372,7 +372,7 @@ spec:
     systemPrompt: "You are a helpful weather assistant."
     maxTokens: 4096
     temperature: 0.7
-  skills:
+  tools:
     - name: get_weather
       description: "Get current weather for a city"
       schema:
@@ -393,7 +393,10 @@ spec:
     go:
       module: "github.com/example/weather-agent"
       version: "1.26.2"
-  acronyms: ["api", "json", "xml"] # Optional: Custom acronyms for better code generation
+  acronyms: # Optional: Custom acronyms for better code generation
+    - api
+    - json
+    - xml
 ```
 
 ### ADL Schema
@@ -405,7 +408,8 @@ The complete ADL schema includes:
 - **config**: Structured configuration sections with environment variable mapping
 - **services**: Service services with interfaces, factories, and type definitions
 - **agent**: AI provider configuration (OpenAI, Anthropic, DeepSeek, Ollama, Google, Mistral, Groq)
-- **skills**: Function definitions with complex JSON schemas, validation, and service injection support
+- **tools**: Function-call definitions with JSON schemas, validation, and service injection support
+- **skills**: Markdown playbooks (id + optional `bare`, version, source) pulled from the skills registry or scaffolded locally, advertised on the agent card, and prepended to the system prompt at runtime
 - **server**: HTTP server configuration with authentication support
 - **language**: Programming language-specific settings (Go, Rust, TypeScript) and configurable acronyms
 - **scm**: Source control management configuration (GitHub, GitLab)
@@ -454,7 +458,7 @@ spec:
       interface: NotificationService
       factory: NewNotificationService
       description: Multi-channel notification service
-  skills:
+  tools:
     - name: query_database
       description: "Execute database queries with validation"
       inject:
@@ -535,6 +539,38 @@ spec:
       enabled: true
 ```
 
+## Skills vs. Tools
+
+The ADL spec distinguishes two complementary concepts:
+
+- **Tools** (`spec.tools`) are function-call entrypoints with explicit JSON schemas. They are generated as code in the target language and registered with the agent's toolbox. The model invokes them by name with structured arguments.
+- **Skills** (`spec.skills`) are markdown playbooks (with YAML frontmatter) that describe *when and how* to use the tools. Each is written to `skills/<id>.md` in the generated project, advertised on the agent card so orchestrators can discover them, and prepended to the system prompt at runtime.
+
+A skill entry is small:
+
+```yaml
+spec:
+  skills:
+    - id: data-analysis          # pulled from registry.inference-gateway.com/skills/
+      version: 0.1.0             # optional pin
+    - id: report-writing         # pulled at the default version
+    - id: company-policy         # scaffolded locally (not fetched)
+      bare: true
+      name: company-policy
+      description: "Internal compliance rules to follow"
+      tags: [policy, compliance]
+    - id: custom-external
+      source: https://example.com/skills/custom-external.md  # per-skill override
+```
+
+Resolution rules:
+
+- `bare: true` → the CLI scaffolds `skills/<id>.md` with frontmatter from the manifest and a TODO body that you author by hand.
+- `source: <url>` → fetch from that URL.
+- Otherwise → fetch `https://registry.inference-gateway.com/skills/<id>[/<version>].md`. Override the registry with `ADL_SKILLS_REGISTRY`. Use `adl generate --offline` to skip network access (requires every non-bare skill to be cached at `~/.adl/skills-cache/`).
+
+At runtime, the generated agent reads every `*.md` under `skills/` (overridable with `A2A_SKILLS_DIR`), strips frontmatter, and concatenates the bodies onto the configured `systemPrompt`. Both Go and Rust runtimes ship with this loader baked into `main.go` / `main.rs`.
+
 ## Service Injection & Configuration Management
 
 The ADL CLI provides a sophisticated service injection system with structured configuration management. This system improves testability, separation of concerns, and provides type-safe configuration with environment variable mapping.
@@ -563,7 +599,7 @@ spec:
       interface: CacheRepository
       factory: NewCacheRepository
       description: High-performance caching layer for API responses
-  skills:
+  tools:
     - name: create_event
       description: "Create a new calendar event"
       inject:
@@ -642,7 +678,7 @@ spec:
       interface: DatabaseService
       factory: NewDatabaseService
       description: PostgreSQL database service
-  skills:
+  tools:
     - name: export_report
       description: "Export data and email report"
       inject:
@@ -741,9 +777,12 @@ my-agent/
 │   │   └── googleCalendar.go       # Calendar service with interface
 │   └── cache/
 │       └── cache.go                # Cache service with interface
-├── skills/
-│   ├── create_event.go             # Skills with injected services
+├── tools/
+│   ├── create_event.go             # Function-call tools with injected services
 │   └── list_events.go
+├── skills/
+│   ├── calendar-workflow.md        # Markdown playbooks loaded into the system prompt
+│   └── meeting-summary.md
 └── .adl-ignore                     # Protects custom implementations
 ```
 
@@ -831,9 +870,12 @@ my-go-agent/
 ├── internal/
 │   └── logger/
 │       └── logger.go          # Built-in logger factory
-├── skills/                    # Skill implementations directory
-│   ├── query_database.go      # Individual skill files (TODO placeholders)
+├── tools/                     # Function-call tool implementations
+│   ├── query_database.go      # Individual tool files (TODO placeholders)
 │   └── send_notification.go
+├── skills/                    # Markdown skill playbooks (system prompt)
+│   ├── incident-response.md   # Loaded into the system prompt at startup
+│   └── support-handoff.md
 ├── Taskfile.yml               # Development tasks (build, test, lint)
 ├── Dockerfile                 # Container configuration
 ├── .adl-ignore                # Files to protect from regeneration
@@ -870,10 +912,13 @@ my-go-agent/
 my-rust-agent/
 ├── src/
 │   ├── main.rs                # Main application entry point
-│   └── skills/                # Skill implementations directory
+│   └── tools/                 # Function-call tool implementations
 │       ├── mod.rs             # Module declarations
-│       ├── query_database.rs  # Individual skill implementations
+│       ├── query_database.rs  # Individual tool implementations
 │       └── send_notification.rs
+├── skills/                    # Markdown skill playbooks (system prompt)
+│   ├── incident-response.md
+│   └── support-handoff.md
 ├── Cargo.toml                 # Rust package configuration
 ├── Taskfile.yml               # Development tasks
 ├── Dockerfile                 # Rust-optimized container
@@ -1329,21 +1374,23 @@ Each language has its own file mapping that determines what gets generated:
 **Go Projects:**
 
 - `main.go` → Go main server setup
-- `skills/{skillname}.go` → Individual skill implementations
+- `tools/{toolname}.go` → Individual function-call tool implementations
+- `skills/{skillid}.md` → Markdown skill playbooks (loaded into system prompt at runtime)
 - `go.mod` → Go module configuration
 - Language-specific Dockerfile and CI configurations
 
 **Rust Projects:**
 
 - `src/main.rs` → Rust main application
-- `src/skills/{skillname}.rs` → Skill implementations
-- `src/skills/mod.rs` → Module declarations
+- `src/tools/{toolname}.rs` → Tool descriptor + handler
+- `src/tools/mod.rs` → Module declarations
+- `skills/{skillid}.md` → Markdown skill playbooks
 - `Cargo.toml` → Rust package configuration
 
 **Universal Files:**
 
 - `Taskfile.yml` → Development task runner
-- `.well-known/agent-card.json` → A2A capabilities manifest
+- `.well-known/agent-card.json` → A2A capabilities manifest (skills are listed here, not tools)
 - `k8s/deployment.yaml` → Kubernetes deployment
 - CI workflows and sandbox configurations
 

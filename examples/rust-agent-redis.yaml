@@ -24,7 +24,7 @@ spec:
       background jobs when long-running work is requested.
     maxTokens: 4096
     temperature: 0.3
-  skills:
+  tools:
     - id: enqueue_job
       name: enqueue_job
       description: "Enqueue a background job for asynchronous processing"
