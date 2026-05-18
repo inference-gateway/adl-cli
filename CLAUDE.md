@@ -127,6 +127,34 @@ is documented in the generated `.env.example` — not baked into `main.rs`. When
 2. Register in `cmd/root.go` via `rootCmd.AddCommand()`
 3. Add tests in `cmd/<command>_test.go`
 
+## ADL Schema Source of Truth
+
+The canonical ADL JSON Schema lives in
+[`inference-gateway/adl`](https://github.com/inference-gateway/adl) under
+`schema/v1/schema.json`. This repo vendors it at `internal/schema/schema.json`
+(embedded into the binary via `//go:embed` in `internal/schema/validator.go`).
+The pinned upstream version is the `ADL_SCHEMA_VERSION` variable in
+`Taskfile.yml`.
+
+Update flow:
+
+```bash
+# bump the version in Taskfile.yml, then:
+task fetch-schema     # writes internal/schema/schema.json
+task verify-schema    # CI gate: confirms the committed file matches upstream
+task generate-types   # (follow-up work) regenerates internal/schema/types.go
+```
+
+`task verify-schema` runs in `task ci` to catch accidental edits or drift.
+
+Go types in `internal/schema/types.go` are currently hand-maintained and
+**must be kept in sync with `schema/v1/schema.json`** when fields are added or
+removed. A `generate-types` Taskfile target is wired up
+(`atombender/go-jsonschema`) but the generated output uses pointer-for-optional
+semantics, which would force a wider consumer refactor across templates,
+`cmd/init.go`, and `internal/generator/generator.go`; that migration is tracked
+as a follow-up.
+
 ## Important Notes
 
 - Go 1.26.2+ required

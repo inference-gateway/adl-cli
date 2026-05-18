@@ -352,6 +352,8 @@ The `--deployment` flag generates platform-specific deployment configurations:
 
 ADL files use YAML to define your agent's configuration, capabilities, and tools.
 
+The canonical schema lives in the [inference-gateway/adl](https://github.com/inference-gateway/adl) repository — that repo is the single source of truth for the ADL specification. This CLI vendors a pinned copy at `internal/schema/schema.json` (refresh with `task fetch-schema`).
+
 ### Example ADL File
 
 ```yaml
