@@ -47,10 +47,11 @@ var (
 // startup. Override with A2A_SKILLS_DIR.
 const skillsDir = "skills"
 
-// loadSkills walks the configured skills directory, strips YAML
-// frontmatter from each *.md file, and returns the concatenated bodies
-// in lexical order. The result is appended to the configured system
-// prompt so the model sees skill playbooks at runtime.
+// loadSkills walks the configured skills directory, reads each
+// <skill>/SKILL.md, strips its YAML frontmatter, and returns the
+// concatenated bodies in lexical order by skill directory. The result is
+// appended to the configured system prompt so the model sees skill
+// playbooks at runtime.
 func loadSkills(dir string) (string, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
@@ -60,22 +61,23 @@ func loadSkills(dir string) (string, error) {
 		return "", err
 	}
 
-	files := make([]string, 0, len(entries))
+	dirs := make([]string, 0, len(entries))
 	for _, e := range entries {
-		if e.IsDir() {
+		if !e.IsDir() {
 			continue
 		}
-		if filepath.Ext(e.Name()) != ".md" {
-			continue
-		}
-		files = append(files, e.Name())
+		dirs = append(dirs, e.Name())
 	}
-	sort.Strings(files)
+	sort.Strings(dirs)
 
 	var out strings.Builder
-	for _, name := range files {
-		data, err := os.ReadFile(filepath.Join(dir, name))
+	for _, name := range dirs {
+		path := filepath.Join(dir, name, "SKILL.md")
+		data, err := os.ReadFile(path)
 		if err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
 			return "", err
 		}
 		body := stripFrontmatter(data)

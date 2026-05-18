@@ -12,31 +12,29 @@ use tracing::{error, info, warn};
 mod tools;
 {{- end }}
 
-/// Load every `*.md` skill from the configured directory, strip YAML
-/// frontmatter from each, and concatenate the bodies in lexical order.
-/// The result is appended to the configured system prompt at runtime so
-/// the model can read skill playbooks alongside the agent persona.
+/// Load each `<skill>/SKILL.md` from the configured directory, strip its
+/// YAML frontmatter, and concatenate the bodies in lexical order by skill
+/// directory. The result is appended to the configured system prompt at
+/// runtime so the model can read skill playbooks alongside the agent
+/// persona.
 fn load_skills(dir: &Path) -> std::io::Result<String> {
     if !dir.exists() {
         return Ok(String::new());
     }
-    let mut files: Vec<_> = fs::read_dir(dir)?
+    let mut dirs: Vec<_> = fs::read_dir(dir)?
         .filter_map(|entry| entry.ok())
-        .filter(|entry| {
-            entry
-                .path()
-                .extension()
-                .and_then(|ext| ext.to_str())
-                .map(|ext| ext.eq_ignore_ascii_case("md"))
-                .unwrap_or(false)
-        })
+        .filter(|entry| entry.path().is_dir())
         .map(|entry| entry.path())
         .collect();
-    files.sort();
+    dirs.sort();
 
     let mut out = String::new();
-    for path in files {
-        let bytes = fs::read(&path)?;
+    for path in dirs {
+        let skill_path = path.join("SKILL.md");
+        if !skill_path.exists() {
+            continue;
+        }
+        let bytes = fs::read(&skill_path)?;
         let body = strip_frontmatter(&bytes);
         if body.is_empty() {
             continue;

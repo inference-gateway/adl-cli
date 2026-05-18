@@ -93,9 +93,9 @@ This agent ships {{ len .ADL.Spec.Skills }} markdown skill{{ if ne (len .ADL.Spe
 - **Version**: {{ .Version }}
 {{- end }}
 {{- if .Bare }}
-- **Source**: scaffolded locally (`skills/{{ .ID }}.md`)
+- **Source**: scaffolded locally (`skills/{{ .ID }}/SKILL.md`)
 {{- else }}
-- **Source**: fetched from the skills registry (`skills/{{ .ID }}.md`)
+- **Source**: fetched from the skills registry (`skills/{{ .ID }}/SKILL.md`)
 {{- end }}
 {{- end }}
 {{- else }}
@@ -269,9 +269,10 @@ docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Me
 {{- range .ADL.Spec.Tools }}
 │   └── {{ printf "%-26s" (printf "%s.go" .Name) }}# {{ .Description }}
 {{- end }}
-├── skills/                       # Markdown skills (loaded into system prompt)
+├── skills/                       # Skill directories (SKILL.md + optional assets)
 {{- range .Skills }}
-│   └── {{ printf "%-26s" (printf "%s.md" .ID) }}# {{ .Description }}
+│   └── {{ printf "%-26s" (printf "%s/" .ID) }}# {{ .Description }}
+│       └── SKILL.md              # Playbook prepended to the system prompt
 {{- end }}
 ├── .well-known/                  # Agent configuration
 │   └── agent-card.json           # Agent metadata
@@ -289,9 +290,10 @@ docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Me
 │       ├── {{ printf "%-21s" (printf "%s.rs" .Name) }}# {{ .Description }}
 {{- end }}
 │       └── mod.rs                # Tools module
-├── skills/                       # Markdown skills (loaded into system prompt)
+├── skills/                       # Skill directories (SKILL.md + optional assets)
 {{- range .Skills }}
-│   └── {{ printf "%-26s" (printf "%s.md" .ID) }}# {{ .Description }}
+│   └── {{ printf "%-26s" (printf "%s/" .ID) }}# {{ .Description }}
+│       └── SKILL.md              # Playbook prepended to the system prompt
 {{- end }}
 ├── .well-known/                  # Agent configuration
 │   └── agent-card.json           # Agent metadata
@@ -308,9 +310,10 @@ docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Me
 {{- range .ADL.Spec.Tools }}
 │       └── {{ printf "%-21s" (printf "%s.ts" .Name) }}# {{ .Description }}
 {{- end }}
-├── skills/                       # Markdown skills (loaded into system prompt)
+├── skills/                       # Skill directories (SKILL.md + optional assets)
 {{- range .Skills }}
-│   └── {{ printf "%-26s" (printf "%s.md" .ID) }}# {{ .Description }}
+│   └── {{ printf "%-26s" (printf "%s/" .ID) }}# {{ .Description }}
+│       └── SKILL.md              # Playbook prepended to the system prompt
 {{- end }}
 ├── .well-known/                  # Agent configuration
 │   └── agent-card.json           # Agent metadata

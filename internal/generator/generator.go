@@ -419,7 +419,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 				}
 			}
 		} else if templateKey == "skills/skill.md" {
-			skillID := strings.TrimSuffix(filepath.Base(fileName), filepath.Ext(fileName))
+			skillID := filepath.Base(filepath.Dir(fileName))
 			resolved, ok := skillsByID[skillID]
 			if !ok {
 				return fmt.Errorf("skill %s not found in resolved skills", skillID)
@@ -466,7 +466,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		}
 
 		isSkillFile := templateKey == "skills/skill.md" ||
-			(strings.HasPrefix(fileName, "skills/") && ext == ".md")
+			(strings.HasPrefix(fileName, "skills/") && filepath.Base(fileName) == "SKILL.md")
 
 		isToolFile := (templateKey == "tool.go" || templateKey == "tool.rs" || templateKey == "tool.mod.rs" || templateKey == "tool.ts") ||
 			(strings.HasPrefix(fileName, "tools/") && ext == ".go") ||
@@ -647,7 +647,7 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 
 		for _, skill := range adl.Spec.Skills {
 			if skill.Bare {
-				filesToIgnore = append(filesToIgnore, fmt.Sprintf("skills/%s.md", skill.ID))
+				filesToIgnore = append(filesToIgnore, fmt.Sprintf("skills/%s/", skill.ID))
 			}
 		}
 	}

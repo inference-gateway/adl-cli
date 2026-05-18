@@ -74,13 +74,13 @@ main.go                       # Entry point, sets version
 - `ADL` - Root structure with `apiVersion`, `kind`, `metadata`, `spec`
 - `Spec` - Contains `capabilities`, `agent`, `tools`, `skills`, `services`, `server`, `language`, `deployment`
 - `Tool` - Function-call entrypoint with `id`, `name`, `schema`, `inject` (for service injection). Generated as code in the target language.
-- `Skill` - Markdown playbook with `id` plus optional `version`/`source`/`bare`/`name`/`description`/`tags`. Generated as `skills/<id>.md`, advertised on the agent card, prepended to the system prompt at runtime.
+- `Skill` - Markdown playbook with `id` plus optional `version`/`source`/`bare`/`name`/`description`/`tags`. Generated as `skills/<id>/SKILL.md` (Anthropic-style directory layout — bare skills may ship bundled scripts/resources alongside), advertised on the agent card, prepended to the system prompt at runtime.
 - `Service` - Injectable service with `interface`, `factory`, `description`
 
 ### Tools vs Skills
 
 - **Tools** are functions the agent can invoke. Defined under `spec.tools`. Each one becomes code in the target language with a JSON schema.
-- **Skills** are markdown documents (YAML frontmatter + body) injected into the system prompt at startup. Defined under `spec.skills`. Either pulled from `registry.inference-gateway.com/skills/<id>[/<version>].md` (override with `ADL_SKILLS_REGISTRY`) or scaffolded blank with `bare: true`. `adl generate --offline` skips registry fetches.
+- **Skills** are markdown documents (YAML frontmatter + body) injected into the system prompt at startup. Defined under `spec.skills`. Each is generated under `skills/<id>/SKILL.md` (one directory per skill); bare skills may ship bundled scripts/resources alongside `SKILL.md` and the whole directory is protected by `.adl-ignore`. Skills are either pulled from `registry.inference-gateway.com/skills/<id>[/<version>].md` (override with `ADL_SKILLS_REGISTRY`) or scaffolded blank with `bare: true`. Registry skills currently produce only `SKILL.md` (no bundled assets over the wire). `adl generate --offline` skips registry fetches.
 
 ### Service Injection
 

@@ -86,7 +86,7 @@ spec:
       name: test_tool
       description: A test tool
       tags:
-	  	- test
+        - test
       schema:
         type: object
         properties:
@@ -100,7 +100,7 @@ spec:
       name: test-skill
       description: A test bare skill
       tags:
-	  	- test
+        - test
   server:
     port: 8080
     debug: false
@@ -150,9 +150,9 @@ spec:
 		t.Errorf("expected test_tool_id.go to be generated")
 	}
 
-	testSkillPath := filepath.Join(outputPath, "skills", "test-skill.md")
+	testSkillPath := filepath.Join(outputPath, "skills", "test-skill", "SKILL.md")
 	if _, err := os.Stat(testSkillPath); os.IsNotExist(err) {
-		t.Errorf("expected skills/test-skill.md to be scaffolded")
+		t.Errorf("expected skills/test-skill/SKILL.md to be scaffolded")
 	}
 }
 
