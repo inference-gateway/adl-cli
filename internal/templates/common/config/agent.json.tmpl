@@ -25,21 +25,15 @@
 		{{- end }}
 	},
 	"skills": [
-		{{- range $index, $skill := .ADL.Spec.Skills }}
+		{{- range $index, $skill := .Skills }}
 		{{- if $index }},{{ end }}
 		{
 			"id": "{{ $skill.ID }}",
 			"name": "{{ $skill.Name }}",
 			"description": "{{ $skill.Description }}",
-			"tags": {{ $skill.Tags | toJson }}
-			{{- if $skill.Examples }},
-			"examples": {{ $skill.Examples | toJson }}
-			{{- end }}
-			{{- if $skill.InputModes }},
-			"inputModes": {{ $skill.InputModes | toJson }}
-			{{- end }}
-			{{- if $skill.OutputModes }},
-			"outputModes": {{ $skill.OutputModes | toJson }}
+			"tags": {{ if $skill.Tags }}{{ $skill.Tags | toJson }}{{ else }}[]{{ end }}
+			{{- if $skill.Version }},
+			"version": "{{ $skill.Version }}"
 			{{- end }}
 		}
 		{{- end }}

@@ -81,18 +81,27 @@ spec:
   agent:
     provider: deepseek
     model: deepseek-v4-flash
-  skills:
-    - id: test_skill_id
-      name: test_skill
-      description: A test skill
-      tags: ["test"]
+  tools:
+    - id: test_tool_id
+      name: test_tool
+      description: A test tool
+      tags:
+        - test
       schema:
         type: object
         properties:
           input:
             type: string
             description: Test input
-        required: [input]
+        required:
+          - input
+  skills:
+    - id: test-skill
+      bare: true
+      name: test-skill
+      description: A test bare skill
+      tags:
+        - test
   server:
     port: 8080
     debug: false
@@ -111,13 +120,16 @@ spec:
 
 	originalADLFile := adlFile
 	originalOutputDir := outputDir
+	originalOffline := offlineMode
 	defer func() {
 		adlFile = originalADLFile
 		outputDir = originalOutputDir
+		offlineMode = originalOffline
 	}()
 
 	adlFile = adlPath
 	outputDir = outputPath
+	offlineMode = true
 
 	err := runGenerate(generateCmd, []string{})
 	if err != nil {
@@ -129,14 +141,19 @@ spec:
 		t.Errorf("expected main.go to be generated")
 	}
 
-	skillsDir := filepath.Join(outputPath, "skills")
-	if _, err := os.Stat(skillsDir); os.IsNotExist(err) {
-		t.Errorf("expected skills directory to be generated")
+	toolsDir := filepath.Join(outputPath, "tools")
+	if _, err := os.Stat(toolsDir); os.IsNotExist(err) {
+		t.Errorf("expected tools directory to be generated")
 	}
 
-	testSkillPath := filepath.Join(skillsDir, "test_skill_id.go")
+	testToolPath := filepath.Join(toolsDir, "test_tool_id.go")
+	if _, err := os.Stat(testToolPath); os.IsNotExist(err) {
+		t.Errorf("expected test_tool_id.go to be generated")
+	}
+
+	testSkillPath := filepath.Join(outputPath, "skills", "test-skill", "SKILL.md")
 	if _, err := os.Stat(testSkillPath); os.IsNotExist(err) {
-		t.Errorf("expected test_skill_id.go to be generated")
+		t.Errorf("expected skills/test-skill/SKILL.md to be scaffolded")
 	}
 }
 

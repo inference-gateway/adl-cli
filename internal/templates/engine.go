@@ -183,6 +183,17 @@ func toUpperSnakeCaseWithAcronyms(s string, acronyms map[string]string) string {
 	return strings.Join(result, "_")
 }
 
+// SkillView is the resolved view of a markdown skill that templates can
+// safely render — frontmatter only, body lives on disk.
+type SkillView struct {
+	ID          string
+	Name        string
+	Description string
+	Tags        []string
+	Version     string
+	Bare        bool
+}
+
 // Context provides data for template execution
 type Context struct {
 	ADL             *schema.ADL
@@ -192,6 +203,7 @@ type Context struct {
 	GenerateCD      bool
 	EnableAI        bool
 	GenerateCommand string
+	Skills          []SkillView
 	customAcronyms  map[string]string
 }
 

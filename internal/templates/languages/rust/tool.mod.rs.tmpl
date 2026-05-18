@@ -5,14 +5,14 @@
 
 use inference_gateway_sdk::ChatCompletionTool;
 
-{{- range .ADL.Spec.Skills }}
+{{- range .ADL.Spec.Tools }}
 pub mod {{ toSnakeCase .ID }};
 {{- end }}
 
 /// All tool descriptors registered with the agent.
 pub fn all() -> Vec<ChatCompletionTool> {
     vec![
-{{- range .ADL.Spec.Skills }}
+{{- range .ADL.Spec.Tools }}
         {{ toSnakeCase .ID }}::descriptor(),
 {{- end }}
     ]

@@ -72,25 +72,54 @@ The agent uses OpenAI-compatible LLM client. Configure with:
 
 ## Adding New Functionality
 
-### Skills Implementation
+### Tools (function-call)
 
-{{- if .ADL.Spec.Skills }}
-The following skills are currently defined:
-{{- range .ADL.Spec.Skills }}
+{{- if .ADL.Spec.Tools }}
+The following tools are currently defined:
+{{- range .ADL.Spec.Tools }}
 - **{{ .Name }}**: {{ .Description }}
 {{- end }}
 
-To modify skills:
-1. Update `agent.yaml` with skill definitions
+To modify tools:
+1. Update `agent.yaml` `spec.tools` with tool definitions
 2. Run `task generate` to regenerate the codebase
-3. Implement skill logic in generated skill files (look for TODO placeholders)
-4. Write tests for each skill
+3. Implement tool logic in the generated `tools/` files (look for TODO placeholders)
+4. Write tests for each tool
 {{- else }}
-Currently no skills are defined. To add skills:
-1. Update `agent.yaml` with skill definitions
+Currently no tools are defined. To add tools:
+1. Add entries under `spec.tools` in `agent.yaml`
 2. Run `task generate` to regenerate the codebase
-3. Implement skill logic in generated skill files (look for TODO placeholders)
-4. Write tests for each skill
+3. Implement tool logic in the generated `tools/` files (look for TODO placeholders)
+4. Write tests for each tool
+{{- end }}
+
+### Skills (markdown system-prompt playbooks)
+
+{{- if .ADL.Spec.Skills }}
+The following skills are currently shipped with the agent:
+{{- range .Skills }}
+- **{{ .Name }}** ({{ if .Bare }}bare scaffold{{ else }}registry{{ end }}): {{ .Description }}
+{{- end }}
+
+Each skill lives in its own directory at `skills/<id>/SKILL.md` and is
+loaded into the system prompt at startup. Bare skills can ship arbitrary
+bundled assets (scripts, templates, resources) alongside `SKILL.md` —
+the whole `skills/<id>/` directory is protected by `.adl-ignore` against
+regeneration overwrites. To modify skills:
+1. Update `agent.yaml` `spec.skills` with skill definitions
+2. Run `task generate` (registry skills are re-fetched; bare skill
+   directories are preserved when listed in `.adl-ignore`)
+3. For bare skills, edit `skills/<id>/SKILL.md` directly — frontmatter
+   (`name`/`description`/`tags`) shows up on the agent card. Drop helper
+   scripts or templates next to it (e.g. `skills/<id>/scripts/foo.py`).
+{{- else }}
+No skills are currently defined. To add skills:
+1. Add entries under `spec.skills` in `agent.yaml`
+   - Set `bare: true` and provide `name`/`description`/`tags` to scaffold
+     a blank skill you author by hand
+   - Or omit `bare` to pull from the registry
+     (`registry.inference-gateway.com/skills/<id>.md`)
+2. Run `task generate`
 {{- end }}
 
 ### Modifying Agent Behavior

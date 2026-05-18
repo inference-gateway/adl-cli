@@ -1,10 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"sort"
+	"strings"
 	"syscall"
 
 	server "github.com/inference-gateway/adk/server"
@@ -12,14 +16,14 @@ import (
 	zap "go.uber.org/zap"
 
 	config "{{ .ADL.Spec.Language.Go.Module }}/config"
-{{- if .ADL.Spec.Skills }}
-	skills "{{ .ADL.Spec.Language.Go.Module }}/skills"
+{{- if .ADL.Spec.Tools }}
+	tools "{{ .ADL.Spec.Language.Go.Module }}/tools"
 {{- end }}
 
 	logger "{{ .ADL.Spec.Language.Go.Module }}/internal/logger"
 {{- range $serviceName, $svc := .ADL.Spec.Services }}
 {{- $svcUsed := false }}
-{{- range $.ADL.Spec.Skills }}
+{{- range $.ADL.Spec.Tools }}
 {{- range .Inject }}
 {{- if eq . $serviceName }}
 {{- $svcUsed = true }}
@@ -39,6 +43,73 @@ var (
 	AgentDescription = "{{ .ADL.Metadata.Description }}"
 )
 
+// skillsDir is the directory the runtime loads markdown skills from at
+// startup. Override with A2A_SKILLS_DIR.
+const skillsDir = "skills"
+
+// loadSkills walks the configured skills directory, reads each
+// <skill>/SKILL.md, strips its YAML frontmatter, and returns the
+// concatenated bodies in lexical order by skill directory. The result is
+// appended to the configured system prompt so the model sees skill
+// playbooks at runtime.
+func loadSkills(dir string) (string, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", nil
+		}
+		return "", err
+	}
+
+	dirs := make([]string, 0, len(entries))
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		dirs = append(dirs, e.Name())
+	}
+	sort.Strings(dirs)
+
+	var out strings.Builder
+	for _, name := range dirs {
+		path := filepath.Join(dir, name, "SKILL.md")
+		data, err := os.ReadFile(path)
+		if err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
+			return "", err
+		}
+		body := stripFrontmatter(data)
+		if len(body) == 0 {
+			continue
+		}
+		if out.Len() > 0 {
+			out.WriteString("\n\n")
+		}
+		out.Write(body)
+	}
+	return out.String(), nil
+}
+
+func stripFrontmatter(content []byte) []byte {
+	bom := []byte{0xEF, 0xBB, 0xBF}
+	trimmed := bytes.TrimPrefix(content, bom)
+	trimmed = bytes.TrimLeft(trimmed, "\r\n\t ")
+	if !bytes.HasPrefix(trimmed, []byte("---")) {
+		return bytes.TrimRight(content, "\r\n")
+	}
+	rest := trimmed[3:]
+	rest = bytes.TrimLeft(rest, "\r\n")
+	idx := bytes.Index(rest, []byte("\n---"))
+	if idx < 0 {
+		return bytes.TrimRight(content, "\r\n")
+	}
+	body := rest[idx+4:]
+	body = bytes.TrimLeft(body, "\r\n")
+	return bytes.TrimRight(body, "\r\n")
+}
+
 func main() {
 	ctx := context.Background()
 
@@ -55,10 +126,21 @@ func main() {
 
 	l.Info("starting " + AgentName + " agent (version: " + Version + ", environment: " + cfg.Environment + ")")
 
+	resolvedSkillsDir := skillsDir
+	if v := os.Getenv("A2A_SKILLS_DIR"); v != "" {
+		resolvedSkillsDir = v
+	}
+	skillsPrompt, err := loadSkills(resolvedSkillsDir)
+	if err != nil {
+		l.Warn("failed to load skills, continuing without them", zap.Error(err))
+	} else if skillsPrompt != "" {
+		l.Info("loaded skills into system prompt", zap.String("dir", resolvedSkillsDir))
+	}
+
 	{{- if .ADL.Spec.Services }}
 	{{- $anySvcUsed := false }}
 	{{- range $serviceName, $svc := .ADL.Spec.Services }}
-	{{- range $.ADL.Spec.Skills }}
+	{{- range $.ADL.Spec.Tools }}
 	{{- range .Inject }}
 	{{- if eq . $serviceName }}
 	{{- $anySvcUsed = true }}
@@ -72,7 +154,7 @@ func main() {
 	{{- end }}
 	{{- range $serviceName, $svc := .ADL.Spec.Services }}
 	{{- $svcUsed := false }}
-	{{- range $.ADL.Spec.Skills }}
+	{{- range $.ADL.Spec.Tools }}
 	{{- range .Inject }}
 	{{- if eq . $serviceName }}
 	{{- $svcUsed = true }}
@@ -91,12 +173,12 @@ func main() {
 	// Create toolbox with default tools (like input_required, create_artifact etc)
 	toolBox := server.NewDefaultToolBox(&cfg.A2A.AgentConfig.ToolBoxConfig)
 
-	{{- range .ADL.Spec.Skills }}
+	{{- range .ADL.Spec.Tools }}
 
-	// Register {{ .Name }} skill
-	{{ .Name | toCamelCase }}Skill := skills.New{{ .Name | toPascalCase }}Skill({{ range $index, $svc := .Inject }}{{ if $index }}, {{ end }}{{ if eq $svc "logger" }}l{{ else if eq $svc "config" }}&cfg{{ else if hasPrefix "config." $svc }}&cfg.{{ $svc | trimPrefix "config." | toPascalCase }}{{ else }}{{ $svc | toCamelCase }}Svc{{ end }}{{ end }})
-	toolBox.AddTool({{ .Name | toCamelCase }}Skill)
-	l.Info("registered skill: {{ .Name }} ({{ .Description }})")
+	// Register {{ .Name }} tool
+	{{ .Name | toCamelCase }}Tool := tools.New{{ .Name | toPascalCase }}Tool({{ range $index, $svc := .Inject }}{{ if $index }}, {{ end }}{{ if eq $svc "logger" }}l{{ else if eq $svc "config" }}&cfg{{ else if hasPrefix "config." $svc }}&cfg.{{ $svc | trimPrefix "config." | toPascalCase }}{{ else }}{{ $svc | toCamelCase }}Svc{{ end }}{{ end }})
+	toolBox.AddTool({{ .Name | toCamelCase }}Tool)
+	l.Info("registered tool: {{ .Name }} ({{ .Description }})")
 	{{- end }}
 
 	llmClient, err := server.NewOpenAICompatibleLLMClient(&cfg.A2A.AgentConfig, l)
@@ -104,12 +186,17 @@ func main() {
 		l.Fatal("failed to create LLM client", zap.Error(err))
 	}
 
+	systemPrompt := `{{- if and .ADL.Spec.Agent .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt }}{{- else }}You are a helpful AI assistant.{{- end }}`
+	if skillsPrompt != "" {
+		systemPrompt = systemPrompt + "\n\n" + skillsPrompt
+	}
+
 	agent, err := server.NewAgentBuilder(l).
 		WithConfig(&cfg.A2A.AgentConfig).
 		WithLLMClient(llmClient).
 		WithToolBox(toolBox).
 		WithMaxChatCompletion(cfg.A2A.AgentConfig.MaxChatCompletionIterations).
-		WithSystemPrompt(`{{- if and .ADL.Spec.Agent .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt }}{{- else }}You are a helpful AI assistant.{{- end }}`).
+		WithSystemPrompt(systemPrompt).
 		Build()
 	if err != nil {
 		l.Fatal("failed to create agent", zap.Error(err))
@@ -170,7 +257,7 @@ func main() {
 	}
 {{- end }}
 
-	l.Info("{{ .ADL.Metadata.Name }} agent running successfully", 
+	l.Info("{{ .ADL.Metadata.Name }} agent running successfully",
 		zap.String("port", cfg.A2A.ServerConfig.Port),
 		zap.String("environment", cfg.Environment))
 

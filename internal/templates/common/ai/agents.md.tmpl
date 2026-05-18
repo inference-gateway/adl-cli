@@ -59,11 +59,11 @@ This agent is built using the Agent Definition Language (ADL) and provides A2A c
 No AI provider configured - this is a minimal agent.
 {{- end }}
 
-## Skills
-{{- if .ADL.Spec.Skills }}
+## Tools
+{{- if .ADL.Spec.Tools }}
 
-This agent provides {{ len .ADL.Spec.Skills }} skills:
-{{- range .ADL.Spec.Skills }}
+This agent exposes {{ len .ADL.Spec.Tools }} function-call tools:
+{{- range .ADL.Spec.Tools }}
 
 ### {{ .Name }}
 - **Description**: {{ .Description }}
@@ -75,7 +75,32 @@ This agent provides {{ len .ADL.Spec.Skills }} skills:
 {{- end }}
 {{- else }}
 
-No skills defined - this agent provides basic A2A communication without specialized capabilities.
+No tools defined - this agent provides basic A2A communication without function-call tools.
+{{- end }}
+
+## Skills
+{{- if .ADL.Spec.Skills }}
+
+This agent ships {{ len .ADL.Spec.Skills }} markdown skill{{ if ne (len .ADL.Spec.Skills) 1 }}s{{ end }} that are loaded into the system prompt at startup:
+{{- range .Skills }}
+
+### {{ .Name }}
+- **Description**: {{ .Description }}
+{{- if .Tags }}
+- **Tags**: {{ join ", " .Tags }}
+{{- end }}
+{{- if .Version }}
+- **Version**: {{ .Version }}
+{{- end }}
+{{- if .Bare }}
+- **Source**: scaffolded locally (`skills/{{ .ID }}/SKILL.md`)
+{{- else }}
+- **Source**: fetched from the skills registry (`skills/{{ .ID }}/SKILL.md`)
+{{- end }}
+{{- end }}
+{{- else }}
+
+No skills defined - this agent runs with only its configured system prompt.
 {{- end }}
 
 ## Server Configuration
@@ -240,9 +265,14 @@ docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Me
 ```
 .
 ├── main.go                       # Server entry point
-├── skills/                       # Business logic skills
-{{- range .ADL.Spec.Skills }}
-│   └── {{ printf "%-25s" (printf "%s.go" .Name) }} # {{ .Description }}
+├── tools/                        # Function-call tools
+{{- range .ADL.Spec.Tools }}
+│   └── {{ printf "%-26s" (printf "%s.go" .Name) }}# {{ .Description }}
+{{- end }}
+├── skills/                       # Skill directories (SKILL.md + optional assets)
+{{- range .Skills }}
+│   └── {{ printf "%-26s" (printf "%s/" .ID) }}# {{ .Description }}
+│       └── SKILL.md              # Playbook prepended to the system prompt
 {{- end }}
 ├── .well-known/                  # Agent configuration
 │   └── agent-card.json           # Agent metadata
@@ -256,10 +286,15 @@ docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Me
 ├── src/                          # Source directory
 │   ├── main.rs                   # Server entry point
 │   └── tools/                    # Tool descriptors + handlers
-{{- range .ADL.Spec.Skills }}
-│       ├── {{ printf "%-21s" (printf "%s.rs" .Name) }} # {{ .Description }}
+{{- range .ADL.Spec.Tools }}
+│       ├── {{ printf "%-21s" (printf "%s.rs" .Name) }}# {{ .Description }}
 {{- end }}
 │       └── mod.rs                # Tools module
+├── skills/                       # Skill directories (SKILL.md + optional assets)
+{{- range .Skills }}
+│   └── {{ printf "%-26s" (printf "%s/" .ID) }}# {{ .Description }}
+│       └── SKILL.md              # Playbook prepended to the system prompt
+{{- end }}
 ├── .well-known/                  # Agent configuration
 │   └── agent-card.json           # Agent metadata
 ├── Cargo.toml                    # Rust package definition
@@ -271,9 +306,14 @@ docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Me
 .
 ├── src/                          # Source directory
 │   ├── index.ts                  # Server entry point
-│   └── skills/                   # Business logic skills
-{{- range .ADL.Spec.Skills }}
-│       └── {{ printf "%-21s" (printf "%s.ts" .Name) }} # {{ .Description }}
+│   └── tools/                    # Function-call tools
+{{- range .ADL.Spec.Tools }}
+│       └── {{ printf "%-21s" (printf "%s.ts" .Name) }}# {{ .Description }}
+{{- end }}
+├── skills/                       # Skill directories (SKILL.md + optional assets)
+{{- range .Skills }}
+│   └── {{ printf "%-26s" (printf "%s/" .ID) }}# {{ .Description }}
+│       └── SKILL.md              # Playbook prepended to the system prompt
 {{- end }}
 ├── .well-known/                  # Agent configuration
 │   └── agent-card.json           # Agent metadata

@@ -159,9 +159,13 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		}
 	}
 
+	for _, tool := range adl.Spec.Tools {
+		snakeCaseName := strings.ReplaceAll(tool.ID, "-", "_")
+		files[fmt.Sprintf("tools/%s.go", snakeCaseName)] = "tool.go"
+	}
+
 	for _, skill := range adl.Spec.Skills {
-		snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
-		files[fmt.Sprintf("skills/%s.go", snakeCaseName)] = "skill.go"
+		files[fmt.Sprintf("skills/%s/SKILL.md", skill.ID)] = "skills/skill.md"
 	}
 
 	files["internal/logger/logger.go"] = "logger.go"
@@ -203,14 +207,18 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 	}
 
 	if adl.Spec.Agent != nil {
-		for _, skill := range adl.Spec.Skills {
-			snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
+		for _, tool := range adl.Spec.Tools {
+			snakeCaseName := strings.ReplaceAll(tool.ID, "-", "_")
 			files[fmt.Sprintf("src/tools/%s.rs", snakeCaseName)] = "tool.rs"
 		}
 
-		if len(adl.Spec.Skills) > 0 {
+		if len(adl.Spec.Tools) > 0 {
 			files["src/tools/mod.rs"] = "tool.mod.rs"
 		}
+	}
+
+	for _, skill := range adl.Spec.Skills {
+		files[fmt.Sprintf("skills/%s/SKILL.md", skill.ID)] = "skills/skill.md"
 	}
 
 	if adl.Spec.Sandbox != nil &&
@@ -250,9 +258,13 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		}
 	}
 
+	for _, tool := range adl.Spec.Tools {
+		snakeCaseName := strings.ReplaceAll(tool.ID, "-", "_")
+		files[fmt.Sprintf("src/tools/%s.ts", snakeCaseName)] = "tool.ts"
+	}
+
 	for _, skill := range adl.Spec.Skills {
-		snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
-		files[fmt.Sprintf("src/skills/%s.ts", snakeCaseName)] = "skill.ts"
+		files[fmt.Sprintf("skills/%s/SKILL.md", skill.ID)] = "skills/skill.md"
 	}
 
 	r.addSandboxFiles(adl, files)

@@ -63,7 +63,7 @@ spec:
       interface: ReportingService
       factory: NewReportingService
       description: Business report generation service with multiple output formats
-  skills:
+  tools:
     - id: query_database
       name: query_database
       description: "Query the company database with proper authentication"
@@ -165,14 +165,24 @@ spec:
             type: string
             description: "Output format"
             enum:
-              - pdf
-              - excel
-              - json
-              - html
+            - pdf
+            - excel
+            - json
+            - html
         required:
-          - report_type
-          - date_range
-          - format
+        - report_type
+        - date_range
+        - format
+  skills:
+    - id: incident-response
+      bare: true
+      name: incident-response
+      description: "Use this when the user reports a production incident, a paging alert fires, or a postmortem mentions ongoing degradation. Triages severity, identifies the responsible service via query_database, drafts an initial response with generate_report, and notifies stakeholders with send_notification."
+      tags:
+        - operations
+        - incident
+        - on-call
+        - triage
   server:
     port: 8443
     scheme: https

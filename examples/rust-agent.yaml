@@ -17,7 +17,7 @@ spec:
       - text
     defaultOutputModes:
       - text
-  skills:
+  tools:
     - id: echo
       name: echo
       description: "Echo a message back to the caller"
@@ -32,6 +32,14 @@ spec:
             description: "The message to echo back"
         required:
           - message
+  skills:
+    - id: echo-formatting
+      bare: true
+      name: echo-formatting
+      description: "Use this when the user sends an echo request that benefits from formatting — pretty-printing JSON payloads, normalizing surrounding whitespace, or wrapping code-shaped content in fenced blocks before invoking the echo tool."
+      tags:
+        - echo
+        - formatting
   server:
     port: 8080
     scheme: http
