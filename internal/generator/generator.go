@@ -162,7 +162,6 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 		return fmt.Errorf("spec.server.port must be between 1 and 65535")
 	}
 
-
 	languageCount := 0
 	if adl.Spec.Language.Go != nil {
 		languageCount++
