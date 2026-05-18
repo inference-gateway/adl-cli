@@ -102,7 +102,7 @@ spec:
   language:
     rust:
       packageName: my-agent
-      version: "1.88"
+      version: "1.94.1"
       edition: "2024"
       features:
         - redis

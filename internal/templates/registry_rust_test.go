@@ -22,7 +22,7 @@ func minimalRustADL() *schema.ADL {
 			Language: schema.Language{
 				Rust: &schema.RustConfig{
 					PackageName: "rust-agent",
-					Version:     "1.88",
+					Version:     "1.94.1",
 					Edition:     "2024",
 				},
 			},

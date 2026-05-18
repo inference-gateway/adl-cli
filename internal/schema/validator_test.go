@@ -122,7 +122,7 @@ spec:
   language:
     rust:
       packageName: "agent"
-      version: "1.88"
+      version: "1.94.1"
       edition: "2024"
       features:
         - redis
@@ -147,7 +147,7 @@ spec:
   language:
     rust:
       packageName: "agent"
-      version: "1.88"
+      version: "1.94.1"
       edition: "2024"
 `,
 			wantErr: false,
