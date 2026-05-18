@@ -1,0 +1,19 @@
+//! Tools module
+//!
+//! Each submodule defines a tool: its descriptor (passed to the LLM)
+//! and its handler (invoked when the model picks the tool).
+
+use inference_gateway_sdk::ChatCompletionTool;
+
+{{- range .ADL.Spec.Skills }}
+pub mod {{ toSnakeCase .ID }};
+{{- end }}
+
+/// All tool descriptors registered with the agent.
+pub fn all() -> Vec<ChatCompletionTool> {
+    vec![
+{{- range .ADL.Spec.Skills }}
+        {{ toSnakeCase .ID }}::descriptor(),
+{{- end }}
+    ]
+}

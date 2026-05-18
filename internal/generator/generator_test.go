@@ -371,10 +371,10 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 			wantContent:  "skills/search_docs.go",
 		},
 		{
-			name:         "minimal template creates specific skill file for Rust",
+			name:         "minimal template creates specific tool file for Rust",
 			templateName: "minimal",
 			adl:          rustADL,
-			wantContent:  "src/skills/process_data.rs",
+			wantContent:  "src/tools/process_data.rs",
 		},
 	}
 

@@ -255,11 +255,11 @@ docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Me
 .
 ├── src/                          # Source directory
 │   ├── main.rs                   # Server entry point
-│   └── skills/                   # Business logic skills
+│   └── tools/                    # Tool descriptors + handlers
 {{- range .ADL.Spec.Skills }}
 │       ├── {{ printf "%-21s" (printf "%s.rs" .Name) }} # {{ .Description }}
 {{- end }}
-│       └── mod.rs                # Skills module
+│       └── mod.rs                # Tools module
 ├── .well-known/                  # Agent configuration
 │   └── agent-card.json           # Agent metadata
 ├── Cargo.toml                    # Rust package definition

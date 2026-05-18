@@ -1,14 +1,13 @@
 use inference_gateway_adk::{A2AServerBuilder, {{ if .ADL.Spec.Agent }}AgentBuilder, {{ end }}Config};
-{{- if .ADL.Spec.Agent }}
-use inference_gateway_sdk::{ChatCompletionTool, ChatCompletionToolType, FunctionObject, FunctionParameters};
-use serde_json::{Value, json};
+{{- if and .ADL.Spec.Agent .ADL.Spec.Skills }}
+use serde_json::Value;
 {{- end }}
 use std::net::SocketAddr;
 use tracing::{error, info};
 
 {{- if and .ADL.Spec.Agent .ADL.Spec.Skills }}
 
-mod skills;
+mod tools;
 {{- end }}
 
 #[tokio::main]
@@ -35,38 +34,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "starting {{ .ADL.Metadata.Name }} agent",
     );
 
-    let tools: Vec<ChatCompletionTool> = vec![
-{{- range .ADL.Spec.Skills }}
-        ChatCompletionTool {
-            type_: ChatCompletionToolType::Function,
-            function: FunctionObject {
-                name: {{ .ID | quote }}.to_string(),
-                description: Some({{ .Description | quote }}.to_string()),
-                parameters: Some(FunctionParameters(
-                    json!({{ toJson .Schema }})
-                        .as_object()
-                        .expect("skill schema must be a JSON object")
-                        .clone(),
-                )),
-                strict: false,
-            },
-        },
-{{- end }}
-    ];
-
     let agent = AgentBuilder::new()
         .with_config(&config.agent_config)
         .with_system_prompt({{ .ADL.Spec.Agent.SystemPrompt | quote }})
-        .with_toolbox(tools)
+{{- if .ADL.Spec.Skills }}
+        .with_toolbox(tools::all())
 {{- range .ADL.Spec.Skills }}
 {{- if .Inject }}
         .with_async_function_tool({{ .ID | quote }}.to_string(), |args: Value| async move {
-            skills::{{ toSnakeCase .ID }}::handle(args).await
+            tools::{{ toSnakeCase .ID }}::handle(args).await
         })
 {{- else }}
         .with_function_tool({{ .ID | quote }}.to_string(), |args: Value| {
-            skills::{{ toSnakeCase .ID }}::handle(args)
+            tools::{{ toSnakeCase .ID }}::handle(args)
         })
+{{- end }}
 {{- end }}
 {{- end }}
         .build()

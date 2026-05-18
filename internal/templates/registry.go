@@ -205,11 +205,11 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 	if adl.Spec.Agent != nil {
 		for _, skill := range adl.Spec.Skills {
 			snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
-			files[fmt.Sprintf("src/skills/%s.rs", snakeCaseName)] = "skill.rs"
+			files[fmt.Sprintf("src/tools/%s.rs", snakeCaseName)] = "tool.rs"
 		}
 
 		if len(adl.Spec.Skills) > 0 {
-			files["src/skills/mod.rs"] = "skill.mod.rs"
+			files["src/tools/mod.rs"] = "tool.mod.rs"
 		}
 	}
 

@@ -1,0 +1,46 @@
+use inference_gateway_sdk::{ChatCompletionTool, ChatCompletionToolType, FunctionObject, FunctionParameters};
+use serde_json::{Value, json};
+
+/// {{ .Description }}
+pub fn descriptor() -> ChatCompletionTool {
+    ChatCompletionTool {
+        type_: ChatCompletionToolType::Function,
+        function: FunctionObject {
+            name: {{ .ID | quote }}.to_string(),
+            description: Some({{ .Description | quote }}.to_string()),
+            parameters: Some(FunctionParameters(
+                json!({{ toJson .Schema }})
+                    .as_object()
+                    .expect("tool schema must be a JSON object")
+                    .clone(),
+            )),
+            strict: false,
+        },
+    }
+}
+
+{{ if .Inject -}}
+/// {{ .Description }}
+pub async fn handle(args: Value) -> anyhow::Result<String> {
+    tracing::info!(tool = {{ .ID | quote }}, "handling request");
+
+    // TODO: implement {{ .ID }}
+    // Injected services: {{ range $i, $svc := .Inject }}{{ if $i }}, {{ end }}{{ $svc }}{{ end }}
+{{- if has "redis" .Inject }}
+    // The `redis` Cargo feature is enabled and A2A_QUEUE_URL / A2A_QUEUE_NAMESPACE
+    // are set in the environment. Open a connection with `redis::Client::open(...)`
+    // if your tool needs direct access to the store.
+{{- end }}
+    let _ = args;
+    Ok(json!({ "status": "ok", "tool": {{ .ID | quote }} }).to_string())
+}
+{{- else -}}
+/// {{ .Description }}
+pub fn handle(args: Value) -> anyhow::Result<String> {
+    tracing::info!(tool = {{ .ID | quote }}, "handling request");
+
+    // TODO: implement {{ .ID }}
+    let _ = args;
+    Ok(json!({ "status": "ok", "tool": {{ .ID | quote }} }).to_string())
+}
+{{- end }}

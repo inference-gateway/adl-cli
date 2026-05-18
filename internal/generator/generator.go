@@ -313,7 +313,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 					return fmt.Errorf("service %s not found in ADL spec", serviceName)
 				}
 			}
-		} else if (templateKey == "skill.go" || templateKey == "skill.rs" || templateKey == "skill.ts") && strings.Contains(fileName, "/") {
+		} else if (templateKey == "skill.go" || templateKey == "tool.rs" || templateKey == "skill.ts") && strings.Contains(fileName, "/") {
 			parts := strings.Split(fileName, "/")
 			if len(parts) >= 2 {
 				toolFileName := parts[len(parts)-1]
@@ -393,8 +393,9 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 			fileType = "taskfile"
 		}
 
-		isSkillFile := (templateKey == "skill.go" || templateKey == "skill.rs" || templateKey == "skill.ts") ||
-			(strings.Contains(fileName, "/skills/") && (ext == ".go" || ext == ".rs" || ext == ".ts"))
+		isSkillFile := (templateKey == "skill.go" || templateKey == "tool.rs" || templateKey == "tool.mod.rs" || templateKey == "skill.ts") ||
+			(strings.Contains(fileName, "/skills/") && (ext == ".go" || ext == ".ts")) ||
+			(strings.Contains(fileName, "/tools/") && ext == ".rs")
 
 		isServiceFile := templateKey == "service.go" ||
 			(strings.Contains(fileName, "/internal/") && strings.HasSuffix(fileName, ".go") && !strings.Contains(fileName, "/logger/"))
@@ -554,7 +555,7 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 			if adl.Spec.Agent != nil {
 				for _, skill := range adl.Spec.Skills {
 					snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
-					filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/skills/%s.rs", snakeCaseName))
+					filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/tools/%s.rs", snakeCaseName))
 				}
 			}
 		case "typescript":
@@ -592,7 +593,7 @@ func generateA2aIgnoreContent(filesToIgnore []string, language string) string {
 
 	switch language {
 	case "rust":
-		exampleFile = "src/skills/agent_skill.rs"
+		exampleFile = "src/tools/agent_tool.rs"
 		exampleGlob = "*.rs"
 		exampleDir = "target/"
 		customFile = "my-custom-file.rs"
