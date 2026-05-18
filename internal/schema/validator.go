@@ -108,6 +108,9 @@ func (v *Validator) validateServiceReferences(adl *ADL) error {
 	}
 
 	for _, skill := range adl.Spec.Skills {
+		if skill.Schema != nil || len(skill.Inject) > 0 || skill.Implementation != "" {
+			return fmt.Errorf("skill '%s' has function-call fields (schema/inject/implementation); declare it under spec.tools instead", skill.ID)
+		}
 		if skill.Bare {
 			if skill.Name == "" {
 				return fmt.Errorf("skill '%s' has bare: true but is missing name", skill.ID)

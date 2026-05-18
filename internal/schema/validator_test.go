@@ -223,7 +223,7 @@ func TestValidator_SkillsAndTools(t *testing.T) {
 	}{
 		{
 			name: "tool and bare skill both valid",
-			adl: `apiVersion: adl.dev/v1
+			adl: `apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: split-agent
@@ -262,7 +262,7 @@ spec:
 		},
 		{
 			name: "skill with stray schema field is rejected",
-			adl: `apiVersion: adl.dev/v1
+			adl: `apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: bad-skill
@@ -285,11 +285,11 @@ spec:
       version: "1.26.2"
 `,
 			wantErr: true,
-			errSub:  "Additional property schema",
+			errSub:  "function-call fields",
 		},
 		{
 			name: "bare skill missing description is rejected",
-			adl: `apiVersion: adl.dev/v1
+			adl: `apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: bare-missing
@@ -316,7 +316,7 @@ spec:
 		},
 		{
 			name: "tool injecting undefined service is rejected",
-			adl: `apiVersion: adl.dev/v1
+			adl: `apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: missing-svc
