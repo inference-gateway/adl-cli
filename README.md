@@ -357,7 +357,7 @@ The canonical schema lives in the [inference-gateway/adl](https://github.com/inf
 ### Example ADL File
 
 ```yaml
-apiVersion: adl.dev/v1
+apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: weather-agent
@@ -417,7 +417,7 @@ The complete ADL schema includes:
 ### Complete ADL Example
 
 ```yaml
-apiVersion: adl.dev/v1
+apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: advanced-agent
@@ -1523,7 +1523,7 @@ Each language has sensible defaults:
 You can customize or extend the default behavior by adding a `hooks` section to your ADL file:
 
 ```yaml
-apiVersion: adl.dev/v1
+apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: my-agent

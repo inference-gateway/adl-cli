@@ -5,7 +5,7 @@ vars:
   VERSION: 0.28.0
   BUILD_DIR: bin
   DIST_DIR: dist
-  ADL_SCHEMA_VERSION: v0.1.0
+  ADL_SCHEMA_VERSION: v0.1.1
   ADL_SCHEMA_URL: https://raw.githubusercontent.com/inference-gateway/adl/{{.ADL_SCHEMA_VERSION}}/schema/v1/schema.json
   ADL_SCHEMA_PATH: internal/schema/schema.json
 
@@ -85,7 +85,7 @@ tasks:
     cmds:
       - go run github.com/atombender/go-jsonschema@v0.23.1
           --package schema
-          --schema-root-type=https://adl.dev/schemas/agent/v1=ADL
+          --schema-root-type=https://adl.inference-gateway.com/schemas/agent/v1=ADL
           --capitalization ID --capitalization URL --capitalization SCM
           --capitalization CPU --capitalization API --capitalization CI --capitalization CD
           --capitalization CloudRun --capitalization DevContainer --capitalization TypeScript

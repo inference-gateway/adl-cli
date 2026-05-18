@@ -1,5 +1,5 @@
 ---
-apiVersion: adl.dev/v1
+apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: go-agent-filesystem-artifacts

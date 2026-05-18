@@ -11,7 +11,7 @@ import (
 
 func TestGenerator_Generate(t *testing.T) {
 	validADL := &schema.ADL{
-		APIVersion: "adl.dev/v1",
+		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 		Metadata: schema.Metadata{
 			Name:        "test-agent",
@@ -71,7 +71,7 @@ func TestGenerator_validateADL(t *testing.T) {
 		{
 			name: "valid minimal ADL",
 			adl: &schema.ADL{
-				APIVersion: "adl.dev/v1",
+				APIVersion: "adl.inference-gateway.com/v1",
 				Kind:       "Agent",
 				Metadata: schema.Metadata{
 					Name:        "test-agent",
@@ -106,7 +106,7 @@ func TestGenerator_validateADL(t *testing.T) {
 		{
 			name: "missing Go module",
 			adl: &schema.ADL{
-				APIVersion: "adl.dev/v1",
+				APIVersion: "adl.inference-gateway.com/v1",
 				Kind:       "Agent",
 				Metadata: schema.Metadata{
 					Name:        "test-agent",
@@ -135,7 +135,7 @@ func TestGenerator_validateADL(t *testing.T) {
 		{
 			name: "invalid port",
 			adl: &schema.ADL{
-				APIVersion: "adl.dev/v1",
+				APIVersion: "adl.inference-gateway.com/v1",
 				Kind:       "Agent",
 				Metadata: schema.Metadata{
 					Name:        "test-agent",
@@ -165,7 +165,7 @@ func TestGenerator_validateADL(t *testing.T) {
 		{
 			name: "rust with redis cargo feature is accepted",
 			adl: &schema.ADL{
-				APIVersion: "adl.dev/v1",
+				APIVersion: "adl.inference-gateway.com/v1",
 				Kind:       "Agent",
 				Metadata: schema.Metadata{
 					Name:        "test-agent",
@@ -196,7 +196,7 @@ func TestGenerator_validateADL(t *testing.T) {
 		{
 			name: "multiple languages specified",
 			adl: &schema.ADL{
-				APIVersion: "adl.dev/v1",
+				APIVersion: "adl.inference-gateway.com/v1",
 				Kind:       "Agent",
 				Metadata: schema.Metadata{
 					Name:        "test-agent",
@@ -253,7 +253,7 @@ func TestGenerator_validateADL(t *testing.T) {
 
 func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 	goADL := &schema.ADL{
-		APIVersion: "adl.dev/v1",
+		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 		Metadata: schema.Metadata{
 			Name:        "test-agent",
@@ -282,7 +282,7 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 	}
 
 	rustADL := &schema.ADL{
-		APIVersion: "adl.dev/v1",
+		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 		Metadata: schema.Metadata{
 			Name:        "rust-agent",
@@ -391,7 +391,7 @@ func containsSubstring(content, pattern string) bool {
 
 func TestGenerator_generateCD(t *testing.T) {
 	validADL := &schema.ADL{
-		APIVersion: "adl.dev/v1",
+		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 		Metadata: schema.Metadata{
 			Name:        "test-cd-agent",
@@ -422,7 +422,7 @@ func TestGenerator_generateCD(t *testing.T) {
 	}
 
 	githubAppADL := &schema.ADL{
-		APIVersion: "adl.dev/v1",
+		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 		Metadata: schema.Metadata{
 			Name:        "test-github-app-agent",
@@ -628,7 +628,7 @@ func TestGenerator_buildGenerateCommand(t *testing.T) {
 
 func TestGenerator_IssueTemplates(t *testing.T) {
 	adlWithIssueTemplates := &schema.ADL{
-		APIVersion: "adl.dev/v1",
+		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 		Metadata: schema.Metadata{
 			Name:        "test-agent",
@@ -660,7 +660,7 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 	}
 
 	adlWithoutIssueTemplates := &schema.ADL{
-		APIVersion: "adl.dev/v1",
+		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 		Metadata: schema.Metadata{
 			Name:        "test-agent-no-templates",

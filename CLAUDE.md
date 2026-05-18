@@ -165,6 +165,6 @@ Hand-written companions live alongside the generated file:
 
 - Go 1.26.2+ required
 - Templates use Go `text/template` with Sprig v3 functions
-- ADL schema version: `adl.dev/v1`
+- ADL schema version: `adl.inference-gateway.com/v1`
 - Supports Go, Rust (TypeScript planned)
 - Use table-driven tests with isolated mocks

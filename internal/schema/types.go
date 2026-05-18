@@ -2,7 +2,8 @@
 
 package schema
 
-// JSON Schema for Agent Definition Language manifests (apiVersion adl.dev/v1).
+// JSON Schema for Agent Definition Language manifests (apiVersion
+// adl.inference-gateway.com/v1).
 type ADL struct {
 	// APIVersion corresponds to the JSON schema field "apiVersion".
 	APIVersion string `json:"apiVersion" yaml:"apiVersion" mapstructure:"apiVersion"`

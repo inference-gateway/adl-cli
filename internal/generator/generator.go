@@ -138,7 +138,7 @@ func (g *Generator) parseADL(adlFile string) (*schema.ADL, error) {
 
 // validateADL validates the ADL structure for code generation requirements
 func (g *Generator) validateADL(adl *schema.ADL) error {
-	if adl.APIVersion != "adl.dev/v1" {
+	if adl.APIVersion != "adl.inference-gateway.com/v1" {
 		return fmt.Errorf("unsupported API version: %s", adl.APIVersion)
 	}
 	if adl.Kind != "Agent" {

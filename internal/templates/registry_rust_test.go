@@ -9,7 +9,7 @@ import (
 
 func minimalRustADL() *schema.ADL {
 	return &schema.ADL{
-		APIVersion: "adl.dev/v1",
+		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 		Metadata: schema.Metadata{
 			Name:        "rust-agent",

@@ -279,7 +279,7 @@ task test
 
 ### ADL File Structure
 ```yaml
-apiVersion: adl.dev/v1
+apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: agent-name

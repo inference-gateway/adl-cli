@@ -10,7 +10,7 @@ func TestGenerateCommand(t *testing.T) {
 	tempDir := t.TempDir()
 	outputPath := filepath.Join(tempDir, "test-output")
 
-	adlContent := `apiVersion: adl.dev/v1
+	adlContent := `apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: test-agent
@@ -67,7 +67,7 @@ spec:
 func TestGenerateWithoutInit(t *testing.T) {
 	tempDir := t.TempDir()
 
-	adlContent := `apiVersion: adl.dev/v1
+	adlContent := `apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: standalone-agent
@@ -144,7 +144,7 @@ func TestGenerateWithCD(t *testing.T) {
 	tempDir := t.TempDir()
 	outputPath := filepath.Join(tempDir, "test-cd-output")
 
-	adlContent := `apiVersion: adl.dev/v1
+	adlContent := `apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: test-cd-agent
@@ -234,7 +234,7 @@ func TestGenerateWithAI(t *testing.T) {
 	tempDir := t.TempDir()
 	outputPath := filepath.Join(tempDir, "test-ai-output")
 
-	adlContent := `apiVersion: adl.dev/v1
+	adlContent := `apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: test-ai-agent
