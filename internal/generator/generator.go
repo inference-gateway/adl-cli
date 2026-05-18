@@ -162,9 +162,6 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 		return fmt.Errorf("spec.server.port must be between 1 and 65535")
 	}
 
-	// Capabilities and Language are required by the JSON Schema and
-	// therefore always present after a successful unmarshal — no
-	// nil-check needed here.
 
 	languageCount := 0
 	if adl.Spec.Language.Go != nil {
