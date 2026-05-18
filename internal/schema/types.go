@@ -111,9 +111,10 @@ type TypeScriptConfig struct {
 
 // RustConfig for Rust-specific settings
 type RustConfig struct {
-	PackageName string `yaml:"packageName" json:"packageName"`
-	Version     string `yaml:"version" json:"version"`
-	Edition     string `yaml:"edition" json:"edition"`
+	PackageName string   `yaml:"packageName" json:"packageName"`
+	Version     string   `yaml:"version" json:"version"`
+	Edition     string   `yaml:"edition" json:"edition"`
+	Features    []string `yaml:"features,omitempty" json:"features,omitempty"`
 }
 
 // Language configuration for different programming languages
@@ -138,8 +139,9 @@ type SCM struct {
 
 // SandboxConfig for sandbox environment settings
 type SandboxConfig struct {
-	Flox         *FloxConfig         `yaml:"flox,omitempty" json:"flox,omitempty"`
-	DevContainer *DevContainerConfig `yaml:"devcontainer,omitempty" json:"devcontainer,omitempty"`
+	Flox          *FloxConfig          `yaml:"flox,omitempty" json:"flox,omitempty"`
+	DevContainer  *DevContainerConfig  `yaml:"devcontainer,omitempty" json:"devcontainer,omitempty"`
+	DockerCompose *DockerComposeConfig `yaml:"dockerCompose,omitempty" json:"dockerCompose,omitempty"`
 }
 
 // FloxConfig for Flox environment settings
@@ -149,6 +151,11 @@ type FloxConfig struct {
 
 // DevContainerConfig for Dev Container environment settings
 type DevContainerConfig struct {
+	Enabled bool `yaml:"enabled" json:"enabled"`
+}
+
+// DockerComposeConfig for local docker-compose dev settings
+type DockerComposeConfig struct {
 	Enabled bool `yaml:"enabled" json:"enabled"`
 }
 

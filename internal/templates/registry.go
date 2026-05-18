@@ -189,6 +189,7 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		".gitignore":                  "config/gitignore",
 		".gitattributes":              "config/gitattributes",
 		".editorconfig":               "config/editorconfig",
+		".env.example":                "env.example",
 		"README.md":                   "docs/README.md",
 	}
 
@@ -201,13 +202,21 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		}
 	}
 
-	for _, skill := range adl.Spec.Skills {
-		snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
-		files[fmt.Sprintf("src/skills/%s.rs", snakeCaseName)] = "skill.rs"
+	if adl.Spec.Agent != nil {
+		for _, skill := range adl.Spec.Skills {
+			snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
+			files[fmt.Sprintf("src/tools/%s.rs", snakeCaseName)] = "tool.rs"
+		}
+
+		if len(adl.Spec.Skills) > 0 {
+			files["src/tools/mod.rs"] = "tool.mod.rs"
+		}
 	}
 
-	if len(adl.Spec.Skills) > 0 {
-		files["src/skills/mod.rs"] = "skill.mod.rs"
+	if adl.Spec.Sandbox != nil &&
+		adl.Spec.Sandbox.DockerCompose != nil &&
+		adl.Spec.Sandbox.DockerCompose.Enabled {
+		files["docker-compose.yaml"] = "docker-compose.yaml"
 	}
 
 	r.addSandboxFiles(adl, files)

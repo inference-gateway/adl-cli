@@ -206,6 +206,37 @@ func TestGenerator_validateADL(t *testing.T) {
 			errMsg:  "spec.server.port is required and must be greater than 0",
 		},
 		{
+			name: "rust with redis cargo feature is accepted",
+			adl: &schema.ADL{
+				APIVersion: "adl.dev/v1",
+				Kind:       "Agent",
+				Metadata: schema.Metadata{
+					Name:        "test-agent",
+					Description: "Test agent",
+					Version:     "1.0.0",
+				},
+				Spec: schema.Spec{
+					Capabilities: &schema.Capabilities{
+						Streaming:              true,
+						PushNotifications:      false,
+						StateTransitionHistory: false,
+					},
+					Server: schema.Server{
+						Port: 8080,
+					},
+					Language: &schema.Language{
+						Rust: &schema.RustConfig{
+							PackageName: "rust-agent",
+							Version:     "1.88",
+							Edition:     "2024",
+							Features:    []string{"redis"},
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
 			name: "multiple languages specified",
 			adl: &schema.ADL{
 				APIVersion: "adl.dev/v1",
@@ -302,6 +333,10 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 			Version:     "1.0.0",
 		},
 		Spec: schema.Spec{
+			Agent: &schema.Agent{
+				Provider: "openai",
+				Model:    "gpt-4o-mini",
+			},
 			Language: &schema.Language{
 				Rust: &schema.RustConfig{
 					PackageName: "rust-agent",
@@ -336,10 +371,10 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 			wantContent:  "skills/search_docs.go",
 		},
 		{
-			name:         "minimal template creates specific skill file for Rust",
+			name:         "minimal template creates specific tool file for Rust",
 			templateName: "minimal",
 			adl:          rustADL,
-			wantContent:  "src/skills/process_data.rs",
+			wantContent:  "src/tools/process_data.rs",
 		},
 	}
 

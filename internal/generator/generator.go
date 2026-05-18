@@ -313,7 +313,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 					return fmt.Errorf("service %s not found in ADL spec", serviceName)
 				}
 			}
-		} else if (templateKey == "skill.go" || templateKey == "skill.rs" || templateKey == "skill.ts") && strings.Contains(fileName, "/") {
+		} else if (templateKey == "skill.go" || templateKey == "tool.rs" || templateKey == "skill.ts") && strings.Contains(fileName, "/") {
 			parts := strings.Split(fileName, "/")
 			if len(parts) >= 2 {
 				toolFileName := parts[len(parts)-1]
@@ -393,8 +393,9 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 			fileType = "taskfile"
 		}
 
-		isSkillFile := (templateKey == "skill.go" || templateKey == "skill.rs" || templateKey == "skill.ts") ||
-			(strings.Contains(fileName, "/skills/") && (ext == ".go" || ext == ".rs" || ext == ".ts"))
+		isSkillFile := (templateKey == "skill.go" || templateKey == "tool.rs" || templateKey == "tool.mod.rs" || templateKey == "skill.ts") ||
+			(strings.Contains(fileName, "/skills/") && (ext == ".go" || ext == ".ts")) ||
+			(strings.Contains(fileName, "/tools/") && ext == ".rs")
 
 		isServiceFile := templateKey == "service.go" ||
 			(strings.Contains(fileName, "/internal/") && strings.HasSuffix(fileName, ".go") && !strings.Contains(fileName, "/logger/"))
@@ -551,14 +552,11 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 				filesToIgnore = append(filesToIgnore, fmt.Sprintf("internal/%s/%s.go", snakeCaseName, snakeCaseName))
 			}
 		case "rust":
-			for _, skill := range adl.Spec.Skills {
-				snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
-				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/skills/%s.rs", snakeCaseName))
-			}
-
-			for serviceName := range adl.Spec.Services {
-				snakeCaseName := strings.ReplaceAll(serviceName, "-", "_")
-				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/services/%s.rs", snakeCaseName))
+			if adl.Spec.Agent != nil {
+				for _, skill := range adl.Spec.Skills {
+					snakeCaseName := strings.ReplaceAll(skill.ID, "-", "_")
+					filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/tools/%s.rs", snakeCaseName))
+				}
 			}
 		case "typescript":
 			for _, skill := range adl.Spec.Skills {
@@ -577,7 +575,7 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 		return nil
 	}
 
-	content := generateA2aIgnoreContent(filesToIgnore)
+	content := generateA2aIgnoreContent(filesToIgnore, language)
 
 	if err := os.WriteFile(ignoreFilePath, []byte(content), 0644); err != nil {
 		return fmt.Errorf("failed to write .adl-ignore file: %w", err)
@@ -590,32 +588,59 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 }
 
 // generateA2aIgnoreContent generates the content for .adl-ignore file
-func generateA2aIgnoreContent(filesToIgnore []string) string {
-	content := `# .adl-ignore file
+func generateA2aIgnoreContent(filesToIgnore []string, language string) string {
+	var exampleFile, exampleGlob, exampleDir, customFile, depsHeader, depsList string
+
+	switch language {
+	case "rust":
+		exampleFile = "src/tools/agent_tool.rs"
+		exampleGlob = "*.rs"
+		exampleDir = "target/"
+		customFile = "my-custom-file.rs"
+		depsHeader = "# Rust dependency files"
+		depsList = "Cargo.lock\n"
+	case "typescript":
+		exampleFile = "src/skills/agent_skill.ts"
+		exampleGlob = "*.ts"
+		exampleDir = "node_modules/"
+		customFile = "my-custom-file.ts"
+		depsHeader = "# Node dependency files"
+		depsList = "package-lock.json\npnpm-lock.yaml\nyarn.lock\n"
+	default:
+		exampleFile = "skills/agent_skill.go"
+		exampleGlob = "*.go"
+		exampleDir = "build/"
+		customFile = "my-custom-file.go"
+		depsHeader = "# Go dependency files"
+		depsList = "go.sum\n"
+	}
+
+	content := fmt.Sprintf(`# .adl-ignore file
 # This file specifies which files should not be overwritten during generation operations.
 # Files listed here typically contain implementations that users have completed.
 #
 # Patterns supported:
-# - Exact file names: skills/agent_skill.go
-# - Wildcards: *.go
+# - Exact file names: %s
+# - Wildcards: %s
 # - Directory patterns: skills/*
-# - Directories: build/
+# - Directories: %s
 # - Comments: lines starting with #
 
-`
+`, exampleFile, exampleGlob, exampleDir)
 
 	for _, file := range filesToIgnore {
 		content += file + "\n"
 	}
 
-	content += `
-# Go dependency files
-go.sum
+	content += fmt.Sprintf(`
+%s
+%s`, depsHeader, depsList)
 
+	content += fmt.Sprintf(`
 # Add your own files to ignore here:
-# my-custom-file.go
+# %s
 # config/secrets.yaml
-`
+`, customFile)
 
 	return content
 }
@@ -721,7 +746,8 @@ func (g *Generator) runPostGenerationSteps(adl *schema.ADL, outputDir, language 
 			commands = []string{"go mod tidy", "go fmt ./..."}
 			fmt.Println("🔧 Running default Go post-generation commands...")
 		case "rust":
-			commands = []string{"cargo fmt", "cargo check"}
+			commands = []string{"cargo fmt"}
+			fmt.Println("🔧 Running default Rust post-generation commands...")
 		case "typescript":
 			// Default TypeScript commands could be added here
 			// commands = []string{"npm install", "npm run format"}

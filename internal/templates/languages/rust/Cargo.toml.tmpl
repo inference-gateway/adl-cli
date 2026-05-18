@@ -6,14 +6,23 @@ rust-version = "{{ .ADL.Spec.Language.Rust.Version }}"
 description = "{{ .ADL.Metadata.Description }}"
 
 [dependencies]
-inference-gateway-adk = "0.2.2"
-inference-gateway-sdk = "0.11.0"
-tokio = { version = "1.0", features = ["full", "signal"] }
+{{- if .ADL.Spec.Language.Rust.Features }}
+inference-gateway-adk = { version = "0.4.3", features = [{{- range $i, $f := .ADL.Spec.Language.Rust.Features }}{{ if $i }}, {{ end }}{{ $f | quote }}{{- end }}] }
+{{- else }}
+inference-gateway-adk = "0.4.3"
+{{- end }}
+inference-gateway-sdk = "0.13.3"
+tokio = { version = "1", features = ["full", "signal"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-anyhow = "1.0"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+async-trait = "0.1"
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+dotenvy = "0.15.7"
+envy = "0.4.2"
 
 [profile.release]
 opt-level = 3
