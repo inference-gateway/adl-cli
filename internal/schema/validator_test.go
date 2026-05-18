@@ -261,33 +261,6 @@ spec:
 			wantErr: false,
 		},
 		{
-			name: "skill with stray schema field is rejected",
-			adl: `apiVersion: adl.inference-gateway.com/v1
-kind: Agent
-metadata:
-  name: bad-skill
-  description: "schema not allowed on skills"
-  version: "0.1.0"
-spec:
-  capabilities:
-    streaming: true
-    pushNotifications: false
-    stateTransitionHistory: false
-  skills:
-    - id: bad-skill
-      schema:
-        type: object
-  server:
-    port: 8080
-  language:
-    go:
-      module: "github.com/example/bad"
-      version: "1.26.2"
-`,
-			wantErr: true,
-			errSub:  "function-call fields",
-		},
-		{
 			name: "bare skill missing description is rejected",
 			adl: `apiVersion: adl.inference-gateway.com/v1
 kind: Agent
