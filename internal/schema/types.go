@@ -114,6 +114,9 @@ type DeploymentConfig struct {
 	// CloudRun corresponds to the JSON schema field "cloudrun".
 	CloudRun *CloudRunConfig `json:"cloudrun,omitempty,omitzero" yaml:"cloudrun,omitempty" mapstructure:"cloudrun,omitempty"`
 
+	// Kubernetes corresponds to the JSON schema field "kubernetes".
+	Kubernetes *KubernetesConfig `json:"kubernetes,omitempty,omitzero" yaml:"kubernetes,omitempty" mapstructure:"kubernetes,omitempty"`
+
 	// Type corresponds to the JSON schema field "type".
 	Type DeploymentConfigType `json:"type,omitempty,omitzero" yaml:"type,omitempty" mapstructure:"type,omitempty"`
 }
@@ -163,6 +166,11 @@ type ImageConfig struct {
 
 	// UseCloudBuild corresponds to the JSON schema field "useCloudBuild".
 	UseCloudBuild bool `json:"useCloudBuild,omitempty,omitzero" yaml:"useCloudBuild,omitempty" mapstructure:"useCloudBuild,omitempty"`
+}
+
+type KubernetesConfig struct {
+	// Image corresponds to the JSON schema field "image".
+	Image *ImageConfig `json:"image,omitempty,omitzero" yaml:"image,omitempty" mapstructure:"image,omitempty"`
 }
 
 type Language struct {

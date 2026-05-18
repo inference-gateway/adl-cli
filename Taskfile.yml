@@ -5,7 +5,7 @@ vars:
   VERSION: 0.28.0
   BUILD_DIR: bin
   DIST_DIR: dist
-  ADL_SCHEMA_VERSION: v0.1.1
+  ADL_SCHEMA_VERSION: v0.2.0
   ADL_SCHEMA_URL: https://raw.githubusercontent.com/inference-gateway/adl/{{.ADL_SCHEMA_VERSION}}/schema/v1/schema.json
   ADL_SCHEMA_PATH: internal/schema/schema.json
 
@@ -121,6 +121,7 @@ tasks:
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-artifacts-minio.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/cloudrun-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/cloudrun-ghcr-agent.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/kubernetes-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent-redis.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent-ai.yaml
@@ -137,6 +138,7 @@ tasks:
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/go-agent-artifacts-minio.yaml --output test-output/go-agent-artifacts-minio --overwrite
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/cloudrun-agent.yaml --output test-output/cloudrun-agent --overwrite
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/cloudrun-ghcr-agent.yaml --output test-output/cloudrun-ghcr-agent --overwrite
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/kubernetes-agent.yaml --output test-output/kubernetes-agent --overwrite
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/rust-agent.yaml --output test-output/rust-agent --overwrite
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/rust-agent-redis.yaml --output test-output/rust-agent-redis --overwrite
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/rust-agent-ai.yaml --output test-output/rust-agent-ai --overwrite
