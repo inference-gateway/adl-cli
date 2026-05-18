@@ -12,7 +12,7 @@ spec:
     stateTransitionHistory: true
   card:
     protocolVersion: "0.3.0"
-    preferredTransport: "JSONRPC"
+    preferredTransport: JSONRPC
     defaultInputModes:
       - text
       - voice
