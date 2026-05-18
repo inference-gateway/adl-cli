@@ -291,8 +291,8 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 		},
 		Spec: schema.Spec{
 			Agent: &schema.Agent{
-				Provider: schema.AgentProviderOpenai,
-				Model:    "gpt-4o-mini",
+				Provider: schema.AgentProviderDeepseek,
+				Model:    "deepseek-v4-flash",
 			},
 			Language: schema.Language{
 				Rust: &schema.RustConfig{

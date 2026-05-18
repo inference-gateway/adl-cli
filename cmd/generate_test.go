@@ -79,8 +79,8 @@ spec:
     pushNotifications: false
     stateTransitionHistory: false
   agent:
-    provider: openai
-    model: gpt-4o-mini
+    provider: deepseek
+    model: deepseek-v4-flash
   skills:
     - id: test_skill_id
       name: test_skill

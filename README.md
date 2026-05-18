@@ -207,8 +207,8 @@ adl init my-agent --defaults
 adl init my-agent \
   --name "Weather Agent" \
   --description "Provides weather information" \
-  --provider openai \
-  --model gpt-4o-mini \
+  --provider deepseek \
+  --model deepseek-v4-flash \
   --language go \
   --flox
 ```
@@ -429,8 +429,8 @@ spec:
     pushNotifications: true
     stateTransitionHistory: true
   agent:
-    provider: openai
-    model: gpt-4o-mini
+    provider: deepseek
+    model: deepseek-v4-flash
     systemPrompt: |
       You are a helpful assistant with enterprise capabilities.
       Always prioritize security and compliance.
