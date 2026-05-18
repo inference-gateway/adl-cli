@@ -382,7 +382,7 @@ type Spec struct {
 	Tools []Tool `json:"tools,omitempty,omitzero" yaml:"tools,omitempty" mapstructure:"tools,omitempty"`
 }
 
-type SpecConfig map[string]map[string]interface{}
+type SpecConfig map[string]map[string]any
 
 type SpecServices map[string]Service
 
@@ -409,7 +409,7 @@ type Tool struct {
 }
 
 // Free-form JSON Schema describing the tool's input parameters.
-type ToolSchema map[string]interface{}
+type ToolSchema map[string]any
 
 type TypeScriptConfig struct {
 	// NodeVersion corresponds to the JSON schema field "nodeVersion".

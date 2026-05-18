@@ -101,6 +101,7 @@ tasks:
           --only-models \
           --output internal/schema/types.go \
           "$tmp"
+      - gofmt -r 'interface{} -> any' -w internal/schema/types.go
       - go fmt ./internal/schema/...
 
   clean:
