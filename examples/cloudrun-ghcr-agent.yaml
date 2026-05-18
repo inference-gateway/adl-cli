@@ -11,8 +11,8 @@ spec:
     pushNotifications: false
     stateTransitionHistory: true
   agent:
-    provider: openai
-    model: gpt-4o
+    provider: deepseek
+    model: deepseek-v4-flash
     systemPrompt: |
       You are a helpful A2A agent that uses GitHub Container Registry.
       Your container is pre-built and stored in GHCR.
