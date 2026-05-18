@@ -311,9 +311,7 @@ const ServiceTypeRepository ServiceType = "repository"
 const ServiceTypeService ServiceType = "service"
 
 // Markdown playbook injected into the agent's system prompt. Pulled from the
-// skills registry or scaffolded blank with bare: true. Older v1 manifests may also
-// use Skill for the legacy function-call shape (carrying
-// schema/implementation/inject); new manifests should use Tool for that.
+// skills registry or scaffolded blank with bare: true.
 type Skill struct {
 	// Bare corresponds to the JSON schema field "bare".
 	Bare bool `json:"bare,omitempty,omitzero" yaml:"bare,omitempty" mapstructure:"bare,omitempty"`
@@ -321,30 +319,11 @@ type Skill struct {
 	// Description corresponds to the JSON schema field "description".
 	Description string `json:"description,omitempty,omitzero" yaml:"description,omitempty" mapstructure:"description,omitempty"`
 
-	// Examples corresponds to the JSON schema field "examples".
-	Examples []string `json:"examples,omitempty,omitzero" yaml:"examples,omitempty" mapstructure:"examples,omitempty"`
-
 	// ID corresponds to the JSON schema field "id".
 	ID string `json:"id" yaml:"id" mapstructure:"id"`
 
-	// Implementation corresponds to the JSON schema field "implementation".
-	Implementation string `json:"implementation,omitempty,omitzero" yaml:"implementation,omitempty" mapstructure:"implementation,omitempty"`
-
-	// Inject corresponds to the JSON schema field "inject".
-	Inject []string `json:"inject,omitempty,omitzero" yaml:"inject,omitempty" mapstructure:"inject,omitempty"`
-
-	// InputModes corresponds to the JSON schema field "inputModes".
-	InputModes []string `json:"inputModes,omitempty,omitzero" yaml:"inputModes,omitempty" mapstructure:"inputModes,omitempty"`
-
 	// Name corresponds to the JSON schema field "name".
 	Name string `json:"name,omitempty,omitzero" yaml:"name,omitempty" mapstructure:"name,omitempty"`
-
-	// OutputModes corresponds to the JSON schema field "outputModes".
-	OutputModes []string `json:"outputModes,omitempty,omitzero" yaml:"outputModes,omitempty" mapstructure:"outputModes,omitempty"`
-
-	// Legacy v1 field: JSON Schema for a function-call Skill. New manifests should
-	// declare functions under spec.tools instead.
-	Schema SkillSchema `json:"schema,omitempty,omitzero" yaml:"schema,omitempty" mapstructure:"schema,omitempty"`
 
 	// Source corresponds to the JSON schema field "source".
 	Source string `json:"source,omitempty,omitzero" yaml:"source,omitempty" mapstructure:"source,omitempty"`
@@ -355,10 +334,6 @@ type Skill struct {
 	// Version corresponds to the JSON schema field "version".
 	Version string `json:"version,omitempty,omitzero" yaml:"version,omitempty" mapstructure:"version,omitempty"`
 }
-
-// Legacy v1 field: JSON Schema for a function-call Skill. New manifests should
-// declare functions under spec.tools instead.
-type SkillSchema map[string]interface{}
 
 type Spec struct {
 	// Acronyms corresponds to the JSON schema field "acronyms".
@@ -417,26 +392,14 @@ type Tool struct {
 	// Description corresponds to the JSON schema field "description".
 	Description string `json:"description" yaml:"description" mapstructure:"description"`
 
-	// Examples corresponds to the JSON schema field "examples".
-	Examples []string `json:"examples,omitempty,omitzero" yaml:"examples,omitempty" mapstructure:"examples,omitempty"`
-
 	// ID corresponds to the JSON schema field "id".
 	ID string `json:"id" yaml:"id" mapstructure:"id"`
-
-	// Implementation corresponds to the JSON schema field "implementation".
-	Implementation string `json:"implementation,omitempty,omitzero" yaml:"implementation,omitempty" mapstructure:"implementation,omitempty"`
 
 	// Inject corresponds to the JSON schema field "inject".
 	Inject []string `json:"inject,omitempty,omitzero" yaml:"inject,omitempty" mapstructure:"inject,omitempty"`
 
-	// InputModes corresponds to the JSON schema field "inputModes".
-	InputModes []string `json:"inputModes,omitempty,omitzero" yaml:"inputModes,omitempty" mapstructure:"inputModes,omitempty"`
-
 	// Name corresponds to the JSON schema field "name".
 	Name string `json:"name" yaml:"name" mapstructure:"name"`
-
-	// OutputModes corresponds to the JSON schema field "outputModes".
-	OutputModes []string `json:"outputModes,omitempty,omitzero" yaml:"outputModes,omitempty" mapstructure:"outputModes,omitempty"`
 
 	// Free-form JSON Schema describing the tool's input parameters.
 	Schema ToolSchema `json:"schema" yaml:"schema" mapstructure:"schema"`

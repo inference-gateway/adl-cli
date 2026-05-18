@@ -373,16 +373,12 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 
 				if foundTool != nil {
 					toolContext := map[string]interface{}{
-						"ID":             foundTool.ID,
-						"Name":           foundTool.Name,
-						"Description":    foundTool.Description,
-						"Tags":           foundTool.Tags,
-						"Examples":       foundTool.Examples,
-						"InputModes":     foundTool.InputModes,
-						"OutputModes":    foundTool.OutputModes,
-						"Schema":         foundTool.Schema,
-						"Implementation": foundTool.Implementation,
-						"Inject":         foundTool.Inject,
+						"ID":          foundTool.ID,
+						"Name":        foundTool.Name,
+						"Description": foundTool.Description,
+						"Tags":        foundTool.Tags,
+						"Schema":      foundTool.Schema,
+						"Inject":      foundTool.Inject,
 					}
 
 					if adl.Spec.Language.Go != nil {

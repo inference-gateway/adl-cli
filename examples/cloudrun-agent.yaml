@@ -25,9 +25,6 @@ spec:
       tags:
         - greeting
         - interaction
-      examples:
-        - "Hello there!"
-        - "Hi, how can I help you today?"
       schema:
         type: object
         properties:
