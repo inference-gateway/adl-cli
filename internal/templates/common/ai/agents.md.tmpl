@@ -64,6 +64,12 @@ No AI provider configured - this is a minimal agent.
 
 This agent exposes {{ len .ADL.Spec.Tools }} function-call tools:
 {{- range .ADL.Spec.Tools }}
+{{- if isBuiltinToolID .ID }}{{- $m := builtinToolMeta .ID }}
+
+### {{ $m.Name }} (built-in)
+- **Description**: {{ $m.Description }}
+- **Parameters**: {{ if $m.Parameters }}{{ $m.Parameters | join ", " }}{{ else }}None{{ end }}
+{{- else }}
 
 ### {{ .Name }}
 - **Description**: {{ .Description }}
@@ -72,6 +78,7 @@ This agent exposes {{ len .ADL.Spec.Tools }} function-call tools:
 {{- end }}
 - **Input Schema**: Defined in agent configuration
 - **Output Schema**: Defined in agent configuration
+{{- end }}
 {{- end }}
 {{- else }}
 
@@ -267,7 +274,11 @@ docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Me
 ├── main.go                       # Server entry point
 ├── tools/                        # Function-call tools
 {{- range .ADL.Spec.Tools }}
-│   └── {{ printf "%-26s" (printf "%s.go" .Name) }}# {{ .Description }}
+{{- if isBuiltinToolID .ID }}{{- $m := builtinToolMeta .ID }}
+│   └── {{ printf "%-26s" (printf "%s.go" .ID) }}# {{ $m.Description }}
+{{- else }}
+│   └── {{ printf "%-26s" (printf "%s.go" .ID) }}# {{ .Description }}
+{{- end }}
 {{- end }}
 ├── skills/                       # Skill directories (SKILL.md + optional assets)
 {{- range .Skills }}
@@ -287,7 +298,11 @@ docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Me
 │   ├── main.rs                   # Server entry point
 │   └── tools/                    # Tool descriptors + handlers
 {{- range .ADL.Spec.Tools }}
-│       ├── {{ printf "%-21s" (printf "%s.rs" .Name) }}# {{ .Description }}
+{{- if isBuiltinToolID .ID }}{{- $m := builtinToolMeta .ID }}
+│       ├── {{ printf "%-21s" (printf "%s.rs" .ID) }}# {{ $m.Description }}
+{{- else }}
+│       ├── {{ printf "%-21s" (printf "%s.rs" .ID) }}# {{ .Description }}
+{{- end }}
 {{- end }}
 │       └── mod.rs                # Tools module
 ├── skills/                       # Skill directories (SKILL.md + optional assets)
@@ -308,7 +323,11 @@ docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Me
 │   ├── index.ts                  # Server entry point
 │   └── tools/                    # Function-call tools
 {{- range .ADL.Spec.Tools }}
-│       └── {{ printf "%-21s" (printf "%s.ts" .Name) }}# {{ .Description }}
+{{- if isBuiltinToolID .ID }}{{- $m := builtinToolMeta .ID }}
+│       └── {{ printf "%-21s" (printf "%s.ts" .ID) }}# {{ $m.Description }}
+{{- else }}
+│       └── {{ printf "%-21s" (printf "%s.ts" .ID) }}# {{ .Description }}
+{{- end }}
 {{- end }}
 ├── skills/                       # Skill directories (SKILL.md + optional assets)
 {{- range .Skills }}
