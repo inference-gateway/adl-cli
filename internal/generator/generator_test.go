@@ -577,7 +577,7 @@ func TestGenerator_buildGenerateCommand(t *testing.T) {
 			expectedCmd: "adl generate --file agent.yaml --output .",
 		},
 		{
-			name: "config with all flags",
+			name: "config with all flags rewrites paths to in-project canonical values",
 			config: Config{
 				ADLFile:            "my-agent.yaml",
 				OutputDir:          "./output",
@@ -590,7 +590,7 @@ func TestGenerator_buildGenerateCommand(t *testing.T) {
 				EnableDevContainer: true,
 				EnableAI:           true,
 			},
-			expectedCmd: "adl generate --file my-agent.yaml --output ./output --template custom --overwrite --ci --cd --deployment kubernetes --flox --devcontainer --ai",
+			expectedCmd: "adl generate --file agent.yaml --output . --template custom --overwrite --ci --cd --deployment kubernetes --flox --devcontainer --ai",
 		},
 		{
 			name: "config reproducing the issue scenario",

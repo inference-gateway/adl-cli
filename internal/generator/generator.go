@@ -590,23 +590,14 @@ func (g *Generator) getVersion() string {
 	return "dev"
 }
 
-// buildGenerateCommand constructs the original adl generate command from the config
+// buildGenerateCommand constructs the adl generate command embedded in the
+// generated Taskfile. Paths are always the in-project canonical values
+// (agent.yaml at the project root) so the task works after `cd` into the
+// generated project, regardless of how `adl generate` was originally invoked.
 func (g *Generator) buildGenerateCommand() string {
 	var parts []string
 
-	parts = append(parts, "adl", "generate")
-
-	if g.config.ADLFile != "" {
-		parts = append(parts, "--file", g.config.ADLFile)
-	} else {
-		parts = append(parts, "--file", "agent.yaml")
-	}
-
-	if g.config.OutputDir != "" {
-		parts = append(parts, "--output", g.config.OutputDir)
-	} else {
-		parts = append(parts, "--output", ".")
-	}
+	parts = append(parts, "adl", "generate", "--file", "agent.yaml", "--output", ".")
 
 	if g.config.Template != "" && g.config.Template != "minimal" {
 		parts = append(parts, "--template", g.config.Template)
