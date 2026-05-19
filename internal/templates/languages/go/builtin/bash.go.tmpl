@@ -74,7 +74,7 @@ func NewBashTool(logger *zap.Logger, cfg BashConfig) server.Tool {
 // Handler executes the Bash tool.
 func (t *BashTool) Handler(ctx context.Context, args map[string]any) (string, error) {
 	if !t.cfg.Enabled {
-		return "", errors.New("Bash tool is disabled; set spec.config.tools.bash.enabled: true and ensure A2A_BASH_DISABLED is not 1")
+		return "", errors.New("bash tool is disabled; set spec.config.tools.bash.enabled: true and ensure A2A_BASH_DISABLED is not 1")
 	}
 
 	command, _ := args["command"].(string)

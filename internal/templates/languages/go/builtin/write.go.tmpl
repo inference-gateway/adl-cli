@@ -55,7 +55,7 @@ func NewWriteTool(logger *zap.Logger, cfg WriteConfig) server.Tool {
 // Handler executes the Write tool.
 func (t *WriteTool) Handler(ctx context.Context, args map[string]any) (string, error) {
 	if !t.cfg.Enabled {
-		return "", errors.New("Write tool is disabled; set spec.config.tools.write.enabled: true in the ADL and regenerate")
+		return "", errors.New("write tool is disabled; set spec.config.tools.write.enabled: true in the ADL and regenerate")
 	}
 
 	rawPath, _ := args["file_path"].(string)

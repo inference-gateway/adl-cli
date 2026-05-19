@@ -70,7 +70,7 @@ pub fn descriptor() -> ChatCompletionTool {
 /// Handle a Bash invocation.
 pub async fn handle(args: Value, cfg: Config) -> anyhow::Result<String> {
     if !cfg.enabled {
-        bail!("Bash tool is disabled; set spec.config.tools.bash.enabled: true and ensure A2A_BASH_DISABLED is not 1");
+        bail!("bash tool is disabled; set spec.config.tools.bash.enabled: true and ensure A2A_BASH_DISABLED is not 1");
     }
 
     let command = args

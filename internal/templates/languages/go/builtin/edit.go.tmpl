@@ -59,7 +59,7 @@ func NewEditTool(logger *zap.Logger, cfg EditConfig) server.Tool {
 // Handler executes the Edit tool.
 func (t *EditTool) Handler(ctx context.Context, args map[string]any) (string, error) {
 	if !t.cfg.Enabled {
-		return "", errors.New("Edit tool is disabled; set spec.config.tools.edit.enabled: true in the ADL and regenerate")
+		return "", errors.New("edit tool is disabled; set spec.config.tools.edit.enabled: true in the ADL and regenerate")
 	}
 
 	rawPath, _ := args["file_path"].(string)
