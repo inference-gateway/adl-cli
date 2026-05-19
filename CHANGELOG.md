@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.30.3](https://github.com/inference-gateway/adl-cli/compare/v0.30.2...v0.30.3) (2026-05-19)
+
+### ♻️ Improvements
+
+* **builtin-tools:** Load Go built-in tool config from env vars via envconfig ([#116](https://github.com/inference-gateway/adl-cli/issues/116)) ([780da9d](https://github.com/inference-gateway/adl-cli/commit/780da9d6e8f2ac231a0117572ec5267a17ee321f))
+
 ## [0.30.2](https://github.com/inference-gateway/adl-cli/compare/v0.30.1...v0.30.2) (2026-05-19)
 
 ### 🔧 Miscellaneous
