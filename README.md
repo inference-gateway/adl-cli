@@ -631,7 +631,7 @@ The 3-segment form assumes a `skills/<id>/` subdirectory inside the repo (the co
 
 The generated agent advertises skills to the LLM via a frontmatter-only manifest, **not** by inlining SKILL.md bodies. At startup it walks first-level subdirectories under `skills/` (overridable with `A2A_SKILLS_DIR`), parses each `<id>/SKILL.md`'s YAML frontmatter, and appends an `AVAILABLE SKILLS:` block to the system prompt:
 
-```
+```text
 AVAILABLE SKILLS:
 Skills are reusable instructions for specific tasks. When a task matches a
 skill's description, read the SKILL.md file at the listed path using the Read
