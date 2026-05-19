@@ -77,7 +77,11 @@ The agent uses OpenAI-compatible LLM client. Configure with:
 {{- if .ADL.Spec.Tools }}
 The following tools are currently defined:
 {{- range .ADL.Spec.Tools }}
+{{- if isBuiltinToolID .ID }}{{- $m := builtinToolMeta .ID }}
+- **{{ $m.Name }}** (built-in): {{ $m.Description }}
+{{- else }}
 - **{{ .Name }}**: {{ .Description }}
+{{- end }}
 {{- end }}
 
 To modify tools:
