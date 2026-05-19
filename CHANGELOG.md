@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.30.6](https://github.com/inference-gateway/adl-cli/compare/v0.30.5...v0.30.6) (2026-05-19)
+
+### 🐛 Bug Fixes
+
+* Built-in read tool ([f75d509](https://github.com/inference-gateway/adl-cli/commit/f75d509ea114f0207174af4ccf71391799153fa7))
+
+### 🔧 Miscellaneous
+
+* **deps:** Bump infer CLI to latest ([3d80831](https://github.com/inference-gateway/adl-cli/commit/3d808312f939f70412986311548bab92ae552933))
+
 ## [0.30.5](https://github.com/inference-gateway/adl-cli/compare/v0.30.4...v0.30.5) (2026-05-19)
 
 ### 🔧 Miscellaneous
