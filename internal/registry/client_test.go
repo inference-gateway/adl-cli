@@ -58,26 +58,6 @@ func TestClient_FetchByID(t *testing.T) {
 	}
 }
 
-func TestClient_FetchURL(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/external/skill.md" {
-			_, _ = w.Write([]byte("---\nname: ext\ndescription: e\n---\nbody\n"))
-			return
-		}
-		http.NotFound(w, r)
-	}))
-	defer srv.Close()
-
-	client := NewClient("")
-	body, err := client.FetchURL(context.Background(), srv.URL+"/external/skill.md")
-	if err != nil {
-		t.Fatalf("FetchURL: %v", err)
-	}
-	if !strings.Contains(string(body), "name: ext") {
-		t.Errorf("unexpected body: %q", body)
-	}
-}
-
 func TestNewClient_DefaultBaseURL(t *testing.T) {
 	c := NewClient("")
 	if c.BaseURL != DefaultBaseURL {

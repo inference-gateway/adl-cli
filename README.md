@@ -411,7 +411,7 @@ The complete ADL schema includes:
 - **services**: Service services with interfaces, factories, and type definitions
 - **agent**: AI provider configuration (OpenAI, Anthropic, DeepSeek, Ollama, Google, Mistral, Groq)
 - **tools**: Function-call definitions with JSON schemas, validation, and service injection support
-- **skills**: Markdown playbooks (id + optional `bare`, version, source) pulled from the skills registry or scaffolded locally, advertised on the agent card, and prepended to the system prompt at runtime
+- **skills**: Markdown playbooks (id + optional `bare`, version, source) pulled from the skills registry, fetched as a full directory from a GitHub repo (shorthand or URL), or scaffolded locally; advertised on the agent card and prepended to the system prompt at runtime
 - **server**: HTTP server configuration with authentication support
 - **language**: Programming language-specific settings (Go, Rust, TypeScript) and configurable acronyms
 - **scm**: Source control management configuration (GitHub, GitLab)
@@ -479,7 +479,9 @@ spec:
             type: integer
             description: "Result limit"
             maximum: 1000
-        required: [query, table]
+        required:
+          - query
+          - table
     - name: send_notification
       description: "Send multi-channel notifications"
       inject:
@@ -496,11 +498,23 @@ spec:
             description: "Message content"
           priority:
             type: string
-            enum: ["low", "medium", "high", "critical"]
+            enum:
+              - low
+              - medium
+              - high
+              - critical
           channel:
             type: string
-            enum: ["email", "slack", "teams", "webhook"]
-        required: [recipient, message, priority, channel]
+            enum:
+              - email
+              - slack
+              - teams
+              - webhook
+        required:
+          - recipient
+          - message
+          - priority
+          - channel
   server:
     port: 8443
     debug: false
@@ -561,15 +575,57 @@ spec:
       name: company-policy
       description: "Internal compliance rules to follow"
       tags: [policy, compliance]
-    - id: custom-external
-      source: https://example.com/skills/custom-external.md  # per-skill override
+    - id: pdf                    # pull a full skill directory from GitHub
+      source: anthropics/skills/pdf
+    - id: skill-creator
+      source: skill-creator@v1.0 # pin to a tag/branch/sha
 ```
 
-Resolution rules:
+### Resolution rules
 
-- `bare: true` → the CLI scaffolds `skills/<id>/SKILL.md` with frontmatter from the manifest and a TODO body that you author by hand. The whole `skills/<id>/` directory is listed in `.adl-ignore`, so any bundled scripts, templates, or resources you drop alongside `SKILL.md` are preserved on regeneration.
-- `source: <url>` → fetch from that URL (becomes `skills/<id>/SKILL.md`).
-- Otherwise → fetch `https://registry.inference-gateway.com/skills/<id>[/<version>].md` (becomes `skills/<id>/SKILL.md`). Override the registry with `ADL_SKILLS_REGISTRY`. Use `adl generate --offline` to skip network access (requires every non-bare skill to be cached at `~/.adl/skills-cache/`). Registry skills currently produce only the `SKILL.md` file — bundled-asset support over the wire is a future enhancement.
+- **`bare: true`** → the CLI scaffolds `skills/<id>/SKILL.md` with frontmatter from the manifest and a TODO body that you author by hand. The whole `skills/<id>/` directory is listed in `.adl-ignore`, so any bundled scripts, templates, or resources you drop alongside `SKILL.md` are preserved on regeneration.
+- **`source:` set** → the source must resolve to a public GitHub directory (a `/tree/<ref>/<path>` URL, or one of the shorthand forms below). The CLI pulls the _entire_ directory — `SKILL.md`, reference docs, bundled scripts, anything else — and writes it to `skills/<id>/`. Non-`github.com` URLs are rejected so the same code path always produces a complete skill bundle, not a stray markdown file.
+- **Otherwise** → fetch `https://registry.inference-gateway.com/skills/<id>[/<version>].md` (becomes `skills/<id>/SKILL.md`). Override the registry with `ADL_SKILLS_REGISTRY`. Registry-by-id currently ships `SKILL.md` only; if you need bundled assets, use `source:` to point at a GitHub directory.
+
+Use `adl generate --offline` to skip network access — every non-bare skill must already be cached at `~/.adl/skills-cache/<id>@<ref>/` (where `<ref>` is the pinned tag/branch, or `latest` for an unpinned registry fetch).
+
+### `source:` shorthand grammar
+
+Every form below resolves to a GitHub `tree/<ref>/<path>` URL. An optional `@<tag>` suffix pins a branch, tag, or commit SHA; omit it to use the default `main` branch.
+
+| Shorthand                        | Expands to                                                                   |
+| -------------------------------- | ---------------------------------------------------------------------------- |
+| `<skill>`                        | `https://github.com/inference-gateway/skills/tree/main/skills/<skill>`       |
+| `<skill>@<tag>`                  | `https://github.com/inference-gateway/skills/tree/<tag>/skills/<skill>`      |
+| `<owner>/<repo>/<skill>`         | `https://github.com/<owner>/<repo>/tree/main/skills/<skill>`                 |
+| `<owner>/<repo>/<skill>@<tag>`   | `https://github.com/<owner>/<repo>/tree/<tag>/skills/<skill>`                |
+| Full `https://github.com/...` URL | passed through unchanged                                                    |
+
+Concrete examples:
+
+```yaml
+# Default inference-gateway/skills, latest main:
+- id: skill-creator
+  source: skill-creator
+
+# Default inference-gateway/skills, pinned to a tag:
+- id: skill-creator
+  source: skill-creator@v1.0
+
+# Different repo (Anthropic's official skill library):
+- id: pdf
+  source: anthropics/skills/pdf
+
+# Different repo, pinned to a commit SHA:
+- id: pdf
+  source: anthropics/skills/pdf@abc1234
+
+# Full URL for anything that doesn't fit the shorthand:
+- id: custom
+  source: https://github.com/my-org/my-repo/tree/release/path/to/skill
+```
+
+The 3-segment form assumes a `skills/<id>/` subdirectory inside the repo (the convention used by both `inference-gateway/skills` and `anthropics/skills`). If your repo lays skills out differently, pass the full URL.
 
 At runtime, the generated agent walks first-level subdirectories under `skills/` (overridable with `A2A_SKILLS_DIR`), reads each `<id>/SKILL.md`, strips frontmatter, and concatenates the bodies onto the configured `systemPrompt`. Both Go and Rust runtimes ship with this loader baked into `main.go` / `main.rs`.
 

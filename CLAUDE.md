@@ -80,7 +80,17 @@ main.go                       # Entry point, sets version
 ### Tools vs Skills
 
 - **Tools** are functions the agent can invoke. Defined under `spec.tools`. Each one becomes code in the target language with a JSON schema.
-- **Skills** are markdown documents (YAML frontmatter + body) injected into the system prompt at startup. Defined under `spec.skills`. Each is generated under `skills/<id>/SKILL.md` (one directory per skill); bare skills may ship bundled scripts/resources alongside `SKILL.md` and the whole directory is protected by `.adl-ignore`. Skills are either pulled from `registry.inference-gateway.com/skills/<id>[/<version>].md` (override with `ADL_SKILLS_REGISTRY`) or scaffolded blank with `bare: true`. Registry skills currently produce only `SKILL.md` (no bundled assets over the wire). `adl generate --offline` skips registry fetches.
+- **Skills** are markdown documents (YAML frontmatter + body) injected into the system prompt at startup. Defined under `spec.skills`. Each is generated under `skills/<id>/SKILL.md` (one directory per skill, Anthropic-style layout — bundled scripts/resources may live alongside `SKILL.md`). Resolution paths:
+  - **`bare: true`** → scaffolded from inline `name`/`description`/`tags`; the whole `skills/<id>/` directory is listed in `.adl-ignore` so user-authored assets survive regeneration.
+  - **`source:` set** → must be a `github.com` `/tree/<ref>/<path>` URL or one of the shorthand forms below; the full directory is fetched (SKILL.md + bundled assets) via the GitHub trees API + `raw.githubusercontent.com`. Implemented in `internal/registry/installer.go`.
+  - **Otherwise** → fetch `registry.inference-gateway.com/skills/<id>[/<version>].md` (override with `ADL_SKILLS_REGISTRY`). Registry-by-id ships SKILL.md only.
+
+  `source:` shorthand (an optional `@<tag>` pins a branch/tag/SHA, default `main`):
+  - `<skill>[@<tag>]` → `inference-gateway/skills` repo
+  - `<owner>/<repo>/<skill>[@<tag>]` → arbitrary repo (assumes a `skills/<id>/` subdir, matching Anthropic's convention)
+  - Full `https://github.com/...` URL → passed through
+
+  Non-`github.com` URLs are rejected so the source path always produces a complete bundle. `adl generate --offline` skips network fetches; every non-bare skill must be cached at `~/.adl/skills-cache/<id>@<ref>/`.
 
 ### Service Injection
 

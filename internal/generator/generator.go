@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -412,20 +413,19 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 			if !ok {
 				return fmt.Errorf("skill %s not found in resolved skills", skillID)
 			}
-			if resolved.Bare {
-				skillContext := map[string]interface{}{
-					"ID":          resolved.ID,
-					"Name":        resolved.Name,
-					"Description": resolved.Description,
-					"Tags":        resolved.Tags,
-					"Version":     resolved.Version,
-				}
-				content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, skillContext, ctx)
-				if err != nil {
-					return fmt.Errorf("failed to scaffold bare skill %s: %w", resolved.ID, err)
-				}
-			} else {
-				content = string(resolved.Body)
+			if !resolved.Bare {
+				return fmt.Errorf("non-bare skill %s should not flow through the skills/skill.md template", resolved.ID)
+			}
+			skillContext := map[string]interface{}{
+				"ID":          resolved.ID,
+				"Name":        resolved.Name,
+				"Description": resolved.Description,
+				"Tags":        resolved.Tags,
+				"Version":     resolved.Version,
+			}
+			content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, skillContext, ctx)
+			if err != nil {
+				return fmt.Errorf("failed to scaffold bare skill %s: %w", resolved.ID, err)
 			}
 		} else if templateKey == "service.go" {
 			return fmt.Errorf("service template reached fallback case - this should not happen")
@@ -474,6 +474,10 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		}
 	}
 
+	if err := g.writeResolvedSkillFiles(resolvedSkills, outputDir, ignoreChecker); err != nil {
+		return err
+	}
+
 	if err := g.generateADLIgnoreFile(outputDir, templateEngine.GetTemplate(), adl); err != nil {
 		return fmt.Errorf("failed to generate .adl-ignore file: %w", err)
 	}
@@ -490,6 +494,34 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		}
 	}
 
+	return nil
+}
+
+// writeResolvedSkillFiles writes the file map of every non-bare resolved
+// skill to skills/<id>/<rel-path>. Bare skills are scaffolded earlier by
+// the template engine and don't appear here. Files matched by .adl-ignore
+// are skipped so users can lock down a vendored skill if they need to.
+func (g *Generator) writeResolvedSkillFiles(skills []*registry.ResolvedSkill, outputDir string, ignoreChecker *IgnoreChecker) error {
+	for _, rs := range skills {
+		if rs.Bare {
+			continue
+		}
+		for rel, data := range rs.Files {
+			cleaned := filepath.ToSlash(filepath.Clean(rel))
+			if strings.HasPrefix(cleaned, "../") || strings.HasPrefix(cleaned, "/") {
+				return fmt.Errorf("skill %s: refusing to write file with suspicious path %q", rs.ID, rel)
+			}
+			relPath := path.Join("skills", rs.ID, cleaned)
+			if ignoreChecker.ShouldIgnore(relPath) {
+				fmt.Printf("🚫 Ignoring file (matches .adl-ignore): %s\n", relPath)
+				continue
+			}
+			filePath := filepath.Join(outputDir, filepath.FromSlash(relPath))
+			if err := g.writeFile(filePath, string(data)); err != nil {
+				return fmt.Errorf("failed to write %s: %w", relPath, err)
+			}
+		}
+	}
 	return nil
 }
 

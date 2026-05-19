@@ -2,6 +2,7 @@ package registry
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -18,8 +19,9 @@ func newTestResolver(t *testing.T, handler http.HandlerFunc) (*Resolver, func())
 		t.Fatalf("NewCache: %v", err)
 	}
 	return &Resolver{
-		Client: NewClient(srv.URL + "/skills/"),
-		Cache:  cache,
+		Client:    NewClient(srv.URL + "/skills/"),
+		Installer: NewInstaller(),
+		Cache:     cache,
 	}, srv.Close
 }
 
@@ -45,8 +47,8 @@ func TestResolver_Bare(t *testing.T) {
 	if resolved.Name != "company-policy" || resolved.Description != "Internal rules" {
 		t.Errorf("unexpected resolved metadata: %+v", resolved)
 	}
-	if len(resolved.Body) != 0 {
-		t.Errorf("bare skill should not have Body, got %q", resolved.Body)
+	if len(resolved.Files) != 0 {
+		t.Errorf("bare skill should not have Files, got %d entries", len(resolved.Files))
 	}
 }
 
@@ -85,6 +87,9 @@ func TestResolver_FetchAndCache(t *testing.T) {
 	if len(resolved.Tags) != 1 || resolved.Tags[0] != "analytics" {
 		t.Errorf("unexpected tags: %v", resolved.Tags)
 	}
+	if _, ok := resolved.Files["SKILL.md"]; !ok {
+		t.Errorf("expected resolved.Files to contain SKILL.md, got keys: %v", keysOf(resolved.Files))
+	}
 	if calls != 1 {
 		t.Errorf("expected 1 registry call, got %d", calls)
 	}
@@ -110,27 +115,106 @@ func TestResolver_OfflineMissingCache(t *testing.T) {
 	}
 }
 
-func TestResolver_SourceOverride(t *testing.T) {
-	var seenPath string
+func TestResolver_SourceRejectsNonGitHub(t *testing.T) {
 	resolver, closer := newTestResolver(t, func(w http.ResponseWriter, r *http.Request) {
-		seenPath = r.URL.Path
-		_, _ = w.Write([]byte("---\nname: external\ndescription: from override\n---\nbody\n"))
+		t.Fatalf("should not hit registry when source is invalid")
 	})
 	defer closer()
 
-	skill := schema.Skill{
-		ID:     "external-skill",
-		Source: resolver.Client.BaseURL + "../custom/path/external.md",
+	_, err := resolver.Resolve(context.Background(), schema.Skill{
+		ID:     "external",
+		Source: "https://example.com/some/skill.md",
+	})
+	if err == nil || !strings.Contains(err.Error(), "github.com") {
+		t.Fatalf("expected github.com URL error, got %v", err)
+	}
+}
+
+func TestResolver_SourceFetchesGitHubDirectory(t *testing.T) {
+	files := map[string]string{
+		"skills/skill-creator/SKILL.md":         "---\nname: skill-creator\ndescription: from gh\n---\nbody\n",
+		"skills/skill-creator/scripts/hello.sh": "#!/bin/sh\necho hi\n",
 	}
 
-	resolved, err := resolver.Resolve(context.Background(), skill)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/repos/acme/skills/git/trees/main", func(w http.ResponseWriter, r *http.Request) {
+		resp := treeResponse{
+			Tree: []treeEntry{
+				{Path: "skills/skill-creator", Type: "tree"},
+				{Path: "skills/skill-creator/SKILL.md", Type: "blob"},
+				{Path: "skills/skill-creator/scripts", Type: "tree"},
+				{Path: "skills/skill-creator/scripts/hello.sh", Type: "blob"},
+				{Path: "skills/other-skill/SKILL.md", Type: "blob"},
+			},
+		}
+		_ = json.NewEncoder(w).Encode(resp)
+	})
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		var body string
+		var ok bool
+		for repoPath, content := range files {
+			if strings.HasSuffix(r.URL.Path, "/"+repoPath) {
+				body = content
+				ok = true
+				break
+			}
+		}
+		if !ok {
+			http.NotFound(w, r)
+			return
+		}
+		_, _ = w.Write([]byte(body))
+	})
+
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+
+	cache, err := NewCache(t.TempDir())
 	if err != nil {
-		t.Fatalf("Resolve with source override: %v", err)
+		t.Fatalf("NewCache: %v", err)
 	}
-	if resolved.Name != "external" {
-		t.Errorf("unexpected name: %q", resolved.Name)
+	resolver := &Resolver{
+		Client: NewClient(""),
+		Installer: &Installer{
+			Client:  srv.Client(),
+			APIBase: srv.URL,
+			RawBase: srv.URL,
+		},
+		Cache: cache,
 	}
-	if !strings.Contains(seenPath, "external.md") {
-		t.Errorf("expected fetch through source override path, got %s", seenPath)
+
+	resolved, err := resolver.Resolve(context.Background(), schema.Skill{
+		ID:     "skill-creator",
+		Source: "https://github.com/acme/skills/tree/main/skills/skill-creator",
+	})
+	if err != nil {
+		t.Fatalf("Resolve: %v", err)
 	}
+	if resolved.Name != "skill-creator" || resolved.Description != "from gh" {
+		t.Errorf("unexpected metadata: %+v", resolved)
+	}
+	if len(resolved.Files) != 2 {
+		t.Fatalf("expected 2 files (SKILL.md + scripts/hello.sh), got %d: %v", len(resolved.Files), keysOf(resolved.Files))
+	}
+	if _, ok := resolved.Files["SKILL.md"]; !ok {
+		t.Errorf("missing SKILL.md, got keys: %v", keysOf(resolved.Files))
+	}
+	if _, ok := resolved.Files["scripts/hello.sh"]; !ok {
+		t.Errorf("missing scripts/hello.sh, got keys: %v", keysOf(resolved.Files))
+	}
+	if resolved.Version != "main" {
+		t.Errorf("expected Version derived from ref 'main', got %q", resolved.Version)
+	}
+
+	if _, ok, err := resolver.Cache.Get("skill-creator", "main"); err != nil || !ok {
+		t.Errorf("expected cache to be populated after Resolve, got ok=%v err=%v", ok, err)
+	}
+}
+
+func keysOf(m map[string][]byte) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
 }
