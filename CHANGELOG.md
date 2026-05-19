@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.30.2](https://github.com/inference-gateway/adl-cli/compare/v0.30.1...v0.30.2) (2026-05-19)
+
+### 🔧 Miscellaneous
+
+* **deps:** Bump claude-code to latest ([6d74881](https://github.com/inference-gateway/adl-cli/commit/6d74881b73752d461fc29a72ef83f35e8fd6a625))
+* **deps:** Bump docker to latest ([9b195d6](https://github.com/inference-gateway/adl-cli/commit/9b195d66428110773d01b5765e0b547a0edc1037))
+
 ## [0.30.1](https://github.com/inference-gateway/adl-cli/compare/v0.30.0...v0.30.1) (2026-05-19)
 
 ### 🐛 Bug Fixes
