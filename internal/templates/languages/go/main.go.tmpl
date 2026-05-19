@@ -52,7 +52,7 @@ const skillsDir = "skills"
 // loadSkillsManifest walks the configured skills directory, reads each
 // <skill>/SKILL.md, extracts the YAML frontmatter (name + description),
 // and returns an `AVAILABLE SKILLS:` block to append to the system
-// prompt. SKILL.md bodies are NOT inlined — the model must call the
+// prompt. SKILL.md bodies are NOT inlined - the model must call the
 // Read tool to load a skill's playbook on demand. Returns "" when the
 // directory is missing or has no valid manifests.
 func loadSkillsManifest(dir string) (string, error) {

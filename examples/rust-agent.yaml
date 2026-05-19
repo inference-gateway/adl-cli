@@ -52,7 +52,7 @@ spec:
     - id: echo-formatting
       bare: true
       name: echo-formatting
-      description: "Use this when the user sends an echo request that benefits from formatting — pretty-printing JSON payloads, normalizing surrounding whitespace, or wrapping code-shaped content in fenced blocks before invoking the echo tool."
+      description: "Use this when the user sends an echo request that benefits from formatting - pretty-printing JSON payloads, normalizing surrounding whitespace, or wrapping code-shaped content in fenced blocks before invoking the echo tool."
       tags:
         - echo
         - formatting

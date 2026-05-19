@@ -352,7 +352,7 @@ The `--deployment` flag generates platform-specific deployment configurations:
 
 ADL files use YAML to define your agent's configuration, capabilities, and tools.
 
-The canonical schema lives in the [inference-gateway/adl](https://github.com/inference-gateway/adl) repository — that repo is the single source of truth for the ADL specification. This CLI vendors a pinned copy at `internal/schema/schema.json` (refresh with `task fetch-schema`).
+The canonical schema lives in the [inference-gateway/adl](https://github.com/inference-gateway/adl) repository - that repo is the single source of truth for the ADL specification. This CLI vendors a pinned copy at `internal/schema/schema.json` (refresh with `task fetch-schema`).
 
 ### Example ADL File
 
@@ -560,7 +560,7 @@ spec:
 The ADL spec distinguishes two complementary concepts:
 
 - **Tools** (`spec.tools`) are function-call entrypoints with explicit JSON schemas. They are generated as code in the target language and registered with the agent's toolbox. The model invokes them by name with structured arguments.
-- **Skills** (`spec.skills`) are markdown playbooks (with YAML frontmatter) that describe _when and how_ to use the tools. Each is written to its own directory at `skills/<id>/SKILL.md` in the generated project, advertised on the agent card so orchestrators can discover them, and prepended to the system prompt at runtime. The directory layout matches Anthropic's [agent skills convention](https://github.com/anthropics/skills) — bare skills can ship arbitrary scripts, templates, or reference material alongside `SKILL.md`.
+- **Skills** (`spec.skills`) are markdown playbooks (with YAML frontmatter) that describe _when and how_ to use the tools. Each is written to its own directory at `skills/<id>/SKILL.md` in the generated project, advertised on the agent card so orchestrators can discover them, and prepended to the system prompt at runtime. The directory layout matches Anthropic's [agent skills convention](https://github.com/anthropics/skills) - bare skills can ship arbitrary scripts, templates, or reference material alongside `SKILL.md`.
 
 A skill entry is small:
 
@@ -584,10 +584,10 @@ spec:
 ### Resolution rules
 
 - **`bare: true`** → the CLI scaffolds `skills/<id>/SKILL.md` with frontmatter from the manifest and a TODO body that you author by hand. The whole `skills/<id>/` directory is listed in `.adl-ignore`, so any bundled scripts, templates, or resources you drop alongside `SKILL.md` are preserved on regeneration.
-- **`source:` set** → the source must resolve to a public GitHub directory (a `/tree/<ref>/<path>` URL, or one of the shorthand forms below). The CLI pulls the _entire_ directory — `SKILL.md`, reference docs, bundled scripts, anything else — and writes it to `skills/<id>/`. Non-`github.com` URLs are rejected so the same code path always produces a complete skill bundle, not a stray markdown file.
+- **`source:` set** → the source must resolve to a public GitHub directory (a `/tree/<ref>/<path>` URL, or one of the shorthand forms below). The CLI pulls the _entire_ directory - `SKILL.md`, reference docs, bundled scripts, anything else - and writes it to `skills/<id>/`. Non-`github.com` URLs are rejected so the same code path always produces a complete skill bundle, not a stray markdown file.
 - **Otherwise** → fetch `https://registry.inference-gateway.com/skills/<id>[/<version>].md` (becomes `skills/<id>/SKILL.md`). Override the registry with `ADL_SKILLS_REGISTRY`. Registry-by-id currently ships `SKILL.md` only; if you need bundled assets, use `source:` to point at a GitHub directory.
 
-Use `adl generate --offline` to skip network access — every non-bare skill must already be cached at `~/.adl/skills-cache/<id>@<ref>/` (where `<ref>` is the pinned tag/branch, or `latest` for an unpinned registry fetch).
+Use `adl generate --offline` to skip network access - every non-bare skill must already be cached at `~/.adl/skills-cache/<id>@<ref>/` (where `<ref>` is the pinned tag/branch, or `latest` for an unpinned registry fetch).
 
 ### `source:` shorthand grammar
 
@@ -643,7 +643,7 @@ tool, then follow its instructions.
   Path: skills/pdf/SKILL.md
 ```
 
-The model loads each SKILL.md body on demand via the `Read` built-in tool, and executes any bundled scripts via `Bash` / `Write` / `Edit`. **A skills-using agent must therefore list `- id: read` in `spec.tools` and set `spec.config.tools.read.enabled: true`** — the validator enforces this; see [Reserved built-in tools](#reserved-built-in-tools).
+The model loads each SKILL.md body on demand via the `Read` built-in tool, and executes any bundled scripts via `Bash` / `Write` / `Edit`. **A skills-using agent must therefore list `- id: read` in `spec.tools` and set `spec.config.tools.read.enabled: true`** - the validator enforces this; see [Reserved built-in tools](#reserved-built-in-tools).
 
 ### Reserved built-in tools
 
@@ -656,7 +656,7 @@ The model loads each SKILL.md body on demand via the `Read` built-in tool, and e
 | `write`     | `tools/write.go` etc.   | Write content to a file (creates parent dirs).                   |
 | `edit`      | `tools/edit.go` etc.    | Replace a unique string in a file (`old_string` → `new_string`). |
 
-Opt in by listing the id alone — the generator owns `name`, `description`, and the JSON schema:
+Opt in by listing the id alone - the generator owns `name`, `description`, and the JSON schema:
 
 ```yaml
 spec:
@@ -689,11 +689,11 @@ spec:
         enabled: true
 ```
 
-Values are baked into the generated constructor as compile-time literals — there's no `ToolsConfig` struct in `config/config.go` because reserved-namespace sections are intentionally skipped. The validator decodes each `spec.config.tools.<id>` block into the built-in's typed shape and rejects unknown keys (typos like `tymeout_seconds` fail with `spec.config.tools.bash.tymeout_seconds`).
+Values are baked into the generated constructor as compile-time literals - there's no `ToolsConfig` struct in `config/config.go` because reserved-namespace sections are intentionally skipped. The validator decodes each `spec.config.tools.<id>` block into the built-in's typed shape and rejects unknown keys (typos like `tymeout_seconds` fail with `spec.config.tools.bash.tymeout_seconds`).
 
 Runtime overrides for Bash (read inside `tools/bash.go`):
 
-- `A2A_BASH_DISABLED=1` is a kill switch — overrides `enabled: true` back to false.
+- `A2A_BASH_DISABLED=1` is a kill switch - overrides `enabled: true` back to false.
 - `A2A_BASH_WHITELIST=ls,cat,grep` overrides the compile-time whitelist.
 
 Resolution precedence at runtime: **env > compile-time literal > built-in default (disabled)**.

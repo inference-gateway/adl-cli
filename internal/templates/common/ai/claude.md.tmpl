@@ -107,13 +107,13 @@ The following skills are currently shipped with the agent:
 
 Each skill lives in its own directory at `skills/<id>/SKILL.md` and is
 loaded into the system prompt at startup. Bare skills can ship arbitrary
-bundled assets (scripts, templates, resources) alongside `SKILL.md` —
+bundled assets (scripts, templates, resources) alongside `SKILL.md` -
 the whole `skills/<id>/` directory is protected by `.adl-ignore` against
 regeneration overwrites. To modify skills:
 1. Update `agent.yaml` `spec.skills` with skill definitions
 2. Run `task generate` (registry skills are re-fetched; bare skill
    directories are preserved when listed in `.adl-ignore`)
-3. For bare skills, edit `skills/<id>/SKILL.md` directly — frontmatter
+3. For bare skills, edit `skills/<id>/SKILL.md` directly - frontmatter
    (`name`/`description`/`tags`) shows up on the agent card. Drop helper
    scripts or templates next to it (e.g. `skills/<id>/scripts/foo.py`).
 {{- else }}

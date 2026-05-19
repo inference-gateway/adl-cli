@@ -73,15 +73,15 @@ main.go                       # Entry point, sets version
 
 - `ADL` - Root structure with `apiVersion`, `kind`, `metadata`, `spec`
 - `Spec` - Contains `capabilities`, `agent`, `tools`, `skills`, `services`, `server`, `language`, `deployment`
-- `Tool` - Function-call entrypoint with `id` (only `id` is required since v0.4.0). User-defined tools also set `name`, `description`, `tags`, `schema`, optional `inject`. Reserved IDs (`read`, `bash`, `write`, `edit`) take `id` alone — the generator owns metadata. See `internal/schema/builtin_config.go` for the reserved-ID set.
-- `Skill` - Markdown playbook with `id` plus optional `version`/`source`/`bare`/`name`/`description`/`tags`. Generated as `skills/<id>/SKILL.md`. **At runtime, only the frontmatter is consumed** — the body lives on disk and the model reads it on demand via the `Read` built-in.
+- `Tool` - Function-call entrypoint with `id` (only `id` is required since v0.4.0). User-defined tools also set `name`, `description`, `tags`, `schema`, optional `inject`. Reserved IDs (`read`, `bash`, `write`, `edit`) take `id` alone - the generator owns metadata. See `internal/schema/builtin_config.go` for the reserved-ID set.
+- `Skill` - Markdown playbook with `id` plus optional `version`/`source`/`bare`/`name`/`description`/`tags`. Generated as `skills/<id>/SKILL.md`. **At runtime, only the frontmatter is consumed** - the body lives on disk and the model reads it on demand via the `Read` built-in.
 - `Service` - Injectable service with `interface`, `factory`, `description`
 
 ### Tools vs Skills
 
 - **Tools** are functions the agent can invoke. Defined under `spec.tools`. Two kinds:
-  - **User tools** — full entry (`id`, `name`, `description`, `tags`, `schema`, optional `inject`). Generated as `tools/<id>.<ext>` from `tool.<ext>.tmpl`.
-  - **Reserved built-ins** — `id` only. Currently `read`, `bash`, `write`, `edit`. Generated from `builtin/<id>.<ext>.tmpl`. **All four default to `enabled: false`**; activate via `spec.config.tools.<id>.enabled: true`. The Read built-in is what loads SKILL.md bodies on demand — `spec.skills` non-empty REQUIRES `- id: read` listed AND enabled (validator enforces).
+  - **User tools** - full entry (`id`, `name`, `description`, `tags`, `schema`, optional `inject`). Generated as `tools/<id>.<ext>` from `tool.<ext>.tmpl`.
+  - **Reserved built-ins** - `id` only. Currently `read`, `bash`, `write`, `edit`. Generated from `builtin/<id>.<ext>.tmpl`. **All four default to `enabled: false`**; activate via `spec.config.tools.<id>.enabled: true`. The Read built-in is what loads SKILL.md bodies on demand - `spec.skills` non-empty REQUIRES `- id: read` listed AND enabled (validator enforces).
 - **Skills** are markdown documents (YAML frontmatter + body). The frontmatter (`name`/`description`) is consumed at runtime to build an `AVAILABLE SKILLS:` block appended to the system prompt; the body is fetched on demand by the model via Read. Each skill goes to `skills/<id>/SKILL.md`. Resolution paths unchanged:
   - **`bare: true`** → scaffolded from inline `name`/`description`/`tags`; the whole `skills/<id>/` directory is listed in `.adl-ignore`.
   - **`source:` set** → must be a `github.com` `/tree/<ref>/<path>` URL or one of the shorthand forms below; the full directory is fetched via the GitHub trees API + `raw.githubusercontent.com`. Implemented in `internal/registry/installer.go`.
@@ -91,7 +91,7 @@ main.go                       # Entry point, sets version
 
 ### Reserved tool config (`spec.config.tools.<id>`)
 
-Built-in config lives under the reserved `spec.config.tools` namespace (not `spec.config.<id>` — that name is reserved). The validator decodes each block into a typed struct in `internal/schema/builtin_config.go` (`ReadBuiltinConfig`, `BashBuiltinConfig`, `WriteBuiltinConfig`, `EditBuiltinConfig`) with `ErrorUnused: true`, so typos surface immediately as `spec.config.tools.bash.tymeout_seconds`. Values flow into the generated runtime as compile-time literals in `main.<ext>`'s tool-registration block — they do NOT flow through `config/config.go` (which explicitly skips the `tools` section).
+Built-in config lives under the reserved `spec.config.tools` namespace (not `spec.config.<id>` - that name is reserved). The validator decodes each block into a typed struct in `internal/schema/builtin_config.go` (`ReadBuiltinConfig`, `BashBuiltinConfig`, `WriteBuiltinConfig`, `EditBuiltinConfig`) with `ErrorUnused: true`, so typos surface immediately as `spec.config.tools.bash.tymeout_seconds`. Values flow into the generated runtime as compile-time literals in `main.<ext>`'s tool-registration block - they do NOT flow through `config/config.go` (which explicitly skips the `tools` section).
 
 Bash env-var runtime overrides (read inside `tools/bash.<ext>`): `A2A_BASH_DISABLED=1` (kill switch), `A2A_BASH_WHITELIST=ls,cat,grep`. Resolution precedence: **env > compile-time literal > built-in default (disabled)**.
 
@@ -134,7 +134,7 @@ spec:
 ```
 
 Runtime configuration (`A2A_QUEUE_PROVIDER`, `A2A_QUEUE_URL`, `A2A_QUEUE_NAMESPACE`)
-is documented in the generated `.env.example` — not baked into `main.rs`. When
+is documented in the generated `.env.example` - not baked into `main.rs`. When
 `spec.sandbox.dockerCompose.enabled: true` is also set, a working
 `docker-compose.yaml` with a Redis service is produced alongside the agent.
 
@@ -188,7 +188,7 @@ keeps passing.
 
 Hand-written companion (only one):
 
-- `internal/schema/metadata.go` — `GeneratedMetadata` struct used by the
+- `internal/schema/metadata.go` - `GeneratedMetadata` struct used by the
   templating layer (not part of the ADL spec).
 
 ## Important Notes

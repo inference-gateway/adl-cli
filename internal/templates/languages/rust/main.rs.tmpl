@@ -25,7 +25,7 @@ struct SkillFrontmatter {
 /// Walk the configured skills directory, extract YAML frontmatter
 /// (name + description) from each `<skill>/SKILL.md`, and return an
 /// `AVAILABLE SKILLS:` block to append to the system prompt. SKILL.md
-/// bodies are NOT inlined — the model must call the Read tool to load a
+/// bodies are NOT inlined - the model must call the Read tool to load a
 /// skill's playbook on demand. Returns an empty string when the
 /// directory is missing or has no valid manifests.
 fn load_skills_manifest(dir: &Path) -> std::io::Result<String> {
