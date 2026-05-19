@@ -584,7 +584,7 @@ spec:
 ### Resolution rules
 
 - **`bare: true`** → the CLI scaffolds `skills/<id>/SKILL.md` with frontmatter from the manifest and a TODO body that you author by hand. The whole `skills/<id>/` directory is listed in `.adl-ignore`, so any bundled scripts, templates, or resources you drop alongside `SKILL.md` are preserved on regeneration.
-- **`source:` set** → the source must resolve to a public GitHub directory (a `/tree/<ref>/<path>` URL, or one of the shorthand forms below). The CLI pulls the *entire* directory — `SKILL.md`, reference docs, bundled scripts, anything else — and writes it to `skills/<id>/`. Non-`github.com` URLs are rejected so the same code path always produces a complete skill bundle, not a stray markdown file.
+- **`source:` set** → the source must resolve to a public GitHub directory (a `/tree/<ref>/<path>` URL, or one of the shorthand forms below). The CLI pulls the _entire_ directory — `SKILL.md`, reference docs, bundled scripts, anything else — and writes it to `skills/<id>/`. Non-`github.com` URLs are rejected so the same code path always produces a complete skill bundle, not a stray markdown file.
 - **Otherwise** → fetch `https://registry.inference-gateway.com/skills/<id>[/<version>].md` (becomes `skills/<id>/SKILL.md`). Override the registry with `ADL_SKILLS_REGISTRY`. Registry-by-id currently ships `SKILL.md` only; if you need bundled assets, use `source:` to point at a GitHub directory.
 
 Use `adl generate --offline` to skip network access — every non-bare skill must already be cached at `~/.adl/skills-cache/<id>@<ref>/` (where `<ref>` is the pinned tag/branch, or `latest` for an unpinned registry fetch).
