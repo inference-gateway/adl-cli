@@ -106,6 +106,12 @@ func (t *ReadTool) Handler(ctx context.Context, args map[string]any) (string, er
 
 	file, err := os.Open(cleaned)
 	if err != nil {
+		if os.IsNotExist(err) {
+			cwd, cwdErr := os.Getwd()
+			if cwdErr == nil {
+				return "", fmt.Errorf("open %s: %w; the agent's working directory is %s - paths are resolved relative to it, do not guess paths from other environments", cleaned, err, cwd)
+			}
+		}
 		return "", fmt.Errorf("open %s: %w", cleaned, err)
 	}
 	defer func() {

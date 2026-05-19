@@ -478,9 +478,10 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		isSkillFile := templateKey == "skills/skill.md" ||
 			(strings.HasPrefix(fileName, "skills/") && filepath.Base(fileName) == "SKILL.md")
 
-		isToolFile := (templateKey == "tool.go" || templateKey == "tool.rs" || templateKey == "tool.mod.rs" || templateKey == "tool.ts") ||
+		isBuiltinToolFile := strings.HasPrefix(templateKey, "builtin/")
+		isToolFile := !isBuiltinToolFile && ((templateKey == "tool.go" || templateKey == "tool.rs" || templateKey == "tool.mod.rs" || templateKey == "tool.ts") ||
 			(strings.HasPrefix(fileName, "tools/") && ext == ".go") ||
-			(strings.HasPrefix(fileName, "src/tools/") && (ext == ".rs" || ext == ".ts"))
+			(strings.HasPrefix(fileName, "src/tools/") && (ext == ".rs" || ext == ".ts")))
 
 		isServiceFile := templateKey == "service.go" ||
 			(strings.Contains(fileName, "/internal/") && strings.HasSuffix(fileName, ".go") && !strings.Contains(fileName, "/logger/"))

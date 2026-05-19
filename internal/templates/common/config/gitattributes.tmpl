@@ -36,6 +36,28 @@ k8s/*.yml linguist-generated=true
 # Agent capabilities
 .well-known/agent-card.json linguist-generated=true
 
+{{- $hasBuiltinTools := false }}
+{{- range .ADL.Spec.Tools }}
+  {{- if isBuiltinToolID .ID }}
+    {{- $hasBuiltinTools = true }}
+  {{- end }}
+{{- end }}
+{{- if $hasBuiltinTools }}
+
+# Built-in tools (generated from ADL CLI templates)
+{{- range .ADL.Spec.Tools }}
+  {{- if isBuiltinToolID .ID }}
+    {{- if eq $.Language "go" }}
+tools/{{ .ID }}.go linguist-generated=true
+    {{- else if eq $.Language "rust" }}
+src/tools/{{ .ID }}.rs linguist-generated=true
+    {{- else if eq $.Language "typescript" }}
+src/tools/{{ .ID }}.ts linguist-generated=true
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
 # Documentation (partially generated)
 README.md linguist-documentation=true
 
