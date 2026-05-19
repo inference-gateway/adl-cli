@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.30.1](https://github.com/inference-gateway/adl-cli/compare/v0.30.0...v0.30.1) (2026-05-19)
+
+### 🐛 Bug Fixes
+
+* **templates:** Lowercase builtin tool error strings to satisfy staticcheck ST1005 ([#115](https://github.com/inference-gateway/adl-cli/issues/115)) ([52e8c8a](https://github.com/inference-gateway/adl-cli/commit/52e8c8aedf0db2fc0bef515ba1eb38d26edb22dc)), closes [#113](https://github.com/inference-gateway/adl-cli/issues/113)
+* **templates:** Render built-in tools with proper name/description in AGENTS.md and CLAUDE.md ([#114](https://github.com/inference-gateway/adl-cli/issues/114)) ([2dfdd57](https://github.com/inference-gateway/adl-cli/commit/2dfdd572b4b5738e63559cd9333c1fdfdddee69c)), closes [#112](https://github.com/inference-gateway/adl-cli/issues/112)
+
 ## [0.30.0](https://github.com/inference-gateway/adl-cli/compare/v0.29.0...v0.30.0) (2026-05-19)
 
 ### ✨ Features
