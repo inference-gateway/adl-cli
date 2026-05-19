@@ -63,7 +63,7 @@ pub fn descriptor() -> ChatCompletionTool {
 /// Handle a Read invocation.
 pub async fn handle(args: Value, cfg: Config) -> anyhow::Result<String> {
     if !cfg.enabled {
-        bail!("Read tool is disabled; set spec.config.tools.read.enabled: true in the ADL and regenerate");
+        bail!("read tool is disabled; set spec.config.tools.read.enabled: true in the ADL and regenerate");
     }
 
     let file_path = args
@@ -73,7 +73,7 @@ pub async fn handle(args: Value, cfg: Config) -> anyhow::Result<String> {
         .to_string();
 
     if is_image_path(&file_path) {
-        bail!("Read does not support image files ({}); use a multimodal API instead", file_path);
+        bail!("read does not support image files ({}); use a multimodal API instead", file_path);
     }
 
     validate_path(&cfg.allowed_roots, &file_path)?;

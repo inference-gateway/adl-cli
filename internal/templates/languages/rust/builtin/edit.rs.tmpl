@@ -53,7 +53,7 @@ pub fn descriptor() -> ChatCompletionTool {
 /// Handle an Edit invocation.
 pub async fn handle(args: Value, cfg: Config) -> anyhow::Result<String> {
     if !cfg.enabled {
-        bail!("Edit tool is disabled; set spec.config.tools.edit.enabled: true in the ADL and regenerate");
+        bail!("edit tool is disabled; set spec.config.tools.edit.enabled: true in the ADL and regenerate");
     }
 
     let file_path = args

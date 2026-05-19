@@ -66,7 +66,7 @@ func NewReadTool(logger *zap.Logger, cfg ReadConfig) server.Tool {
 // Handler executes the Read tool.
 func (t *ReadTool) Handler(ctx context.Context, args map[string]any) (string, error) {
 	if !t.cfg.Enabled {
-		return "", errors.New("Read tool is disabled; set spec.config.tools.read.enabled: true in the ADL and regenerate")
+		return "", errors.New("read tool is disabled; set spec.config.tools.read.enabled: true in the ADL and regenerate")
 	}
 
 	rawPath, _ := args["file_path"].(string)
@@ -94,7 +94,7 @@ func (t *ReadTool) Handler(ctx context.Context, args map[string]any) (string, er
 	cleaned := filepath.Clean(rawPath)
 
 	if isImagePath(cleaned) {
-		return "", fmt.Errorf("Read does not support image files (%s); use a multimodal API instead", filepath.Ext(cleaned))
+		return "", fmt.Errorf("read does not support image files (%s); use a multimodal API instead", filepath.Ext(cleaned))
 	}
 
 	file, err := os.Open(cleaned)

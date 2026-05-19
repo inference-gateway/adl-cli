@@ -49,7 +49,7 @@ pub fn descriptor() -> ChatCompletionTool {
 /// Handle a Write invocation.
 pub async fn handle(args: Value, cfg: Config) -> anyhow::Result<String> {
     if !cfg.enabled {
-        bail!("Write tool is disabled; set spec.config.tools.write.enabled: true in the ADL and regenerate");
+        bail!("write tool is disabled; set spec.config.tools.write.enabled: true in the ADL and regenerate");
     }
 
     let file_path = args
