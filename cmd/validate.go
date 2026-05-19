@@ -37,9 +37,14 @@ func runValidate(cmd *cobra.Command, args []string) error {
 	fmt.Printf("Validating '%s'...\n", adlFile)
 
 	validator := schema.NewValidator()
-	if err := validator.ValidateFile(adlFile); err != nil {
+	warnings, err := validator.ValidateFile(adlFile)
+	if err != nil {
 		fmt.Printf("❌ Validation failed: %v\n", err)
 		return err
+	}
+
+	for _, w := range warnings {
+		fmt.Fprintf(os.Stderr, "⚠️  %s\n", w)
 	}
 
 	fmt.Printf("✅ '%s' is valid!\n", adlFile)
