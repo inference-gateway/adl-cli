@@ -10,14 +10,16 @@ import (
 	"strings"
 
 	server "github.com/inference-gateway/adk/server"
+	envconfig "github.com/sethvargo/go-envconfig"
 	zap "go.uber.org/zap"
 )
 
-// WriteConfig is the compile-time config for the Write built-in. Values
-// flow in from spec.config.tools.write at generation time.
+// WriteConfig is the runtime config for the Write built-in. Defaults are
+// baked from spec.config.tools.write at generation time; the TOOLS_WRITE_*
+// env vars override them at startup.
 type WriteConfig struct {
-	Enabled      bool
-	AllowedRoots []string
+	Enabled      bool     `env:"TOOLS_WRITE_ENABLED, default={{ printf "%t" .Config.Enabled }}"`
+	AllowedRoots []string `env:"TOOLS_WRITE_ALLOWED_ROOTS{{- if .Config.AllowedRoots }}, default={{ join "," .Config.AllowedRoots }}{{- end }}"`
 }
 
 // WriteTool exposes a Write built-in. Disabled by default; flip
@@ -27,8 +29,13 @@ type WriteTool struct {
 	cfg    WriteConfig
 }
 
-// NewWriteTool builds a Write tool with the resolved config baked in.
-func NewWriteTool(logger *zap.Logger, cfg WriteConfig) server.Tool {
+// NewWriteTool builds a Write tool, resolving config from TOOLS_WRITE_*
+// env vars (or the spec.config.tools.write defaults baked in at generation).
+func NewWriteTool(ctx context.Context, logger *zap.Logger) (server.Tool, error) {
+	var cfg WriteConfig
+	if err := envconfig.Process(ctx, &cfg); err != nil {
+		return nil, fmt.Errorf("load Write config: %w", err)
+	}
 	t := &WriteTool{logger: logger, cfg: cfg}
 	return server.NewBasicTool(
 		"Write",
@@ -49,7 +56,7 @@ func NewWriteTool(logger *zap.Logger, cfg WriteConfig) server.Tool {
 			"required": []string{"file_path", "content"},
 		},
 		t.Handler,
-	)
+	), nil
 }
 
 // Handler executes the Write tool.

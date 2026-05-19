@@ -197,42 +197,39 @@ func main() {
 	{{- if eq .ID "read" }}
 
 	// Register Read built-in
-	readTool := tools.NewReadTool(l, tools.ReadConfig{
-		Enabled:      {{ $.BuiltinConfigs.Read.Enabled }},
-		MaxLines:     {{ $.BuiltinConfigs.Read.MaxLines }},
-		AllowedRoots: []string{ {{- range $i, $r := $.BuiltinConfigs.Read.AllowedRoots }}{{ if $i }}, {{ end }}{{ $r | quote }}{{- end }} },
-	})
+	readTool, err := tools.NewReadTool(ctx, l)
+	if err != nil {
+		l.Fatal("failed to construct Read tool", zap.Error(err))
+	}
 	toolBox.AddTool(readTool)
-	l.Info("registered built-in: Read", zap.Bool("enabled", {{ $.BuiltinConfigs.Read.Enabled }}))
+	l.Info("registered built-in: Read")
 	{{- else if eq .ID "bash" }}
 
 	// Register Bash built-in
-	bashTool := tools.NewBashTool(l, tools.BashConfig{
-		Enabled:        {{ $.BuiltinConfigs.Bash.Enabled }},
-		Whitelist:      []string{ {{- range $i, $w := $.BuiltinConfigs.Bash.Whitelist }}{{ if $i }}, {{ end }}{{ $w | quote }}{{- end }} },
-		TimeoutSeconds: {{ $.BuiltinConfigs.Bash.TimeoutSeconds }},
-		WorkingDir:     {{ $.BuiltinConfigs.Bash.WorkingDir | quote }},
-	})
+	bashTool, err := tools.NewBashTool(ctx, l)
+	if err != nil {
+		l.Fatal("failed to construct Bash tool", zap.Error(err))
+	}
 	toolBox.AddTool(bashTool)
-	l.Info("registered built-in: Bash", zap.Bool("enabled", {{ $.BuiltinConfigs.Bash.Enabled }}))
+	l.Info("registered built-in: Bash")
 	{{- else if eq .ID "write" }}
 
 	// Register Write built-in
-	writeTool := tools.NewWriteTool(l, tools.WriteConfig{
-		Enabled:      {{ $.BuiltinConfigs.Write.Enabled }},
-		AllowedRoots: []string{ {{- range $i, $r := $.BuiltinConfigs.Write.AllowedRoots }}{{ if $i }}, {{ end }}{{ $r | quote }}{{- end }} },
-	})
+	writeTool, err := tools.NewWriteTool(ctx, l)
+	if err != nil {
+		l.Fatal("failed to construct Write tool", zap.Error(err))
+	}
 	toolBox.AddTool(writeTool)
-	l.Info("registered built-in: Write", zap.Bool("enabled", {{ $.BuiltinConfigs.Write.Enabled }}))
+	l.Info("registered built-in: Write")
 	{{- else if eq .ID "edit" }}
 
 	// Register Edit built-in
-	editTool := tools.NewEditTool(l, tools.EditConfig{
-		Enabled:      {{ $.BuiltinConfigs.Edit.Enabled }},
-		AllowedRoots: []string{ {{- range $i, $r := $.BuiltinConfigs.Edit.AllowedRoots }}{{ if $i }}, {{ end }}{{ $r | quote }}{{- end }} },
-	})
+	editTool, err := tools.NewEditTool(ctx, l)
+	if err != nil {
+		l.Fatal("failed to construct Edit tool", zap.Error(err))
+	}
 	toolBox.AddTool(editTool)
-	l.Info("registered built-in: Edit", zap.Bool("enabled", {{ $.BuiltinConfigs.Edit.Enabled }}))
+	l.Info("registered built-in: Edit")
 	{{- else }}
 
 	// Register {{ .Name }} tool

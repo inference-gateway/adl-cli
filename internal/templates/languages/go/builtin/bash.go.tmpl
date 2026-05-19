@@ -5,57 +5,46 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"os/exec"
 	"strings"
 	"time"
 
 	server "github.com/inference-gateway/adk/server"
+	envconfig "github.com/sethvargo/go-envconfig"
 	zap "go.uber.org/zap"
 )
 
-// BashConfig is the compile-time config for the Bash built-in. Values
-// flow in from spec.config.tools.bash at generation time. Runtime env
-// vars `A2A_BASH_DISABLED` and `A2A_BASH_WHITELIST` override the
-// compile-time values.
+// BashConfig is the runtime config for the Bash built-in. Defaults are
+// baked from spec.config.tools.bash at generation time; the TOOLS_BASH_*
+// env vars override them at startup.
 type BashConfig struct {
-	Enabled        bool
-	Whitelist      []string
-	TimeoutSeconds int
-	WorkingDir     string
+	Enabled        bool     `env:"TOOLS_BASH_ENABLED, default={{ printf "%t" .Config.Enabled }}"`
+	Whitelist      []string `env:"TOOLS_BASH_WHITELIST{{- if .Config.Whitelist }}, default={{ join "," .Config.Whitelist }}{{- end }}"`
+	TimeoutSeconds int      `env:"TOOLS_BASH_TIMEOUT_SECONDS, default={{ .Config.TimeoutSeconds }}"`
+	WorkingDir     string   `env:"TOOLS_BASH_WORKING_DIR, default={{ .Config.WorkingDir }}"`
 }
 
 // BashTool exposes a Bash built-in. Disabled by default; flip
 // spec.config.tools.bash.enabled: true in your ADL to activate.
-// Resolution: env > compile-time literal > built-in default.
 type BashTool struct {
 	logger *zap.Logger
 	cfg    BashConfig
 }
 
-// NewBashTool builds a Bash tool with the resolved config baked in.
-// Env-var overrides are read here, once, at agent startup.
-func NewBashTool(logger *zap.Logger, cfg BashConfig) server.Tool {
+// NewBashTool builds a Bash tool, resolving config from TOOLS_BASH_* env
+// vars (or the spec.config.tools.bash defaults baked in at generation).
+func NewBashTool(ctx context.Context, logger *zap.Logger) (server.Tool, error) {
+	var cfg BashConfig
+	if err := envconfig.Process(ctx, &cfg); err != nil {
+		return nil, fmt.Errorf("load Bash config: %w", err)
+	}
 	if cfg.TimeoutSeconds <= 0 {
 		cfg.TimeoutSeconds = 30
-	}
-	if os.Getenv("A2A_BASH_DISABLED") == "1" {
-		cfg.Enabled = false
-	}
-	if v := os.Getenv("A2A_BASH_WHITELIST"); v != "" {
-		parts := strings.Split(v, ",")
-		out := make([]string, 0, len(parts))
-		for _, p := range parts {
-			if trimmed := strings.TrimSpace(p); trimmed != "" {
-				out = append(out, trimmed)
-			}
-		}
-		cfg.Whitelist = out
 	}
 	t := &BashTool{logger: logger, cfg: cfg}
 	return server.NewBasicTool(
 		"Bash",
-		"Execute a shell command. Subject to the configured whitelist and timeout; honors A2A_BASH_DISABLED as a runtime kill switch.",
+		"Execute a shell command. Subject to the configured whitelist and timeout.",
 		map[string]any{
 			"type":                 "object",
 			"additionalProperties": false,
@@ -68,13 +57,13 @@ func NewBashTool(logger *zap.Logger, cfg BashConfig) server.Tool {
 			"required": []string{"command"},
 		},
 		t.Handler,
-	)
+	), nil
 }
 
 // Handler executes the Bash tool.
 func (t *BashTool) Handler(ctx context.Context, args map[string]any) (string, error) {
 	if !t.cfg.Enabled {
-		return "", errors.New("bash tool is disabled; set spec.config.tools.bash.enabled: true and ensure A2A_BASH_DISABLED is not 1")
+		return "", errors.New("bash tool is disabled; set spec.config.tools.bash.enabled: true or TOOLS_BASH_ENABLED=true")
 	}
 
 	command, _ := args["command"].(string)
