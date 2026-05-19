@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -159,6 +160,70 @@ spec:
 	testSkillPath := filepath.Join(outputPath, "skills", "test-skill", "SKILL.md")
 	if _, err := os.Stat(testSkillPath); os.IsNotExist(err) {
 		t.Errorf("expected skills/test-skill/SKILL.md to be scaffolded")
+	}
+
+	dockerfilePath := filepath.Join(outputPath, "Dockerfile")
+	dockerfileBytes, err := os.ReadFile(dockerfilePath)
+	if err != nil {
+		t.Fatalf("failed to read generated Dockerfile: %v", err)
+	}
+	dockerfileContent := string(dockerfileBytes)
+	if !strings.Contains(dockerfileContent, "COPY --from=builder /app/skills ./skills") {
+		t.Errorf("expected Dockerfile to COPY skills/ when spec.skills is non-empty, got:\n%s", dockerfileContent)
+	}
+}
+
+func TestGenerateDockerfileOmitsSkillsCopyWhenAbsent(t *testing.T) {
+	tempDir := t.TempDir()
+	outputPath := filepath.Join(tempDir, "no-skills-output")
+
+	adlContent := `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: no-skills-agent
+  description: Agent without skills
+  version: 1.0.0
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  server:
+    port: 8080
+    debug: false
+  language:
+    go:
+      module: github.com/test/no-skills
+      version: "1.26.2"
+`
+
+	adlPath := filepath.Join(tempDir, "agent.yaml")
+	if err := os.WriteFile(adlPath, []byte(adlContent), 0644); err != nil {
+		t.Fatalf("failed to write ADL file: %v", err)
+	}
+
+	originalADLFile := adlFile
+	originalOutputDir := outputDir
+	defer func() {
+		adlFile = originalADLFile
+		outputDir = originalOutputDir
+	}()
+
+	adlFile = adlPath
+	outputDir = outputPath
+
+	if err := runGenerate(generateCmd, []string{}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	dockerfilePath := filepath.Join(outputPath, "Dockerfile")
+	dockerfileBytes, err := os.ReadFile(dockerfilePath)
+	if err != nil {
+		t.Fatalf("failed to read generated Dockerfile: %v", err)
+	}
+	dockerfileContent := string(dockerfileBytes)
+	if strings.Contains(dockerfileContent, "/app/skills") {
+		t.Errorf("expected Dockerfile to omit skills COPY when spec.skills is empty, got:\n%s", dockerfileContent)
 	}
 }
 
