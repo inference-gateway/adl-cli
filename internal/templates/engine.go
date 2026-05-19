@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"text/template"
 	"unicode"
@@ -224,7 +225,7 @@ func NewWithRegistry(templateName string, registry *Registry) *Engine {
 }
 
 // toJson converts a value to JSON string representation
-func toJson(v interface{}) string {
+func toJson(v any) string {
 	jsonBytes, err := json.Marshal(v)
 	if err != nil {
 		return "{}"
@@ -233,60 +234,72 @@ func toJson(v interface{}) string {
 }
 
 // toGoMap converts a value to Go map literal string representation
-func toGoMap(v interface{}) string {
+func toGoMap(v any) string {
 	return convertToGoMapLiteral(v)
 }
 
-// convertToGoMapLiteral recursively converts values to Go map literal format
-func convertToGoMapLiteral(v interface{}) string {
-	switch val := v.(type) {
-	case map[string]interface{}:
-		if len(val) == 0 {
+// convertToGoMapLiteral recursively converts values to Go map literal format.
+// Uses reflection so named map/slice types (e.g. schema.ToolSchema) decoded by
+// yaml.v3 — which propagates the named type to nested maps — are handled the
+// same as plain map[string]any / []any.
+func convertToGoMapLiteral(v any) string {
+	if s, ok := v.(string); ok {
+		return fmt.Sprintf(`"%s"`, s)
+	}
+
+	rv := reflect.ValueOf(v)
+	if !rv.IsValid() {
+		return "nil"
+	}
+
+	switch rv.Kind() {
+	case reflect.Map:
+		if rv.Type().Key().Kind() != reflect.String {
+			break
+		}
+		if rv.Len() == 0 {
 			return "map[string]any{}"
 		}
 		result := "map[string]any{"
 		first := true
-		for k, v := range val {
+		iter := rv.MapRange()
+		for iter.Next() {
 			if !first {
 				result += ", "
 			}
 			first = false
-			result += fmt.Sprintf(`"%s": %s`, k, convertToGoMapLiteral(v))
+			result += fmt.Sprintf(`"%s": %s`, iter.Key().String(), convertToGoMapLiteral(iter.Value().Interface()))
 		}
 		result += "}"
 		return result
-	case []interface{}:
-		if len(val) == 0 {
+	case reflect.Slice, reflect.Array:
+		n := rv.Len()
+		if n == 0 {
 			return "[]string{}"
 		}
 
 		allStrings := true
-		for _, item := range val {
-			if _, ok := item.(string); !ok {
+		for i := 0; i < n; i++ {
+			if _, ok := rv.Index(i).Interface().(string); !ok {
 				allStrings = false
 				break
 			}
 		}
 		if allStrings {
 			result := "[]string{"
-			for i, item := range val {
+			for i := 0; i < n; i++ {
 				if i > 0 {
 					result += ", "
 				}
-				result += fmt.Sprintf(`"%s"`, item.(string))
+				result += fmt.Sprintf(`"%s"`, rv.Index(i).Interface().(string))
 			}
 			result += "}"
 			return result
 		}
-
-		jsonBytes, _ := json.Marshal(val)
-		return string(jsonBytes)
-	case string:
-		return fmt.Sprintf(`"%s"`, val)
-	default:
-		jsonBytes, _ := json.Marshal(val)
-		return string(jsonBytes)
 	}
+
+	jsonBytes, _ := json.Marshal(v)
+	return string(jsonBytes)
 }
 
 // findDependencyByID finds a dependency by name in the dependencies slice
