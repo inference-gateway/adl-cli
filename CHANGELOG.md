@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.30.0](https://github.com/inference-gateway/adl-cli/compare/v0.29.0...v0.30.0) (2026-05-19)
+
+### ✨ Features
+
+* **skills+tools:** Skill manifest + reserved-ID built-in tools (closes [#109](https://github.com/inference-gateway/adl-cli/issues/109)) ([#111](https://github.com/inference-gateway/adl-cli/issues/111)) ([ec7a918](https://github.com/inference-gateway/adl-cli/commit/ec7a918c1254ed4d383f00c5fb086bc830729bcf)), closes [inference-gateway/adl#4](https://github.com/inference-gateway/adl/issues/4)
+* **skills:** Pull whole skill directories from GitHub ([#110](https://github.com/inference-gateway/adl-cli/issues/110)) ([3f889f0](https://github.com/inference-gateway/adl-cli/commit/3f889f078b30c137eb4d7188f8e62d23ee906ac4))
+
 ## [0.29.0](https://github.com/inference-gateway/adl-cli/compare/v0.28.0...v0.29.0) (2026-05-18)
 
 ### ✨ Features
