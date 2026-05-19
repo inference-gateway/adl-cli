@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.30.4](https://github.com/inference-gateway/adl-cli/compare/v0.30.3...v0.30.4) (2026-05-19)
+
+### 🐛 Bug Fixes
+
+* **templates:** COPY skills/ into runtime image when spec.skills is non-empty ([#118](https://github.com/inference-gateway/adl-cli/issues/118)) ([46c66db](https://github.com/inference-gateway/adl-cli/commit/46c66db41616b98bd5600809ea2aa23022d90dd6)), closes [#117](https://github.com/inference-gateway/adl-cli/issues/117)
+
+### 🔧 Miscellaneous
+
+* Remove all em dashes ([80f5ff7](https://github.com/inference-gateway/adl-cli/commit/80f5ff73e8a5a92515010dafdad3fa911dca8ab9))
+
 ## [0.30.3](https://github.com/inference-gateway/adl-cli/compare/v0.30.2...v0.30.3) (2026-05-19)
 
 ### ♻️ Improvements

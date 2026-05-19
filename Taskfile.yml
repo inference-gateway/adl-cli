@@ -2,7 +2,7 @@ version: "3"
 
 vars:
   APP_NAME: adl
-  VERSION: 0.30.3
+  VERSION: 0.30.4
   BUILD_DIR: bin
   DIST_DIR: dist
   ADL_SCHEMA_VERSION: v0.4.0
