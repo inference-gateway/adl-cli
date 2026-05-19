@@ -85,7 +85,11 @@ infer agents add {{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Scheme | default "
 | Tool | Description | Parameters |
 |------|-------------|------------|
 {{- range .ADL.Spec.Tools }}
+{{- if isBuiltinToolID .ID }}{{- $m := builtinToolMeta .ID }}
+| `{{ $m.Name }}` | {{ $m.Description }} | {{ if $m.Parameters }}{{ $m.Parameters | join ", " }}{{ else }}None{{ end }} |
+{{- else }}
 | `{{ .Name }}` | {{ .Description }} | {{- if .Schema.properties }}{{- $props := list }}{{- range $key, $value := .Schema.properties }}{{- $props = append $props $key }}{{- end }} {{ $props | join ", " }} {{- else }} None {{- end }} |
+{{- end }}
 {{- end }}
 
 {{- if .Skills }}

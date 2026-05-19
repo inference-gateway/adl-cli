@@ -323,6 +323,8 @@ func customFuncMap() template.FuncMap {
 	funcMap["toJson"] = toJson
 	funcMap["toGoMap"] = toGoMap
 	funcMap["findDependencyByID"] = findDependencyByID
+	funcMap["isBuiltinToolID"] = schema.IsReservedToolID
+	funcMap["builtinToolMeta"] = schema.BuiltinToolMetaFor
 	return funcMap
 }
 
@@ -351,6 +353,8 @@ func customFuncMapWithAcronyms(acronyms map[string]string) template.FuncMap {
 	funcMap["toJson"] = toJson
 	funcMap["toGoMap"] = toGoMap
 	funcMap["findDependencyByID"] = findDependencyByID
+	funcMap["isBuiltinToolID"] = schema.IsReservedToolID
+	funcMap["builtinToolMeta"] = schema.BuiltinToolMetaFor
 	return funcMap
 }
 

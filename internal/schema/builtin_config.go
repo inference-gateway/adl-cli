@@ -33,6 +33,54 @@ func IsReservedToolID(id string) bool {
 	return ok
 }
 
+// BuiltinToolMeta is the documentation-facing view of a reserved built-in
+// tool — the same information the generator bakes into the per-language
+// runtime descriptor, surfaced here so templates (README, CLAUDE.md) can
+// render a uniform table without each template re-stating it.
+type BuiltinToolMeta struct {
+	ID          string
+	Name        string
+	Description string
+	Parameters  []string
+}
+
+// BuiltinToolMetas maps reserved tool IDs to their documentation metadata.
+// Keep the Name/Description/Parameters here aligned with what each
+// language's `builtin/<id>.<ext>.tmpl` advertises to the LLM.
+var BuiltinToolMetas = map[string]BuiltinToolMeta{
+	string(ReservedToolRead): {
+		ID:          string(ReservedToolRead),
+		Name:        "Read",
+		Description: "Read a file from disk. Returns its contents, optionally sliced by line offset/limit. Use this to load SKILL.md bodies on demand.",
+		Parameters:  []string{"file_path", "offset", "limit"},
+	},
+	string(ReservedToolBash): {
+		ID:          string(ReservedToolBash),
+		Name:        "Bash",
+		Description: "Execute a shell command. Subject to the configured whitelist and timeout; honors A2A_BASH_DISABLED as a runtime kill switch.",
+		Parameters:  []string{"command"},
+	},
+	string(ReservedToolWrite): {
+		ID:          string(ReservedToolWrite),
+		Name:        "Write",
+		Description: "Write content to a file, creating intermediate directories as needed. Overwrites the file if it already exists.",
+		Parameters:  []string{"file_path", "content"},
+	},
+	string(ReservedToolEdit): {
+		ID:          string(ReservedToolEdit),
+		Name:        "Edit",
+		Description: "Replace a unique string in a file with a new value. Errors if old_string is not found or appears more than once.",
+		Parameters:  []string{"file_path", "old_string", "new_string"},
+	},
+}
+
+// BuiltinToolMetaFor returns the metadata for a reserved tool ID, or an
+// empty struct if id is not a reserved built-in. Templates can call this
+// unconditionally and check `.Name` to detect presence.
+func BuiltinToolMetaFor(id string) BuiltinToolMeta {
+	return BuiltinToolMetas[id]
+}
+
 // ReadBuiltinConfig is the typed shape of spec.config.tools.read.
 type ReadBuiltinConfig struct {
 	Enabled      bool     `mapstructure:"enabled"`
