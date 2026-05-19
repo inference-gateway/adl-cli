@@ -38,7 +38,12 @@ spec:
         max_lines: 2000
       bash:
         enabled: true
-        whitelist: [ls, cat, grep, jq, find]
+        whitelist:
+          - ls
+          - cat
+          - grep
+          - jq
+          - find
         timeout_seconds: 30
     database:
       connectionString: "postgresql://user:pass@localhost:5432/company_db"
