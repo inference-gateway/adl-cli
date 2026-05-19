@@ -17,9 +17,9 @@ tasks:
       - go build -ldflags "-X main.Version={{.VERSION}}" -o {{.BUILD_DIR}}/{{.APP_NAME}} .
 
   install:
-    desc: Install the adl CLI to GOPATH/bin
+    desc: Install the adl CLI to GOPATH/bin as 'adl'
     cmds:
-      - go install -ldflags "-X main.Version={{.VERSION}}" .
+      - go build -ldflags "-X main.Version={{.VERSION}}" -o "$(go env GOPATH)/bin/{{.APP_NAME}}" .
 
   test:
     desc: Run tests
