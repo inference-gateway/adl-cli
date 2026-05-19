@@ -1,0 +1,152 @@
+package tools
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"os/exec"
+	"strings"
+	"time"
+
+	server "github.com/inference-gateway/adk/server"
+	zap "go.uber.org/zap"
+)
+
+// BashConfig is the compile-time config for the Bash built-in. Values
+// flow in from spec.config.tools.bash at generation time. Runtime env
+// vars `A2A_BASH_DISABLED` and `A2A_BASH_WHITELIST` override the
+// compile-time values.
+type BashConfig struct {
+	Enabled        bool
+	Whitelist      []string
+	TimeoutSeconds int
+	WorkingDir     string
+}
+
+// BashTool exposes a Bash built-in. Disabled by default; flip
+// spec.config.tools.bash.enabled: true in your ADL to activate.
+// Resolution: env > compile-time literal > built-in default.
+type BashTool struct {
+	logger *zap.Logger
+	cfg    BashConfig
+}
+
+// NewBashTool builds a Bash tool with the resolved config baked in.
+// Env-var overrides are read here, once, at agent startup.
+func NewBashTool(logger *zap.Logger, cfg BashConfig) server.Tool {
+	if cfg.TimeoutSeconds <= 0 {
+		cfg.TimeoutSeconds = 30
+	}
+	if os.Getenv("A2A_BASH_DISABLED") == "1" {
+		cfg.Enabled = false
+	}
+	if v := os.Getenv("A2A_BASH_WHITELIST"); v != "" {
+		parts := strings.Split(v, ",")
+		out := make([]string, 0, len(parts))
+		for _, p := range parts {
+			if trimmed := strings.TrimSpace(p); trimmed != "" {
+				out = append(out, trimmed)
+			}
+		}
+		cfg.Whitelist = out
+	}
+	t := &BashTool{logger: logger, cfg: cfg}
+	return server.NewBasicTool(
+		"Bash",
+		"Execute a shell command. Subject to the configured whitelist and timeout; honors A2A_BASH_DISABLED as a runtime kill switch.",
+		map[string]any{
+			"type":                 "object",
+			"additionalProperties": false,
+			"properties": map[string]any{
+				"command": map[string]any{
+					"type":        "string",
+					"description": "The shell command to execute.",
+				},
+			},
+			"required": []string{"command"},
+		},
+		t.Handler,
+	)
+}
+
+// Handler executes the Bash tool.
+func (t *BashTool) Handler(ctx context.Context, args map[string]any) (string, error) {
+	if !t.cfg.Enabled {
+		return "", errors.New("Bash tool is disabled; set spec.config.tools.bash.enabled: true and ensure A2A_BASH_DISABLED is not 1")
+	}
+
+	command, _ := args["command"].(string)
+	command = strings.TrimSpace(command)
+	if command == "" {
+		return "", errors.New("command is required")
+	}
+
+	if err := t.checkWhitelist(command); err != nil {
+		return "", err
+	}
+
+	timeout := time.Duration(t.cfg.TimeoutSeconds) * time.Second
+	cmdCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(cmdCtx, "sh", "-c", command)
+	if t.cfg.WorkingDir != "" {
+		cmd.Dir = t.cfg.WorkingDir
+	}
+
+	start := time.Now()
+	out, runErr := cmd.CombinedOutput()
+	duration := time.Since(start)
+
+	exitCode := 0
+	stderrTrunc := ""
+	if runErr != nil {
+		var exitErr *exec.ExitError
+		if errors.As(runErr, &exitErr) {
+			exitCode = exitErr.ExitCode()
+		} else if errors.Is(cmdCtx.Err(), context.DeadlineExceeded) {
+			stderrTrunc = fmt.Sprintf("bash timed out after %s", timeout)
+			exitCode = -1
+		} else {
+			stderrTrunc = runErr.Error()
+			exitCode = -1
+		}
+	}
+
+	result := map[string]any{
+		"command":     command,
+		"exit_code":   exitCode,
+		"duration_ms": duration.Milliseconds(),
+		"output":      string(out),
+	}
+	if stderrTrunc != "" {
+		result["error"] = stderrTrunc
+	}
+	payload, err := json.Marshal(result)
+	if err != nil {
+		return "", fmt.Errorf("encode Bash result: %w", err)
+	}
+	t.logger.Debug("bash executed", zap.String("command", command), zap.Int("exit", exitCode))
+	return string(payload), nil
+}
+
+// checkWhitelist enforces the configured whitelist (if any). An empty
+// whitelist allows any command (the operator is opting into Bash with
+// no command restrictions).
+func (t *BashTool) checkWhitelist(command string) error {
+	if len(t.cfg.Whitelist) == 0 {
+		return nil
+	}
+	for _, allowed := range t.cfg.Whitelist {
+		allowed = strings.TrimSpace(allowed)
+		if allowed == "" {
+			continue
+		}
+		if command == allowed || strings.HasPrefix(command, allowed+" ") {
+			return nil
+		}
+	}
+	return fmt.Errorf("command %q is not in the configured whitelist", command)
+}

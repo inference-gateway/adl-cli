@@ -1,0 +1,100 @@
+use anyhow::{anyhow, bail};
+use inference_gateway_sdk::{ChatCompletionTool, ChatCompletionToolType, FunctionObject, FunctionParameters};
+use serde_json::{Value, json};
+use std::path::{Path, PathBuf};
+use tokio::fs;
+
+/// Compile-time config for the Write built-in. Values flow in from
+/// spec.config.tools.write at generation time.
+#[derive(Clone, Debug)]
+pub struct Config {
+    pub enabled: bool,
+    pub allowed_roots: Vec<String>,
+}
+
+/// Tool descriptor advertised to the LLM.
+pub fn descriptor() -> ChatCompletionTool {
+    ChatCompletionTool {
+        type_: ChatCompletionToolType::Function,
+        function: FunctionObject {
+            name: "Write".to_string(),
+            description: Some(
+                "Write content to a file, creating intermediate directories as needed. Overwrites the file if it already exists.".to_string(),
+            ),
+            parameters: Some(FunctionParameters(
+                json!({
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "file_path": {
+                            "type": "string",
+                            "description": "Path to the file (absolute or relative to the agent's working directory)."
+                        },
+                        "content": {
+                            "type": "string",
+                            "description": "Content to write to the file."
+                        }
+                    },
+                    "required": ["file_path", "content"]
+                })
+                .as_object()
+                .expect("schema literal must be an object")
+                .clone(),
+            )),
+            strict: false,
+        },
+    }
+}
+
+/// Handle a Write invocation.
+pub async fn handle(args: Value, cfg: Config) -> anyhow::Result<String> {
+    if !cfg.enabled {
+        bail!("Write tool is disabled; set spec.config.tools.write.enabled: true in the ADL and regenerate");
+    }
+
+    let file_path = args
+        .get("file_path")
+        .and_then(Value::as_str)
+        .ok_or_else(|| anyhow!("file_path is required"))?
+        .to_string();
+    let content = args
+        .get("content")
+        .and_then(Value::as_str)
+        .ok_or_else(|| anyhow!("content is required"))?
+        .to_string();
+
+    validate_path(&cfg.allowed_roots, &file_path)?;
+
+    let cleaned = PathBuf::from(&file_path);
+    if let Some(parent) = cleaned.parent() {
+        if !parent.as_os_str().is_empty() {
+            fs::create_dir_all(parent)
+                .await
+                .map_err(|e| anyhow!("create parent dir for {}: {}", cleaned.display(), e))?;
+        }
+    }
+    let bytes = content.as_bytes();
+    fs::write(&cleaned, bytes)
+        .await
+        .map_err(|e| anyhow!("write {}: {}", cleaned.display(), e))?;
+
+    Ok(json!({
+        "file_path": cleaned.display().to_string(),
+        "bytes_written": bytes.len(),
+    })
+    .to_string())
+}
+
+fn validate_path(allowed_roots: &[String], p: &str) -> anyhow::Result<()> {
+    if allowed_roots.is_empty() {
+        return Ok(());
+    }
+    let cleaned = Path::new(p).to_path_buf();
+    for root in allowed_roots {
+        let root_clean = Path::new(root).to_path_buf();
+        if cleaned == root_clean || cleaned.starts_with(&root_clean) {
+            return Ok(());
+        }
+    }
+    bail!("path {:?} is outside the configured allowed_roots", p);
+}

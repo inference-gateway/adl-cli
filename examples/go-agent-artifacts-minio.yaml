@@ -106,7 +106,7 @@ spec:
     provider: github
     url: "https://github.com/inference-gateway/adl-cli"
     github_app: true
-    issue_templates: true
+    issue_templates: false
   sandbox:
     flox:
       enabled: true

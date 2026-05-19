@@ -8,20 +8,23 @@ import (
 type Config struct {
 	// Core application settings
 	Environment string `env:"ENVIRONMENT"`
-	
+
 	// A2A configuration (all A2A_ prefixed vars)
 	A2A serverConfig.Config `env:",prefix=A2A_"`
 	{{- if .ADL.Spec.Config }}
-	
+
 	// Custom configuration sections
 	{{- range $sectionName, $sectionConfig := .ADL.Spec.Config }}
+	{{- if ne $sectionName "tools" }}
 	{{ $sectionName | toPascalCase }} {{ $sectionName | toPascalCase }}Config `env:",prefix={{ $sectionName | toUpperSnakeCase }}_"`
+	{{- end }}
 	{{- end }}
 	{{- end }}
 }
 
 {{- if .ADL.Spec.Config }}
 {{- range $sectionName, $sectionConfig := .ADL.Spec.Config }}
+{{- if ne $sectionName "tools" }}
 
 // {{ $sectionName | toPascalCase }}Config represents the {{ $sectionName }} configuration
 type {{ $sectionName | toPascalCase }}Config struct {
@@ -41,5 +44,6 @@ type {{ $sectionName | toPascalCase }}Config struct {
 	{{ $key | toPascalCase }} {{ $type }} `env:"{{ $key | toUpperSnakeCase }}{{- if or $value $isBool }},default={{ $value }}{{- end }}"`
 	{{- end }}
 }
+{{- end }}
 {{- end }}
 {{- end }}

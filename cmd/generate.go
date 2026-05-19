@@ -63,10 +63,13 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to resolve output directory path: %w", err)
 	}
 
-	// Validate ADL file before generation
 	validator := schema.NewValidator()
-	if err := validator.ValidateFile(adlFile); err != nil {
+	warnings, err := validator.ValidateFile(adlFile)
+	if err != nil {
 		return fmt.Errorf("ADL validation failed: %w", err)
+	}
+	for _, w := range warnings {
+		fmt.Fprintf(os.Stderr, "⚠️  %s\n", w)
 	}
 
 	gen := generator.New(generator.Config{

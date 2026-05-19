@@ -19,7 +19,7 @@ type Registry struct {
 
 // Embed template files at compile time
 //
-//go:embed languages/*/*.tmpl common/*/*.tmpl common/github/*/*.tmpl sandbox/*/*.tmpl
+//go:embed languages/*/*.tmpl languages/*/builtin/*.tmpl common/*/*.tmpl common/github/*/*.tmpl sandbox/*/*.tmpl
 var templateFS embed.FS
 
 // RegistryOptions holds options for creating a new registry
@@ -160,6 +160,10 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 	}
 
 	for _, tool := range adl.Spec.Tools {
+		if schema.IsReservedToolID(tool.ID) {
+			files[fmt.Sprintf("tools/%s.go", tool.ID)] = fmt.Sprintf("builtin/%s.go", tool.ID)
+			continue
+		}
 		snakeCaseName := strings.ReplaceAll(tool.ID, "-", "_")
 		files[fmt.Sprintf("tools/%s.go", snakeCaseName)] = "tool.go"
 	}
@@ -210,6 +214,10 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 
 	if adl.Spec.Agent != nil {
 		for _, tool := range adl.Spec.Tools {
+			if schema.IsReservedToolID(tool.ID) {
+				files[fmt.Sprintf("src/tools/%s.rs", tool.ID)] = fmt.Sprintf("builtin/%s.rs", tool.ID)
+				continue
+			}
 			snakeCaseName := strings.ReplaceAll(tool.ID, "-", "_")
 			files[fmt.Sprintf("src/tools/%s.rs", snakeCaseName)] = "tool.rs"
 		}

@@ -44,7 +44,7 @@ spec:
   scm:
     provider: github
     url: "https://github.com/example/cloudrun-example"
-    issue_templates: true
+    issue_templates: false
   deployment:
     type: cloudrun
     cloudrun:

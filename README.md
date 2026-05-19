@@ -627,7 +627,76 @@ Concrete examples:
 
 The 3-segment form assumes a `skills/<id>/` subdirectory inside the repo (the convention used by both `inference-gateway/skills` and `anthropics/skills`). If your repo lays skills out differently, pass the full URL.
 
-At runtime, the generated agent walks first-level subdirectories under `skills/` (overridable with `A2A_SKILLS_DIR`), reads each `<id>/SKILL.md`, strips frontmatter, and concatenates the bodies onto the configured `systemPrompt`. Both Go and Rust runtimes ship with this loader baked into `main.go` / `main.rs`.
+### Runtime: AVAILABLE SKILLS manifest + on-demand Read
+
+The generated agent advertises skills to the LLM via a frontmatter-only manifest, **not** by inlining SKILL.md bodies. At startup it walks first-level subdirectories under `skills/` (overridable with `A2A_SKILLS_DIR`), parses each `<id>/SKILL.md`'s YAML frontmatter, and appends an `AVAILABLE SKILLS:` block to the system prompt:
+
+```text
+AVAILABLE SKILLS:
+Skills are reusable instructions for specific tasks. When a task matches a
+skill's description, read the SKILL.md file at the listed path using the Read
+tool, then follow its instructions.
+
+- incident-response: Use this when the user reports a production incident...
+  Path: skills/incident-response/SKILL.md
+- pdf: Fill in PDF forms and extract structured data from PDFs.
+  Path: skills/pdf/SKILL.md
+```
+
+The model loads each SKILL.md body on demand via the `Read` built-in tool, and executes any bundled scripts via `Bash` / `Write` / `Edit`. **A skills-using agent must therefore list `- id: read` in `spec.tools` and set `spec.config.tools.read.enabled: true`** — the validator enforces this; see [Reserved built-in tools](#reserved-built-in-tools).
+
+### Reserved built-in tools
+
+`spec.tools` accepts four reserved IDs that map to framework-supplied implementations:
+
+| Reserved ID | Generated as            | Purpose                                                          |
+| ----------- | ----------------------- | ---------------------------------------------------------------- |
+| `read`      | `tools/read.go` etc.    | Read a file (`file_path`, optional `offset`/`limit`).            |
+| `bash`      | `tools/bash.go` etc.    | Execute a shell command (subject to whitelist + timeout).        |
+| `write`     | `tools/write.go` etc.   | Write content to a file (creates parent dirs).                   |
+| `edit`      | `tools/edit.go` etc.    | Replace a unique string in a file (`old_string` → `new_string`). |
+
+Opt in by listing the id alone — the generator owns `name`, `description`, and the JSON schema:
+
+```yaml
+spec:
+  tools:
+    - id: read
+    - id: bash
+    - id: query_database       # user tool: full entry still required
+      name: query_database
+      description: "..."
+      schema: { type: object, ... }
+```
+
+**All four built-ins default to `enabled: false`.** Activate them via the reserved namespace `spec.config.tools.<id>`:
+
+```yaml
+spec:
+  config:
+    tools:
+      read:
+        enabled: true
+        max_lines: 2000          # offset/limit default window
+        allowed_roots: []        # empty = project-wide
+      bash:
+        enabled: true
+        whitelist: [ls, cat, grep, jq]
+        timeout_seconds: 30
+      write:
+        enabled: false           # listed but explicitly disabled
+      edit:
+        enabled: true
+```
+
+Values are baked into the generated constructor as compile-time literals — there's no `ToolsConfig` struct in `config/config.go` because reserved-namespace sections are intentionally skipped. The validator decodes each `spec.config.tools.<id>` block into the built-in's typed shape and rejects unknown keys (typos like `tymeout_seconds` fail with `spec.config.tools.bash.tymeout_seconds`).
+
+Runtime overrides for Bash (read inside `tools/bash.go`):
+
+- `A2A_BASH_DISABLED=1` is a kill switch — overrides `enabled: true` back to false.
+- `A2A_BASH_WHITELIST=ls,cat,grep` overrides the compile-time whitelist.
+
+Resolution precedence at runtime: **env > compile-time literal > built-in default (disabled)**.
 
 ## Service Injection & Configuration Management
 

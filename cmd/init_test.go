@@ -79,7 +79,7 @@ func TestInitCommandIncludesSCMDefaults(t *testing.T) {
 	if !strings.Contains(contentStr, "github_app: true") {
 		t.Errorf("ADL file missing SCM github_app default")
 	}
-	if !strings.Contains(contentStr, "issue_templates: true") {
+	if !strings.Contains(contentStr, "issue_templates: false") {
 		t.Errorf("ADL file missing SCM issue_templates default")
 	}
 
@@ -120,16 +120,16 @@ func TestInitIssueTemplatesDefault(t *testing.T) {
 	if adl.Spec.SCM.Provider != "github" {
 		t.Errorf("expected SCM provider to be 'github', got: %s", adl.Spec.SCM.Provider)
 	}
-	if !adl.Spec.SCM.IssueTemplates {
-		t.Errorf("expected IssueTemplates to be true by default")
+	if adl.Spec.SCM.IssueTemplates {
+		t.Errorf("expected IssueTemplates to be false by default")
 	}
 	if !adl.Spec.SCM.GithubApp {
 		t.Errorf("expected GithubApp to be true by default")
 	}
 
 	contentStr := string(content)
-	if !strings.Contains(contentStr, "issue_templates: true") {
-		t.Errorf("ADL file should contain 'issue_templates: true'")
+	if !strings.Contains(contentStr, "issue_templates: false") {
+		t.Errorf("ADL file should contain 'issue_templates: false'")
 	}
 }
 

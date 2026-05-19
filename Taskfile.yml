@@ -5,7 +5,7 @@ vars:
   VERSION: 0.29.0
   BUILD_DIR: bin
   DIST_DIR: dist
-  ADL_SCHEMA_VERSION: v0.3.0
+  ADL_SCHEMA_VERSION: v0.4.0
   ADL_SCHEMA_URL: https://raw.githubusercontent.com/inference-gateway/adl/{{.ADL_SCHEMA_VERSION}}/schema/v1/schema.json
   ADL_SCHEMA_PATH: internal/schema/schema.json
 
@@ -17,9 +17,9 @@ tasks:
       - go build -ldflags "-X main.Version={{.VERSION}}" -o {{.BUILD_DIR}}/{{.APP_NAME}} .
 
   install:
-    desc: Install the adl CLI to GOPATH/bin
+    desc: Install the adl CLI to GOPATH/bin as 'adl'
     cmds:
-      - go install -ldflags "-X main.Version={{.VERSION}}" .
+      - go build -ldflags "-X main.Version={{.VERSION}}" -o "$(go env GOPATH)/bin/{{.APP_NAME}}" .
 
   test:
     desc: Run tests
@@ -139,15 +139,19 @@ tasks:
     cmds:
       - rm -rf test-output
       - mkdir -p test-output
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/go-agent.yaml --output test-output/go-agent --overwrite
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/go-agent-artifacts-filesystem.yaml --output test-output/go-agent-artifacts-filesystem --overwrite
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/go-agent-artifacts-minio.yaml --output test-output/go-agent-artifacts-minio --overwrite
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/cloudrun-agent.yaml --output test-output/cloudrun-agent --overwrite
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/cloudrun-ghcr-agent.yaml --output test-output/cloudrun-ghcr-agent --overwrite
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/kubernetes-agent.yaml --output test-output/kubernetes-agent --overwrite
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/rust-agent.yaml --output test-output/rust-agent --overwrite
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/rust-agent-redis.yaml --output test-output/rust-agent-redis --overwrite
-      - ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/rust-agent-ai.yaml --output test-output/rust-agent-ai --overwrite
+      - for:
+          - go-agent
+          - go-agent-artifacts-filesystem
+          - go-agent-artifacts-minio
+          - cloudrun-agent
+          - cloudrun-ghcr-agent
+          - kubernetes-agent
+          - rust-agent
+          - rust-agent-redis
+          - rust-agent-ai
+        cmd: |
+          ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/{{.ITEM}}.yaml --output test-output/{{.ITEM}} --overwrite
+          cp examples/{{.ITEM}}.yaml test-output/{{.ITEM}}/agent.yaml
 
   release:
     desc: Build release binaries for multiple platforms

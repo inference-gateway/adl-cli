@@ -35,27 +35,30 @@ func NewValidator() *Validator {
 	}
 }
 
-// ValidateFile validates an ADL file
-func (v *Validator) ValidateFile(filePath string) error {
+// ValidateFile validates an ADL file. Returns any non-fatal warnings
+// that callers should surface to the user (e.g., a skills-using agent
+// that hasn't enabled the Read built-in). A nil error means the manifest
+// is structurally valid; warnings may still be present.
+func (v *Validator) ValidateFile(filePath string) ([]string, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		return fmt.Errorf("failed to read file: %w", err)
+		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
 
 	var yamlData any
 	if err := yaml.Unmarshal(data, &yamlData); err != nil {
-		return fmt.Errorf("failed to parse YAML: %w", err)
+		return nil, fmt.Errorf("failed to parse YAML: %w", err)
 	}
 
 	jsonData, err := json.Marshal(yamlData)
 	if err != nil {
-		return fmt.Errorf("failed to convert to JSON: %w", err)
+		return nil, fmt.Errorf("failed to convert to JSON: %w", err)
 	}
 
 	documentLoader := gojsonschema.NewBytesLoader(jsonData)
 	result, err := v.schema.Validate(documentLoader)
 	if err != nil {
-		return fmt.Errorf("validation error: %w", err)
+		return nil, fmt.Errorf("validation error: %w", err)
 	}
 
 	if !result.Valid() {
@@ -63,41 +66,88 @@ func (v *Validator) ValidateFile(filePath string) error {
 		for _, desc := range result.Errors() {
 			errors = append(errors, desc.String())
 		}
-		return fmt.Errorf("validation failed:\n- %s", fmt.Sprintf("\n- %s", errors))
+		return nil, fmt.Errorf("validation failed:\n- %s", fmt.Sprintf("\n- %s", errors))
 	}
 
 	// Additional validation: check that injected services are defined
 	var adl ADL
 	if err := yaml.Unmarshal(data, &adl); err != nil {
-		return fmt.Errorf("failed to parse ADL for service validation: %w", err)
+		return nil, fmt.Errorf("failed to parse ADL for service validation: %w", err)
 	}
 
-	if err := v.validateServiceReferences(&adl); err != nil {
-		return fmt.Errorf("service validation failed: %w", err)
+	if err := v.validateTools(&adl); err != nil {
+		return nil, fmt.Errorf("tool validation failed: %w", err)
 	}
 
-	return nil
+	warnings, err := v.validateSkills(&adl)
+	if err != nil {
+		return nil, fmt.Errorf("skill validation failed: %w", err)
+	}
+
+	return warnings, nil
 }
 
-// validateServiceReferences checks that all injected services are defined in the spec
-func (v *Validator) validateServiceReferences(adl *ADL) error {
-	definedServices := make(map[string]bool)
+// reservedConfigSection is the namespace inside spec.config dedicated to
+// built-in tool config (spec.config.tools.<id>). User-defined services
+// cannot inject from it.
+const reservedConfigSection = "tools"
+
+// validateTools enforces the contract for both user-defined and reserved
+// (built-in) tool IDs and the integrity of spec.config.tools.<id>.
+func (v *Validator) validateTools(adl *ADL) error {
+	definedServices := map[string]bool{"logger": true, "config": true}
 	for serviceName := range adl.Spec.Services {
 		definedServices[serviceName] = true
 	}
-
-	definedServices["logger"] = true
-	definedServices["config"] = true
 
 	definedConfigSections := make(map[string]bool)
 	for configSection := range adl.Spec.Config {
 		definedConfigSections[configSection] = true
 	}
 
+	toolsCfg := adl.Spec.Config[reservedConfigSection]
+
 	for _, tool := range adl.Spec.Tools {
+		if IsReservedToolID(tool.ID) {
+			if tool.Name != "" {
+				return fmt.Errorf("reserved tool '%s' must not set 'name' (the generator supplies it)", tool.ID)
+			}
+			if tool.Description != "" {
+				return fmt.Errorf("reserved tool '%s' must not set 'description' (the generator supplies it)", tool.ID)
+			}
+			if len(tool.Schema) > 0 {
+				return fmt.Errorf("reserved tool '%s' must not set 'schema' (the generator supplies it)", tool.ID)
+			}
+			if len(tool.Inject) > 0 {
+				return fmt.Errorf("reserved tool '%s' must not set 'inject' (built-ins do not use service injection)", tool.ID)
+			}
+			if raw, ok := toolsCfg[tool.ID]; ok {
+				if _, err := DecodeBuiltinToolConfig(tool.ID, raw); err != nil {
+					return err
+				}
+			}
+			continue
+		}
+
+		if tool.Name == "" {
+			return fmt.Errorf("tool '%s' must set 'name' (only reserved built-in IDs may omit it)", tool.ID)
+		}
+		if tool.Description == "" {
+			return fmt.Errorf("tool '%s' must set 'description'", tool.ID)
+		}
+		if len(tool.Tags) == 0 {
+			return fmt.Errorf("tool '%s' must set 'tags' (at least one)", tool.ID)
+		}
+		if len(tool.Schema) == 0 {
+			return fmt.Errorf("tool '%s' must set 'schema'", tool.ID)
+		}
+
 		for _, injectedService := range tool.Inject {
 			if len(injectedService) > 7 && injectedService[:7] == "config." {
 				configSection := injectedService[7:]
+				if configSection == reservedConfigSection {
+					return fmt.Errorf("tool '%s' injects reserved namespace 'config.tools'; this namespace is owned by built-in tools and cannot be inject-referenced", tool.ID)
+				}
 				if !definedConfigSections[configSection] {
 					return fmt.Errorf("tool '%s' injects config section '%s' that is not defined in spec.config", tool.ID, configSection)
 				}
@@ -107,16 +157,62 @@ func (v *Validator) validateServiceReferences(adl *ADL) error {
 		}
 	}
 
+	return nil
+}
+
+// validateSkills enforces bare-skill metadata and surfaces non-fatal
+// warnings about the skills-need-read contract: a skills-using agent
+// should list `- id: read` AND enable `spec.config.tools.read.enabled:
+// true`, otherwise it can't load SKILL.md bodies at runtime. Returns
+// warnings (not errors) for the read-tool case so partially configured
+// manifests still pass validation — the warning prompts the user to fix
+// it.
+func (v *Validator) validateSkills(adl *ADL) ([]string, error) {
 	for _, skill := range adl.Spec.Skills {
 		if skill.Bare {
 			if skill.Name == "" {
-				return fmt.Errorf("skill '%s' has bare: true but is missing name", skill.ID)
+				return nil, fmt.Errorf("skill '%s' has bare: true but is missing name", skill.ID)
 			}
 			if skill.Description == "" {
-				return fmt.Errorf("skill '%s' has bare: true but is missing description", skill.ID)
+				return nil, fmt.Errorf("skill '%s' has bare: true but is missing description", skill.ID)
 			}
 		}
 	}
 
-	return nil
+	if len(adl.Spec.Skills) == 0 || adl.Spec.Agent == nil {
+		return nil, nil
+	}
+
+	hasReadTool := false
+	for _, tool := range adl.Spec.Tools {
+		if tool.ID == string(ReservedToolRead) {
+			hasReadTool = true
+			break
+		}
+	}
+	if !hasReadTool {
+		return []string{
+			"spec.skills is non-empty but spec.tools is missing '- id: read'; the AVAILABLE SKILLS manifest will be added to the system prompt but the agent has no Read built-in to load SKILL.md bodies. Add '- id: read' to spec.tools and set spec.config.tools.read.enabled: true.",
+		}, nil
+	}
+
+	toolsCfg := adl.Spec.Config[reservedConfigSection]
+	readRaw, ok := toolsCfg[string(ReservedToolRead)]
+	if !ok {
+		return []string{
+			"spec.skills is non-empty and '- id: read' is listed, but spec.config.tools.read is missing; the Read built-in will register in a disabled state and fail at runtime. Set spec.config.tools.read.enabled: true.",
+		}, nil
+	}
+	decoded, err := DecodeBuiltinToolConfig(string(ReservedToolRead), readRaw)
+	if err != nil {
+		return nil, err
+	}
+	readCfg, ok := decoded.(*ReadBuiltinConfig)
+	if !ok || !readCfg.Enabled {
+		return []string{
+			"spec.skills is non-empty but spec.config.tools.read.enabled is not true; the Read built-in will register in a disabled state and fail at runtime. Set spec.config.tools.read.enabled: true so the agent can load SKILL.md bodies.",
+		}, nil
+	}
+
+	return nil, nil
 }

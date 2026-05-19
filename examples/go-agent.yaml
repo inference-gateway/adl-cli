@@ -32,6 +32,19 @@ spec:
     maxTokens: 8192
     temperature: 0.3
   config:
+    tools:
+      read:
+        enabled: true
+        max_lines: 2000
+      bash:
+        enabled: true
+        whitelist:
+          - ls
+          - cat
+          - grep
+          - jq
+          - find
+        timeout_seconds: 30
     database:
       connectionString: "postgresql://user:pass@localhost:5432/company_db"
       maxConnections: "10"
@@ -64,6 +77,8 @@ spec:
       factory: NewReportingService
       description: Business report generation service with multiple output formats
   tools:
+    - id: read
+    - id: bash
     - id: query_database
       name: query_database
       description: "Query the company database with proper authentication"
@@ -197,7 +212,7 @@ spec:
     provider: github
     url: "https://github.com/inference-gateway/adl-cli"
     github_app: true
-    issue_templates: true
+    issue_templates: false
   sandbox:
     flox:
       enabled: true

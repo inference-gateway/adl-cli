@@ -209,6 +209,9 @@ func (g *Generator) validateADL(adl *schema.ADL) error {
 		if tool.ID == "" {
 			return fmt.Errorf("spec.tools[%d].id is required", i)
 		}
+		if schema.IsReservedToolID(tool.ID) {
+			continue
+		}
 		if tool.Name == "" {
 			return fmt.Errorf("spec.tools[%d].name is required", i)
 		}
@@ -280,6 +283,11 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		})
 	}
 
+	builtinConfigs, err := schema.ResolveBuiltinConfigs(adl)
+	if err != nil {
+		return fmt.Errorf("failed to resolve built-in tool config: %w", err)
+	}
+
 	ctx := templates.Context{
 		ADL: adl,
 		Metadata: schema.GeneratedMetadata{
@@ -293,6 +301,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		EnableAI:        g.config.EnableAI,
 		GenerateCommand: g.buildGenerateCommand(),
 		Skills:          skillViews,
+		BuiltinConfigs:  builtinConfigs,
 	}
 
 	ignoreChecker, err := NewIgnoreChecker(outputDir)
@@ -357,7 +366,8 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 					return fmt.Errorf("service %s not found in ADL spec", serviceName)
 				}
 			}
-		} else if (templateKey == "tool.go" || templateKey == "tool.rs" || templateKey == "tool.ts") && strings.Contains(fileName, "/") {
+		} else if (templateKey == "tool.go" || templateKey == "tool.rs" || templateKey == "tool.ts" ||
+			strings.HasPrefix(templateKey, "builtin/")) && strings.Contains(fileName, "/") {
 			parts := strings.Split(fileName, "/")
 			if len(parts) >= 2 {
 				toolFileName := parts[len(parts)-1]
@@ -398,6 +408,18 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 						}
 					}
 					toolContext["ServiceMap"] = serviceMap
+
+					if schema.IsReservedToolID(foundTool.ID) {
+						var rawCfg any
+						if toolsCfg, ok := adl.Spec.Config["tools"]; ok {
+							rawCfg = toolsCfg[foundTool.ID]
+						}
+						decoded, decodeErr := schema.DecodeBuiltinToolConfig(foundTool.ID, rawCfg)
+						if decodeErr != nil {
+							return fmt.Errorf("failed to decode built-in tool config for %s: %w", foundTool.ID, decodeErr)
+						}
+						toolContext["Config"] = decoded
+					}
 
 					content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, toolContext, ctx)
 					if err != nil {
@@ -568,23 +590,14 @@ func (g *Generator) getVersion() string {
 	return "dev"
 }
 
-// buildGenerateCommand constructs the original adl generate command from the config
+// buildGenerateCommand constructs the adl generate command embedded in the
+// generated Taskfile. Paths are always the in-project canonical values
+// (agent.yaml at the project root) so the task works after `cd` into the
+// generated project, regardless of how `adl generate` was originally invoked.
 func (g *Generator) buildGenerateCommand() string {
 	var parts []string
 
-	parts = append(parts, "adl", "generate")
-
-	if g.config.ADLFile != "" {
-		parts = append(parts, "--file", g.config.ADLFile)
-	} else {
-		parts = append(parts, "--file", "agent.yaml")
-	}
-
-	if g.config.OutputDir != "" {
-		parts = append(parts, "--output", g.config.OutputDir)
-	} else {
-		parts = append(parts, "--output", ".")
-	}
+	parts = append(parts, "adl", "generate", "--file", "agent.yaml", "--output", ".")
 
 	if g.config.Template != "" && g.config.Template != "minimal" {
 		parts = append(parts, "--template", g.config.Template)
@@ -638,6 +651,9 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 		switch language {
 		case "go":
 			for _, tool := range adl.Spec.Tools {
+				if schema.IsReservedToolID(tool.ID) {
+					continue
+				}
 				snakeCaseName := strings.ReplaceAll(tool.ID, "-", "_")
 				filesToIgnore = append(filesToIgnore, fmt.Sprintf("tools/%s.go", snakeCaseName))
 			}
@@ -649,12 +665,18 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 		case "rust":
 			if adl.Spec.Agent != nil {
 				for _, tool := range adl.Spec.Tools {
+					if schema.IsReservedToolID(tool.ID) {
+						continue
+					}
 					snakeCaseName := strings.ReplaceAll(tool.ID, "-", "_")
 					filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/tools/%s.rs", snakeCaseName))
 				}
 			}
 		case "typescript":
 			for _, tool := range adl.Spec.Tools {
+				if schema.IsReservedToolID(tool.ID) {
+					continue
+				}
 				snakeCaseName := strings.ReplaceAll(tool.ID, "-", "_")
 				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/tools/%s.ts", snakeCaseName))
 			}

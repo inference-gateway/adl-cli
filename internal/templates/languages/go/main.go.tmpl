@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -14,6 +15,7 @@ import (
 	server "github.com/inference-gateway/adk/server"
 	envconfig "github.com/sethvargo/go-envconfig"
 	zap "go.uber.org/zap"
+	yaml "gopkg.in/yaml.v3"
 
 	config "{{ .ADL.Spec.Language.Go.Module }}/config"
 {{- if .ADL.Spec.Tools }}
@@ -43,16 +45,17 @@ var (
 	AgentDescription = "{{ .ADL.Metadata.Description }}"
 )
 
-// skillsDir is the directory the runtime loads markdown skills from at
+// skillsDir is the directory the runtime scans for skill manifests at
 // startup. Override with A2A_SKILLS_DIR.
 const skillsDir = "skills"
 
-// loadSkills walks the configured skills directory, reads each
-// <skill>/SKILL.md, strips its YAML frontmatter, and returns the
-// concatenated bodies in lexical order by skill directory. The result is
-// appended to the configured system prompt so the model sees skill
-// playbooks at runtime.
-func loadSkills(dir string) (string, error) {
+// loadSkillsManifest walks the configured skills directory, reads each
+// <skill>/SKILL.md, extracts the YAML frontmatter (name + description),
+// and returns an `AVAILABLE SKILLS:` block to append to the system
+// prompt. SKILL.md bodies are NOT inlined — the model must call the
+// Read tool to load a skill's playbook on demand. Returns "" when the
+// directory is missing or has no valid manifests.
+func loadSkillsManifest(dir string) (string, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -70,9 +73,14 @@ func loadSkills(dir string) (string, error) {
 	}
 	sort.Strings(dirs)
 
-	var out strings.Builder
-	for _, name := range dirs {
-		path := filepath.Join(dir, name, "SKILL.md")
+	type skillFrontmatter struct {
+		Name        string `yaml:"name"`
+		Description string `yaml:"description"`
+	}
+
+	var manifest strings.Builder
+	for _, id := range dirs {
+		path := filepath.Join(dir, id, "SKILL.md")
 		data, err := os.ReadFile(path)
 		if err != nil {
 			if os.IsNotExist(err) {
@@ -80,34 +88,46 @@ func loadSkills(dir string) (string, error) {
 			}
 			return "", err
 		}
-		body := stripFrontmatter(data)
-		if len(body) == 0 {
+		fmBytes, ok := extractFrontmatter(data)
+		if !ok {
 			continue
 		}
-		if out.Len() > 0 {
-			out.WriteString("\n\n")
+		var fm skillFrontmatter
+		if err := yaml.Unmarshal(fmBytes, &fm); err != nil {
+			continue
 		}
-		out.Write(body)
+		if fm.Name == "" || fm.Description == "" {
+			continue
+		}
+		if manifest.Len() == 0 {
+			manifest.WriteString("AVAILABLE SKILLS:\n")
+			manifest.WriteString("Skills are reusable instructions for specific tasks. When a task matches a\n")
+			manifest.WriteString("skill's description, read the SKILL.md file at the listed path using the Read\n")
+			manifest.WriteString("tool, then follow its instructions.\n\n")
+		}
+		fmt.Fprintf(&manifest, "- %s: %s\n  Path: %s\n", fm.Name, fm.Description, path)
 	}
-	return out.String(), nil
+	return manifest.String(), nil
 }
 
-func stripFrontmatter(content []byte) []byte {
+// extractFrontmatter returns the bytes between the opening and closing
+// `---` fences of a SKILL.md file (without including the fences
+// themselves). The second return value is false when no frontmatter is
+// found.
+func extractFrontmatter(content []byte) ([]byte, bool) {
 	bom := []byte{0xEF, 0xBB, 0xBF}
-	trimmed := bytes.TrimPrefix(content, bom)
-	trimmed = bytes.TrimLeft(trimmed, "\r\n\t ")
-	if !bytes.HasPrefix(trimmed, []byte("---")) {
-		return bytes.TrimRight(content, "\r\n")
+	buf := bytes.TrimPrefix(content, bom)
+	buf = bytes.TrimLeft(buf, "\r\n\t ")
+	if !bytes.HasPrefix(buf, []byte("---")) {
+		return nil, false
 	}
-	rest := trimmed[3:]
+	rest := buf[3:]
 	rest = bytes.TrimLeft(rest, "\r\n")
 	idx := bytes.Index(rest, []byte("\n---"))
 	if idx < 0 {
-		return bytes.TrimRight(content, "\r\n")
+		return nil, false
 	}
-	body := rest[idx+4:]
-	body = bytes.TrimLeft(body, "\r\n")
-	return bytes.TrimRight(body, "\r\n")
+	return rest[:idx], true
 }
 
 func main() {
@@ -130,11 +150,11 @@ func main() {
 	if v := os.Getenv("A2A_SKILLS_DIR"); v != "" {
 		resolvedSkillsDir = v
 	}
-	skillsPrompt, err := loadSkills(resolvedSkillsDir)
+	skillsPrompt, err := loadSkillsManifest(resolvedSkillsDir)
 	if err != nil {
-		l.Warn("failed to load skills, continuing without them", zap.Error(err))
+		l.Warn("failed to load skills manifest, continuing without them", zap.Error(err))
 	} else if skillsPrompt != "" {
-		l.Info("loaded skills into system prompt", zap.String("dir", resolvedSkillsDir))
+		l.Info("loaded skills manifest into system prompt", zap.String("dir", resolvedSkillsDir))
 	}
 
 	{{- if .ADL.Spec.Services }}
@@ -174,11 +194,52 @@ func main() {
 	toolBox := server.NewDefaultToolBox(&cfg.A2A.AgentConfig.ToolBoxConfig)
 
 	{{- range .ADL.Spec.Tools }}
+	{{- if eq .ID "read" }}
+
+	// Register Read built-in
+	readTool := tools.NewReadTool(l, tools.ReadConfig{
+		Enabled:      {{ $.BuiltinConfigs.Read.Enabled }},
+		MaxLines:     {{ $.BuiltinConfigs.Read.MaxLines }},
+		AllowedRoots: []string{ {{- range $i, $r := $.BuiltinConfigs.Read.AllowedRoots }}{{ if $i }}, {{ end }}{{ $r | quote }}{{- end }} },
+	})
+	toolBox.AddTool(readTool)
+	l.Info("registered built-in: Read", zap.Bool("enabled", {{ $.BuiltinConfigs.Read.Enabled }}))
+	{{- else if eq .ID "bash" }}
+
+	// Register Bash built-in
+	bashTool := tools.NewBashTool(l, tools.BashConfig{
+		Enabled:        {{ $.BuiltinConfigs.Bash.Enabled }},
+		Whitelist:      []string{ {{- range $i, $w := $.BuiltinConfigs.Bash.Whitelist }}{{ if $i }}, {{ end }}{{ $w | quote }}{{- end }} },
+		TimeoutSeconds: {{ $.BuiltinConfigs.Bash.TimeoutSeconds }},
+		WorkingDir:     {{ $.BuiltinConfigs.Bash.WorkingDir | quote }},
+	})
+	toolBox.AddTool(bashTool)
+	l.Info("registered built-in: Bash", zap.Bool("enabled", {{ $.BuiltinConfigs.Bash.Enabled }}))
+	{{- else if eq .ID "write" }}
+
+	// Register Write built-in
+	writeTool := tools.NewWriteTool(l, tools.WriteConfig{
+		Enabled:      {{ $.BuiltinConfigs.Write.Enabled }},
+		AllowedRoots: []string{ {{- range $i, $r := $.BuiltinConfigs.Write.AllowedRoots }}{{ if $i }}, {{ end }}{{ $r | quote }}{{- end }} },
+	})
+	toolBox.AddTool(writeTool)
+	l.Info("registered built-in: Write", zap.Bool("enabled", {{ $.BuiltinConfigs.Write.Enabled }}))
+	{{- else if eq .ID "edit" }}
+
+	// Register Edit built-in
+	editTool := tools.NewEditTool(l, tools.EditConfig{
+		Enabled:      {{ $.BuiltinConfigs.Edit.Enabled }},
+		AllowedRoots: []string{ {{- range $i, $r := $.BuiltinConfigs.Edit.AllowedRoots }}{{ if $i }}, {{ end }}{{ $r | quote }}{{- end }} },
+	})
+	toolBox.AddTool(editTool)
+	l.Info("registered built-in: Edit", zap.Bool("enabled", {{ $.BuiltinConfigs.Edit.Enabled }}))
+	{{- else }}
 
 	// Register {{ .Name }} tool
 	{{ .Name | toCamelCase }}Tool := tools.New{{ .Name | toPascalCase }}Tool({{ range $index, $svc := .Inject }}{{ if $index }}, {{ end }}{{ if eq $svc "logger" }}l{{ else if eq $svc "config" }}&cfg{{ else if hasPrefix "config." $svc }}&cfg.{{ $svc | trimPrefix "config." | toPascalCase }}{{ else }}{{ $svc | toCamelCase }}Svc{{ end }}{{ end }})
 	toolBox.AddTool({{ .Name | toCamelCase }}Tool)
 	l.Info("registered tool: {{ .Name }} ({{ .Description }})")
+	{{- end }}
 	{{- end }}
 
 	llmClient, err := server.NewOpenAICompatibleLLMClient(&cfg.A2A.AgentConfig, l)

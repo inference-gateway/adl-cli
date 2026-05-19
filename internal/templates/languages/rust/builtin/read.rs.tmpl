@@ -1,0 +1,146 @@
+use anyhow::{anyhow, bail};
+use inference_gateway_sdk::{ChatCompletionTool, ChatCompletionToolType, FunctionObject, FunctionParameters};
+use serde_json::{Value, json};
+use std::path::{Path, PathBuf};
+use tokio::fs;
+use tokio::io::{AsyncBufReadExt, BufReader};
+
+/// Compile-time config for the Read built-in. Values flow in from
+/// spec.config.tools.read at generation time.
+#[derive(Clone, Debug)]
+pub struct Config {
+    pub enabled: bool,
+    pub max_lines: usize,
+    pub allowed_roots: Vec<String>,
+}
+
+impl Config {
+    fn default_max_lines(&self) -> usize {
+        if self.max_lines == 0 { 2000 } else { self.max_lines }
+    }
+}
+
+/// Tool descriptor advertised to the LLM.
+pub fn descriptor() -> ChatCompletionTool {
+    ChatCompletionTool {
+        type_: ChatCompletionToolType::Function,
+        function: FunctionObject {
+            name: "Read".to_string(),
+            description: Some(
+                "Read a file from disk. Returns its contents, optionally sliced by line offset/limit. Use this to load SKILL.md bodies on demand.".to_string(),
+            ),
+            parameters: Some(FunctionParameters(
+                json!({
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "file_path": {
+                            "type": "string",
+                            "description": "Path to the file (absolute or relative to the agent's working directory)."
+                        },
+                        "offset": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "description": "1-based line number to start reading from."
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "description": "Maximum number of lines to return."
+                        }
+                    },
+                    "required": ["file_path"]
+                })
+                .as_object()
+                .expect("schema literal must be an object")
+                .clone(),
+            )),
+            strict: false,
+        },
+    }
+}
+
+/// Handle a Read invocation.
+pub async fn handle(args: Value, cfg: Config) -> anyhow::Result<String> {
+    if !cfg.enabled {
+        bail!("Read tool is disabled; set spec.config.tools.read.enabled: true in the ADL and regenerate");
+    }
+
+    let file_path = args
+        .get("file_path")
+        .and_then(Value::as_str)
+        .ok_or_else(|| anyhow!("file_path is required"))?
+        .to_string();
+
+    if is_image_path(&file_path) {
+        bail!("Read does not support image files ({}); use a multimodal API instead", file_path);
+    }
+
+    validate_path(&cfg.allowed_roots, &file_path)?;
+
+    let offset = args
+        .get("offset")
+        .and_then(Value::as_u64)
+        .filter(|n| *n > 0)
+        .unwrap_or(1) as usize;
+    let limit = args
+        .get("limit")
+        .and_then(Value::as_u64)
+        .filter(|n| *n > 0)
+        .map(|n| n as usize)
+        .unwrap_or_else(|| cfg.default_max_lines());
+
+    let cleaned = PathBuf::from(&file_path);
+    let file = fs::File::open(&cleaned)
+        .await
+        .map_err(|e| anyhow!("open {}: {}", cleaned.display(), e))?;
+    let mut reader = BufReader::new(file).lines();
+
+    let mut current_line: usize = 0;
+    let mut emitted: usize = 0;
+    let mut buf = String::new();
+
+    while let Some(line) = reader.next_line().await? {
+        current_line += 1;
+        if current_line < offset {
+            continue;
+        }
+        if emitted >= limit {
+            break;
+        }
+        buf.push_str(&line);
+        buf.push('\n');
+        emitted += 1;
+    }
+
+    Ok(json!({
+        "file_path": cleaned.display().to_string(),
+        "offset": offset,
+        "limit": limit,
+        "lines_read": emitted,
+        "total_lines": current_line,
+        "content": buf,
+    })
+    .to_string())
+}
+
+fn validate_path(allowed_roots: &[String], p: &str) -> anyhow::Result<()> {
+    if allowed_roots.is_empty() {
+        return Ok(());
+    }
+    let cleaned = Path::new(p).to_path_buf();
+    for root in allowed_roots {
+        let root_clean = Path::new(root).to_path_buf();
+        if cleaned == root_clean || cleaned.starts_with(&root_clean) {
+            return Ok(());
+        }
+    }
+    bail!("path {:?} is outside the configured allowed_roots", p);
+}
+
+fn is_image_path(p: &str) -> bool {
+    let lower = p.to_lowercase();
+    [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tiff"]
+        .iter()
+        .any(|ext| lower.ends_with(ext))
+}
