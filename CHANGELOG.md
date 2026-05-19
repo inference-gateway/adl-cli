@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.30.5](https://github.com/inference-gateway/adl-cli/compare/v0.30.4...v0.30.5) (2026-05-19)
+
+### 🔧 Miscellaneous
+
+* **deps:** Bump golang dependecies to latest ([6254276](https://github.com/inference-gateway/adl-cli/commit/6254276dadce86db57dc99eef4c13b400bb63e4b))
+
 ## [0.30.4](https://github.com/inference-gateway/adl-cli/compare/v0.30.3...v0.30.4) (2026-05-19)
 
 ### 🐛 Bug Fixes
