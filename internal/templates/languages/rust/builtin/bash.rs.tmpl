@@ -1,0 +1,139 @@
+use anyhow::{anyhow, bail};
+use inference_gateway_sdk::{ChatCompletionTool, ChatCompletionToolType, FunctionObject, FunctionParameters};
+use serde_json::{Value, json};
+use std::env;
+use std::time::{Duration, Instant};
+use tokio::process::Command;
+use tokio::time::timeout;
+
+/// Compile-time config for the Bash built-in. Values flow in from
+/// spec.config.tools.bash at generation time. Runtime env vars
+/// `A2A_BASH_DISABLED` and `A2A_BASH_WHITELIST` override these.
+#[derive(Clone, Debug)]
+pub struct Config {
+    pub enabled: bool,
+    pub whitelist: Vec<String>,
+    pub timeout_seconds: u64,
+    pub working_dir: String,
+}
+
+impl Config {
+    /// Apply env-var overrides once, at startup.
+    pub fn with_env_overrides(mut self) -> Self {
+        if env::var("A2A_BASH_DISABLED").as_deref() == Ok("1") {
+            self.enabled = false;
+        }
+        if let Ok(value) = env::var("A2A_BASH_WHITELIST") {
+            self.whitelist = value
+                .split(',')
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect();
+        }
+        if self.timeout_seconds == 0 {
+            self.timeout_seconds = 30;
+        }
+        self
+    }
+}
+
+/// Tool descriptor advertised to the LLM.
+pub fn descriptor() -> ChatCompletionTool {
+    ChatCompletionTool {
+        type_: ChatCompletionToolType::Function,
+        function: FunctionObject {
+            name: "Bash".to_string(),
+            description: Some(
+                "Execute a shell command. Subject to the configured whitelist and timeout; honors A2A_BASH_DISABLED as a runtime kill switch.".to_string(),
+            ),
+            parameters: Some(FunctionParameters(
+                json!({
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "command": {
+                            "type": "string",
+                            "description": "The shell command to execute."
+                        }
+                    },
+                    "required": ["command"]
+                })
+                .as_object()
+                .expect("schema literal must be an object")
+                .clone(),
+            )),
+            strict: false,
+        },
+    }
+}
+
+/// Handle a Bash invocation.
+pub async fn handle(args: Value, cfg: Config) -> anyhow::Result<String> {
+    if !cfg.enabled {
+        bail!("Bash tool is disabled; set spec.config.tools.bash.enabled: true and ensure A2A_BASH_DISABLED is not 1");
+    }
+
+    let command = args
+        .get("command")
+        .and_then(Value::as_str)
+        .ok_or_else(|| anyhow!("command is required"))?
+        .trim()
+        .to_string();
+    if command.is_empty() {
+        bail!("command is required");
+    }
+
+    check_whitelist(&cfg.whitelist, &command)?;
+
+    let mut cmd = Command::new("sh");
+    cmd.arg("-c").arg(&command);
+    if !cfg.working_dir.is_empty() {
+        cmd.current_dir(&cfg.working_dir);
+    }
+
+    let start = Instant::now();
+    let timed = timeout(Duration::from_secs(cfg.timeout_seconds), cmd.output()).await;
+    let duration_ms = start.elapsed().as_millis() as u64;
+
+    let (exit_code, output, error) = match timed {
+        Ok(Ok(out)) => {
+            let exit_code = out.status.code().unwrap_or(-1);
+            let combined =
+                format!("{}{}", String::from_utf8_lossy(&out.stdout), String::from_utf8_lossy(&out.stderr));
+            (exit_code, combined, None)
+        }
+        Ok(Err(e)) => (-1, String::new(), Some(e.to_string())),
+        Err(_) => (
+            -1,
+            String::new(),
+            Some(format!("bash timed out after {}s", cfg.timeout_seconds)),
+        ),
+    };
+
+    let mut payload = json!({
+        "command": command,
+        "exit_code": exit_code,
+        "duration_ms": duration_ms,
+        "output": output,
+    });
+    if let Some(err_msg) = error {
+        payload["error"] = Value::String(err_msg);
+    }
+    Ok(payload.to_string())
+}
+
+fn check_whitelist(whitelist: &[String], command: &str) -> anyhow::Result<()> {
+    if whitelist.is_empty() {
+        return Ok(());
+    }
+    for allowed in whitelist {
+        let allowed = allowed.trim();
+        if allowed.is_empty() {
+            continue;
+        }
+        if command == allowed || command.starts_with(&format!("{} ", allowed)) {
+            return Ok(());
+        }
+    }
+    bail!("command {:?} is not in the configured whitelist", command);
+}

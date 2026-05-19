@@ -81,7 +81,12 @@ spec:
   agent:
     provider: deepseek
     model: deepseek-v4-flash
+  config:
+    tools:
+      read:
+        enabled: true
   tools:
+    - id: read
     - id: test_tool_id
       name: test_tool
       description: A test tool

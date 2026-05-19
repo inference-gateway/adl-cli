@@ -1,0 +1,106 @@
+package tools
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
+	server "github.com/inference-gateway/adk/server"
+	zap "go.uber.org/zap"
+)
+
+// WriteConfig is the compile-time config for the Write built-in. Values
+// flow in from spec.config.tools.write at generation time.
+type WriteConfig struct {
+	Enabled      bool
+	AllowedRoots []string
+}
+
+// WriteTool exposes a Write built-in. Disabled by default; flip
+// spec.config.tools.write.enabled: true in your ADL to activate.
+type WriteTool struct {
+	logger *zap.Logger
+	cfg    WriteConfig
+}
+
+// NewWriteTool builds a Write tool with the resolved config baked in.
+func NewWriteTool(logger *zap.Logger, cfg WriteConfig) server.Tool {
+	t := &WriteTool{logger: logger, cfg: cfg}
+	return server.NewBasicTool(
+		"Write",
+		"Write content to a file, creating intermediate directories as needed. Overwrites the file if it already exists.",
+		map[string]any{
+			"type":                 "object",
+			"additionalProperties": false,
+			"properties": map[string]any{
+				"file_path": map[string]any{
+					"type":        "string",
+					"description": "Path to the file (absolute or relative to the agent's working directory).",
+				},
+				"content": map[string]any{
+					"type":        "string",
+					"description": "Content to write to the file.",
+				},
+			},
+			"required": []string{"file_path", "content"},
+		},
+		t.Handler,
+	)
+}
+
+// Handler executes the Write tool.
+func (t *WriteTool) Handler(ctx context.Context, args map[string]any) (string, error) {
+	if !t.cfg.Enabled {
+		return "", errors.New("Write tool is disabled; set spec.config.tools.write.enabled: true in the ADL and regenerate")
+	}
+
+	rawPath, _ := args["file_path"].(string)
+	if rawPath == "" {
+		return "", errors.New("file_path is required")
+	}
+	content, ok := args["content"].(string)
+	if !ok {
+		return "", errors.New("content is required")
+	}
+
+	if err := t.validatePath(rawPath); err != nil {
+		return "", err
+	}
+
+	cleaned := filepath.Clean(rawPath)
+	if err := os.MkdirAll(filepath.Dir(cleaned), 0o755); err != nil {
+		return "", fmt.Errorf("create parent dir for %s: %w", cleaned, err)
+	}
+	if err := os.WriteFile(cleaned, []byte(content), 0o644); err != nil {
+		return "", fmt.Errorf("write %s: %w", cleaned, err)
+	}
+
+	t.logger.Debug("write executed", zap.String("path", cleaned), zap.Int("bytes", len(content)))
+	result := map[string]any{
+		"file_path":     cleaned,
+		"bytes_written": len(content),
+	}
+	payload, err := json.Marshal(result)
+	if err != nil {
+		return "", fmt.Errorf("encode Write result: %w", err)
+	}
+	return string(payload), nil
+}
+
+func (t *WriteTool) validatePath(p string) error {
+	if len(t.cfg.AllowedRoots) == 0 {
+		return nil
+	}
+	cleaned := filepath.Clean(p)
+	for _, root := range t.cfg.AllowedRoots {
+		rootClean := filepath.Clean(root)
+		if cleaned == rootClean || strings.HasPrefix(cleaned, rootClean+string(filepath.Separator)) {
+			return nil
+		}
+	}
+	return fmt.Errorf("path %q is outside the configured allowed_roots", p)
+}

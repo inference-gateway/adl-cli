@@ -387,10 +387,12 @@ type SpecConfig map[string]map[string]any
 type SpecServices map[string]Service
 
 // Function-call entrypoint the agent can invoke. Generated as code in the target
-// language.
+// language. User-defined tools require name, description, tags, and schema;
+// reserved built-in IDs (e.g. read, bash, write, edit) may omit them and have
+// those fields supplied by the generator.
 type Tool struct {
 	// Description corresponds to the JSON schema field "description".
-	Description string `json:"description" yaml:"description" mapstructure:"description"`
+	Description string `json:"description,omitempty,omitzero" yaml:"description,omitempty" mapstructure:"description,omitempty"`
 
 	// ID corresponds to the JSON schema field "id".
 	ID string `json:"id" yaml:"id" mapstructure:"id"`
@@ -399,13 +401,13 @@ type Tool struct {
 	Inject []string `json:"inject,omitempty,omitzero" yaml:"inject,omitempty" mapstructure:"inject,omitempty"`
 
 	// Name corresponds to the JSON schema field "name".
-	Name string `json:"name" yaml:"name" mapstructure:"name"`
+	Name string `json:"name,omitempty,omitzero" yaml:"name,omitempty" mapstructure:"name,omitempty"`
 
 	// Free-form JSON Schema describing the tool's input parameters.
-	Schema ToolSchema `json:"schema" yaml:"schema" mapstructure:"schema"`
+	Schema ToolSchema `json:"schema,omitempty,omitzero" yaml:"schema,omitempty" mapstructure:"schema,omitempty"`
 
 	// Tags corresponds to the JSON schema field "tags".
-	Tags []string `json:"tags" yaml:"tags" mapstructure:"tags"`
+	Tags []string `json:"tags,omitempty,omitzero" yaml:"tags,omitempty" mapstructure:"tags,omitempty"`
 }
 
 // Free-form JSON Schema describing the tool's input parameters.

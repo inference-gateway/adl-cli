@@ -1,0 +1,119 @@
+use anyhow::{anyhow, bail};
+use inference_gateway_sdk::{ChatCompletionTool, ChatCompletionToolType, FunctionObject, FunctionParameters};
+use serde_json::{Value, json};
+use std::path::{Path, PathBuf};
+use tokio::fs;
+
+/// Compile-time config for the Edit built-in. Values flow in from
+/// spec.config.tools.edit at generation time.
+#[derive(Clone, Debug)]
+pub struct Config {
+    pub enabled: bool,
+    pub allowed_roots: Vec<String>,
+}
+
+/// Tool descriptor advertised to the LLM.
+pub fn descriptor() -> ChatCompletionTool {
+    ChatCompletionTool {
+        type_: ChatCompletionToolType::Function,
+        function: FunctionObject {
+            name: "Edit".to_string(),
+            description: Some(
+                "Replace a unique string in a file with a new value. Errors if old_string is not found or appears more than once.".to_string(),
+            ),
+            parameters: Some(FunctionParameters(
+                json!({
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "file_path": {
+                            "type": "string",
+                            "description": "Path to the file to edit."
+                        },
+                        "old_string": {
+                            "type": "string",
+                            "description": "Exact string in the file to replace. Must be unique."
+                        },
+                        "new_string": {
+                            "type": "string",
+                            "description": "Replacement string."
+                        }
+                    },
+                    "required": ["file_path", "old_string", "new_string"]
+                })
+                .as_object()
+                .expect("schema literal must be an object")
+                .clone(),
+            )),
+            strict: false,
+        },
+    }
+}
+
+/// Handle an Edit invocation.
+pub async fn handle(args: Value, cfg: Config) -> anyhow::Result<String> {
+    if !cfg.enabled {
+        bail!("Edit tool is disabled; set spec.config.tools.edit.enabled: true in the ADL and regenerate");
+    }
+
+    let file_path = args
+        .get("file_path")
+        .and_then(Value::as_str)
+        .ok_or_else(|| anyhow!("file_path is required"))?
+        .to_string();
+    let old_str = args
+        .get("old_string")
+        .and_then(Value::as_str)
+        .ok_or_else(|| anyhow!("old_string is required"))?;
+    if old_str.is_empty() {
+        bail!("old_string must be non-empty");
+    }
+    let new_str = args
+        .get("new_string")
+        .and_then(Value::as_str)
+        .ok_or_else(|| anyhow!("new_string is required"))?;
+
+    validate_path(&cfg.allowed_roots, &file_path)?;
+
+    let cleaned = PathBuf::from(&file_path);
+    let body = fs::read_to_string(&cleaned)
+        .await
+        .map_err(|e| anyhow!("read {}: {}", cleaned.display(), e))?;
+
+    let count = body.matches(old_str).count();
+    if count == 0 {
+        bail!("old_string not found in {}", cleaned.display());
+    }
+    if count > 1 {
+        bail!(
+            "old_string appears {} times in {}; refusing to edit (must be unique)",
+            count,
+            cleaned.display()
+        );
+    }
+
+    let replaced = body.replacen(old_str, new_str, 1);
+    fs::write(&cleaned, replaced.as_bytes())
+        .await
+        .map_err(|e| anyhow!("write {}: {}", cleaned.display(), e))?;
+
+    Ok(json!({
+        "file_path": cleaned.display().to_string(),
+        "replacements": 1,
+    })
+    .to_string())
+}
+
+fn validate_path(allowed_roots: &[String], p: &str) -> anyhow::Result<()> {
+    if allowed_roots.is_empty() {
+        return Ok(());
+    }
+    let cleaned = Path::new(p).to_path_buf();
+    for root in allowed_roots {
+        let root_clean = Path::new(root).to_path_buf();
+        if cleaned == root_clean || cleaned.starts_with(&root_clean) {
+            return Ok(());
+        }
+    }
+    bail!("path {:?} is outside the configured allowed_roots", p);
+}

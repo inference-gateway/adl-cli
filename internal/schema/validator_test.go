@@ -222,7 +222,7 @@ func TestValidator_SkillsAndTools(t *testing.T) {
 		errSub  string
 	}{
 		{
-			name: "tool and bare skill both valid",
+			name: "tool and bare skill both valid with read built-in",
 			adl: `apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
@@ -234,7 +234,12 @@ spec:
     streaming: true
     pushNotifications: false
     stateTransitionHistory: false
+  config:
+    tools:
+      read:
+        enabled: true
   tools:
+    - id: read
     - id: ping
       name: ping
       description: "Ping a host"
@@ -256,6 +261,219 @@ spec:
   language:
     go:
       module: "github.com/example/split"
+      version: "1.26.2"
+`,
+			wantErr: false,
+		},
+		{
+			name: "skills present but no read tool is rejected",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: no-read
+  description: "skills without read"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  agent:
+    provider: deepseek
+    model: deepseek-v4-flash
+  skills:
+    - id: x
+      bare: true
+      name: x
+      description: "x"
+  server:
+    port: 8080
+  language:
+    go:
+      module: "github.com/example/x"
+      version: "1.26.2"
+`,
+			wantErr: true,
+			errSub:  "missing '- id: read'",
+		},
+		{
+			name: "skills with read listed but not enabled is rejected",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: read-disabled
+  description: "skills with disabled read"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  agent:
+    provider: deepseek
+    model: deepseek-v4-flash
+  tools:
+    - id: read
+  skills:
+    - id: x
+      bare: true
+      name: x
+      description: "x"
+  server:
+    port: 8080
+  language:
+    go:
+      module: "github.com/example/x"
+      version: "1.26.2"
+`,
+			wantErr: true,
+			errSub:  "spec.config.tools.read.enabled",
+		},
+		{
+			name: "skills without agent are allowed even without read",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: no-agent-with-skills
+  description: "skills used as documentation, no agent loop"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  skills:
+    - id: x
+      bare: true
+      name: x
+      description: "x"
+  server:
+    port: 8080
+  language:
+    go:
+      module: "github.com/example/x"
+      version: "1.26.2"
+`,
+			wantErr: false,
+		},
+		{
+			name: "reserved tool with user-supplied name is rejected",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: reserved-with-name
+  description: "reserved id must be id-only"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  tools:
+    - id: bash
+      name: MyBash
+  server:
+    port: 8080
+  language:
+    go:
+      module: "github.com/example/x"
+      version: "1.26.2"
+`,
+			wantErr: true,
+			errSub:  "reserved tool 'bash' must not set 'name'",
+		},
+		{
+			name: "reserved tool config with unknown key is rejected",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: typo-config
+  description: "unknown config key under bash"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  config:
+    tools:
+      bash:
+        enabled: true
+        tymeout_seconds: 30
+  tools:
+    - id: bash
+  server:
+    port: 8080
+  language:
+    go:
+      module: "github.com/example/x"
+      version: "1.26.2"
+`,
+			wantErr: true,
+			errSub:  "spec.config.tools.bash",
+		},
+		{
+			name: "inject config.tools is rejected",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: inject-reserved
+  description: "user tool tries to inject the reserved namespace"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  tools:
+    - id: nope
+      name: nope
+      description: "Tries to grab reserved config"
+      tags: [bad]
+      inject:
+        - config.tools
+      schema:
+        type: object
+        properties:
+          x:
+            type: string
+        required: [x]
+  server:
+    port: 8080
+  language:
+    go:
+      module: "github.com/example/x"
+      version: "1.26.2"
+`,
+			wantErr: true,
+			errSub:  "reserved namespace 'config.tools'",
+		},
+		{
+			name: "reserved tool id-only entry is valid",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: minimal-bash
+  description: "minimal reserved entry"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  config:
+    tools:
+      bash:
+        enabled: true
+        whitelist: [ls, cat]
+        timeout_seconds: 30
+  tools:
+    - id: bash
+  server:
+    port: 8080
+  language:
+    go:
+      module: "github.com/example/x"
       version: "1.26.2"
 `,
 			wantErr: false,

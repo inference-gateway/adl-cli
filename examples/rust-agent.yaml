@@ -17,7 +17,23 @@ spec:
       - text
     defaultOutputModes:
       - text
+  agent:
+    provider: deepseek
+    model: deepseek-v4-flash
+    systemPrompt: |
+      You are a helpful echo assistant. When a request mentions formatting
+      (JSON, code blocks, whitespace cleanup) read the echo-formatting
+      skill at skills/echo-formatting/SKILL.md first, then apply its
+      guidance before invoking the echo tool.
+    maxTokens: 2048
+    temperature: 0.3
+  config:
+    tools:
+      read:
+        enabled: true
+        max_lines: 2000
   tools:
+    - id: read
     - id: echo
       name: echo
       description: "Echo a message back to the caller"

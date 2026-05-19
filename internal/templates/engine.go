@@ -204,6 +204,7 @@ type Context struct {
 	EnableAI        bool
 	GenerateCommand string
 	Skills          []SkillView
+	BuiltinConfigs  schema.ResolvedBuiltinConfigs
 	customAcronyms  map[string]string
 }
 
