@@ -110,16 +110,26 @@ Configure the agent via environment variables:
 
 ### Custom Configuration
 
-The following custom configuration variables are available:
+The following custom configuration variables are available. Defaults are
+derived from `spec.config.*` in `agent.yaml`; the env vars below override
+them at runtime.
 
-| Category | Variable | Description | Default |
-|----------|----------|-------------|---------|
+| Category | Variable | Default |
+|----------|----------|---------|
 {{- range $category, $configs := .ADL.Spec.Config }}
 {{- range $key, $value := $configs }}
-| **{{ $category | title }}** | `{{ $category | toUpperSnakeCase }}_{{ $key | toUpperSnakeCase }}` | {{ $key | title }} configuration | `{{ $value }}` |
+{{- if kindIs "map" $value }}
+{{- range $leaf, $leafVal := $value }}
+| **{{ $category | title }}** | `{{ $category | toUpperSnakeCase }}_{{ $key | toUpperSnakeCase }}_{{ $leaf | toUpperSnakeCase }}` | `{{ $leafVal }}` |
+{{- end }}
+{{- else }}
+| **{{ $category | title }}** | `{{ $category | toUpperSnakeCase }}_{{ $key | toUpperSnakeCase }}` | `{{ $value }}` |
 {{- end }}
 {{- end }}
 {{- end }}
+{{- end }}
+
+### Environment Variables
 
 | Category | Variable | Description | Default |
 |----------|----------|-------------|---------|

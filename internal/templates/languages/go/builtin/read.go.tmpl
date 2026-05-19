@@ -11,15 +11,17 @@ import (
 	"strings"
 
 	server "github.com/inference-gateway/adk/server"
+	envconfig "github.com/sethvargo/go-envconfig"
 	zap "go.uber.org/zap"
 )
 
-// ReadConfig is the compile-time config for the Read built-in. Values
-// flow in from spec.config.tools.read at generation time.
+// ReadConfig is the runtime config for the Read built-in. Defaults are
+// baked from spec.config.tools.read at generation time; the TOOLS_READ_*
+// env vars override them at startup.
 type ReadConfig struct {
-	Enabled      bool
-	MaxLines     int
-	AllowedRoots []string
+	Enabled      bool     `env:"TOOLS_READ_ENABLED, default={{ printf "%t" .Config.Enabled }}"`
+	MaxLines     int      `env:"TOOLS_READ_MAX_LINES, default={{ .Config.MaxLines }}"`
+	AllowedRoots []string `env:"TOOLS_READ_ALLOWED_ROOTS{{- if .Config.AllowedRoots }}, default={{ join "," .Config.AllowedRoots }}{{- end }}"`
 }
 
 // ReadTool exposes a Read built-in. Disabled by default; flip
@@ -29,8 +31,13 @@ type ReadTool struct {
 	cfg    ReadConfig
 }
 
-// NewReadTool builds a Read tool with the resolved config baked in.
-func NewReadTool(logger *zap.Logger, cfg ReadConfig) server.Tool {
+// NewReadTool builds a Read tool, resolving config from TOOLS_READ_* env
+// vars (or the spec.config.tools.read defaults baked in at generation).
+func NewReadTool(ctx context.Context, logger *zap.Logger) (server.Tool, error) {
+	var cfg ReadConfig
+	if err := envconfig.Process(ctx, &cfg); err != nil {
+		return nil, fmt.Errorf("load Read config: %w", err)
+	}
 	if cfg.MaxLines <= 0 {
 		cfg.MaxLines = 2000
 	}
@@ -60,7 +67,7 @@ func NewReadTool(logger *zap.Logger, cfg ReadConfig) server.Tool {
 			"required": []string{"file_path"},
 		},
 		t.Handler,
-	)
+	), nil
 }
 
 // Handler executes the Read tool.

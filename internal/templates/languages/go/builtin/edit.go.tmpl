@@ -10,14 +10,16 @@ import (
 	"strings"
 
 	server "github.com/inference-gateway/adk/server"
+	envconfig "github.com/sethvargo/go-envconfig"
 	zap "go.uber.org/zap"
 )
 
-// EditConfig is the compile-time config for the Edit built-in. Values
-// flow in from spec.config.tools.edit at generation time.
+// EditConfig is the runtime config for the Edit built-in. Defaults are
+// baked from spec.config.tools.edit at generation time; the TOOLS_EDIT_*
+// env vars override them at startup.
 type EditConfig struct {
-	Enabled      bool
-	AllowedRoots []string
+	Enabled      bool     `env:"TOOLS_EDIT_ENABLED, default={{ printf "%t" .Config.Enabled }}"`
+	AllowedRoots []string `env:"TOOLS_EDIT_ALLOWED_ROOTS{{- if .Config.AllowedRoots }}, default={{ join "," .Config.AllowedRoots }}{{- end }}"`
 }
 
 // EditTool exposes an Edit built-in. Disabled by default; flip
@@ -27,8 +29,13 @@ type EditTool struct {
 	cfg    EditConfig
 }
 
-// NewEditTool builds an Edit tool with the resolved config baked in.
-func NewEditTool(logger *zap.Logger, cfg EditConfig) server.Tool {
+// NewEditTool builds an Edit tool, resolving config from TOOLS_EDIT_* env
+// vars (or the spec.config.tools.edit defaults baked in at generation).
+func NewEditTool(ctx context.Context, logger *zap.Logger) (server.Tool, error) {
+	var cfg EditConfig
+	if err := envconfig.Process(ctx, &cfg); err != nil {
+		return nil, fmt.Errorf("load Edit config: %w", err)
+	}
 	t := &EditTool{logger: logger, cfg: cfg}
 	return server.NewBasicTool(
 		"Edit",
@@ -53,7 +60,7 @@ func NewEditTool(logger *zap.Logger, cfg EditConfig) server.Tool {
 			"required": []string{"file_path", "old_string", "new_string"},
 		},
 		t.Handler,
-	)
+	), nil
 }
 
 // Handler executes the Edit tool.
