@@ -251,7 +251,7 @@ type adlData struct {
 			Provider       string `yaml:"provider"`
 			URL            string `yaml:"url,omitempty"`
 			GithubApp      bool   `yaml:"github_app,omitempty"`
-			IssueTemplates bool   `yaml:"issue_templates,omitempty"`
+			IssueTemplates bool   `yaml:"issue_templates"`
 		} `yaml:"scm,omitempty"`
 		Sandbox *struct {
 			Flox *struct {
@@ -718,7 +718,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 			Provider       string `yaml:"provider"`
 			URL            string `yaml:"url,omitempty"`
 			GithubApp      bool   `yaml:"github_app,omitempty"`
-			IssueTemplates bool   `yaml:"issue_templates,omitempty"`
+			IssueTemplates bool   `yaml:"issue_templates"`
 		}{
 			Provider: scmProvider,
 		}
@@ -737,10 +737,10 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 			adl.Spec.SCM.GithubApp = conditionalPromptBool(useDefaults, "Enable GitHub App integration", true)
 
 			if useDefaults {
-				adl.Spec.SCM.IssueTemplates = true
-				fmt.Printf("Enable issue templates [y/n] [y]: y\n")
+				adl.Spec.SCM.IssueTemplates = false
+				fmt.Printf("Enable issue templates [y/n] [n]: n\n")
 			} else {
-				adl.Spec.SCM.IssueTemplates = promptBool("Enable issue templates", true)
+				adl.Spec.SCM.IssueTemplates = promptBool("Enable issue templates", false)
 			}
 		}
 	}

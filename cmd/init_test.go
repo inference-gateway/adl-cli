@@ -120,8 +120,8 @@ func TestInitIssueTemplatesDefault(t *testing.T) {
 	if adl.Spec.SCM.Provider != "github" {
 		t.Errorf("expected SCM provider to be 'github', got: %s", adl.Spec.SCM.Provider)
 	}
-	if !adl.Spec.SCM.IssueTemplates {
-		t.Errorf("expected IssueTemplates to be true by default")
+	if adl.Spec.SCM.IssueTemplates {
+		t.Errorf("expected IssueTemplates to be false by default")
 	}
 	if !adl.Spec.SCM.GithubApp {
 		t.Errorf("expected GithubApp to be true by default")
