@@ -68,6 +68,8 @@ jobs:
           repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
       - name: Install ADL CLI
+        env:
+          VERSION: v{{ .Metadata.CLIVersion }}
         run: |
           curl -fsSL https://raw.githubusercontent.com/inference-gateway/adl-cli/v{{ .Metadata.CLIVersion }}/install.sh | bash
           adl --version
