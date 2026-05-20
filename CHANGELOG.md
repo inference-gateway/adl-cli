@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.30.9](https://github.com/inference-gateway/adl-cli/compare/v0.30.8...v0.30.9) (2026-05-20)
+
+### 🐛 Bug Fixes
+
+* **templates:** Use CLIVersion in generated CI/CD workflows instead of hardcoded ADL CLI version ([e1066a3](https://github.com/inference-gateway/adl-cli/commit/e1066a3a24863c1667482e332d73491c2d3368ae))
+
 ## [0.30.8](https://github.com/inference-gateway/adl-cli/compare/v0.30.7...v0.30.8) (2026-05-20)
 
 ### 👷 CI
