@@ -36,7 +36,7 @@ jobs:
 
     - name: Install ADL CLI
       run: |
-        curl -fsSL https://raw.githubusercontent.com/inference-gateway/adl-cli/v0.30.7/install.sh | bash
+        curl -fsSL https://raw.githubusercontent.com/inference-gateway/adl-cli/v{{ .Metadata.CLIVersion }}/install.sh | bash
         adl --version
 
     - name: Validate ADL
