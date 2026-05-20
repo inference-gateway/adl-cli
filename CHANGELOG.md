@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.30.8](https://github.com/inference-gateway/adl-cli/compare/v0.30.7...v0.30.8) (2026-05-20)
+
+### 👷 CI
+
+* **deps:** Update CI workflows to use action-based installations for golangci-lint and task ([f746da8](https://github.com/inference-gateway/adl-cli/commit/f746da88ee845d746176bb332c7d735b754e9606))
+
 ## [0.30.7](https://github.com/inference-gateway/adl-cli/compare/v0.30.6...v0.30.7) (2026-05-19)
 
 ### 🔧 Miscellaneous
