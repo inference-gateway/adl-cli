@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.30.10](https://github.com/inference-gateway/adl-cli/compare/v0.30.9...v0.30.10) (2026-05-20)
+
+### 🐛 Bug Fixes
+
+* **ci:** Set the version environment variable not just the tag ([e79120c](https://github.com/inference-gateway/adl-cli/commit/e79120c41e4f21762c2373a2f70d8194c6491e2a))
+
 ## [0.30.9](https://github.com/inference-gateway/adl-cli/compare/v0.30.8...v0.30.9) (2026-05-20)
 
 ### 🐛 Bug Fixes
