@@ -62,12 +62,14 @@ jobs:
           cache: true
 
       - name: Install task
-        run: |
-          curl -s https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin v3.48.0
+        uses: arduino/setup-task@v2.0.0
+        with:
+          version: 3.48.0
+          repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
       - name: Install ADL CLI
         run: |
-          curl -fsSL https://raw.githubusercontent.com/inference-gateway/adl-cli/main/install.sh | bash
+          curl -fsSL https://raw.githubusercontent.com/inference-gateway/adl-cli/v0.30.7/install.sh | bash
           adl --version
 
       - name: Download dependencies
@@ -87,11 +89,13 @@ jobs:
           components: rustfmt, clippy
 
       - name: Install task
-        run: |
-          curl -s https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin v3.48.0
+        uses: arduino/setup-task@v2.0.0
+        with:
+          version: 3.48.0
+          repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
       - name: Cache cargo dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5.0.5
         with:
           path: |
             ~/.cargo/bin/
@@ -114,8 +118,10 @@ jobs:
           cache: 'npm'
 
       - name: Install task
-        run: |
-          curl -s https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin v3.48.0
+        uses: arduino/setup-task@v2.0.0
+        with:
+          version: 3.48.0
+          repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
       - name: Install dependencies
         run: npm ci
@@ -127,8 +133,10 @@ jobs:
         run: task build
 {{- else }}
       - name: Install task
-        run: |
-          curl -s https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin v3.48.0
+        uses: arduino/setup-task@v2.0.0
+        with:
+          version: 3.48.0
+          repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
       - name: Build
         run: task build
@@ -244,8 +252,10 @@ jobs:
           project_id: ${{`{{ secrets.GCP_PROJECT_ID }}`}}
 
       - name: Install task
-        run: |
-          curl -s https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin v3.48.0
+        uses: arduino/setup-task@v2.0.0
+        with:
+          version: 3.48.0
+          repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
       - name: Deploy to Cloud Run
         env:
