@@ -10,8 +10,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `task test` - Run all tests
 - `task test:coverage` - Run tests with coverage report
 - `task lint` - Run golangci-lint
-- `task fmt` - Format all Go code
-- `task ci` - Run complete CI pipeline: fmt, lint, test, build
+- `task lint:md` / `task lint:md:fix` - Run markdownlint (auto-fix variant available)
+- `task fmt` - Format all Go code (`go fmt`)
+- `task vet` - Run `go vet`
+- `task install` - Build and install the CLI to `$GOPATH/bin` as `adl`
+- `task generate-types` - Regenerate `internal/schema/types.go` from the embedded schema
+- `task ci` - Run complete CI pipeline: fmt, lint, test, build, verify-schema
 
 ### Running Specific Tests
 
@@ -47,6 +51,7 @@ main.go                       # Entry point, sets version
     │   ├── client.go        # HTTP client for the skills registry
     │   ├── cache.go         # Local on-disk cache (~/.adl/skills-cache/)
     │   ├── frontmatter.go   # YAML frontmatter parser for skill markdown
+    │   ├── installer.go     # GitHub-source skill installer (trees API + raw.githubusercontent.com)
     │   └── resolver.go      # Coordinates fetch/cache/scaffold for skills
     ├── schema/              # ADL schema definitions
     │   ├── types.go         # All ADL type definitions (ADL, Spec, Tool, Skill, etc.)
