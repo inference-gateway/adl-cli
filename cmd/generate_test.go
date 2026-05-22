@@ -723,8 +723,6 @@ func TestGenerateAIDocsRespectSandboxEnabledFlags(t *testing.T) {
 		},
 		{
 			name: "all three pointers present but disabled",
-			// emulates the init flow that populates all three pointers
-			// regardless of the user's enabled choice - none should render.
 		},
 	}
 
