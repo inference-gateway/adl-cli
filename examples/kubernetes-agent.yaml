@@ -45,6 +45,8 @@ spec:
     provider: github
     url: "https://github.com/example/kubernetes-example"
     issue_templates: false
+    ci: true
+    cd: false
   deployment:
     type: kubernetes
     kubernetes:

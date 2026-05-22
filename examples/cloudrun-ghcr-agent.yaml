@@ -44,6 +44,8 @@ spec:
   scm:
     provider: github
     url: "https://github.com/example/ghcr-example"
+    ci: true
+    cd: false
   deployment:
     type: cloudrun
     cloudrun:

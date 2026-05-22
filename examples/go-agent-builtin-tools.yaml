@@ -131,6 +131,13 @@ spec:
     go:
       module: "github.com/inference-gateway/adl-cli/test-output"
       version: "1.26.2"
+  scm:
+    provider: github
+    url: "https://github.com/inference-gateway/adl-cli"
+    github_app: true
+    issue_templates: false
+    ci: true
+    cd: false
   development:
     sandbox:
       flox:
