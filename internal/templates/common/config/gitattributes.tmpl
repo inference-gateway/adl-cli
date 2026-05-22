@@ -29,6 +29,14 @@ Taskfile.yml linguist-generated=true
 .github/workflows/cd.yml linguist-generated=true
 .releaserc.yaml linguist-generated=true
 
+{{- $scmProvider := "" }}
+{{- if .ADL.Spec.SCM }}{{- $scmProvider = printf "%s" .ADL.Spec.SCM.Provider }}{{- end }}
+{{- if and .ADL.Spec.SCM .ADL.Spec.SCM.Dependabot (or (eq $scmProvider "github") (eq $scmProvider "")) }}
+
+# Dependabot configuration
+.github/dependabot.yml linguist-generated=true
+{{- end }}
+
 {{- if or .EnableAI (and .ADL.Spec.Development .ADL.Spec.Development.AI .ADL.Spec.Development.AI.Enabled) }}
 
 # AI assistant documentation (generated)
