@@ -269,6 +269,12 @@ The init command supports extensive configuration options:
 - `--flox` - Enable Flox environment
 - `--devcontainer` - Enable DevContainer environment
 
+**Pipeline / AI Options (declarative, written into the manifest as `false` by default):**
+
+- `--ai` - Sets `spec.ai.enabled: true` (generate `CLAUDE.md`/`AGENTS.md`, add claude-code to sandboxes)
+- `--ci` - Sets `spec.scm.ci: true` (generate CI workflow on `adl generate`)
+- `--cd` - Sets `spec.scm.cd: true` (generate CD pipeline + semantic-release on `adl generate`)
+
 ### Generate Command
 
 ```bash
@@ -299,10 +305,18 @@ adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun --
 | `--output`, `-o`   | Output directory for generated code (default: ".")                                         |
 | `--template`, `-t` | Template to use (default: "minimal")                                                       |
 | `--overwrite`      | Overwrite existing files (respects .adl-ignore)                                            |
-| `--ci`             | Generate CI workflow configuration (GitHub Actions)                                        |
-| `--cd`             | Generate CD pipeline configuration with semantic-release                                   |
+| `--ci`             | Generate CI workflow configuration (GitHub Actions). Overrides `spec.scm.ci`.              |
+| `--cd`             | Generate CD pipeline configuration with semantic-release. Overrides `spec.scm.cd`.         |
 | `--deployment`     | Generate deployment configuration (`kubernetes`, `cloudrun`)                               |
-| `--ai`             | Generate AI assistant instructions (CLAUDE.md) and add claude-code to sandbox environments |
+| `--ai`             | Generate AI assistant instructions (CLAUDE.md) and add claude-code to sandbox environments. Overrides `spec.ai.enabled`. |
+
+> **Declarative equivalents:** `--ai`, `--ci`, and `--cd` can also be set in the manifest as
+> `spec.ai.enabled: true`, `spec.scm.ci: true`, and `spec.scm.cd: true`. The CLI flag is OR'd
+> on top of the manifest value (passing the flag wins; omitting it falls back to the manifest).
+> `adl init` writes all three as `false` by default — they're opt-in. Generated files
+> (`CLAUDE.md`, `AGENTS.md`, `.github/workflows/ci.yml`, `.github/workflows/cd.yml`,
+> `.releaserc.yaml`) are tagged `linguist-generated=true` in `.gitattributes` so they collapse
+> in pull request diffs.
 
 **CI Generation Features:**
 

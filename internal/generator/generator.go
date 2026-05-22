@@ -55,6 +55,41 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 		return fmt.Errorf("ADL validation failed: %w", err)
 	}
 
+	// Reconcile CLI flags with manifest fields. The CLI flag is OR'd on top
+	// of the manifest value, so passing --ai/--ci/--cd at the command line
+	// always wins; omitting the flag falls back to the manifest. After this
+	// block, both g.config.* and adl.Spec.* reflect the same effective state
+	// so templates (e.g. .gitattributes) can read either source of truth.
+	if adl.Spec.AI != nil && adl.Spec.AI.Enabled {
+		g.config.EnableAI = true
+	}
+	if g.config.EnableAI {
+		if adl.Spec.AI == nil {
+			adl.Spec.AI = &schema.AIConfig{Enabled: true}
+		} else {
+			adl.Spec.AI.Enabled = true
+		}
+	}
+	if adl.Spec.SCM != nil {
+		if adl.Spec.SCM.CI {
+			g.config.GenerateCI = true
+		}
+		if adl.Spec.SCM.CD {
+			g.config.GenerateCD = true
+		}
+	}
+	if g.config.GenerateCI || g.config.GenerateCD {
+		if adl.Spec.SCM == nil {
+			adl.Spec.SCM = &schema.SCM{}
+		}
+		if g.config.GenerateCI {
+			adl.Spec.SCM.CI = true
+		}
+		if g.config.GenerateCD {
+			adl.Spec.SCM.CD = true
+		}
+	}
+
 	if g.config.DeploymentType != "" {
 		if adl.Spec.Deployment == nil {
 			adl.Spec.Deployment = &schema.DeploymentConfig{}
