@@ -675,14 +675,15 @@ The model loads each SKILL.md body on demand via the `Read` built-in tool, and e
 
 ### Reserved built-in tools
 
-`spec.tools` accepts four reserved IDs that map to framework-supplied implementations:
+`spec.tools` accepts five reserved IDs that map to framework-supplied implementations:
 
-| Reserved ID | Generated as            | Purpose                                                          |
-| ----------- | ----------------------- | ---------------------------------------------------------------- |
-| `read`      | `tools/read.go` etc.    | Read a file (`file_path`, optional `offset`/`limit`).            |
-| `bash`      | `tools/bash.go` etc.    | Execute a shell command (subject to whitelist + timeout).        |
-| `write`     | `tools/write.go` etc.   | Write content to a file (creates parent dirs).                   |
-| `edit`      | `tools/edit.go` etc.    | Replace a unique string in a file (`old_string` → `new_string`). |
+| Reserved ID | Generated as            | Purpose                                                                              |
+| ----------- | ----------------------- | ------------------------------------------------------------------------------------ |
+| `read`      | `tools/read.go` etc.    | Read a file (`file_path`, optional `offset`/`limit`).                                |
+| `bash`      | `tools/bash.go` etc.    | Execute a shell command (subject to whitelist + timeout).                            |
+| `write`     | `tools/write.go` etc.   | Write content to a file (creates parent dirs).                                       |
+| `edit`      | `tools/edit.go` etc.    | Replace a unique string in a file (`old_string` → `new_string`).                     |
+| `fetch`     | `tools/fetch.go` etc.   | Fetch an http(s) URL (whitelist, max-bytes cap, optional save-to-disk inside `/tmp`).|
 
 Opt in by listing the id alone - the generator owns `name`, `description`, and the JSON schema:
 
@@ -697,7 +698,7 @@ spec:
       schema: { type: object, ... }
 ```
 
-**All four built-ins default to `enabled: false`.** Activate them via the reserved namespace `spec.config.tools.<id>`:
+**All five built-ins default to `enabled: false`.** Activate them via the reserved namespace `spec.config.tools.<id>`:
 
 ```yaml
 spec:
@@ -715,6 +716,15 @@ spec:
         enabled: false           # listed but explicitly disabled
       edit:
         enabled: true
+      fetch:
+        enabled: true
+        allowed_domains:         # whitelist of hosts (empty = unrestricted, discouraged)
+          - example.com
+          - .api.dev             # entries starting with "." match any subdomain
+        max_bytes: 10485760      # 10 MiB cap on response body (default)
+        timeout_seconds: 30      # total request timeout (default)
+        download_dir: /tmp       # root for save_path writes (default /tmp)
+        allow_downloads: false   # set true to allow writing response bodies to disk
 ```
 
 Values are baked into the generated constructor as compile-time literals - there's no `ToolsConfig` struct in `config/config.go` because reserved-namespace sections are intentionally skipped. The validator decodes each `spec.config.tools.<id>` block into the built-in's typed shape and rejects unknown keys (typos like `tymeout_seconds` fail with `spec.config.tools.bash.tymeout_seconds`).
@@ -723,6 +733,13 @@ Runtime overrides for Bash (read inside `tools/bash.go`):
 
 - `A2A_BASH_DISABLED=1` is a kill switch - overrides `enabled: true` back to false.
 - `A2A_BASH_WHITELIST=ls,cat,grep` overrides the compile-time whitelist.
+
+Runtime overrides for Fetch (resolution precedence: env > compile-time literal > default-disabled):
+
+- Go: `TOOLS_FETCH_ENABLED`, `TOOLS_FETCH_ALLOWED_DOMAINS`, `TOOLS_FETCH_MAX_BYTES`, `TOOLS_FETCH_TIMEOUT_SECONDS`, `TOOLS_FETCH_DOWNLOAD_DIR`, `TOOLS_FETCH_ALLOW_DOWNLOADS` (envconfig-style; comma-separated for lists).
+- Rust: `A2A_FETCH_DISABLED=1` (kill switch), `A2A_FETCH_ALLOWED_DOMAINS`, `A2A_FETCH_MAX_BYTES`, `A2A_FETCH_TIMEOUT_SECONDS`, `A2A_FETCH_DOWNLOAD_DIR`, `A2A_FETCH_ALLOW_DOWNLOADS`.
+
+The Fetch tool supports `GET` and `HEAD` only. Optional `save_path` writes the response body to a path resolved under `download_dir` - absolute paths and parent-directory traversal (`..`) are rejected, and the request fails unless `allow_downloads: true`. Bodies (and on-disk files) are capped at `max_bytes`; oversized responses are truncated and the result payload sets `"truncated": true`. The Go template uses only the standard library (`net/http`); the Rust template adds `reqwest` (rustls-tls + json features) to `Cargo.toml` automatically when `- id: fetch` is present in `spec.tools`.
 
 Resolution precedence at runtime: **env > compile-time literal > built-in default (disabled)**.
 

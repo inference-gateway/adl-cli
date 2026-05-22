@@ -16,6 +16,7 @@ const (
 	ReservedToolBash  ReservedToolID = "bash"
 	ReservedToolWrite ReservedToolID = "write"
 	ReservedToolEdit  ReservedToolID = "edit"
+	ReservedToolFetch ReservedToolID = "fetch"
 )
 
 // ReservedToolIDs is the lookup set used by validator/generator to detect
@@ -25,6 +26,7 @@ var ReservedToolIDs = map[string]struct{}{
 	string(ReservedToolBash):  {},
 	string(ReservedToolWrite): {},
 	string(ReservedToolEdit):  {},
+	string(ReservedToolFetch): {},
 }
 
 // IsReservedToolID reports whether id maps to a built-in implementation.
@@ -72,6 +74,12 @@ var BuiltinToolMetas = map[string]BuiltinToolMeta{
 		Description: "Replace a unique string in a file with a new value. Errors if old_string is not found or appears more than once.",
 		Parameters:  []string{"file_path", "old_string", "new_string"},
 	},
+	string(ReservedToolFetch): {
+		ID:          string(ReservedToolFetch),
+		Name:        "Fetch",
+		Description: "Fetch a URL over HTTP(S). Subject to an allowed-domains whitelist and a max-bytes cap; can optionally save the response body to a file inside the configured download_dir (defaults to /tmp).",
+		Parameters:  []string{"url", "method", "save_path", "headers"},
+	},
 }
 
 // BuiltinToolMetaFor returns the metadata for a reserved tool ID, or an
@@ -108,6 +116,28 @@ type EditBuiltinConfig struct {
 	AllowedRoots []string `mapstructure:"allowed_roots"`
 }
 
+// FetchBuiltinConfig is the typed shape of spec.config.tools.fetch.
+//
+// AllowedDomains is the host whitelist; entries are matched against the
+// request URL's host (case-insensitive). An entry beginning with "." is
+// treated as a suffix match, so ".example.com" allows any subdomain. An
+// empty list with Enabled=true means "any host is allowed" - intentional
+// for users who want unrestricted HTTP access, but discouraged.
+//
+// MaxBytes caps how much of the response body the tool reads (0 means
+// "use the built-in default of 10 MiB"). DownloadDir is the root the
+// tool writes to when the model requests `save_path`; AllowDownloads
+// must be true to enable file output at all. TimeoutSeconds caps the
+// total request time (0 means "use the built-in default of 30s").
+type FetchBuiltinConfig struct {
+	Enabled        bool     `mapstructure:"enabled"`
+	AllowedDomains []string `mapstructure:"allowed_domains"`
+	MaxBytes       int      `mapstructure:"max_bytes"`
+	TimeoutSeconds int      `mapstructure:"timeout_seconds"`
+	DownloadDir    string   `mapstructure:"download_dir"`
+	AllowDownloads bool     `mapstructure:"allow_downloads"`
+}
+
 // ResolvedBuiltinConfigs holds the decoded config blocks for every reserved
 // tool id present in spec.tools. Entries for absent ids carry default
 // (zero) values, which means Enabled=false (the safe default).
@@ -116,6 +146,7 @@ type ResolvedBuiltinConfigs struct {
 	Bash  BashBuiltinConfig
 	Write WriteBuiltinConfig
 	Edit  EditBuiltinConfig
+	Fetch FetchBuiltinConfig
 }
 
 // ResolveBuiltinConfigs decodes spec.config.tools.<reserved-id> into
@@ -161,6 +192,13 @@ func ResolveBuiltinConfigs(adl *ADL) (ResolvedBuiltinConfigs, error) {
 		}
 		out.Edit = *decoded.(*EditBuiltinConfig)
 	}
+	if raw, present := toolsCfg[string(ReservedToolFetch)]; present {
+		decoded, err := DecodeBuiltinToolConfig(string(ReservedToolFetch), raw)
+		if err != nil {
+			return out, err
+		}
+		out.Fetch = *decoded.(*FetchBuiltinConfig)
+	}
 	return out, nil
 }
 
@@ -181,6 +219,8 @@ func DecodeBuiltinToolConfig(id string, raw any) (any, error) {
 		target = &WriteBuiltinConfig{}
 	case string(ReservedToolEdit):
 		target = &EditBuiltinConfig{}
+	case string(ReservedToolFetch):
+		target = &FetchBuiltinConfig{}
 	default:
 		return nil, fmt.Errorf("not a reserved built-in tool id: %q", id)
 	}

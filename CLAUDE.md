@@ -82,7 +82,7 @@ main.go                       # Entry point, sets version
 
 - **Tools** are functions the agent can invoke. Defined under `spec.tools`. Two kinds:
   - **User tools** - full entry (`id`, `name`, `description`, `tags`, `schema`, optional `inject`). Generated as `tools/<id>.<ext>` from `tool.<ext>.tmpl`.
-  - **Reserved built-ins** - `id` only. Currently `read`, `bash`, `write`, `edit`. Generated from `builtin/<id>.<ext>.tmpl`. **All four default to `enabled: false`**; activate via `spec.config.tools.<id>.enabled: true`. The Read built-in is what loads SKILL.md bodies on demand - `spec.skills` non-empty REQUIRES `- id: read` listed AND enabled (validator enforces).
+  - **Reserved built-ins** - `id` only. Currently `read`, `bash`, `write`, `edit`, `fetch`. Generated from `builtin/<id>.<ext>.tmpl`. **All five default to `enabled: false`**; activate via `spec.config.tools.<id>.enabled: true`. The Read built-in is what loads SKILL.md bodies on demand - `spec.skills` non-empty REQUIRES `- id: read` listed AND enabled (validator enforces). The `fetch` built-in performs HTTP(S) GET/HEAD calls subject to an `allowed_domains` whitelist, a `max_bytes` cap, a request `timeout_seconds`, and (when `allow_downloads: true`) writes responses into `download_dir` (default `/tmp`). Go uses `net/http` (no extra dep); Rust adds `reqwest` (rustls-tls + json) only when `fetch` is listed.
 - **Skills** are markdown documents (YAML frontmatter + body). The frontmatter (`name`/`description`) is consumed at runtime to build an `AVAILABLE SKILLS:` block appended to the system prompt; the body is fetched on demand by the model via Read. Each skill goes to `skills/<id>/SKILL.md`. Resolution paths unchanged:
   - **`bare: true`** → scaffolded from inline `name`/`description`/`tags`; the whole `skills/<id>/` directory is listed in `.adl-ignore`.
   - **`source:` set** → must be a `github.com` `/tree/<ref>/<path>` URL or one of the shorthand forms below; the full directory is fetched via the GitHub trees API + `raw.githubusercontent.com`. Implemented in `internal/registry/installer.go`.
@@ -92,9 +92,11 @@ main.go                       # Entry point, sets version
 
 ### Reserved tool config (`spec.config.tools.<id>`)
 
-Built-in config lives under the reserved `spec.config.tools` namespace (not `spec.config.<id>` - that name is reserved). The validator decodes each block into a typed struct in `internal/schema/builtin_config.go` (`ReadBuiltinConfig`, `BashBuiltinConfig`, `WriteBuiltinConfig`, `EditBuiltinConfig`) with `ErrorUnused: true`, so typos surface immediately as `spec.config.tools.bash.tymeout_seconds`. Values flow into the generated runtime as compile-time literals in `main.<ext>`'s tool-registration block - they do NOT flow through `config/config.go` (which explicitly skips the `tools` section).
+Built-in config lives under the reserved `spec.config.tools` namespace (not `spec.config.<id>` - that name is reserved). The validator decodes each block into a typed struct in `internal/schema/builtin_config.go` (`ReadBuiltinConfig`, `BashBuiltinConfig`, `WriteBuiltinConfig`, `EditBuiltinConfig`, `FetchBuiltinConfig`) with `ErrorUnused: true`, so typos surface immediately as `spec.config.tools.bash.tymeout_seconds`. Values flow into the generated runtime as compile-time literals in `main.<ext>`'s tool-registration block - they do NOT flow through `config/config.go` (which explicitly skips the `tools` section).
 
 Bash env-var runtime overrides (read inside `tools/bash.<ext>`): `A2A_BASH_DISABLED=1` (kill switch), `A2A_BASH_WHITELIST=ls,cat,grep`. Resolution precedence: **env > compile-time literal > built-in default (disabled)**.
+
+Fetch env-var runtime overrides: Go uses `TOOLS_FETCH_ENABLED`, `TOOLS_FETCH_ALLOWED_DOMAINS`, `TOOLS_FETCH_MAX_BYTES`, `TOOLS_FETCH_TIMEOUT_SECONDS`, `TOOLS_FETCH_DOWNLOAD_DIR`, `TOOLS_FETCH_ALLOW_DOWNLOADS` (via `envconfig`); Rust uses `A2A_FETCH_DISABLED=1` (kill switch), `A2A_FETCH_ALLOWED_DOMAINS`, `A2A_FETCH_MAX_BYTES`, `A2A_FETCH_TIMEOUT_SECONDS`, `A2A_FETCH_DOWNLOAD_DIR`, `A2A_FETCH_ALLOW_DOWNLOADS`. An entry in `allowed_domains` that starts with `.` (e.g. `.example.com`) is a suffix match allowing any subdomain. `save_path` is rejected unless `allow_downloads: true`; absolute paths and parent-dir traversal are also rejected.
 
 ### Service Injection
 

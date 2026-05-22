@@ -572,6 +572,97 @@ spec:
 			wantErr: false,
 		},
 		{
+			name: "reserved fetch tool id-only entry is valid",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: minimal-fetch
+  description: "fetch built-in opt-in"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  config:
+    tools:
+      fetch:
+        enabled: true
+        allowed_domains:
+          - example.com
+          - .api.dev
+        max_bytes: 1048576
+        timeout_seconds: 15
+        download_dir: /tmp
+        allow_downloads: true
+  tools:
+    - id: fetch
+  server:
+    port: 8080
+  language:
+    go:
+      module: "github.com/example/x"
+      version: "1.26.2"
+`,
+			wantErr: false,
+		},
+		{
+			name: "reserved fetch tool config with unknown key is rejected",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: fetch-typo
+  description: "unknown key under fetch"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  config:
+    tools:
+      fetch:
+        enabled: true
+        max_byts: 1024
+  tools:
+    - id: fetch
+  server:
+    port: 8080
+  language:
+    go:
+      module: "github.com/example/x"
+      version: "1.26.2"
+`,
+			wantErr: true,
+			errSub:  "spec.config.tools.fetch",
+		},
+		{
+			name: "reserved fetch tool rejects user-supplied name",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: fetch-with-name
+  description: "reserved fetch must be id-only"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  tools:
+    - id: fetch
+      name: MyFetch
+  server:
+    port: 8080
+  language:
+    go:
+      module: "github.com/example/x"
+      version: "1.26.2"
+`,
+			wantErr: true,
+			errSub:  "reserved tool 'fetch' must not set 'name'",
+		},
+		{
 			name: "bare skill missing description is rejected",
 			adl: `apiVersion: adl.inference-gateway.com/v1
 kind: Agent

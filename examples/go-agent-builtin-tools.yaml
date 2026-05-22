@@ -1,0 +1,139 @@
+---
+apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: go-agent-builtin-tools
+  description: "Workspace assistant that exercises every reserved built-in tool: read, write, edit, bash, fetch"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  card:
+    protocolVersion: "0.3.0"
+    preferredTransport: JSONRPC
+    defaultInputModes:
+      - text
+    defaultOutputModes:
+      - text
+  agent:
+    provider: deepseek
+    model: deepseek-v4-flash
+    systemPrompt: |
+      You are a workspace assistant. You can investigate, modify, and
+      research code in the user's project using the five built-in tools
+      below. Always start by Reading the relevant files; never blindly
+      Edit or Bash without first understanding context.
+
+      Tool playbook:
+        - Read    — inspect a file (optionally a slice via offset/limit).
+                    Use it first to load SKILL.md bodies and to confirm
+                    the exact text you are about to Edit.
+        - Write   — create new files. Overwrites existing paths, so
+                    prefer Edit for in-place changes.
+        - Edit    — replace a single, unique substring inside a file.
+                    The match must be unique; widen the context if it
+                    is not.
+        - Bash    — run a whitelisted shell command (ls/cat/grep/find/
+                    rg/jq/wc/head/tail/git/go). Honors the configured
+                    timeout and respects A2A_BASH_DISABLED as a kill
+                    switch.
+        - Fetch   — GET or HEAD a URL on the documentation whitelist.
+                    Optionally save the body under download_dir with
+                    save_path so it can be re-opened with Read.
+
+      Refuse politely if the user asks for a host, command, or write
+      path outside the configured allow-lists - explain the restriction
+      instead of attempting the call.
+    maxTokens: 4096
+    temperature: 0.3
+  config:
+    tools:
+      # Read is required whenever spec.skills is non-empty - it loads
+      # SKILL.md bodies on demand. Cap large files at 2000 lines per
+      # call so a wide window doesn't blow the model's context.
+      read:
+        enabled: true
+        max_lines: 2000
+
+      # Write is opt-in and intentionally narrow: scaffolding new files
+      # is the most destructive of the five built-ins because it
+      # silently overwrites existing paths.
+      write:
+        enabled: true
+
+      # Edit is the safe in-place modifier - prefer it over Write for
+      # changes to files that already exist.
+      edit:
+        enabled: true
+
+      # Bash runs inside the project root. Whitelist read-mostly
+      # commands; mutating operations (rm, mv, chmod, ...) are
+      # deliberately excluded. A2A_BASH_DISABLED=1 is a runtime kill
+      # switch even when enabled: true here.
+      bash:
+        enabled: true
+        whitelist:
+          - ls
+          - cat
+          - grep
+          - find
+          - rg
+          - jq
+          - wc
+          - head
+          - tail
+          - git
+          - go
+        timeout_seconds: 30
+
+      # Fetch pulls documentation pages. allowed_domains mixes exact
+      # hosts with a ".suffix" entry that matches any subdomain. An
+      # empty list would mean "any host" - we intentionally pin to a
+      # curated set of documentation sources. save_path is enabled so
+      # the agent can cache pages it wants to revisit with Read.
+      fetch:
+        enabled: true
+        allowed_domains:
+          - pkg.go.dev
+          - docs.python.org
+          - .rust-lang.org # matches doc.rust-lang.org, blog.rust-lang.org, etc.
+          - raw.githubusercontent.com
+        max_bytes: 5242880 # 5 MiB cap on a single response body
+        timeout_seconds: 20
+        allow_downloads: true
+        download_dir: /tmp/adl-fetch-cache
+  tools:
+    - id: read
+    - id: write
+    - id: edit
+    - id: bash
+    - id: fetch
+  skills:
+    - id: workspace-assistant
+      bare: true
+      name: workspace-assistant
+      description: "Use this whenever the user wants to investigate, modify, or research code in their workspace. Read first to gather context, prefer Edit over Write for in-place changes, run Bash only against the whitelist, and use Fetch (optionally with save_path) for documentation lookups on the allow-listed hosts. Decline politely if any request falls outside those allow-lists."
+      license: MIT
+      tags:
+        - workspace
+        - filesystem
+        - shell
+        - research
+  server:
+    port: 8080
+    scheme: http
+    debug: false
+    auth:
+      enabled: false
+  language:
+    go:
+      module: "github.com/inference-gateway/adl-cli/test-output"
+      version: "1.26.2"
+  development:
+    sandbox:
+      flox:
+        enabled: true
+      devcontainer:
+        enabled: false

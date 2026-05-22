@@ -230,6 +230,15 @@ func main() {
 	}
 	toolBox.AddTool(editTool)
 	l.Info("registered built-in: Edit")
+	{{- else if eq .ID "fetch" }}
+
+	// Register Fetch built-in
+	fetchTool, err := tools.NewFetchTool(ctx, l)
+	if err != nil {
+		l.Fatal("failed to construct Fetch tool", zap.Error(err))
+	}
+	toolBox.AddTool(fetchTool)
+	l.Info("registered built-in: Fetch")
 	{{- else }}
 
 	// Register {{ .Name }} tool

@@ -1,0 +1,314 @@
+package tools
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
+	server "github.com/inference-gateway/adk/server"
+	envconfig "github.com/sethvargo/go-envconfig"
+	zap "go.uber.org/zap"
+)
+
+// FetchConfig is the runtime config for the Fetch built-in. Defaults are
+// baked from spec.config.tools.fetch at generation time; the TOOLS_FETCH_*
+// env vars override them at startup.
+//
+// AllowedDomains is the host whitelist enforced against the request URL.
+// Entries are matched case-insensitively; an entry that begins with "."
+// (e.g. ".example.com") is treated as a suffix match that allows any
+// subdomain. An empty list means "any host is allowed" - intentional for
+// fully unrestricted access but strongly discouraged.
+//
+// MaxBytes caps how much of the response body the tool reads. DownloadDir
+// is the root the tool writes to when the model requests `save_path`;
+// AllowDownloads must be true to enable file output at all.
+type FetchConfig struct {
+	Enabled        bool     `env:"TOOLS_FETCH_ENABLED, default={{ printf "%t" .Config.Enabled }}"`
+	AllowedDomains []string `env:"TOOLS_FETCH_ALLOWED_DOMAINS{{- if .Config.AllowedDomains }}, default={{ join "," .Config.AllowedDomains }}{{- end }}"`
+	MaxBytes       int      `env:"TOOLS_FETCH_MAX_BYTES, default={{ .Config.MaxBytes }}"`
+	TimeoutSeconds int      `env:"TOOLS_FETCH_TIMEOUT_SECONDS, default={{ .Config.TimeoutSeconds }}"`
+	DownloadDir    string   `env:"TOOLS_FETCH_DOWNLOAD_DIR, default={{ if .Config.DownloadDir }}{{ .Config.DownloadDir }}{{ else }}/tmp{{ end }}"`
+	AllowDownloads bool     `env:"TOOLS_FETCH_ALLOW_DOWNLOADS, default={{ printf "%t" .Config.AllowDownloads }}"`
+}
+
+// defaultMaxBytes is the cap applied when neither the ADL nor the env
+// override sets max_bytes. 10 MiB is enough for typical JSON/HTML
+// responses and small binary downloads without letting a misbehaving
+// agent exhaust memory.
+const defaultMaxBytes = 10 * 1024 * 1024
+
+// defaultTimeoutSeconds is the request timeout fallback (total time for
+// dial + TLS + body read).
+const defaultTimeoutSeconds = 30
+
+// FetchTool exposes a Fetch built-in. Disabled by default; flip
+// spec.config.tools.fetch.enabled: true in your ADL to activate.
+type FetchTool struct {
+	logger *zap.Logger
+	cfg    FetchConfig
+	client *http.Client
+}
+
+// NewFetchTool builds a Fetch tool, resolving config from TOOLS_FETCH_* env
+// vars (or the spec.config.tools.fetch defaults baked in at generation).
+func NewFetchTool(ctx context.Context, logger *zap.Logger) (server.Tool, error) {
+	var cfg FetchConfig
+	if err := envconfig.Process(ctx, &cfg); err != nil {
+		return nil, fmt.Errorf("load Fetch config: %w", err)
+	}
+	if cfg.TimeoutSeconds <= 0 {
+		cfg.TimeoutSeconds = defaultTimeoutSeconds
+	}
+	if cfg.MaxBytes <= 0 {
+		cfg.MaxBytes = defaultMaxBytes
+	}
+	if strings.TrimSpace(cfg.DownloadDir) == "" {
+		cfg.DownloadDir = "/tmp"
+	}
+	t := &FetchTool{
+		logger: logger,
+		cfg:    cfg,
+		client: &http.Client{Timeout: time.Duration(cfg.TimeoutSeconds) * time.Second},
+	}
+	return server.NewBasicTool(
+		"Fetch",
+		"Fetch a URL over HTTP(S). Subject to an allowed-domains whitelist and a max-bytes cap; can optionally save the response body to a file inside the configured download_dir.",
+		map[string]any{
+			"type":                 "object",
+			"additionalProperties": false,
+			"properties": map[string]any{
+				"url": map[string]any{
+					"type":        "string",
+					"description": "The absolute http(s) URL to fetch.",
+				},
+				"method": map[string]any{
+					"type":        "string",
+					"description": "HTTP method. Only GET and HEAD are supported.",
+					"enum":        []string{"GET", "HEAD"},
+				},
+				"save_path": map[string]any{
+					"type":        "string",
+					"description": "Optional filename (or relative path) inside the configured download_dir to write the body to. Requires allow_downloads=true. Absolute paths and parent-dir traversal are rejected.",
+				},
+				"headers": map[string]any{
+					"type":                 "object",
+					"description":          "Optional extra request headers.",
+					"additionalProperties": map[string]any{"type": "string"},
+				},
+			},
+			"required": []string{"url"},
+		},
+		t.Handler,
+	), nil
+}
+
+// Handler executes the Fetch tool.
+func (t *FetchTool) Handler(ctx context.Context, args map[string]any) (string, error) {
+	if !t.cfg.Enabled {
+		return "", errors.New("fetch tool is disabled; set spec.config.tools.fetch.enabled: true or TOOLS_FETCH_ENABLED=true")
+	}
+
+	rawURL, _ := args["url"].(string)
+	rawURL = strings.TrimSpace(rawURL)
+	if rawURL == "" {
+		return "", errors.New("url is required")
+	}
+	parsed, err := url.Parse(rawURL)
+	if err != nil {
+		return "", fmt.Errorf("invalid url %q: %w", rawURL, err)
+	}
+	if parsed.Scheme != "http" && parsed.Scheme != "https" {
+		return "", fmt.Errorf("unsupported url scheme %q (only http and https are allowed)", parsed.Scheme)
+	}
+	if parsed.Host == "" {
+		return "", fmt.Errorf("url %q is missing a host", rawURL)
+	}
+	if err := t.checkDomain(parsed.Hostname()); err != nil {
+		return "", err
+	}
+
+	method := http.MethodGet
+	if v, ok := args["method"].(string); ok && v != "" {
+		method = strings.ToUpper(strings.TrimSpace(v))
+	}
+	if method != http.MethodGet && method != http.MethodHead {
+		return "", fmt.Errorf("unsupported method %q (only GET and HEAD are allowed)", method)
+	}
+
+	savePath, _ := args["save_path"].(string)
+	savePath = strings.TrimSpace(savePath)
+	var resolvedSavePath string
+	if savePath != "" {
+		if !t.cfg.AllowDownloads {
+			return "", errors.New("save_path requested but downloads are disabled; set spec.config.tools.fetch.allow_downloads: true")
+		}
+		if method == http.MethodHead {
+			return "", errors.New("save_path cannot be used with a HEAD request")
+		}
+		resolved, err := t.resolveDownloadPath(savePath)
+		if err != nil {
+			return "", err
+		}
+		resolvedSavePath = resolved
+	}
+
+	req, err := http.NewRequestWithContext(ctx, method, parsed.String(), nil)
+	if err != nil {
+		return "", fmt.Errorf("build request: %w", err)
+	}
+	if hdrs, ok := args["headers"].(map[string]any); ok {
+		for k, v := range hdrs {
+			if s, ok := v.(string); ok {
+				req.Header.Set(k, s)
+			}
+		}
+	}
+
+	start := time.Now()
+	resp, err := t.client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("fetch %s: %w", parsed.String(), err)
+	}
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			t.logger.Warn("failed to close fetch response body", zap.Error(closeErr))
+		}
+	}()
+
+	limited := io.LimitReader(resp.Body, int64(t.cfg.MaxBytes)+1)
+
+	result := map[string]any{
+		"url":         parsed.String(),
+		"method":      method,
+		"status_code": resp.StatusCode,
+		"duration_ms": time.Since(start).Milliseconds(),
+		"headers":     flattenHeaders(resp.Header),
+	}
+
+	if method == http.MethodHead {
+		_, _ = io.Copy(io.Discard, limited)
+		payload, err := json.Marshal(result)
+		if err != nil {
+			return "", fmt.Errorf("encode Fetch result: %w", err)
+		}
+		t.logger.Debug("fetch executed", zap.String("url", parsed.String()), zap.Int("status", resp.StatusCode))
+		return string(payload), nil
+	}
+
+	if resolvedSavePath != "" {
+		if err := os.MkdirAll(filepath.Dir(resolvedSavePath), 0o755); err != nil {
+			return "", fmt.Errorf("create parent dir for %s: %w", resolvedSavePath, err)
+		}
+		f, err := os.Create(resolvedSavePath)
+		if err != nil {
+			return "", fmt.Errorf("create %s: %w", resolvedSavePath, err)
+		}
+		written, copyErr := io.Copy(f, limited)
+		closeErr := f.Close()
+		if copyErr != nil {
+			return "", fmt.Errorf("write %s: %w", resolvedSavePath, copyErr)
+		}
+		if closeErr != nil {
+			return "", fmt.Errorf("close %s: %w", resolvedSavePath, closeErr)
+		}
+		truncated := written > int64(t.cfg.MaxBytes)
+		if truncated {
+			if err := os.Truncate(resolvedSavePath, int64(t.cfg.MaxBytes)); err != nil {
+				return "", fmt.Errorf("truncate %s: %w", resolvedSavePath, err)
+			}
+			written = int64(t.cfg.MaxBytes)
+		}
+		result["saved_to"] = resolvedSavePath
+		result["bytes_written"] = written
+		result["truncated"] = truncated
+		payload, err := json.Marshal(result)
+		if err != nil {
+			return "", fmt.Errorf("encode Fetch result: %w", err)
+		}
+		t.logger.Debug("fetch downloaded", zap.String("url", parsed.String()), zap.String("saved_to", resolvedSavePath), zap.Int64("bytes", written))
+		return string(payload), nil
+	}
+
+	body, err := io.ReadAll(limited)
+	if err != nil {
+		return "", fmt.Errorf("read body: %w", err)
+	}
+	truncated := len(body) > t.cfg.MaxBytes
+	if truncated {
+		body = body[:t.cfg.MaxBytes]
+	}
+	result["body"] = string(body)
+	result["bytes_read"] = len(body)
+	result["truncated"] = truncated
+	payload, err := json.Marshal(result)
+	if err != nil {
+		return "", fmt.Errorf("encode Fetch result: %w", err)
+	}
+	t.logger.Debug("fetch executed", zap.String("url", parsed.String()), zap.Int("status", resp.StatusCode), zap.Int("bytes", len(body)))
+	return string(payload), nil
+}
+
+// checkDomain enforces the configured allowed_domains list. An empty list
+// means any host is allowed.
+func (t *FetchTool) checkDomain(host string) error {
+	if len(t.cfg.AllowedDomains) == 0 {
+		return nil
+	}
+	host = strings.ToLower(host)
+	for _, entry := range t.cfg.AllowedDomains {
+		entry = strings.TrimSpace(strings.ToLower(entry))
+		if entry == "" {
+			continue
+		}
+		if strings.HasPrefix(entry, ".") {
+			suffix := strings.TrimPrefix(entry, ".")
+			if host == suffix || strings.HasSuffix(host, "."+suffix) {
+				return nil
+			}
+			continue
+		}
+		if host == entry {
+			return nil
+		}
+	}
+	return fmt.Errorf("host %q is not in the configured allowed_domains", host)
+}
+
+// resolveDownloadPath joins savePath under DownloadDir and rejects paths
+// that try to escape the directory (absolute paths or ".." traversal).
+func (t *FetchTool) resolveDownloadPath(savePath string) (string, error) {
+	if filepath.IsAbs(savePath) {
+		return "", fmt.Errorf("save_path %q must be relative to download_dir", savePath)
+	}
+	cleaned := filepath.Clean(savePath)
+	if cleaned == "." || cleaned == ".." || strings.HasPrefix(cleaned, ".."+string(filepath.Separator)) {
+		return "", fmt.Errorf("save_path %q escapes download_dir", savePath)
+	}
+	root := filepath.Clean(t.cfg.DownloadDir)
+	full := filepath.Join(root, cleaned)
+	rel, err := filepath.Rel(root, full)
+	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return "", fmt.Errorf("save_path %q escapes download_dir", savePath)
+	}
+	return full, nil
+}
+
+// flattenHeaders collapses http.Header (map[string][]string) into a
+// plain map[string]string for the JSON payload. Multi-value headers are
+// joined with ", ".
+func flattenHeaders(h http.Header) map[string]string {
+	out := make(map[string]string, len(h))
+	for k, v := range h {
+		out[k] = strings.Join(v, ", ")
+	}
+	return out
+}
