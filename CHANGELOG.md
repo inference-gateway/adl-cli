@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.33.1](https://github.com/inference-gateway/adl-cli/compare/v0.33.0...v0.33.1) (2026-05-22)
+
+### 🐛 Bug Fixes
+
+* **init:** Always emit spec.development defaults in generated ADL ([#127](https://github.com/inference-gateway/adl-cli/issues/127)) ([7811a7e](https://github.com/inference-gateway/adl-cli/commit/7811a7ecd035421c1ceb860d59213070c3fdb4ac)), closes [#126](https://github.com/inference-gateway/adl-cli/issues/126)
+
 ## [0.33.0](https://github.com/inference-gateway/adl-cli/compare/v0.32.0...v0.33.0) (2026-05-22)
 
 ### ✨ Features
