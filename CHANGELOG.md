@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.33.0](https://github.com/inference-gateway/adl-cli/compare/v0.32.0...v0.33.0) (2026-05-22)
+
+### ✨ Features
+
+* **schema:** Adopt ADL v0.6.0 schema with spec.development.{sandbox,ai} ([#125](https://github.com/inference-gateway/adl-cli/issues/125)) ([45e411e](https://github.com/inference-gateway/adl-cli/commit/45e411ebea720c2b6f6592d75b34536dab0b04df))
+
+### 🔧 Miscellaneous
+
+* Add YAML separator at the top ([1f70cdc](https://github.com/inference-gateway/adl-cli/commit/1f70cdc8498748fcbe01633bbde5ef43d959ed8f))
+* **deps:** Bump ADL version ([6b61738](https://github.com/inference-gateway/adl-cli/commit/6b6173807311ee5af27daab96578364e4c437273))
+
 ## [0.32.0](https://github.com/inference-gateway/adl-cli/compare/v0.31.0...v0.32.0) (2026-05-22)
 
 ### ✨ Features
