@@ -45,7 +45,7 @@ This file provides guidance to AI agents working with the **ADL CLI** repository
 
 ### Component Map
 
-```
+```text
 main.go                       # Entry point, injects build version
 ├── cmd/                      # CLI commands (Cobra framework)
 │   ├── root.go              # Root command, Viper init, signal handling
@@ -271,10 +271,10 @@ adlFile = adlPath
 outputDir = outputPath
 ```
 
-4. **Inline ADL content** - Tests define ADL content as raw YAML string literals, write them to temp files, then invoke `runGenerate()`
-5. **File existence checks** - Use `os.Stat()` + `os.IsNotExist()` to verify generated files
-6. **Content assertions** - Read generated files and check for expected substrings
-7. **Isolated mocks** - Mock external dependencies (registry client, GitHub API)
+1. **Inline ADL content** - Tests define ADL content as raw YAML string literals, write them to temp files, then invoke `runGenerate()`
+2. **File existence checks** - Use `os.Stat()` + `os.IsNotExist()` to verify generated files
+3. **Content assertions** - Read generated files and check for expected substrings
+4. **Isolated mocks** - Mock external dependencies (registry client, GitHub API)
 
 ### Test Files
 
@@ -321,7 +321,7 @@ Custom acronyms can be added via `spec.acronyms` in the ADL file. They extend th
 
 Use [Conventional Commits](https://www.conventionalcommits.org/) format:
 
-```
+```text
 feat: add TypeScript template support
 
 - Add TypeScript template with Express.js framework
