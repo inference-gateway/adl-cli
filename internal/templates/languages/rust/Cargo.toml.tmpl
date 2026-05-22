@@ -25,13 +25,22 @@ chrono = { version = "0.4", features = ["serde"] }
 dotenvy = "0.15.7"
 envy = "0.4.2"
 {{- $hasFetch := false }}
+{{- $hasBuiltin := false }}
 {{- range .ADL.Spec.Tools }}
 {{- if eq .ID "fetch" }}
 {{- $hasFetch = true }}
 {{- end }}
+{{- if isBuiltinToolID .ID }}
+{{- $hasBuiltin = true }}
+{{- end }}
 {{- end }}
 {{- if $hasFetch }}
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+{{- end }}
+{{- if $hasBuiltin }}
+
+[dev-dependencies]
+tempfile = "3"
 {{- end }}
 
 [profile.release]

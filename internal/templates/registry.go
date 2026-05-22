@@ -162,6 +162,7 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 	for _, tool := range adl.Spec.Tools {
 		if schema.IsReservedToolID(tool.ID) {
 			files[fmt.Sprintf("tools/%s.go", tool.ID)] = fmt.Sprintf("builtin/%s.go", tool.ID)
+			files[fmt.Sprintf("tools/%s_test.go", tool.ID)] = fmt.Sprintf("builtin/%s_test.go", tool.ID)
 			continue
 		}
 		snakeCaseName := strings.ReplaceAll(tool.ID, "-", "_")

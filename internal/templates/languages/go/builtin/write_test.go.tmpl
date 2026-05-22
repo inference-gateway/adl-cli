@@ -1,0 +1,116 @@
+package tools
+
+import (
+	"context"
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"testing"
+
+	zap "go.uber.org/zap"
+)
+
+// newTestWriteTool builds a Write tool with the supplied config, bypassing
+// envconfig so each test pins the exact behavior under test.
+func newTestWriteTool(cfg WriteConfig) *WriteTool {
+	return &WriteTool{logger: zap.NewNop(), cfg: cfg}
+}
+
+func TestWriteTool_DisabledReturnsError(t *testing.T) {
+	t.Parallel()
+	tool := newTestWriteTool(WriteConfig{Enabled: false})
+	if _, err := tool.Handler(context.Background(), map[string]any{"file_path": "x", "content": "y"}); err == nil {
+		t.Fatalf("expected error when tool is disabled, got nil")
+	}
+}
+
+func TestWriteTool_RequiresFilePathAndContent(t *testing.T) {
+	t.Parallel()
+	tool := newTestWriteTool(WriteConfig{Enabled: true})
+	if _, err := tool.Handler(context.Background(), map[string]any{"content": "hi"}); err == nil {
+		t.Fatalf("expected error when file_path is missing, got nil")
+	}
+	if _, err := tool.Handler(context.Background(), map[string]any{"file_path": "x"}); err == nil {
+		t.Fatalf("expected error when content is missing, got nil")
+	}
+}
+
+func TestWriteTool_WritesFileAndCreatesParentDir(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	target := filepath.Join(dir, "nested", "deep", "out.txt")
+
+	tool := newTestWriteTool(WriteConfig{Enabled: true})
+	out, err := tool.Handler(context.Background(), map[string]any{
+		"file_path": target,
+		"content":   "payload",
+	})
+	if err != nil {
+		t.Fatalf("Handler returned error: %v", err)
+	}
+
+	got, err := os.ReadFile(target)
+	if err != nil {
+		t.Fatalf("read back: %v", err)
+	}
+	if string(got) != "payload" {
+		t.Fatalf("expected file to contain 'payload', got %q", string(got))
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal([]byte(out), &payload); err != nil {
+		t.Fatalf("unmarshal payload: %v", err)
+	}
+	if bw := int(payload["bytes_written"].(float64)); bw != len("payload") {
+		t.Fatalf("expected bytes_written=%d, got %d", len("payload"), bw)
+	}
+}
+
+func TestWriteTool_OverwritesExistingFile(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	target := filepath.Join(dir, "out.txt")
+	if err := os.WriteFile(target, []byte("old"), 0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+
+	tool := newTestWriteTool(WriteConfig{Enabled: true})
+	if _, err := tool.Handler(context.Background(), map[string]any{
+		"file_path": target,
+		"content":   "new",
+	}); err != nil {
+		t.Fatalf("Handler returned error: %v", err)
+	}
+
+	got, err := os.ReadFile(target)
+	if err != nil {
+		t.Fatalf("read back: %v", err)
+	}
+	if string(got) != "new" {
+		t.Fatalf("expected file to be overwritten, got %q", string(got))
+	}
+}
+
+func TestWriteTool_EnforcesAllowedRoots(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	allowed := filepath.Join(dir, "allowed")
+	if err := os.MkdirAll(allowed, 0o755); err != nil {
+		t.Fatalf("mkdir allowed: %v", err)
+	}
+
+	tool := newTestWriteTool(WriteConfig{Enabled: true, AllowedRoots: []string{allowed}})
+
+	if _, err := tool.Handler(context.Background(), map[string]any{
+		"file_path": filepath.Join(allowed, "ok.txt"),
+		"content":   "ok",
+	}); err != nil {
+		t.Fatalf("expected write inside allowed root to succeed, got: %v", err)
+	}
+	if _, err := tool.Handler(context.Background(), map[string]any{
+		"file_path": filepath.Join(dir, "outside.txt"),
+		"content":   "nope",
+	}); err == nil {
+		t.Fatalf("expected write outside allowed root to be rejected, got nil")
+	}
+}

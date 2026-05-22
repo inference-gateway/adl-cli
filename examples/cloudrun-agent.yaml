@@ -45,6 +45,8 @@ spec:
     provider: github
     url: "https://github.com/example/cloudrun-example"
     issue_templates: false
+    ci: true
+    cd: false
   deployment:
     type: cloudrun
     cloudrun:

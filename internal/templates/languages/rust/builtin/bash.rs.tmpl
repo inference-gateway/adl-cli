@@ -137,3 +137,80 @@ fn check_whitelist(whitelist: &[String], command: &str) -> anyhow::Result<()> {
     }
     bail!("command {:?} is not in the configured whitelist", command);
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    fn enabled_cfg() -> Config {
+        Config {
+            enabled: true,
+            whitelist: vec![],
+            timeout_seconds: 5,
+            working_dir: String::new(),
+        }
+    }
+
+    #[tokio::test]
+    async fn disabled_returns_error() {
+        let cfg = Config {
+            enabled: false,
+            ..enabled_cfg()
+        };
+        let err = handle(json!({"command": "echo hi"}), cfg).await.unwrap_err();
+        assert!(err.to_string().contains("disabled"));
+    }
+
+    #[tokio::test]
+    async fn requires_command() {
+        let err = handle(json!({"command": "   "}), enabled_cfg())
+            .await
+            .unwrap_err();
+        assert!(err.to_string().contains("command"));
+    }
+
+    #[tokio::test]
+    async fn executes_echo() {
+        let out = handle(json!({"command": "echo hello-bash"}), enabled_cfg())
+            .await
+            .expect("handle");
+        let parsed: serde_json::Value = serde_json::from_str(&out).unwrap();
+        assert_eq!(parsed["exit_code"], json!(0));
+        assert!(parsed["output"].as_str().unwrap().contains("hello-bash"));
+    }
+
+    #[tokio::test]
+    async fn enforces_whitelist() {
+        let cfg = Config {
+            whitelist: vec!["echo".to_string()],
+            ..enabled_cfg()
+        };
+        assert!(handle(json!({"command": "echo ok"}), cfg.clone()).await.is_ok());
+        let err = handle(json!({"command": "ls /"}), cfg).await.unwrap_err();
+        assert!(err.to_string().contains("whitelist"));
+    }
+
+    #[tokio::test]
+    async fn non_zero_exit_code_is_reported() {
+        let out = handle(json!({"command": "exit 7"}), enabled_cfg())
+            .await
+            .expect("handle");
+        let parsed: serde_json::Value = serde_json::from_str(&out).unwrap();
+        assert_eq!(parsed["exit_code"], json!(7));
+    }
+
+    #[test]
+    fn check_whitelist_allows_empty_list() {
+        assert!(check_whitelist(&[], "rm -rf /").is_ok());
+    }
+
+    #[test]
+    fn check_whitelist_matches_prefix_only_with_space() {
+        let wl = vec!["echo".to_string()];
+        assert!(check_whitelist(&wl, "echo").is_ok());
+        assert!(check_whitelist(&wl, "echo hi").is_ok());
+        // "echoes" must NOT match "echo" - prefix needs a trailing space.
+        assert!(check_whitelist(&wl, "echoes").is_err());
+    }
+}
