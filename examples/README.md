@@ -5,7 +5,7 @@ This directory contains example Agent Definition Language (ADL) files that demon
 ## Files
 
 - `go-agent.yaml` - Complete Go agent example with AI capabilities, multiple tools, and enterprise features
-- `go-agent-fetch.yaml` - Minimal Go agent demonstrating the `fetch` built-in with domain whitelisting and on-disk caching
+- `go-agent-builtin-tools.yaml` - Workspace assistant that exercises every reserved built-in tool (`read`, `write`, `edit`, `bash`, `fetch`) with sensible whitelists for each
 - `rust-agent.yaml` - Complete Rust agent example with web scraping tools and browser capabilities
 
 ## Usage
