@@ -272,7 +272,8 @@
         },
         "url": { "type": "string" },
         "github_app": { "type": "boolean" },
-        "issue_templates": { "type": "boolean" }
+        "issue_templates": { "type": "boolean" },
+        "dependabot": { "type": "boolean" }
       }
     },
     "SandboxConfig": {

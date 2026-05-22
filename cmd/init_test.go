@@ -133,6 +133,47 @@ func TestInitIssueTemplatesDefault(t *testing.T) {
 	}
 }
 
+func TestInitDependabotDefault(t *testing.T) {
+	tempDir := t.TempDir()
+	outputPath := filepath.Join(tempDir, "test-output")
+
+	cmd := initCmd
+	if err := cmd.Flags().Set("defaults", "true"); err != nil {
+		t.Fatal(err)
+	}
+	if err := cmd.Flags().Set("path", outputPath); err != nil {
+		t.Fatal(err)
+	}
+
+	err := runInit(cmd, []string{"test-agent"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	adlPath := filepath.Join(outputPath, "agent.yaml")
+	content, err := os.ReadFile(adlPath)
+	if err != nil {
+		t.Fatalf("failed to read ADL file: %v", err)
+	}
+
+	var adl adlData
+	if err := yaml.Unmarshal(content, &adl); err != nil {
+		t.Fatalf("failed to parse ADL YAML: %v", err)
+	}
+
+	if adl.Spec.SCM == nil {
+		t.Fatalf("expected SCM configuration to be present")
+	}
+	if adl.Spec.SCM.Dependabot {
+		t.Errorf("expected Dependabot to be false by default, got true")
+	}
+
+	contentStr := string(content)
+	if !strings.Contains(contentStr, "dependabot: false") {
+		t.Errorf("ADL file should contain 'dependabot: false'")
+	}
+}
+
 func TestInitDoesNotGenerateCode(t *testing.T) {
 	tempDir := t.TempDir()
 
