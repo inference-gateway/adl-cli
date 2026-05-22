@@ -684,8 +684,32 @@ func TestGenerator_Dependabot(t *testing.T) {
 					t.Errorf("expected dependabot output NOT to contain %q, got:\n%s", unexpected, content)
 				}
 			}
+
+			gitattrContent, err := engine.ExecuteTemplate("config/gitattributes", templates.Context{ADL: tt.adl, Language: tt.registryLang})
+			if err != nil {
+				t.Fatalf("failed to execute gitattributes template: %v", err)
+			}
+			if !containsSubstring(gitattrContent, ".github/dependabot.yml linguist-generated=true") {
+				t.Errorf("expected .gitattributes to mark dependabot.yml as linguist-generated when enabled, got:\n%s", gitattrContent)
+			}
 		})
 	}
+
+	t.Run("gitattributes omits dependabot entry when disabled", func(t *testing.T) {
+		adl := makeADL("agent-off", false, goLang, nil)
+		registry, err := templates.NewRegistry("go")
+		if err != nil {
+			t.Fatalf("failed to create template registry: %v", err)
+		}
+		engine := templates.NewWithRegistry("", registry)
+		gitattrContent, err := engine.ExecuteTemplate("config/gitattributes", templates.Context{ADL: adl, Language: "go"})
+		if err != nil {
+			t.Fatalf("failed to execute gitattributes template: %v", err)
+		}
+		if containsSubstring(gitattrContent, ".github/dependabot.yml") {
+			t.Errorf("expected .gitattributes NOT to reference dependabot.yml when disabled, got:\n%s", gitattrContent)
+		}
+	})
 }
 
 func TestGenerator_buildGenerateCommand(t *testing.T) {
