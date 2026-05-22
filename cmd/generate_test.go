@@ -681,3 +681,147 @@ func containsString(content, substr string) bool {
 	}
 	return false
 }
+
+// TestGenerateAIDocsRespectSandboxEnabledFlags verifies that AGENTS.md and
+// CLAUDE.md only mention sandbox environments that are actually enabled. This
+// guards against the regression in issue #129 where `init` populates all three
+// sandbox pointers (flox/devcontainer/dockerCompose), causing the templates to
+// document every environment regardless of its `enabled` flag.
+func TestGenerateAIDocsRespectSandboxEnabledFlags(t *testing.T) {
+	tests := []struct {
+		name              string
+		floxEnabled       bool
+		devContainerOn    bool
+		dockerComposeOn   bool
+		wantFlox          bool
+		wantDevContainer  bool
+		wantDockerCompose bool
+	}{
+		{
+			name:        "only flox enabled",
+			floxEnabled: true,
+			wantFlox:    true,
+		},
+		{
+			name:             "only devcontainer enabled",
+			devContainerOn:   true,
+			wantDevContainer: true,
+		},
+		{
+			name:              "only docker-compose enabled",
+			dockerComposeOn:   true,
+			wantDockerCompose: true,
+		},
+		{
+			name:              "all three enabled",
+			floxEnabled:       true,
+			devContainerOn:    true,
+			dockerComposeOn:   true,
+			wantFlox:          true,
+			wantDevContainer:  true,
+			wantDockerCompose: true,
+		},
+		{
+			name: "all three pointers present but disabled",
+			// emulates the init flow that populates all three pointers
+			// regardless of the user's enabled choice - none should render.
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tempDir := t.TempDir()
+			outputPath := filepath.Join(tempDir, "out")
+
+			adlContent := `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: sandbox-docs-agent
+  description: Agent for verifying sandbox doc rendering
+  version: 1.0.0
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  server:
+    port: 8080
+    debug: false
+  language:
+    go:
+      module: github.com/test/sandbox-docs
+      version: "1.26.2"
+  development:
+    ai:
+      enabled: true
+    sandbox:
+      flox:
+        enabled: ` + boolStr(tc.floxEnabled) + `
+      devcontainer:
+        enabled: ` + boolStr(tc.devContainerOn) + `
+      dockerCompose:
+        enabled: ` + boolStr(tc.dockerComposeOn) + `
+`
+			adlPath := filepath.Join(tempDir, "agent.yaml")
+			if err := os.WriteFile(adlPath, []byte(adlContent), 0644); err != nil {
+				t.Fatalf("failed to write ADL file: %v", err)
+			}
+
+			originalADLFile := adlFile
+			originalOutputDir := outputDir
+			originalEnableAI := enableAI
+			defer func() {
+				adlFile = originalADLFile
+				outputDir = originalOutputDir
+				enableAI = originalEnableAI
+			}()
+
+			adlFile = adlPath
+			outputDir = outputPath
+			enableAI = false
+
+			if err := runGenerate(generateCmd, []string{}); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			for _, doc := range []string{"AGENTS.md", "CLAUDE.md"} {
+				path := filepath.Join(outputPath, doc)
+				bytes, err := os.ReadFile(path)
+				if err != nil {
+					t.Fatalf("failed to read %s: %v", doc, err)
+				}
+				content := string(bytes)
+
+				hasFlox := strings.Contains(content, "Flox Environment")
+				hasDevContainer := strings.Contains(content, "DevContainer")
+				hasDockerCompose := strings.Contains(content, "Docker Compose")
+
+				if hasFlox != tc.wantFlox {
+					t.Errorf("%s: Flox section present=%v, want=%v", doc, hasFlox, tc.wantFlox)
+				}
+				if hasDevContainer != tc.wantDevContainer {
+					t.Errorf("%s: DevContainer section present=%v, want=%v", doc, hasDevContainer, tc.wantDevContainer)
+				}
+				if hasDockerCompose != tc.wantDockerCompose {
+					t.Errorf("%s: Docker Compose section present=%v, want=%v", doc, hasDockerCompose, tc.wantDockerCompose)
+				}
+
+				noneEnabled := !tc.wantFlox && !tc.wantDevContainer && !tc.wantDockerCompose
+				hasFallback := strings.Contains(content, "No sandboxed environments are configured")
+				if noneEnabled && !hasFallback {
+					t.Errorf("%s: expected fallback message when no sandbox environments are enabled, got:\n%s", doc, content)
+				}
+				if !noneEnabled && hasFallback {
+					t.Errorf("%s: unexpected fallback message when at least one sandbox is enabled", doc)
+				}
+			}
+		})
+	}
+}
+
+func boolStr(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
+}

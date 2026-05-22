@@ -142,31 +142,29 @@ When implementing tests:
 
 ## Environment Management
 
+### Development Environment
+{{- $sandbox := false }}
 {{- if and .ADL.Spec.Development .ADL.Spec.Development.Sandbox }}
-{{- if .ADL.Spec.Development.Sandbox.Flox }}
-The project includes Flox environment configuration (`.flox/env/manifest.toml`) providing:
-{{- if .ADL.Spec.Language.Go }}
-- Go {{ .ADL.Spec.Language.Go.Version | default "latest" }}
-{{- else if .ADL.Spec.Language.Rust }}
-- Rust {{ .ADL.Spec.Language.Rust.Version | default "latest" }}
-{{- else if .ADL.Spec.Language.TypeScript }}
-- Node.js {{ .ADL.Spec.Language.TypeScript.NodeVersion | default "latest" }}
-{{- else }}
-- Development runtime
+{{- if and .ADL.Spec.Development.Sandbox.Flox .ADL.Spec.Development.Sandbox.Flox.Enabled }}
+{{- $sandbox = true }}
+- **Flox Environment**: ✅ Configured via `.flox/env/manifest.toml` providing
+{{- if .ADL.Spec.Language.Go }} Go {{ .ADL.Spec.Language.Go.Version | default "latest" }},
+{{- else if .ADL.Spec.Language.Rust }} Rust {{ .ADL.Spec.Language.Rust.Version | default "latest" }},
+{{- else if .ADL.Spec.Language.TypeScript }} Node.js {{ .ADL.Spec.Language.TypeScript.NodeVersion | default "latest" }},
+{{- else }} the development runtime,
+{{- end }} linter, `go-task`, Docker, and the Claude Code CLI. Activate with `flox activate`.
 {{- end }}
-- golangci-lint (linter)
-- go-task (Task runner)
-- Docker
-- Claude Code CLI
-
-Activate with: `flox activate` (if Flox is installed)
-{{- else if .ADL.Spec.Development.Sandbox.DevContainer }}
-The project includes DevContainer configuration providing a consistent development environment.
-
-Open in DevContainer-compatible editor (VS Code, GitHub Codespaces) for automatic setup.
+{{- if and .ADL.Spec.Development.Sandbox.DevContainer .ADL.Spec.Development.Sandbox.DevContainer.Enabled }}
+{{- $sandbox = true }}
+- **DevContainer**: ✅ VS Code DevContainer config at `.devcontainer/devcontainer.json`. Open the project in a DevContainer-compatible editor (VS Code, GitHub Codespaces) for automatic setup.
 {{- end }}
-{{- else }}
-Standard development environment required. Install:
+{{- if and .ADL.Spec.Development.Sandbox.DockerCompose .ADL.Spec.Development.Sandbox.DockerCompose.Enabled }}
+{{- $sandbox = true }}
+- **Docker Compose**: ✅ Local service stack defined in `docker-compose.yaml`. Start dependencies (e.g. Redis) with `docker compose up`.
+{{- end }}
+{{- end }}
+{{- if not $sandbox }}
+No sandboxed environments are configured. Install the toolchain manually:
 {{- if .ADL.Spec.Language.Go }}
 - Go {{ .ADL.Spec.Language.Go.Version | default "1.26.2+" }}
 {{- else if .ADL.Spec.Language.Rust }}
