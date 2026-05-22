@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.34.0](https://github.com/inference-gateway/adl-cli/compare/v0.33.1...v0.34.0) (2026-05-22)
+
+### ✨ Features
+
+* **skills:** Propagate optional SPDX license field from ADL v0.7.0 ([#133](https://github.com/inference-gateway/adl-cli/issues/133)) ([479d17c](https://github.com/inference-gateway/adl-cli/commit/479d17c3e478fd50855f71ae8aacb33ebfc95119)), closes [#132](https://github.com/inference-gateway/adl-cli/issues/132)
+
+### 🐛 Bug Fixes
+
+* **generator:** Mark dependabot.yml as generated in .gitattributes when enabled ([#130](https://github.com/inference-gateway/adl-cli/issues/130)) ([8b838ab](https://github.com/inference-gateway/adl-cli/commit/8b838ab740535740fc02c9040a8a626edd256f3c)), closes [#128](https://github.com/inference-gateway/adl-cli/issues/128)
+* **templates:** Respect sandbox enabled flags in AGENTS.md/CLAUDE.md ([#131](https://github.com/inference-gateway/adl-cli/issues/131)) ([c27cc65](https://github.com/inference-gateway/adl-cli/commit/c27cc6585e3e12b9d2dbad53e96bcf2993adf675)), closes [#129](https://github.com/inference-gateway/adl-cli/issues/129)
+
 ## [0.33.1](https://github.com/inference-gateway/adl-cli/compare/v0.33.0...v0.33.1) (2026-05-22)
 
 ### 🐛 Bug Fixes
