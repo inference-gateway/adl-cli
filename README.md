@@ -136,7 +136,7 @@ adding it to your `.flox/env/manifest.toml`:
 
 ```toml
 [install]
-adl.flake = "github:inference-gateway/adl-cli/v0.27.13"
+adl.flake = "github:inference-gateway/adl-cli/v0.31.0"
 ```
 
 Then activate the environment:
