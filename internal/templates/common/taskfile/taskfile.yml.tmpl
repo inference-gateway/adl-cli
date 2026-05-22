@@ -22,8 +22,8 @@ tasks:
 
   run:
     desc: Run the application in development mode
-    cmd: {{- if eq .Language "go" }} go run .
-    {{- else if eq .Language "rust" }} cargo run
+    cmd: {{- if eq .Language "go" }} go run . start
+    {{- else if eq .Language "rust" }} cargo run -- start
     {{- else if eq .Language "typescript" }} npm run dev
     {{- end }}
     env:

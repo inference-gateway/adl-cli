@@ -27,12 +27,27 @@ A enterprise-ready [Agent-to-Agent (A2A)](https://github.com/inference-gateway/a
 
 ## Quick Start
 
+The generated binary is a CLI. `start` boots the A2A server; `--help` and
+`--version` work as you'd expect.
+
 ```bash
 # Run the agent
 {{- if eq .Language "go" }}
-go run .
+go run . start
+
+# Or build and invoke the CLI directly
+task build
+./bin/{{ .ADL.Metadata.Name }} --help
+./bin/{{ .ADL.Metadata.Name }} --version
+./bin/{{ .ADL.Metadata.Name }} start
 {{- else if eq .Language "rust" }}
-cargo run
+cargo run -- start
+
+# Or build and invoke the CLI directly
+task build
+./target/release/{{ .ADL.Spec.Language.Rust.PackageName }} --help
+./target/release/{{ .ADL.Spec.Language.Rust.PackageName }} --version
+./target/release/{{ .ADL.Spec.Language.Rust.PackageName }} start
 {{- else if eq .Language "typescript" }}
 npm install
 npm run dev
@@ -42,6 +57,17 @@ npm run dev
 docker build -t {{ .ADL.Metadata.Name }} .
 docker run -p {{ .ADL.Spec.Server.Port | default 8080 }}:{{ .ADL.Spec.Server.Port | default 8080 }} {{ .ADL.Metadata.Name }}
 ```
+
+{{- if or (eq .Language "go") (eq .Language "rust") }}
+
+### CLI
+
+| Command | Description |
+|---------|-------------|
+| `{{ .ADL.Metadata.Name }} start` | Start the A2A server (blocks until SIGINT/SIGTERM) |
+| `{{ .ADL.Metadata.Name }} --help` | Show top-level help (and per-subcommand with `<cmd> --help`) |
+| `{{ .ADL.Metadata.Name }} --version` | Print the embedded version and exit |
+{{- end }}
 
 ## Quick Install
 

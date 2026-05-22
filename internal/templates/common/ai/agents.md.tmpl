@@ -181,8 +181,8 @@ No sandboxed environments are configured. Set up your local toolchain manually (
 # Install dependencies
 go mod download
 
-# Run the agent
-go run main.go
+# Run the agent (the binary is a CLI; `start` boots the server)
+go run . start
 
 # Or use Task
 task run
@@ -193,8 +193,8 @@ task run
 # Install dependencies
 cargo build
 
-# Run the agent
-cargo run
+# Run the agent (the binary is a CLI; `start` boots the server)
+cargo run -- start
 
 # Or use Task
 task run
