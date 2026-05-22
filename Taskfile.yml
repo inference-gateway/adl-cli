@@ -125,6 +125,7 @@ tasks:
       - build
     cmds:
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-fetch.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-artifacts-filesystem.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-artifacts-minio.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/cloudrun-agent.yaml
@@ -143,6 +144,7 @@ tasks:
       - mkdir -p test-output
       - for:
           - go-agent
+          - go-agent-fetch
           - go-agent-artifacts-filesystem
           - go-agent-artifacts-minio
           - cloudrun-agent
