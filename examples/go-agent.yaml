@@ -193,6 +193,7 @@ spec:
       bare: true
       name: incident-response
       description: "Use this when the user reports a production incident, a paging alert fires, or a postmortem mentions ongoing degradation. Triages severity, identifies the responsible service via query_database, drafts an initial response with generate_report, and notifies stakeholders with send_notification."
+      license: Proprietary
       tags:
         - operations
         - incident

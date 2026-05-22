@@ -192,6 +192,7 @@ type SkillView struct {
 	Description string
 	Tags        []string
 	Version     string
+	License     string
 	Bare        bool
 }
 

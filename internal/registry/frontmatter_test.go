@@ -7,12 +7,13 @@ import (
 
 func TestParseSkillDocument(t *testing.T) {
 	cases := []struct {
-		name     string
-		input    string
-		wantErr  string
-		wantName string
-		wantTags []string
-		wantBody string
+		name        string
+		input       string
+		wantErr     string
+		wantName    string
+		wantTags    []string
+		wantBody    string
+		wantLicense string
 	}{
 		{
 			name: "well-formed frontmatter and body",
@@ -70,6 +71,31 @@ body
 `,
 			wantErr: "missing required field 'description'",
 		},
+		{
+			name: "frontmatter carries SPDX license",
+			input: `---
+name: licensed-skill
+description: A skill shipped under Apache-2.0
+license: Apache-2.0
+---
+body
+`,
+			wantName:    "licensed-skill",
+			wantBody:    "body\n",
+			wantLicense: "Apache-2.0",
+		},
+		{
+			name: "frontmatter without license parses cleanly",
+			input: `---
+name: unlicensed-skill
+description: No license declared
+---
+body
+`,
+			wantName:    "unlicensed-skill",
+			wantBody:    "body\n",
+			wantLicense: "",
+		},
 	}
 
 	for _, tc := range cases {
@@ -103,6 +129,9 @@ body
 			}
 			if tc.wantBody != "" && doc.Body != tc.wantBody {
 				t.Errorf("body = %q, want %q", doc.Body, tc.wantBody)
+			}
+			if doc.Frontmatter.License != tc.wantLicense {
+				t.Errorf("license = %q, want %q", doc.Frontmatter.License, tc.wantLicense)
 			}
 		})
 	}

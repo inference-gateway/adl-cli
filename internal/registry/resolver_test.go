@@ -37,6 +37,7 @@ func TestResolver_Bare(t *testing.T) {
 		Name:        "company-policy",
 		Description: "Internal rules",
 		Tags:        []string{"policy"},
+		License:     schema.SkillLicenseProprietary,
 	})
 	if err != nil {
 		t.Fatalf("Resolve: %v", err)
@@ -46,6 +47,9 @@ func TestResolver_Bare(t *testing.T) {
 	}
 	if resolved.Name != "company-policy" || resolved.Description != "Internal rules" {
 		t.Errorf("unexpected resolved metadata: %+v", resolved)
+	}
+	if resolved.License != "Proprietary" {
+		t.Errorf("expected license to be propagated from bare skill, got %q", resolved.License)
 	}
 	if len(resolved.Files) != 0 {
 		t.Errorf("bare skill should not have Files, got %d entries", len(resolved.Files))
@@ -71,7 +75,7 @@ func TestResolver_FetchAndCache(t *testing.T) {
 	var calls int
 	resolver, closer := newTestResolver(t, func(w http.ResponseWriter, r *http.Request) {
 		calls++
-		_, _ = w.Write([]byte("---\nname: data-analysis\ndescription: from registry\ntags: [analytics]\n---\nbody\n"))
+		_, _ = w.Write([]byte("---\nname: data-analysis\ndescription: from registry\ntags: [analytics]\nlicense: MIT\n---\nbody\n"))
 	})
 	defer closer()
 
@@ -87,6 +91,9 @@ func TestResolver_FetchAndCache(t *testing.T) {
 	if len(resolved.Tags) != 1 || resolved.Tags[0] != "analytics" {
 		t.Errorf("unexpected tags: %v", resolved.Tags)
 	}
+	if resolved.License != "MIT" {
+		t.Errorf("expected license MIT from frontmatter, got %q", resolved.License)
+	}
 	if _, ok := resolved.Files["SKILL.md"]; !ok {
 		t.Errorf("expected resolved.Files to contain SKILL.md, got keys: %v", keysOf(resolved.Files))
 	}
@@ -99,6 +106,24 @@ func TestResolver_FetchAndCache(t *testing.T) {
 	}
 	if calls != 1 {
 		t.Errorf("expected cache hit on second resolve, got %d calls", calls)
+	}
+}
+
+func TestResolver_LicenseOverridesFrontmatter(t *testing.T) {
+	resolver, closer := newTestResolver(t, func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("---\nname: report-writer\ndescription: from registry\nlicense: MIT\n---\nbody\n"))
+	})
+	defer closer()
+
+	resolved, err := resolver.Resolve(context.Background(), schema.Skill{
+		ID:      "report-writer",
+		License: schema.SkillLicenseApache20,
+	})
+	if err != nil {
+		t.Fatalf("Resolve: %v", err)
+	}
+	if resolved.License != "Apache-2.0" {
+		t.Errorf("expected ADL-declared license to win over frontmatter, got %q", resolved.License)
 	}
 }
 

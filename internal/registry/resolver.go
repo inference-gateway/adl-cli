@@ -24,6 +24,7 @@ type ResolvedSkill struct {
 	Description string
 	Tags        []string
 	Version     string
+	License     string
 	Bare        bool
 	Files       map[string][]byte
 }
@@ -69,6 +70,7 @@ func (r *Resolver) Resolve(ctx context.Context, skill schema.Skill) (*ResolvedSk
 			Description: skill.Description,
 			Tags:        skill.Tags,
 			Version:     skill.Version,
+			License:     string(skill.License),
 			Bare:        true,
 		}, nil
 	}
@@ -107,6 +109,10 @@ func (r *Resolver) Resolve(ctx context.Context, skill schema.Skill) (*ResolvedSk
 	if version == "" {
 		version = cacheRef
 	}
+	license := doc.Frontmatter.License
+	if skill.License != "" {
+		license = string(skill.License)
+	}
 
 	return &ResolvedSkill{
 		ID:          skill.ID,
@@ -114,6 +120,7 @@ func (r *Resolver) Resolve(ctx context.Context, skill schema.Skill) (*ResolvedSk
 		Description: description,
 		Tags:        tags,
 		Version:     version,
+		License:     license,
 		Files:       files,
 	}, nil
 }

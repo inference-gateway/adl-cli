@@ -321,6 +321,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 			Description: rs.Description,
 			Tags:        rs.Tags,
 			Version:     rs.Version,
+			License:     rs.License,
 			Bare:        rs.Bare,
 		})
 	}
@@ -486,6 +487,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 				"Description": resolved.Description,
 				"Tags":        resolved.Tags,
 				"Version":     resolved.Version,
+				"License":     resolved.License,
 			}
 			content, err = templateEngine.ExecuteToolTemplateWithContext(templateKey, skillContext, ctx)
 			if err != nil {

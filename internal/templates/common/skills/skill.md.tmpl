@@ -10,6 +10,9 @@ tags:
 {{- if .Version }}
 version: {{ .Version }}
 {{- end }}
+{{- if .License }}
+license: {{ .License }}
+{{- end }}
 ---
 
 # {{ .Name }}

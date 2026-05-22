@@ -351,6 +351,14 @@ type Skill struct {
 	// ID corresponds to the JSON schema field "id".
 	ID string `json:"id" yaml:"id" mapstructure:"id"`
 
+	// License under which the skill is distributed. Must be one of the accepted SPDX
+	// license identifiers, or "Proprietary" for closed-source skills. Consumers
+	// should mirror this value in the SKILL.md frontmatter so the licence travels
+	// with the playbook; shipping a separate LICENSE file alongside SKILL.md is
+	// optional and not enforced by the schema. New identifiers may be added in future
+	// minor versions of the schema.
+	License SkillLicense `json:"license,omitempty,omitzero" yaml:"license,omitempty" mapstructure:"license,omitempty"`
+
 	// Name corresponds to the JSON schema field "name".
 	Name string `json:"name,omitempty,omitzero" yaml:"name,omitempty" mapstructure:"name,omitempty"`
 
@@ -363,6 +371,24 @@ type Skill struct {
 	// Version corresponds to the JSON schema field "version".
 	Version string `json:"version,omitempty,omitzero" yaml:"version,omitempty" mapstructure:"version,omitempty"`
 }
+
+type SkillLicense string
+
+const SkillLicenseApache20 SkillLicense = "Apache-2.0"
+const SkillLicenseBSD2Clause SkillLicense = "BSD-2-Clause"
+const SkillLicenseBSD3Clause SkillLicense = "BSD-3-Clause"
+const SkillLicenseCC010 SkillLicense = "CC0-1.0"
+const SkillLicenseCCBY40 SkillLicense = "CC-BY-4.0"
+const SkillLicenseCCBYSA40 SkillLicense = "CC-BY-SA-4.0"
+const SkillLicenseGPL20 SkillLicense = "GPL-2.0"
+const SkillLicenseGPL30 SkillLicense = "GPL-3.0"
+const SkillLicenseISC SkillLicense = "ISC"
+const SkillLicenseLGPL21 SkillLicense = "LGPL-2.1"
+const SkillLicenseLGPL30 SkillLicense = "LGPL-3.0"
+const SkillLicenseMIT SkillLicense = "MIT"
+const SkillLicenseMPL20 SkillLicense = "MPL-2.0"
+const SkillLicenseProprietary SkillLicense = "Proprietary"
+const SkillLicenseUnlicense SkillLicense = "Unlicense"
 
 type Spec struct {
 	// Acronyms corresponds to the JSON schema field "acronyms".
