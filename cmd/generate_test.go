@@ -339,11 +339,12 @@ spec:
     go:
       module: github.com/test/ai-agent
       version: "1.26.2"
-  sandbox:
-    flox:
-      enabled: true
-    devcontainer:
-      enabled: true
+  development:
+    sandbox:
+      flox:
+        enabled: true
+      devcontainer:
+        enabled: true
 `
 	adlPath := filepath.Join(tempDir, "agent.yaml")
 	if err := os.WriteFile(adlPath, []byte(adlContent), 0644); err != nil {
@@ -411,7 +412,7 @@ spec:
 	}
 }
 
-// TestGenerateWithAIFromManifest verifies that declaring spec.ai.enabled: true
+// TestGenerateWithAIFromManifest verifies that declaring spec.development.ai.enabled: true
 // in the manifest activates AI assistant docs without needing the --ai CLI flag.
 func TestGenerateWithAIFromManifest(t *testing.T) {
 	tempDir := t.TempDir()
@@ -435,8 +436,9 @@ spec:
     go:
       module: github.com/test/manifest-ai
       version: "1.26.2"
-  ai:
-    enabled: true
+  development:
+    ai:
+      enabled: true
 `
 	adlPath := filepath.Join(tempDir, "agent.yaml")
 	if err := os.WriteFile(adlPath, []byte(adlContent), 0644); err != nil {
@@ -462,7 +464,7 @@ spec:
 
 	claudeMdPath := filepath.Join(outputPath, "CLAUDE.md")
 	if _, err := os.Stat(claudeMdPath); os.IsNotExist(err) {
-		t.Errorf("expected CLAUDE.md to be generated when spec.ai.enabled is true (without --ai flag)")
+		t.Errorf("expected CLAUDE.md to be generated when spec.development.ai.enabled is true (without --ai flag)")
 	}
 
 	gitattributesPath := filepath.Join(outputPath, ".gitattributes")
@@ -628,8 +630,9 @@ spec:
     url: https://github.com/test/cli-overrides
     ci: false
     cd: false
-  ai:
-    enabled: false
+  development:
+    ai:
+      enabled: false
 `
 	adlPath := filepath.Join(tempDir, "agent.yaml")
 	if err := os.WriteFile(adlPath, []byte(adlContent), 0644); err != nil {

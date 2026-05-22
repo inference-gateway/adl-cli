@@ -50,6 +50,15 @@ func (v *Validator) ValidateFile(filePath string) ([]string, error) {
 		return nil, fmt.Errorf("failed to parse YAML: %w", err)
 	}
 
+	// Reject pre-v0.6.0 manifests up front with a clear migration hint.
+	// JSON Schema lets unknown properties slip through Spec, so without
+	// this guard old `spec.sandbox` / `spec.ai` blocks would be silently
+	// dropped at unmarshal time and the agent would generate without
+	// sandboxes or AI docs.
+	if err := checkLegacySpecFields(yamlData); err != nil {
+		return nil, err
+	}
+
 	jsonData, err := json.Marshal(yamlData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert to JSON: %w", err)
@@ -85,6 +94,48 @@ func (v *Validator) ValidateFile(filePath string) ([]string, error) {
 	}
 
 	return warnings, nil
+}
+
+// checkLegacySpecFields rejects manifests that still use the pre-v0.6.0
+// shape where `sandbox` and `ai` sat directly under `spec`. In v0.6.0
+// they were grouped under `spec.development.{sandbox,ai}`. This catches
+// the typo before YAML unmarshal silently drops the unknown fields.
+func checkLegacySpecFields(yamlData any) error {
+	root, ok := yamlData.(map[string]any)
+	if !ok {
+		return nil
+	}
+	spec, ok := root["spec"].(map[string]any)
+	if !ok {
+		return nil
+	}
+
+	var legacy []string
+	if _, exists := spec["sandbox"]; exists {
+		legacy = append(legacy, "spec.sandbox -> spec.development.sandbox")
+	}
+	if _, exists := spec["ai"]; exists {
+		legacy = append(legacy, "spec.ai -> spec.development.ai")
+	}
+	if len(legacy) == 0 {
+		return nil
+	}
+
+	return fmt.Errorf("manifest uses pre-v0.6.0 schema fields; move them under spec.development:\n  - %s\nThe ADL schema is pinned at v0.6.0 (see https://github.com/inference-gateway/adl/releases/tag/v0.6.0)",
+		joinWithIndent(legacy, "\n  - "))
+}
+
+// joinWithIndent is a tiny helper so we don't pull in strings just for one
+// formatted error.
+func joinWithIndent(items []string, sep string) string {
+	out := ""
+	for i, item := range items {
+		if i > 0 {
+			out += sep
+		}
+		out += item
+	}
+	return out
 }
 
 // reservedConfigSection is the namespace inside spec.config dedicated to

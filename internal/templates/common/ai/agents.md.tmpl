@@ -153,11 +153,11 @@ Key environment variables you'll need to configure:
 - `PORT` - Server port (configured: {{ .ADL.Spec.Server.Port }})
 
 ### Development Environment
-{{- if .ADL.Spec.Sandbox }}
-{{- if .ADL.Spec.Sandbox.Flox }}
+{{- if and .ADL.Spec.Development .ADL.Spec.Development.Sandbox }}
+{{- if .ADL.Spec.Development.Sandbox.Flox }}
 **Flox Environment**: ✅ Configured for reproducible development setup
 {{- end }}
-{{- if .ADL.Spec.Sandbox.DevContainer }}
+{{- if .ADL.Spec.Development.Sandbox.DevContainer }}
 **DevContainer**: ✅ VS Code DevContainer configuration available
 {{- end }}
 {{- end }}

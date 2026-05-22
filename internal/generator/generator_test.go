@@ -564,6 +564,25 @@ func TestGenerator_generateCD(t *testing.T) {
 
 func TestGenerator_Dependabot(t *testing.T) {
 	makeADL := func(name string, dependabot bool, lang schema.Language, sandbox *schema.SandboxConfig) *schema.ADL {
+		spec := schema.Spec{
+			Capabilities: schema.Capabilities{
+				Streaming:              true,
+				PushNotifications:      false,
+				StateTransitionHistory: false,
+			},
+			Server: schema.Server{
+				Port: 8080,
+			},
+			Language: lang,
+			SCM: &schema.SCM{
+				Provider:   schema.SCMProviderGithub,
+				URL:        "https://github.com/example/" + name,
+				Dependabot: dependabot,
+			},
+		}
+		if sandbox != nil {
+			spec.Development = &schema.DevelopmentConfig{Sandbox: sandbox}
+		}
 		return &schema.ADL{
 			APIVersion: "adl.inference-gateway.com/v1",
 			Kind:       "Agent",
@@ -572,23 +591,7 @@ func TestGenerator_Dependabot(t *testing.T) {
 				Description: "Test agent",
 				Version:     "1.0.0",
 			},
-			Spec: schema.Spec{
-				Capabilities: schema.Capabilities{
-					Streaming:              true,
-					PushNotifications:      false,
-					StateTransitionHistory: false,
-				},
-				Server: schema.Server{
-					Port: 8080,
-				},
-				Language: lang,
-				Sandbox:  sandbox,
-				SCM: &schema.SCM{
-					Provider:   schema.SCMProviderGithub,
-					URL:        "https://github.com/example/" + name,
-					Dependabot: dependabot,
-				},
-			},
+			Spec: spec,
 		}
 	}
 

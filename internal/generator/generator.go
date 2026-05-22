@@ -58,16 +58,20 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 	// Reconcile CLI flags with manifest fields. The CLI flag is OR'd on top
 	// of the manifest value, so passing --ai/--ci/--cd at the command line
 	// always wins; omitting the flag falls back to the manifest. After this
-	// block, both g.config.* and adl.Spec.* reflect the same effective state
-	// so templates (e.g. .gitattributes) can read either source of truth.
-	if adl.Spec.AI != nil && adl.Spec.AI.Enabled {
+	// block, both g.config.* and adl.Spec.Development.* reflect the same
+	// effective state so templates (e.g. .gitattributes) can read either
+	// source of truth.
+	if adl.Spec.Development != nil && adl.Spec.Development.AI != nil && adl.Spec.Development.AI.Enabled {
 		g.config.EnableAI = true
 	}
 	if g.config.EnableAI {
-		if adl.Spec.AI == nil {
-			adl.Spec.AI = &schema.AIConfig{Enabled: true}
+		if adl.Spec.Development == nil {
+			adl.Spec.Development = &schema.DevelopmentConfig{}
+		}
+		if adl.Spec.Development.AI == nil {
+			adl.Spec.Development.AI = &schema.AIConfig{Enabled: true}
 		} else {
-			adl.Spec.AI.Enabled = true
+			adl.Spec.Development.AI.Enabled = true
 		}
 	}
 	if adl.Spec.SCM != nil {
@@ -117,14 +121,17 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 	}
 
 	if g.config.EnableFlox || g.config.EnableDevContainer {
-		if adl.Spec.Sandbox == nil {
-			adl.Spec.Sandbox = &schema.SandboxConfig{}
+		if adl.Spec.Development == nil {
+			adl.Spec.Development = &schema.DevelopmentConfig{}
 		}
-		if g.config.EnableFlox && (adl.Spec.Sandbox.Flox == nil || !adl.Spec.Sandbox.Flox.Enabled) {
-			adl.Spec.Sandbox.Flox = &schema.FloxConfig{Enabled: true}
+		if adl.Spec.Development.Sandbox == nil {
+			adl.Spec.Development.Sandbox = &schema.SandboxConfig{}
 		}
-		if g.config.EnableDevContainer && (adl.Spec.Sandbox.DevContainer == nil || !adl.Spec.Sandbox.DevContainer.Enabled) {
-			adl.Spec.Sandbox.DevContainer = &schema.DevContainerConfig{Enabled: true}
+		if g.config.EnableFlox && (adl.Spec.Development.Sandbox.Flox == nil || !adl.Spec.Development.Sandbox.Flox.Enabled) {
+			adl.Spec.Development.Sandbox.Flox = &schema.FloxConfig{Enabled: true}
+		}
+		if g.config.EnableDevContainer && (adl.Spec.Development.Sandbox.DevContainer == nil || !adl.Spec.Development.Sandbox.DevContainer.Enabled) {
+			adl.Spec.Development.Sandbox.DevContainer = &schema.DevContainerConfig{Enabled: true}
 		}
 	}
 

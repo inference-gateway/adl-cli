@@ -248,8 +248,8 @@ func TestInitAICICDDefaults(t *testing.T) {
 		t.Errorf("expected SCM.CD to default to false")
 	}
 
-	if adl.Spec.AI != nil && adl.Spec.AI.Enabled {
-		t.Errorf("expected spec.ai to be omitted or disabled by default, got enabled=true")
+	if adl.Spec.Development != nil && adl.Spec.Development.AI != nil && adl.Spec.Development.AI.Enabled {
+		t.Errorf("expected spec.development.ai to be omitted or disabled by default, got enabled=true")
 	}
 
 	contentStr := string(content)
@@ -261,7 +261,7 @@ func TestInitAICICDDefaults(t *testing.T) {
 	}
 }
 
-// TestInitAIFlag verifies that `--ai` flag at init time writes spec.ai.enabled: true.
+// TestInitAIFlag verifies that `--ai` flag at init time writes spec.development.ai.enabled: true.
 func TestInitAIFlag(t *testing.T) {
 	tempDir := t.TempDir()
 	outputPath := filepath.Join(tempDir, "test-output")
@@ -293,13 +293,13 @@ func TestInitAIFlag(t *testing.T) {
 		t.Fatalf("failed to parse ADL YAML: %v", err)
 	}
 
-	if adl.Spec.AI == nil || !adl.Spec.AI.Enabled {
-		t.Errorf("expected spec.ai.enabled to be true when --ai is passed to init")
+	if adl.Spec.Development == nil || adl.Spec.Development.AI == nil || !adl.Spec.Development.AI.Enabled {
+		t.Errorf("expected spec.development.ai.enabled to be true when --ai is passed to init")
 	}
 
 	contentStr := string(content)
-	if !strings.Contains(contentStr, "ai:") || !strings.Contains(contentStr, "enabled: true") {
-		t.Errorf("ADL file should contain ai.enabled: true, got:\n%s", contentStr)
+	if !strings.Contains(contentStr, "development:") || !strings.Contains(contentStr, "ai:") || !strings.Contains(contentStr, "enabled: true") {
+		t.Errorf("ADL file should contain development.ai.enabled: true, got:\n%s", contentStr)
 	}
 }
 

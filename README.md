@@ -271,7 +271,7 @@ The init command supports extensive configuration options:
 
 **Pipeline / AI Options (declarative, written into the manifest as `false` by default):**
 
-- `--ai` - Sets `spec.ai.enabled: true` (generate `CLAUDE.md`/`AGENTS.md`, add claude-code to sandboxes)
+- `--ai` - Sets `spec.development.ai.enabled: true` (generate `CLAUDE.md`/`AGENTS.md`, add claude-code to sandboxes)
 - `--ci` - Sets `spec.scm.ci: true` (generate CI workflow on `adl generate`)
 - `--cd` - Sets `spec.scm.cd: true` (generate CD pipeline + semantic-release on `adl generate`)
 
@@ -308,10 +308,10 @@ adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun --
 | `--ci`             | Generate CI workflow configuration (GitHub Actions). Overrides `spec.scm.ci`.              |
 | `--cd`             | Generate CD pipeline configuration with semantic-release. Overrides `spec.scm.cd`.         |
 | `--deployment`     | Generate deployment configuration (`kubernetes`, `cloudrun`)                               |
-| `--ai`             | Generate AI assistant instructions (CLAUDE.md) and add claude-code to sandbox environments. Overrides `spec.ai.enabled`. |
+| `--ai`             | Generate AI assistant instructions (CLAUDE.md) and add claude-code to sandbox environments. Overrides `spec.development.ai.enabled`. |
 
 > **Declarative equivalents:** `--ai`, `--ci`, and `--cd` can also be set in the manifest as
-> `spec.ai.enabled: true`, `spec.scm.ci: true`, and `spec.scm.cd: true`. The CLI flag is OR'd
+> `spec.development.ai.enabled: true`, `spec.scm.ci: true`, and `spec.scm.cd: true`. The CLI flag is OR'd
 > on top of the manifest value (passing the flag wins; omitting it falls back to the manifest).
 > `adl init` writes all three as `false` by default — they're opt-in. Generated files
 > (`CLAUDE.md`, `AGENTS.md`, `.github/workflows/ci.yml`, `.github/workflows/cd.yml`,
@@ -564,9 +564,10 @@ spec:
       environment:
         LOG_LEVEL: info
         ENVIRONMENT: production
-  sandbox:
-    flox:
-      enabled: true
+  development:
+    sandbox:
+      flox:
+        enabled: true
 ```
 
 ## Skills vs. Tools
@@ -1306,9 +1307,10 @@ Configure Flox for your project by adding to your ADL file:
 
 ```yaml
 spec:
-  sandbox:
-    flox:
-      enabled: true
+  development:
+    sandbox:
+      flox:
+        enabled: true
 ```
 
 Generated files:
@@ -1324,9 +1326,10 @@ Configure DevContainer for your project:
 
 ```yaml
 spec:
-  sandbox:
-    devcontainer:
-      enabled: true
+  development:
+    sandbox:
+      devcontainer:
+        enabled: true
 ```
 
 Generated files:
@@ -1339,11 +1342,12 @@ You can enable multiple sandbox environments simultaneously:
 
 ```yaml
 spec:
-  sandbox:
-    flox:
-      enabled: true
-    devcontainer:
-      enabled: true
+  development:
+    sandbox:
+      flox:
+        enabled: true
+      devcontainer:
+        enabled: true
 ```
 
 This generates both Flox and DevContainer configurations, allowing developers to choose their preferred environment.
@@ -1487,7 +1491,7 @@ emits a weekly-schedule manifest covering the ecosystems present in your ADL:
 - **Language ecosystem** - `gomod`, `cargo`, or `npm` (selected from `spec.language`)
 - **`github-actions`** - Keeps `.github/workflows/` actions pinned
 - **`docker`** - Tracks the base image in the generated `Dockerfile`
-- **`devcontainers`** - Included when `spec.sandbox.devcontainer.enabled: true`
+- **`devcontainers`** - Included when `spec.development.sandbox.devcontainer.enabled: true`
 
 Each ecosystem groups all updates into a single PR per week to keep noise low.
 The default of `false` keeps the existing behavior unchanged for projects that
