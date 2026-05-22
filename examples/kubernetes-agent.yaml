@@ -52,6 +52,7 @@ spec:
         registry: ghcr.io
         repository: example/kubernetes-example
         tag: v1.0.0
-  sandbox:
-    devcontainer:
-      enabled: true
+  development:
+    sandbox:
+      devcontainer:
+        enabled: true

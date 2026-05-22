@@ -234,9 +234,10 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		}
 	}
 
-	if adl.Spec.Sandbox != nil &&
-		adl.Spec.Sandbox.DockerCompose != nil &&
-		adl.Spec.Sandbox.DockerCompose.Enabled {
+	if adl.Spec.Development != nil &&
+		adl.Spec.Development.Sandbox != nil &&
+		adl.Spec.Development.Sandbox.DockerCompose != nil &&
+		adl.Spec.Development.Sandbox.DockerCompose.Enabled {
 		files["docker-compose.yaml"] = "docker-compose.yaml"
 	}
 
@@ -301,18 +302,20 @@ func (r *Registry) addAIFiles(files map[string]string) {
 
 // addSandboxFiles adds sandbox-related files to the file mapping
 func (r *Registry) addSandboxFiles(adl *schema.ADL, files map[string]string) {
-	if adl.Spec.Sandbox == nil {
+	if adl.Spec.Development == nil || adl.Spec.Development.Sandbox == nil {
 		return
 	}
 
-	if adl.Spec.Sandbox.Flox != nil && adl.Spec.Sandbox.Flox.Enabled {
+	sandbox := adl.Spec.Development.Sandbox
+
+	if sandbox.Flox != nil && sandbox.Flox.Enabled {
 		files[".flox/env/manifest.toml"] = "flox/manifest.toml"
 		files[".flox/env.json"] = "flox/env.json"
 		files[".flox/.gitignore"] = "flox/gitignore"
 		files[".flox/.gitattributes"] = "flox/gitattributes"
 	}
 
-	if adl.Spec.Sandbox.DevContainer != nil && adl.Spec.Sandbox.DevContainer.Enabled {
+	if sandbox.DevContainer != nil && sandbox.DevContainer.Enabled {
 		files[".devcontainer/devcontainer.json"] = "devcontainer/devcontainer.json"
 	}
 }

@@ -67,6 +67,7 @@ spec:
       environment:
         LOG_LEVEL: debug
         CACHE_ENABLED: "true"
-  sandbox:
-    flox:
-      enabled: true
+  development:
+    sandbox:
+      flox:
+        enabled: true

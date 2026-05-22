@@ -69,8 +69,11 @@ spec:
       packageName: "rust-agent-ai"
       version: "1.94.1"
       edition: "2024"
-  sandbox:
-    flox:
+  development:
+    sandbox:
+      flox:
+        enabled: true
+      devcontainer:
+        enabled: false
+    ai:
       enabled: true
-    devcontainer:
-      enabled: false

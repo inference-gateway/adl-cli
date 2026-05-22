@@ -142,8 +142,8 @@ When implementing tests:
 
 ## Environment Management
 
-{{- if .ADL.Spec.Sandbox }}
-{{- if .ADL.Spec.Sandbox.Flox }}
+{{- if and .ADL.Spec.Development .ADL.Spec.Development.Sandbox }}
+{{- if .ADL.Spec.Development.Sandbox.Flox }}
 The project includes Flox environment configuration (`.flox/env/manifest.toml`) providing:
 {{- if .ADL.Spec.Language.Go }}
 - Go {{ .ADL.Spec.Language.Go.Version | default "latest" }}
@@ -160,7 +160,7 @@ The project includes Flox environment configuration (`.flox/env/manifest.toml`) 
 - Claude Code CLI
 
 Activate with: `flox activate` (if Flox is installed)
-{{- else if .ADL.Spec.Sandbox.DevContainer }}
+{{- else if .ADL.Spec.Development.Sandbox.DevContainer }}
 The project includes DevContainer configuration providing a consistent development environment.
 
 Open in DevContainer-compatible editor (VS Code, GitHub Codespaces) for automatic setup.

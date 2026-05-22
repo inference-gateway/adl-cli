@@ -49,7 +49,7 @@ updates:
       docker:
         patterns:
           - "*"
-{{- if and .ADL.Spec.Sandbox .ADL.Spec.Sandbox.DevContainer }}{{- if .ADL.Spec.Sandbox.DevContainer.Enabled }}
+{{- if and .ADL.Spec.Development .ADL.Spec.Development.Sandbox .ADL.Spec.Development.Sandbox.DevContainer }}{{- if .ADL.Spec.Development.Sandbox.DevContainer.Enabled }}
 
   - package-ecosystem: devcontainers
     directory: /

@@ -214,6 +214,98 @@ metadata:
 	}
 }
 
+// TestValidator_RejectsLegacySpecFields locks in the v0.6.0 migration:
+// manifests that still nest `sandbox` or `ai` directly under `spec` must
+// fail validation with a hint pointing users at spec.development.
+func TestValidator_RejectsLegacySpecFields(t *testing.T) {
+	cases := []struct {
+		name   string
+		adl    string
+		errSub string
+	}{
+		{
+			name: "legacy spec.sandbox",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: legacy-sandbox
+  description: legacy
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  server:
+    port: 8080
+    debug: false
+  language:
+    go:
+      module: github.com/test/legacy
+      version: "1.26.2"
+  sandbox:
+    flox:
+      enabled: true
+`,
+			errSub: "spec.sandbox -> spec.development.sandbox",
+		},
+		{
+			name: "legacy spec.ai",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: legacy-ai
+  description: legacy
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  server:
+    port: 8080
+    debug: false
+  language:
+    go:
+      module: github.com/test/legacy
+      version: "1.26.2"
+  ai:
+    enabled: true
+`,
+			errSub: "spec.ai -> spec.development.ai",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			tmpFile, err := os.CreateTemp("", "test-adl-legacy-*.yaml")
+			if err != nil {
+				t.Fatalf("Failed to create temp file: %v", err)
+			}
+			defer func() {
+				if err := os.Remove(tmpFile.Name()); err != nil {
+					t.Logf("Failed to remove temp file: %v", err)
+				}
+			}()
+			if _, err := tmpFile.WriteString(tc.adl); err != nil {
+				t.Fatalf("Failed to write temp file: %v", err)
+			}
+			if err := tmpFile.Close(); err != nil {
+				t.Fatalf("Failed to close temp file: %v", err)
+			}
+
+			validator := NewValidator()
+			_, err = validator.ValidateFile(tmpFile.Name())
+			if err == nil {
+				t.Fatalf("expected validation to fail for %s", tc.name)
+			}
+			if !strings.Contains(err.Error(), tc.errSub) {
+				t.Errorf("expected error to contain %q, got: %v", tc.errSub, err)
+			}
+		})
+	}
+}
+
 func TestValidator_SkillsAndTools(t *testing.T) {
 	cases := []struct {
 		name    string

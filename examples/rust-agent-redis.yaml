@@ -58,10 +58,11 @@ spec:
       edition: "2024"
       features:
         - redis
-  sandbox:
-    flox:
-      enabled: true
-    devcontainer:
-      enabled: false
-    dockerCompose:
-      enabled: true
+  development:
+    sandbox:
+      flox:
+        enabled: true
+      devcontainer:
+        enabled: false
+      dockerCompose:
+        enabled: true

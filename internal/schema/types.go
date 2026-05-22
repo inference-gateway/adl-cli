@@ -138,6 +138,17 @@ type DevContainerConfig struct {
 	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
 }
 
+// Local development experience for the agent: sandboxed dev environments (flox,
+// devcontainer, dockerCompose) and AI-assistant integration (CLAUDE.md/AGENTS.md
+// generation, claude-code provisioning).
+type DevelopmentConfig struct {
+	// AI corresponds to the JSON schema field "ai".
+	AI *AIConfig `json:"ai,omitempty,omitzero" yaml:"ai,omitempty" mapstructure:"ai,omitempty"`
+
+	// Sandbox corresponds to the JSON schema field "sandbox".
+	Sandbox *SandboxConfig `json:"sandbox,omitempty,omitzero" yaml:"sandbox,omitempty" mapstructure:"sandbox,omitempty"`
+}
+
 type DockerComposeConfig struct {
 	// Enabled corresponds to the JSON schema field "enabled".
 	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
@@ -253,6 +264,8 @@ const SCMProviderBitbucket SCMProvider = "bitbucket"
 const SCMProviderGithub SCMProvider = "github"
 const SCMProviderGitlab SCMProvider = "gitlab"
 
+// Reproducible development environments. flox, devcontainer, and dockerCompose are
+// alternative ways to package the same sandbox; pick what suits the team.
 type SandboxConfig struct {
 	// DevContainer corresponds to the JSON schema field "devcontainer".
 	DevContainer *DevContainerConfig `json:"devcontainer,omitempty,omitzero" yaml:"devcontainer,omitempty" mapstructure:"devcontainer,omitempty"`
@@ -358,9 +371,6 @@ type Spec struct {
 	// Agent corresponds to the JSON schema field "agent".
 	Agent *Agent `json:"agent,omitempty,omitzero" yaml:"agent,omitempty" mapstructure:"agent,omitempty"`
 
-	// AI corresponds to the JSON schema field "ai".
-	AI *AIConfig `json:"ai,omitempty,omitzero" yaml:"ai,omitempty" mapstructure:"ai,omitempty"`
-
 	// Artifacts corresponds to the JSON schema field "artifacts".
 	Artifacts *ArtifactsConfig `json:"artifacts,omitempty,omitzero" yaml:"artifacts,omitempty" mapstructure:"artifacts,omitempty"`
 
@@ -376,14 +386,14 @@ type Spec struct {
 	// Deployment corresponds to the JSON schema field "deployment".
 	Deployment *DeploymentConfig `json:"deployment,omitempty,omitzero" yaml:"deployment,omitempty" mapstructure:"deployment,omitempty"`
 
+	// Development corresponds to the JSON schema field "development".
+	Development *DevelopmentConfig `json:"development,omitempty,omitzero" yaml:"development,omitempty" mapstructure:"development,omitempty"`
+
 	// Hooks corresponds to the JSON schema field "hooks".
 	Hooks *Hooks `json:"hooks,omitempty,omitzero" yaml:"hooks,omitempty" mapstructure:"hooks,omitempty"`
 
 	// Language corresponds to the JSON schema field "language".
 	Language Language `json:"language" yaml:"language" mapstructure:"language"`
-
-	// Sandbox corresponds to the JSON schema field "sandbox".
-	Sandbox *SandboxConfig `json:"sandbox,omitempty,omitzero" yaml:"sandbox,omitempty" mapstructure:"sandbox,omitempty"`
 
 	// SCM corresponds to the JSON schema field "scm".
 	SCM *SCM `json:"scm,omitempty,omitzero" yaml:"scm,omitempty" mapstructure:"scm,omitempty"`

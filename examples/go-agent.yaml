@@ -213,11 +213,12 @@ spec:
     url: "https://github.com/inference-gateway/adl-cli"
     github_app: true
     issue_templates: false
-  sandbox:
-    flox:
-      enabled: true
-    devcontainer:
-      enabled: false
+  development:
+    sandbox:
+      flox:
+        enabled: true
+      devcontainer:
+        enabled: false
   # hooks:
   #   post:
   #     - "go mod tidy"

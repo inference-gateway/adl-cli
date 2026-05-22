@@ -68,6 +68,7 @@ spec:
       environment:
         LOG_LEVEL: info
         ENVIRONMENT: production
-  sandbox:
-    devcontainer:
-      enabled: true
+  development:
+    sandbox:
+      devcontainer:
+        enabled: true

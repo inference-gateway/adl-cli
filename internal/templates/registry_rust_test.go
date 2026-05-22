@@ -52,8 +52,10 @@ func TestRegistry_getRustFiles_DockerComposeOnlyWhenEnabled(t *testing.T) {
 		t.Fatalf("docker-compose.yaml unexpectedly emitted when sandbox flag unset")
 	}
 
-	adl.Spec.Sandbox = &schema.SandboxConfig{
-		DockerCompose: &schema.DockerComposeConfig{Enabled: true},
+	adl.Spec.Development = &schema.DevelopmentConfig{
+		Sandbox: &schema.SandboxConfig{
+			DockerCompose: &schema.DockerComposeConfig{Enabled: true},
+		},
 	}
 	if _, ok := r.getRustFiles(adl)["docker-compose.yaml"]; !ok {
 		t.Fatalf("docker-compose.yaml missing when sandbox.dockerCompose.enabled=true")

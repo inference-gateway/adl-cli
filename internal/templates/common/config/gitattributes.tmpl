@@ -29,7 +29,7 @@ Taskfile.yml linguist-generated=true
 .github/workflows/cd.yml linguist-generated=true
 .releaserc.yaml linguist-generated=true
 
-{{- if or .EnableAI (and .ADL.Spec.AI .ADL.Spec.AI.Enabled) }}
+{{- if or .EnableAI (and .ADL.Spec.Development .ADL.Spec.Development.AI .ADL.Spec.Development.AI.Enabled) }}
 
 # AI assistant documentation (generated)
 CLAUDE.md linguist-generated=true
