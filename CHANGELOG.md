@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.35.0](https://github.com/inference-gateway/adl-cli/compare/v0.34.2...v0.35.0) (2026-05-22)
+
+### ✨ Features
+
+* **templates:** Generate unit tests for built-in tools ([#139](https://github.com/inference-gateway/adl-cli/issues/139)) ([1bc0f0c](https://github.com/inference-gateway/adl-cli/commit/1bc0f0c7f219068e9f25e08531ee75b37bda38ae)), closes [#138](https://github.com/inference-gateway/adl-cli/issues/138)
+* **tools:** Add built-in fetch tool with domain whitelisting ([#137](https://github.com/inference-gateway/adl-cli/issues/137)) ([df77c16](https://github.com/inference-gateway/adl-cli/commit/df77c1694c2dd6a516bbd148f96cad7de2c4f2bf)), closes [#134](https://github.com/inference-gateway/adl-cli/issues/134)
+
+### 👷 CI
+
+* **claude:** Add maintainer skill ([9d7821a](https://github.com/inference-gateway/adl-cli/commit/9d7821a6f29330b6a39a27f696e071d3bb170c73))
+
+### 🔧 Miscellaneous
+
+* **deps:** Bump adl cli in flox env ([650a21e](https://github.com/inference-gateway/adl-cli/commit/650a21eb534ef4c0e6a1c08abc1d3e2446e243cd))
+* Mark .github/workflows/claude.yml as linguist-generated ([#136](https://github.com/inference-gateway/adl-cli/issues/136)) ([3ff5565](https://github.com/inference-gateway/adl-cli/commit/3ff556590aa1442b59a83f2b484ef724317291b3)), closes [#135](https://github.com/inference-gateway/adl-cli/issues/135)
+
 ## [0.34.2](https://github.com/inference-gateway/adl-cli/compare/v0.34.1...v0.34.2) (2026-05-22)
 
 ### 🔧 Miscellaneous
