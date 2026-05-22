@@ -17,7 +17,8 @@ The codebase is generated using ADL CLI {{ .Metadata.CLIVersion }} and follows a
 
 ### Key Components
 
-- **Main Entry Point**: `main.go` - Configures and starts the A2A server with:
+- **Main Entry Point**: `main.go` - A cobra-based CLI. The root command exposes
+  `--version` and `--help`; the `start` subcommand boots the A2A server with:
   - OpenAI-compatible LLM client configuration
   - Agent builder with system prompt from `agent.yaml`
   - A2A server with streaming and background task handlers

@@ -64,5 +64,5 @@ EXPOSE {{ .ADL.Spec.Server.Port | default 8080 }}
 # Set environment variables
 ENV A2A_SERVER_PORT={{ .ADL.Spec.Server.Port | default 8080 }}
 
-# Run the application
-CMD ["./main"]
+# Run the application (binary is a CLI; `start` boots the A2A server)
+CMD ["./main", "start"]

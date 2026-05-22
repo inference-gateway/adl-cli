@@ -51,5 +51,5 @@ EXPOSE {{ .ADL.Spec.Server.Port | default 8080 }}
 # Set environment variables
 ENV RUST_LOG=info
 
-# Run the application
-CMD ["./{{ .ADL.Metadata.Name }}"]
+# Run the application (binary is a CLI; `start` boots the A2A server)
+CMD ["./{{ .ADL.Metadata.Name }}", "start"]
