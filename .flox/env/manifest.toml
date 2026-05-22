@@ -15,7 +15,7 @@ prettier.pkg-path = "prettier"
 prettier.version = "^3.6.2"
 markdownlint-cli.pkg-path = "markdownlint-cli"
 markdownlint-cli.version = "0.48.0"
-infer.flake = "github:inference-gateway/cli/v0.109.8"
+infer.flake = "github:inference-gateway/cli/v0.109.11"
 adl.flake = "github:inference-gateway/adl-cli/v0.28.0"
 
 [hook]
