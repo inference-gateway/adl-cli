@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.31.0](https://github.com/inference-gateway/adl-cli/compare/v0.30.10...v0.31.0) (2026-05-22)
+
+### ✨ Features
+
+* **scm:** Auto-generate Dependabot configuration ([#121](https://github.com/inference-gateway/adl-cli/issues/121)) ([33452d8](https://github.com/inference-gateway/adl-cli/commit/33452d84daae3907f48eaeb209d6fa594d8cc607)), closes [#120](https://github.com/inference-gateway/adl-cli/issues/120)
+
+### 👷 CI
+
+* **claude:** Simplify conditions for triggering Claude Code actions ([362d618](https://github.com/inference-gateway/adl-cli/commit/362d61848efe1dcd9845f7fa148aac04d4777af2))
+* **deps:** Bump anthropics/claude-code-action in the github-actions group ([#119](https://github.com/inference-gateway/adl-cli/issues/119)) ([bbf12a4](https://github.com/inference-gateway/adl-cli/commit/bbf12a4c59e930046b10bec09641807793b35a85))
+* **deps:** Update claude-code-action to version 1.0.130 ([ce36f2b](https://github.com/inference-gateway/adl-cli/commit/ce36f2b30f8768a15e4480cfe311b5e17a9e81f5))
+
+### 🔧 Miscellaneous
+
+* **deps:** Update infer.flake to v0.109.11 ([38bd4fe](https://github.com/inference-gateway/adl-cli/commit/38bd4fe19f9bcee4f1996120e43e7ecb2043014a))
+
 ## [0.30.10](https://github.com/inference-gateway/adl-cli/compare/v0.30.9...v0.30.10) (2026-05-20)
 
 ### 🐛 Bug Fixes
