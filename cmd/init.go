@@ -252,6 +252,7 @@ type adlData struct {
 			URL            string `yaml:"url,omitempty"`
 			GithubApp      bool   `yaml:"github_app,omitempty"`
 			IssueTemplates bool   `yaml:"issue_templates"`
+			Dependabot     bool   `yaml:"dependabot"`
 		} `yaml:"scm,omitempty"`
 		Sandbox *struct {
 			Flox *struct {
@@ -719,6 +720,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 			URL            string `yaml:"url,omitempty"`
 			GithubApp      bool   `yaml:"github_app,omitempty"`
 			IssueTemplates bool   `yaml:"issue_templates"`
+			Dependabot     bool   `yaml:"dependabot"`
 		}{
 			Provider: scmProvider,
 		}
@@ -741,6 +743,13 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 				fmt.Printf("Enable issue templates [y/n] [n]: n\n")
 			} else {
 				adl.Spec.SCM.IssueTemplates = promptBool("Enable issue templates", false)
+			}
+
+			if useDefaults {
+				adl.Spec.SCM.Dependabot = false
+				fmt.Printf("Enable Dependabot configuration [y/n] [n]: n\n")
+			} else {
+				adl.Spec.SCM.Dependabot = promptBool("Enable Dependabot configuration", false)
 			}
 		}
 	}

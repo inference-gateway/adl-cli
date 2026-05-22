@@ -184,6 +184,7 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 	r.addSandboxFiles(adl, files)
 	r.addAIFiles(files)
 	r.addIssueTemplateFiles(adl, files)
+	r.addDependabotFiles(adl, files)
 
 	return files
 }
@@ -242,6 +243,7 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 	r.addSandboxFiles(adl, files)
 	r.addAIFiles(files)
 	r.addIssueTemplateFiles(adl, files)
+	r.addDependabotFiles(adl, files)
 
 	return files
 }
@@ -284,6 +286,7 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 	r.addSandboxFiles(adl, files)
 	r.addAIFiles(files)
 	r.addIssueTemplateFiles(adl, files)
+	r.addDependabotFiles(adl, files)
 
 	return files
 }
@@ -332,6 +335,20 @@ func (r *Registry) addIssueTemplateFiles(adl *schema.ADL, files map[string]strin
 		files[".github/ISSUE_TEMPLATE/bug_report.md"] = "github/bug_report.md"
 		files[".github/ISSUE_TEMPLATE/feature_request.md"] = "github/feature_request.md"
 		files[".github/ISSUE_TEMPLATE/refactor_request.md"] = "github/refactor_request.md"
+	}
+}
+
+// addDependabotFiles adds the GitHub Dependabot configuration when enabled.
+// The generated manifest enumerates ecosystems based on the ADL spec
+// (gomod/cargo/npm by language plus github-actions, docker, and
+// devcontainers when applicable). Only emitted for the GitHub SCM
+// provider - GitLab/Bitbucket equivalents are out of scope for now.
+func (r *Registry) addDependabotFiles(adl *schema.ADL, files map[string]string) {
+	if adl.Spec.SCM == nil || !adl.Spec.SCM.Dependabot {
+		return
+	}
+	if adl.Spec.SCM.Provider == schema.SCMProviderGithub || adl.Spec.SCM.Provider == "" {
+		files[".github/dependabot.yml"] = "github/dependabot.yaml"
 	}
 }
 

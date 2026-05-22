@@ -1,0 +1,58 @@
+---
+version: 2
+updates:
+{{- if .ADL.Spec.Language.Go }}
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      gomod:
+        patterns:
+          - "*"
+{{- end }}
+{{- if .ADL.Spec.Language.Rust }}
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      cargo:
+        patterns:
+          - "*"
+{{- end }}
+{{- if .ADL.Spec.Language.TypeScript }}
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      npm:
+        patterns:
+          - "*"
+{{- end }}
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      docker:
+        patterns:
+          - "*"
+{{- if and .ADL.Spec.Sandbox .ADL.Spec.Sandbox.DevContainer }}{{- if .ADL.Spec.Sandbox.DevContainer.Enabled }}
+
+  - package-ecosystem: devcontainers
+    directory: /
+    schedule:
+      interval: weekly
+{{- end }}{{- end }}

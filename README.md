@@ -1016,6 +1016,7 @@ my-go-agent/
 │   ├── workflows/             # Generated when using --ci flag
 │   │   ├── ci.yml             # GitHub Actions CI workflow
 │   │   └── cd.yml             # GitHub Actions CD workflow (with --cd flag)
+│   ├── dependabot.yml         # Generated when scm.dependabot: true
 │   └── ISSUE_TEMPLATE/        # Generated when issue_templates: true
 │       ├── bug_report.md      # Bug report template
 │       ├── feature_request.md # Feature request template
@@ -1368,6 +1369,7 @@ spec:
     url: "https://github.com/company/my-agent"
     github_app: false # optional: enable GitHub App for CD
     issue_templates: true # optional: generate GitHub issue templates
+    dependabot: true # optional: generate Dependabot configuration
 ```
 
 **Features:**
@@ -1377,6 +1379,7 @@ spec:
 - **Workflow Optimization** - SCM-specific optimizations and best practices
 - **GitHub App Support** - Enhanced security for enterprise CD pipelines
 - **Issue Templates** - Generate GitHub issue templates for standardized bug reports and feature requests
+- **Dependabot Configuration** - Auto-generate `.github/dependabot.yml` for dependency upgrades
 
 #### GitHub App Integration
 
@@ -1449,6 +1452,32 @@ When `issue_templates: true` is set, the following templates are generated in `.
 - **GitHub Integration** - Automatic labels and assignees configured in frontmatter
 - **Severity Levels** - Priority classification for bug reports (critical, high, medium, low)
 - **Environment Info** - Sections for capturing logs, system details, and configurations
+
+## Dependabot Configuration
+
+The ADL CLI can generate a `.github/dependabot.yml` manifest so generated agent
+projects keep their dependencies up to date automatically. The feature defaults
+to `false` and is opted into via `spec.scm.dependabot`:
+
+```yaml
+spec:
+  scm:
+    provider: github
+    url: "https://github.com/company/my-agent"
+    dependabot: true # Enable Dependabot configuration
+```
+
+When `dependabot: true` is set (and the SCM provider is GitHub), the generator
+emits a weekly-schedule manifest covering the ecosystems present in your ADL:
+
+- **Language ecosystem** - `gomod`, `cargo`, or `npm` (selected from `spec.language`)
+- **`github-actions`** - Keeps `.github/workflows/` actions pinned
+- **`docker`** - Tracks the base image in the generated `Dockerfile`
+- **`devcontainers`** - Included when `spec.sandbox.devcontainer.enabled: true`
+
+Each ecosystem groups all updates into a single PR per week to keep noise low.
+The default of `false` keeps the existing behavior unchanged for projects that
+manage dependency upgrades themselves.
 
 ## Examples
 

@@ -218,6 +218,9 @@ type RustConfig struct {
 }
 
 type SCM struct {
+	// Dependabot corresponds to the JSON schema field "dependabot".
+	Dependabot bool `json:"dependabot,omitempty,omitzero" yaml:"dependabot,omitempty" mapstructure:"dependabot,omitempty"`
+
 	// GithubApp corresponds to the JSON schema field "github_app".
 	GithubApp bool `json:"github_app,omitempty,omitzero" yaml:"github_app,omitempty" mapstructure:"github_app,omitempty"`
 

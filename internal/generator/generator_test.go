@@ -562,6 +562,129 @@ func TestGenerator_generateCD(t *testing.T) {
 	}
 }
 
+func TestGenerator_Dependabot(t *testing.T) {
+	makeADL := func(name string, dependabot bool, lang schema.Language, sandbox *schema.SandboxConfig) *schema.ADL {
+		return &schema.ADL{
+			APIVersion: "adl.inference-gateway.com/v1",
+			Kind:       "Agent",
+			Metadata: schema.Metadata{
+				Name:        name,
+				Description: "Test agent",
+				Version:     "1.0.0",
+			},
+			Spec: schema.Spec{
+				Capabilities: schema.Capabilities{
+					Streaming:              true,
+					PushNotifications:      false,
+					StateTransitionHistory: false,
+				},
+				Server: schema.Server{
+					Port: 8080,
+				},
+				Language: lang,
+				Sandbox:  sandbox,
+				SCM: &schema.SCM{
+					Provider:   schema.SCMProviderGithub,
+					URL:        "https://github.com/example/" + name,
+					Dependabot: dependabot,
+				},
+			},
+		}
+	}
+
+	goLang := schema.Language{
+		Go: &schema.GoConfig{
+			Module:  "github.com/example/test",
+			Version: "1.26.2",
+		},
+	}
+	rustLang := schema.Language{
+		Rust: &schema.RustConfig{
+			PackageName: "test",
+			Version:     "1.94.1",
+			Edition:     "2024",
+		},
+	}
+
+	tests := []struct {
+		name             string
+		adl              *schema.ADL
+		registryLang     string
+		expectDependabot bool
+		mustContain      []string
+		mustNotContain   []string
+	}{
+		{
+			name:             "dependabot disabled: no file mapped",
+			adl:              makeADL("agent-off", false, goLang, nil),
+			registryLang:     "go",
+			expectDependabot: false,
+		},
+		{
+			name:             "go agent with dependabot: gomod ecosystem present",
+			adl:              makeADL("go-agent", true, goLang, nil),
+			registryLang:     "go",
+			expectDependabot: true,
+			mustContain:      []string{"package-ecosystem: gomod", "package-ecosystem: github-actions", "package-ecosystem: docker"},
+			mustNotContain:   []string{"package-ecosystem: cargo", "package-ecosystem: npm", "package-ecosystem: devcontainers"},
+		},
+		{
+			name:             "rust agent with dependabot: cargo ecosystem present",
+			adl:              makeADL("rust-agent", true, rustLang, nil),
+			registryLang:     "rust",
+			expectDependabot: true,
+			mustContain:      []string{"package-ecosystem: cargo", "package-ecosystem: github-actions", "package-ecosystem: docker"},
+			mustNotContain:   []string{"package-ecosystem: gomod", "package-ecosystem: npm"},
+		},
+		{
+			name: "devcontainer enabled: devcontainers ecosystem included",
+			adl: makeADL("dev-agent", true, goLang, &schema.SandboxConfig{
+				DevContainer: &schema.DevContainerConfig{Enabled: true},
+			}),
+			registryLang:     "go",
+			expectDependabot: true,
+			mustContain:      []string{"package-ecosystem: devcontainers"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			registry, err := templates.NewRegistry(tt.registryLang)
+			if err != nil {
+				t.Fatalf("failed to create template registry: %v", err)
+			}
+
+			files := registry.GetFiles(tt.adl)
+
+			_, found := files[".github/dependabot.yml"]
+			if tt.expectDependabot != found {
+				t.Fatalf("dependabot file mapping: expected %v, got %v (files=%v)", tt.expectDependabot, found, files)
+			}
+
+			if !tt.expectDependabot {
+				return
+			}
+
+			engine := templates.NewWithRegistry("", registry)
+			content, err := engine.ExecuteTemplate("github/dependabot.yaml", templates.Context{ADL: tt.adl})
+			if err != nil {
+				t.Fatalf("failed to execute dependabot template: %v", err)
+			}
+
+			for _, expected := range tt.mustContain {
+				if !containsSubstring(content, expected) {
+					t.Errorf("expected dependabot output to contain %q, got:\n%s", expected, content)
+				}
+			}
+			for _, unexpected := range tt.mustNotContain {
+				if containsSubstring(content, unexpected) {
+					t.Errorf("expected dependabot output NOT to contain %q, got:\n%s", unexpected, content)
+				}
+			}
+		})
+	}
+}
+
 func TestGenerator_buildGenerateCommand(t *testing.T) {
 	tests := []struct {
 		name        string
