@@ -56,6 +56,9 @@ func init() {
 	initCmd.Flags().String("typescript-name", "", "TypeScript package name")
 	initCmd.Flags().Bool("flox", false, "Enable Flox environment")
 	initCmd.Flags().Bool("devcontainer", false, "Enable DevContainer environment")
+	initCmd.Flags().Bool("ai", false, "Enable AI assistant docs (CLAUDE.md/AGENTS.md) and claude-code in sandboxes")
+	initCmd.Flags().Bool("ci", false, "Enable CI workflow generation")
+	initCmd.Flags().Bool("cd", false, "Enable CD pipeline generation")
 	initCmd.Flags().String("deployment", "", "Deployment type (kubernetes, defaults to empty for no deployment)")
 
 	if err := viper.BindPFlags(initCmd.Flags()); err != nil {
@@ -253,7 +256,12 @@ type adlData struct {
 			GithubApp      bool   `yaml:"github_app,omitempty"`
 			IssueTemplates bool   `yaml:"issue_templates"`
 			Dependabot     bool   `yaml:"dependabot"`
+			CI             bool   `yaml:"ci"`
+			CD             bool   `yaml:"cd"`
 		} `yaml:"scm,omitempty"`
+		AI *struct {
+			Enabled bool `yaml:"enabled"`
+		} `yaml:"ai,omitempty"`
 		Sandbox *struct {
 			Flox *struct {
 				Enabled bool `yaml:"enabled"`
@@ -721,6 +729,8 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 			GithubApp      bool   `yaml:"github_app,omitempty"`
 			IssueTemplates bool   `yaml:"issue_templates"`
 			Dependabot     bool   `yaml:"dependabot"`
+			CI             bool   `yaml:"ci"`
+			CD             bool   `yaml:"cd"`
 		}{
 			Provider: scmProvider,
 		}
@@ -751,6 +761,20 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 			} else {
 				adl.Spec.SCM.Dependabot = promptBool("Enable Dependabot configuration", false)
 			}
+		}
+
+		adl.Spec.SCM.CI = promptBoolWithConfig("ci", useDefaults, "Enable CI workflow generation", false)
+		adl.Spec.SCM.CD = promptBoolWithConfig("cd", useDefaults, "Enable CD pipeline generation", false)
+	}
+
+	fmt.Println("\n🤖 AI Assistant Documentation")
+	fmt.Println("-----------------------------")
+	aiEnabled := promptBoolWithConfig("ai", useDefaults, "Enable AI assistant docs (CLAUDE.md/AGENTS.md) and claude-code in sandboxes", false)
+	if aiEnabled {
+		adl.Spec.AI = &struct {
+			Enabled bool `yaml:"enabled"`
+		}{
+			Enabled: true,
 		}
 	}
 

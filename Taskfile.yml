@@ -97,6 +97,7 @@ tasks:
           --schema-root-type=https://adl.inference-gateway.com/schemas/agent/v1=ADL \
           --capitalization ID --capitalization URL --capitalization SCM \
           --capitalization CPU --capitalization API --capitalization CI --capitalization CD \
+          --capitalization AI \
           --capitalization CloudRun --capitalization DevContainer --capitalization TypeScript \
           --only-models \
           --output internal/schema/types.go \

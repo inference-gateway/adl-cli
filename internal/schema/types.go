@@ -18,6 +18,13 @@ type ADL struct {
 	Spec Spec `json:"spec" yaml:"spec" mapstructure:"spec"`
 }
 
+// Toggle generation of AI-assistant documentation (CLAUDE.md, AGENTS.md) and
+// provisioning of claude-code in sandbox environments.
+type AIConfig struct {
+	// Enabled corresponds to the JSON schema field "enabled".
+	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
+}
+
 type Agent struct {
 	// MaxTokens corresponds to the JSON schema field "maxTokens".
 	MaxTokens int `json:"maxTokens,omitempty,omitzero" yaml:"maxTokens,omitempty" mapstructure:"maxTokens,omitempty"`
@@ -218,6 +225,12 @@ type RustConfig struct {
 }
 
 type SCM struct {
+	// CD corresponds to the JSON schema field "cd".
+	CD bool `json:"cd,omitempty,omitzero" yaml:"cd,omitempty" mapstructure:"cd,omitempty"`
+
+	// CI corresponds to the JSON schema field "ci".
+	CI bool `json:"ci,omitempty,omitzero" yaml:"ci,omitempty" mapstructure:"ci,omitempty"`
+
 	// Dependabot corresponds to the JSON schema field "dependabot".
 	Dependabot bool `json:"dependabot,omitempty,omitzero" yaml:"dependabot,omitempty" mapstructure:"dependabot,omitempty"`
 
@@ -344,6 +357,9 @@ type Spec struct {
 
 	// Agent corresponds to the JSON schema field "agent".
 	Agent *Agent `json:"agent,omitempty,omitzero" yaml:"agent,omitempty" mapstructure:"agent,omitempty"`
+
+	// AI corresponds to the JSON schema field "ai".
+	AI *AIConfig `json:"ai,omitempty,omitzero" yaml:"ai,omitempty" mapstructure:"ai,omitempty"`
 
 	// Artifacts corresponds to the JSON schema field "artifacts".
 	Artifacts *ArtifactsConfig `json:"artifacts,omitempty,omitzero" yaml:"artifacts,omitempty" mapstructure:"artifacts,omitempty"`
