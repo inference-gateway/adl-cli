@@ -162,9 +162,6 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 	for _, tool := range adl.Spec.Tools {
 		if schema.IsReservedToolID(tool.ID) {
 			files[fmt.Sprintf("tools/%s.go", tool.ID)] = fmt.Sprintf("builtin/%s.go", tool.ID)
-			// Scaffold a unit-test file next to each built-in. Custom
-			// tools deliberately don't get a test scaffold - users can
-			// crib from the built-in tests if they want one.
 			files[fmt.Sprintf("tools/%s_test.go", tool.ID)] = fmt.Sprintf("builtin/%s_test.go", tool.ID)
 			continue
 		}
