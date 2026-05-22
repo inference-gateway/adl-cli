@@ -303,6 +303,114 @@ func TestInitAIFlag(t *testing.T) {
 	}
 }
 
+// TestInitDevelopmentDefaultsEmitted verifies that `adl init --defaults`
+// always writes spec.development.sandbox.{flox,devcontainer,dockerCompose}.enabled
+// and spec.development.ai.enabled as explicit `false` values, so the defaults
+// are discoverable in the generated agent.yaml rather than silently omitted.
+func TestInitDevelopmentDefaultsEmitted(t *testing.T) {
+	tempDir := t.TempDir()
+	outputPath := filepath.Join(tempDir, "test-output")
+
+	cmd := initCmd
+	if err := cmd.Flags().Set("defaults", "true"); err != nil {
+		t.Fatal(err)
+	}
+	if err := cmd.Flags().Set("path", outputPath); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := runInit(cmd, []string{"test-agent"}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	adlPath := filepath.Join(outputPath, "agent.yaml")
+	content, err := os.ReadFile(adlPath)
+	if err != nil {
+		t.Fatalf("failed to read ADL file: %v", err)
+	}
+
+	var adl adlData
+	if err := yaml.Unmarshal(content, &adl); err != nil {
+		t.Fatalf("failed to parse ADL YAML: %v", err)
+	}
+
+	if adl.Spec.Development == nil {
+		t.Fatalf("expected spec.development to be present by default")
+	}
+	if adl.Spec.Development.Sandbox == nil {
+		t.Fatalf("expected spec.development.sandbox to be present by default")
+	}
+	if adl.Spec.Development.Sandbox.Flox == nil || adl.Spec.Development.Sandbox.Flox.Enabled {
+		t.Errorf("expected spec.development.sandbox.flox.enabled to be false by default")
+	}
+	if adl.Spec.Development.Sandbox.DevContainer == nil || adl.Spec.Development.Sandbox.DevContainer.Enabled {
+		t.Errorf("expected spec.development.sandbox.devcontainer.enabled to be false by default")
+	}
+	if adl.Spec.Development.Sandbox.DockerCompose == nil || adl.Spec.Development.Sandbox.DockerCompose.Enabled {
+		t.Errorf("expected spec.development.sandbox.dockerCompose.enabled to be false by default")
+	}
+	if adl.Spec.Development.AI == nil || adl.Spec.Development.AI.Enabled {
+		t.Errorf("expected spec.development.ai.enabled to be false by default")
+	}
+
+	contentStr := string(content)
+	for _, want := range []string{
+		"development:",
+		"sandbox:",
+		"flox:",
+		"devcontainer:",
+		"dockerCompose:",
+		"ai:",
+	} {
+		if !strings.Contains(contentStr, want) {
+			t.Errorf("ADL file should contain %q, got:\n%s", want, contentStr)
+		}
+	}
+
+	t.Logf("Generated ADL content:\n%s", contentStr)
+}
+
+// TestInitDockerComposeFlag verifies that the --docker-compose flag at init
+// time writes spec.development.sandbox.dockerCompose.enabled: true.
+func TestInitDockerComposeFlag(t *testing.T) {
+	tempDir := t.TempDir()
+	outputPath := filepath.Join(tempDir, "test-output")
+
+	cmd := initCmd
+	if err := cmd.Flags().Set("defaults", "true"); err != nil {
+		t.Fatal(err)
+	}
+	if err := cmd.Flags().Set("path", outputPath); err != nil {
+		t.Fatal(err)
+	}
+	if err := cmd.Flags().Set("docker-compose", "true"); err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = cmd.Flags().Set("docker-compose", "false") }()
+
+	if err := runInit(cmd, []string{"test-agent"}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	adlPath := filepath.Join(outputPath, "agent.yaml")
+	content, err := os.ReadFile(adlPath)
+	if err != nil {
+		t.Fatalf("failed to read ADL file: %v", err)
+	}
+
+	var adl adlData
+	if err := yaml.Unmarshal(content, &adl); err != nil {
+		t.Fatalf("failed to parse ADL YAML: %v", err)
+	}
+
+	if adl.Spec.Development == nil ||
+		adl.Spec.Development.Sandbox == nil ||
+		adl.Spec.Development.Sandbox.DockerCompose == nil ||
+		!adl.Spec.Development.Sandbox.DockerCompose.Enabled {
+		t.Errorf("expected spec.development.sandbox.dockerCompose.enabled to be true when --docker-compose is passed to init")
+	}
+}
+
 func TestInitDefaultsVendorNeutral(t *testing.T) {
 	tempDir := t.TempDir()
 	outputPath := filepath.Join(tempDir, "test-output")
