@@ -1,0 +1,306 @@
+use anyhow::{anyhow, bail};
+use inference_gateway_sdk::{ChatCompletionTool, ChatCompletionToolType, FunctionObject, FunctionParameters};
+use reqwest::header::HeaderMap;
+use reqwest::{Client, Method};
+use serde_json::{Map, Value, json};
+use std::collections::HashMap;
+use std::env;
+use std::path::{Component, Path, PathBuf};
+use std::time::{Duration, Instant};
+use tokio::fs;
+
+/// Compile-time config for the Fetch built-in. Values flow in from
+/// spec.config.tools.fetch at generation time. Runtime env vars
+/// `A2A_FETCH_DISABLED` and `A2A_FETCH_ALLOWED_DOMAINS` override these.
+///
+/// `allowed_domains` is the host whitelist enforced against the request
+/// URL. Entries are matched case-insensitively; an entry that begins
+/// with "." (e.g. ".example.com") is a suffix match that allows any
+/// subdomain. An empty list means "any host is allowed" - intentional
+/// for unrestricted access but strongly discouraged.
+///
+/// `max_bytes` caps how much of the response body the tool reads.
+/// `download_dir` is the root the tool writes to when the model
+/// requests `save_path`; `allow_downloads` must be true to enable file
+/// output at all.
+#[derive(Clone, Debug)]
+pub struct Config {
+    pub enabled: bool,
+    pub allowed_domains: Vec<String>,
+    pub max_bytes: u64,
+    pub timeout_seconds: u64,
+    pub download_dir: String,
+    pub allow_downloads: bool,
+}
+
+const DEFAULT_MAX_BYTES: u64 = 10 * 1024 * 1024;
+const DEFAULT_TIMEOUT_SECONDS: u64 = 30;
+
+impl Config {
+    /// Apply env-var overrides once, at startup.
+    pub fn with_env_overrides(mut self) -> Self {
+        if env::var("A2A_FETCH_DISABLED").as_deref() == Ok("1") {
+            self.enabled = false;
+        }
+        if let Ok(value) = env::var("A2A_FETCH_ALLOWED_DOMAINS") {
+            self.allowed_domains = value
+                .split(',')
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect();
+        }
+        if let Ok(value) = env::var("A2A_FETCH_MAX_BYTES") {
+            if let Ok(parsed) = value.trim().parse::<u64>() {
+                self.max_bytes = parsed;
+            }
+        }
+        if let Ok(value) = env::var("A2A_FETCH_TIMEOUT_SECONDS") {
+            if let Ok(parsed) = value.trim().parse::<u64>() {
+                self.timeout_seconds = parsed;
+            }
+        }
+        if let Ok(value) = env::var("A2A_FETCH_DOWNLOAD_DIR") {
+            if !value.trim().is_empty() {
+                self.download_dir = value;
+            }
+        }
+        if let Ok(value) = env::var("A2A_FETCH_ALLOW_DOWNLOADS") {
+            self.allow_downloads = matches!(value.trim(), "1" | "true" | "TRUE" | "True");
+        }
+        if self.max_bytes == 0 {
+            self.max_bytes = DEFAULT_MAX_BYTES;
+        }
+        if self.timeout_seconds == 0 {
+            self.timeout_seconds = DEFAULT_TIMEOUT_SECONDS;
+        }
+        if self.download_dir.trim().is_empty() {
+            self.download_dir = "/tmp".to_string();
+        }
+        self
+    }
+}
+
+/// Tool descriptor advertised to the LLM.
+pub fn descriptor() -> ChatCompletionTool {
+    ChatCompletionTool {
+        type_: ChatCompletionToolType::Function,
+        function: FunctionObject {
+            name: "Fetch".to_string(),
+            description: Some(
+                "Fetch a URL over HTTP(S). Subject to an allowed-domains whitelist and a max-bytes cap; can optionally save the response body to a file inside the configured download_dir.".to_string(),
+            ),
+            parameters: Some(FunctionParameters(
+                json!({
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "description": "The absolute http(s) URL to fetch."
+                        },
+                        "method": {
+                            "type": "string",
+                            "enum": ["GET", "HEAD"],
+                            "description": "HTTP method. Only GET and HEAD are supported."
+                        },
+                        "save_path": {
+                            "type": "string",
+                            "description": "Optional filename (or relative path) inside the configured download_dir to write the body to. Requires allow_downloads=true. Absolute paths and parent-dir traversal are rejected."
+                        },
+                        "headers": {
+                            "type": "object",
+                            "description": "Optional extra request headers.",
+                            "additionalProperties": { "type": "string" }
+                        }
+                    },
+                    "required": ["url"]
+                })
+                .as_object()
+                .expect("schema literal must be an object")
+                .clone(),
+            )),
+            strict: false,
+        },
+    }
+}
+
+/// Handle a Fetch invocation.
+pub async fn handle(args: Value, cfg: Config) -> anyhow::Result<String> {
+    if !cfg.enabled {
+        bail!("fetch tool is disabled; set spec.config.tools.fetch.enabled: true and ensure A2A_FETCH_DISABLED is not 1");
+    }
+
+    let url_str = args
+        .get("url")
+        .and_then(Value::as_str)
+        .ok_or_else(|| anyhow!("url is required"))?
+        .trim()
+        .to_string();
+    if url_str.is_empty() {
+        bail!("url is required");
+    }
+
+    let parsed = reqwest::Url::parse(&url_str).map_err(|e| anyhow!("invalid url {:?}: {}", url_str, e))?;
+    if parsed.scheme() != "http" && parsed.scheme() != "https" {
+        bail!(
+            "unsupported url scheme {:?} (only http and https are allowed)",
+            parsed.scheme()
+        );
+    }
+    let host = parsed
+        .host_str()
+        .ok_or_else(|| anyhow!("url {:?} is missing a host", url_str))?
+        .to_string();
+    check_domain(&cfg.allowed_domains, &host)?;
+
+    let method_str = args
+        .get("method")
+        .and_then(Value::as_str)
+        .unwrap_or("GET")
+        .to_ascii_uppercase();
+    let method = match method_str.as_str() {
+        "GET" => Method::GET,
+        "HEAD" => Method::HEAD,
+        other => bail!(
+            "unsupported method {:?} (only GET and HEAD are allowed)",
+            other
+        ),
+    };
+
+    let save_path_raw = args
+        .get("save_path")
+        .and_then(Value::as_str)
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty());
+    let resolved_save_path = if let Some(ref sp) = save_path_raw {
+        if !cfg.allow_downloads {
+            bail!("save_path requested but downloads are disabled; set spec.config.tools.fetch.allow_downloads: true");
+        }
+        if method == Method::HEAD {
+            bail!("save_path cannot be used with a HEAD request");
+        }
+        Some(resolve_download_path(&cfg.download_dir, sp)?)
+    } else {
+        None
+    };
+
+    let client = Client::builder()
+        .timeout(Duration::from_secs(cfg.timeout_seconds))
+        .build()
+        .map_err(|e| anyhow!("build http client: {}", e))?;
+
+    let mut request = client.request(method.clone(), parsed.clone());
+    if let Some(Value::Object(headers)) = args.get("headers") {
+        for (k, v) in headers.iter() {
+            if let Some(s) = v.as_str() {
+                request = request.header(k.as_str(), s);
+            }
+        }
+    }
+
+    let start = Instant::now();
+    let response = request.send().await.map_err(|e| anyhow!("fetch {}: {}", parsed, e))?;
+    let status = response.status().as_u16();
+    let response_headers = flatten_headers(response.headers());
+
+    let mut result = json!({
+        "url": parsed.to_string(),
+        "method": method.as_str(),
+        "status_code": status,
+        "duration_ms": start.elapsed().as_millis() as u64,
+        "headers": response_headers,
+    });
+
+    if method == Method::HEAD {
+        return Ok(result.to_string());
+    }
+
+    let bytes = response.bytes().await.map_err(|e| anyhow!("read body: {}", e))?;
+    let truncated = (bytes.len() as u64) > cfg.max_bytes;
+    let slice_len = std::cmp::min(bytes.len(), cfg.max_bytes as usize);
+    let slice = &bytes[..slice_len];
+
+    if let Some(save_path) = resolved_save_path {
+        if let Some(parent) = save_path.parent() {
+            fs::create_dir_all(parent)
+                .await
+                .map_err(|e| anyhow!("create parent dir for {}: {}", save_path.display(), e))?;
+        }
+        fs::write(&save_path, slice)
+            .await
+            .map_err(|e| anyhow!("write {}: {}", save_path.display(), e))?;
+        result["saved_to"] = Value::String(save_path.display().to_string());
+        result["bytes_written"] = Value::from(slice_len as u64);
+        result["truncated"] = Value::Bool(truncated);
+        return Ok(result.to_string());
+    }
+
+    let body = String::from_utf8_lossy(slice).into_owned();
+    result["body"] = Value::String(body);
+    result["bytes_read"] = Value::from(slice_len as u64);
+    result["truncated"] = Value::Bool(truncated);
+    Ok(result.to_string())
+}
+
+fn check_domain(allowed: &[String], host: &str) -> anyhow::Result<()> {
+    if allowed.is_empty() {
+        return Ok(());
+    }
+    let host = host.to_lowercase();
+    for entry in allowed {
+        let entry = entry.trim().to_lowercase();
+        if entry.is_empty() {
+            continue;
+        }
+        if let Some(suffix) = entry.strip_prefix('.') {
+            if host == suffix || host.ends_with(&format!(".{}", suffix)) {
+                return Ok(());
+            }
+            continue;
+        }
+        if host == entry {
+            return Ok(());
+        }
+    }
+    bail!("host {:?} is not in the configured allowed_domains", host);
+}
+
+fn resolve_download_path(root: &str, save_path: &str) -> anyhow::Result<PathBuf> {
+    let candidate = Path::new(save_path);
+    if candidate.is_absolute() {
+        bail!(
+            "save_path {:?} must be relative to download_dir",
+            save_path
+        );
+    }
+    let mut normalized = PathBuf::new();
+    for component in candidate.components() {
+        match component {
+            Component::CurDir => {}
+            Component::ParentDir | Component::RootDir | Component::Prefix(_) => {
+                bail!("save_path {:?} escapes download_dir", save_path);
+            }
+            Component::Normal(part) => normalized.push(part),
+        }
+    }
+    if normalized.as_os_str().is_empty() {
+        bail!("save_path {:?} is empty", save_path);
+    }
+    let root = PathBuf::from(root);
+    Ok(root.join(normalized))
+}
+
+fn flatten_headers(h: &HeaderMap) -> Value {
+    let mut grouped: HashMap<String, Vec<String>> = HashMap::new();
+    for (name, value) in h.iter() {
+        let entry = grouped.entry(name.as_str().to_string()).or_default();
+        if let Ok(v) = value.to_str() {
+            entry.push(v.to_string());
+        }
+    }
+    let mut out = Map::new();
+    for (k, vs) in grouped {
+        out.insert(k, Value::String(vs.join(", ")));
+    }
+    Value::Object(out)
+}

@@ -201,6 +201,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             };
             tools::edit::handle(args, cfg).await
         })
+{{- else if eq .ID "fetch" }}
+        .with_async_function_tool("Fetch".to_string(), |args: Value| async move {
+            let cfg = tools::fetch::Config {
+                enabled: {{ $.BuiltinConfigs.Fetch.Enabled }},
+                allowed_domains: vec![{{ range $i, $d := $.BuiltinConfigs.Fetch.AllowedDomains }}{{ if $i }}, {{ end }}{{ $d | quote }}.to_string(){{ end }}],
+                max_bytes: {{ $.BuiltinConfigs.Fetch.MaxBytes }},
+                timeout_seconds: {{ $.BuiltinConfigs.Fetch.TimeoutSeconds }},
+                download_dir: {{ if $.BuiltinConfigs.Fetch.DownloadDir }}{{ $.BuiltinConfigs.Fetch.DownloadDir | quote }}{{ else }}"/tmp"{{ end }}.to_string(),
+                allow_downloads: {{ $.BuiltinConfigs.Fetch.AllowDownloads }},
+            }
+            .with_env_overrides();
+            tools::fetch::handle(args, cfg).await
+        })
 {{- else if .Inject }}
         .with_async_function_tool({{ .ID | quote }}.to_string(), |args: Value| async move {
             tools::{{ toSnakeCase .ID }}::handle(args).await

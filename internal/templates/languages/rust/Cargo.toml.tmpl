@@ -24,6 +24,15 @@ uuid = { version = "1", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 dotenvy = "0.15.7"
 envy = "0.4.2"
+{{- $hasFetch := false }}
+{{- range .ADL.Spec.Tools }}
+{{- if eq .ID "fetch" }}
+{{- $hasFetch = true }}
+{{- end }}
+{{- end }}
+{{- if $hasFetch }}
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+{{- end }}
 
 [profile.release]
 opt-level = 3
