@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.34.1](https://github.com/inference-gateway/adl-cli/compare/v0.34.0...v0.34.1) (2026-05-22)
+
+### 🐛 Bug Fixes
+
+* **dependabot:** Limit the version bump of golang projects ([c9f5f03](https://github.com/inference-gateway/adl-cli/commit/c9f5f034bedff7aaf71d106368d900dae386146f))
+
+### 👷 CI
+
+* **deps:** Bump dependecies ([d39c858](https://github.com/inference-gateway/adl-cli/commit/d39c858451857b8bcbdbcc1272a86086ae4f2de2))
+
 ## [0.34.0](https://github.com/inference-gateway/adl-cli/compare/v0.33.1...v0.34.0) (2026-05-22)
 
 ### ✨ Features
