@@ -1,0 +1,146 @@
+# GEMINI.md
+
+This file provides guidance to Google's Gemini coding agent when working with code in this repository.
+
+## Project Overview
+
+{{ .ADL.Metadata.Name }} is an A2A (Agent-to-Agent) server implementing the [A2A Protocol](https://github.com/inference-gateway/adk) for agent-to-agent communication. {{ .ADL.Metadata.Description }}. The project is automatically generated from ADL (Agent Definition Language) specifications defined in `agent.yaml`.
+
+## Core Architecture
+
+### ADL-Generated Structure
+
+The codebase is generated using ADL CLI {{ .Metadata.CLIVersion }} and follows a strict generation pattern:
+- **Generated Files**: Marked with `DO NOT EDIT` headers - manual changes will be overwritten
+- **Configuration Source**: `agent.yaml` - defines agent capabilities, skills, and metadata
+- **Server Implementation**: Built on the ADK (Agent Development Kit) framework from `github.com/inference-gateway/adk`
+
+### Key Components
+
+- **Main Entry Point**:
+{{- if eq .Language "go" }} `main.go` - A cobra-based CLI. The root command exposes
+  `--version` and `--help`; the `start` subcommand boots the A2A server with:
+{{- else if eq .Language "rust" }} `src/main.rs` - boots the A2A server with:
+{{- else if eq .Language "typescript" }} `src/index.ts` - boots the A2A server with:
+{{- end }}
+  - OpenAI-compatible LLM client configuration
+  - Agent builder with system prompt from `agent.yaml`
+  - A2A server with streaming and background task handlers
+  - Graceful shutdown handling
+
+- **Agent Configuration**: `.well-known/agent-card.json` - Serves agent metadata at runtime
+- **Environment Configuration**: Extensive env vars with `A2A_` prefix (see README for full list)
+
+## Development Commands
+
+```bash
+# Generate/regenerate code from ADL specification
+task generate
+
+# Run the agent in development mode (debug enabled, port {{ .ADL.Spec.Server.Port | default "8080" }})
+task run
+
+# Run tests
+task test
+task test:cover  # with coverage
+
+# Code quality
+task lint         # Run linters
+task fmt          # Format code
+
+# Build
+task build        # Build the agent
+task docker:build # Build Docker image
+
+# Clean build artifacts
+task clean
+```
+
+## LLM Provider Configuration
+
+The agent uses OpenAI-compatible LLM client. Configure with:
+- `A2A_AGENT_CLIENT_PROVIDER`: {{- if and .ADL.Spec.Agent .ADL.Spec.Agent.Provider }} `{{ .ADL.Spec.Agent.Provider }}`{{ else }} `openai`, `anthropic`, `azure`, `ollama`, `deepseek`, `google`{{ end }}
+- `A2A_AGENT_CLIENT_MODEL`: {{- if and .ADL.Spec.Agent .ADL.Spec.Agent.Model }} `{{ .ADL.Spec.Agent.Model }}`{{ else }} Model identifier{{ end }}
+- `A2A_AGENT_CLIENT_API_KEY`: Provider API key
+- `A2A_AGENT_CLIENT_BASE_URL`: Custom endpoint (optional)
+
+## Adding New Functionality
+
+### Tools (function-call)
+
+{{- if .ADL.Spec.Tools }}
+The following tools are currently defined:
+{{- range .ADL.Spec.Tools }}
+{{- if isBuiltinToolID .ID }}{{- $m := builtinToolMeta .ID }}
+- **{{ $m.Name }}** (built-in): {{ $m.Description }}
+{{- else }}
+- **{{ .Name }}**: {{ .Description }}
+{{- end }}
+{{- end }}
+
+To modify tools:
+1. Update `agent.yaml` `spec.tools` with tool definitions
+2. Run `task generate` to regenerate the codebase
+3. Implement tool logic in the generated `tools/` files (look for TODO placeholders)
+4. Write tests for each tool
+{{- else }}
+Currently no tools are defined. To add tools:
+1. Add entries under `spec.tools` in `agent.yaml`
+2. Run `task generate` to regenerate the codebase
+3. Implement tool logic in the generated `tools/` files (look for TODO placeholders)
+4. Write tests for each tool
+{{- end }}
+
+### Skills (markdown system-prompt playbooks)
+
+{{- if .ADL.Spec.Skills }}
+The following skills are currently shipped with the agent:
+{{- range .Skills }}
+- **{{ .Name }}** ({{ if .Bare }}bare scaffold{{ else }}registry{{ end }}): {{ .Description }}
+{{- end }}
+
+Each skill lives in its own directory at `skills/<id>/SKILL.md` and is
+loaded into the system prompt at startup. Bare skills can ship arbitrary
+bundled assets (scripts, templates, resources) alongside `SKILL.md` -
+the whole `skills/<id>/` directory is protected by `.adl-ignore` against
+regeneration overwrites.
+{{- else }}
+No skills are currently defined. To add skills:
+1. Add entries under `spec.skills` in `agent.yaml`
+   - Set `bare: true` and provide `name`/`description`/`tags` to scaffold
+     a blank skill you author by hand
+   - Or omit `bare` to pull from the registry
+     (`registry.inference-gateway.com/skills/<id>.md`)
+2. Run `task generate`
+{{- end }}
+
+### Modifying Agent Behavior
+
+- **System Prompt**: Edit in `agent.yaml`, then regenerate
+- **Capabilities**: Modify in `agent.yaml` (streaming, pushNotifications, stateTransitionHistory)
+- **Server Configuration**: Update environment variables or `agent.yaml` server section
+
+## Testing Strategy
+
+When implementing tests:
+- Create test files alongside implementation files
+- Use table-driven tests for comprehensive coverage
+- Mock external dependencies (LLM client, Redis if used)
+- Test A2A protocol compliance with integration tests
+
+## Important Constraints
+
+- **Generated Files**: Never manually edit files with "DO NOT EDIT" headers
+- **Configuration Changes**: Always modify `agent.yaml` and regenerate
+- **ADL Version**: Ensure ADL CLI {{ .Metadata.CLIVersion }} or compatible version for regeneration
+- **Port Configuration**: Default {{ .ADL.Spec.Server.Port | default "8080" }}, configurable via `A2A_PORT` or `A2A_SERVER_PORT`
+
+## Debugging Tips
+
+- Enable debug mode: `A2A_DEBUG=true`{{ if .ADL.Spec.Server.Debug }} (currently enabled in agent.yaml){{ end }}
+- Check health: `GET /health`
+- View agent metadata: `GET /.well-known/agent-card.json`
+{{- if .ADL.Spec.Capabilities.Streaming }}
+- Monitor streaming updates: Set `A2A_STREAMING_STATUS_UPDATE_INTERVAL`
+{{- end }}
+- Use A2A Debugger container for interactive testing

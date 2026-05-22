@@ -273,7 +273,21 @@ type adlData struct {
 				} `yaml:"dockerCompose,omitempty"`
 			} `yaml:"sandbox,omitempty"`
 			AI *struct {
-				Enabled bool `yaml:"enabled"`
+				Claudecode *struct {
+					Enabled bool `yaml:"enabled"`
+				} `yaml:"claudecode,omitempty"`
+				Codex *struct {
+					Enabled bool `yaml:"enabled"`
+				} `yaml:"codex,omitempty"`
+				Gemini *struct {
+					Enabled bool `yaml:"enabled"`
+				} `yaml:"gemini,omitempty"`
+				Opencode *struct {
+					Enabled bool `yaml:"enabled"`
+				} `yaml:"opencode,omitempty"`
+				Infer *struct {
+					Enabled bool `yaml:"enabled"`
+				} `yaml:"infer,omitempty"`
 			} `yaml:"ai,omitempty"`
 		} `yaml:"development,omitempty"`
 		Deployment *struct {
@@ -776,12 +790,44 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 
 	fmt.Println("\n🤖 AI Assistant Documentation")
 	fmt.Println("-----------------------------")
-	aiEnabled := promptBoolWithConfig("ai", useDefaults, "Enable AI assistant docs (CLAUDE.md/AGENTS.md) and claude-code in sandboxes", false)
+	// Legacy `--ai` flag is a shortcut for "enable claudecode" so the
+	// init UX still matches what the flag historically meant
+	// (CLAUDE.md + claude-code in sandboxes). Per-agent toggles can be
+	// edited in agent.yaml after init.
+	aiEnabled := promptBoolWithConfig("ai", useDefaults, "Enable Claude Code (CLAUDE.md + claude-code in sandboxes)", false)
 	ensureDevelopment(adl)
 	adl.Spec.Development.AI = &struct {
-		Enabled bool `yaml:"enabled"`
+		Claudecode *struct {
+			Enabled bool `yaml:"enabled"`
+		} `yaml:"claudecode,omitempty"`
+		Codex *struct {
+			Enabled bool `yaml:"enabled"`
+		} `yaml:"codex,omitempty"`
+		Gemini *struct {
+			Enabled bool `yaml:"enabled"`
+		} `yaml:"gemini,omitempty"`
+		Opencode *struct {
+			Enabled bool `yaml:"enabled"`
+		} `yaml:"opencode,omitempty"`
+		Infer *struct {
+			Enabled bool `yaml:"enabled"`
+		} `yaml:"infer,omitempty"`
 	}{
-		Enabled: aiEnabled,
+		Claudecode: &struct {
+			Enabled bool `yaml:"enabled"`
+		}{Enabled: aiEnabled},
+		Codex: &struct {
+			Enabled bool `yaml:"enabled"`
+		}{Enabled: false},
+		Gemini: &struct {
+			Enabled bool `yaml:"enabled"`
+		}{Enabled: false},
+		Opencode: &struct {
+			Enabled bool `yaml:"enabled"`
+		}{Enabled: false},
+		Infer: &struct {
+			Enabled bool `yaml:"enabled"`
+		}{Enabled: false},
 	}
 
 	return adl
@@ -807,7 +853,21 @@ func ensureDevelopment(adl *adlData) {
 			} `yaml:"dockerCompose,omitempty"`
 		} `yaml:"sandbox,omitempty"`
 		AI *struct {
-			Enabled bool `yaml:"enabled"`
+			Claudecode *struct {
+				Enabled bool `yaml:"enabled"`
+			} `yaml:"claudecode,omitempty"`
+			Codex *struct {
+				Enabled bool `yaml:"enabled"`
+			} `yaml:"codex,omitempty"`
+			Gemini *struct {
+				Enabled bool `yaml:"enabled"`
+			} `yaml:"gemini,omitempty"`
+			Opencode *struct {
+				Enabled bool `yaml:"enabled"`
+			} `yaml:"opencode,omitempty"`
+			Infer *struct {
+				Enabled bool `yaml:"enabled"`
+			} `yaml:"infer,omitempty"`
 		} `yaml:"ai,omitempty"`
 	}{}
 }

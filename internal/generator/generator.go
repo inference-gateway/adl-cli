@@ -35,6 +35,49 @@ type Config struct {
 	Offline            bool
 	ADLFile            string
 	OutputDir          string
+	// AIToggles is the resolved per-agent state derived from
+	// spec.development.ai (with legacy `enabled` and --ai fall-back
+	// applied). Computed in Generate() before templating; not set by
+	// callers.
+	AIToggles schema.AIAgentToggles
+}
+
+// applyAITogglesToConfig mirrors the resolved per-agent toggles back
+// onto AIConfig so templates that read directly from
+// spec.development.ai see the same effective state as the generator.
+// This keeps the --ai CLI flag and legacy `enabled: true` working
+// without forcing every template to consult AIToggles independently.
+func applyAITogglesToConfig(ai *schema.AIConfig, t schema.AIAgentToggles) {
+	if t.ClaudeCode {
+		if ai.Claudecode == nil {
+			ai.Claudecode = &schema.ClaudeCodeConfig{}
+		}
+		ai.Claudecode.Enabled = true
+	}
+	if t.Codex {
+		if ai.Codex == nil {
+			ai.Codex = &schema.CodexConfig{}
+		}
+		ai.Codex.Enabled = true
+	}
+	if t.Gemini {
+		if ai.Gemini == nil {
+			ai.Gemini = &schema.GeminiConfig{}
+		}
+		ai.Gemini.Enabled = true
+	}
+	if t.OpenCode {
+		if ai.Opencode == nil {
+			ai.Opencode = &schema.OpenCodeConfig{}
+		}
+		ai.Opencode.Enabled = true
+	}
+	if t.Infer {
+		if ai.Infer == nil {
+			ai.Infer = &schema.InferConfig{}
+		}
+		ai.Infer.Enabled = true
+	}
 }
 
 // New creates a new generator
@@ -61,19 +104,33 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 	// block, both g.config.* and adl.Spec.Development.* reflect the same
 	// effective state so templates (e.g. .gitattributes) can read either
 	// source of truth.
-	if adl.Spec.Development != nil && adl.Spec.Development.AI != nil && adl.Spec.Development.AI.Enabled {
-		g.config.EnableAI = true
+	//
+	// Per-agent toggles (claudecode/codex/gemini/opencode/infer) live on
+	// adl.Spec.Development.AI in v0.8.0+. The legacy `enabled` flag was
+	// dropped from the schema but is still tolerated for backwards
+	// compatibility — detectLegacyAIEnabled peeks at the raw YAML for it.
+	legacyAIEnabled, err := g.detectLegacyAIEnabled(adlFile)
+	if err != nil {
+		return fmt.Errorf("failed to inspect manifest for legacy AI flag: %w", err)
 	}
-	if g.config.EnableAI {
+	legacyAIEnabled = legacyAIEnabled || g.config.EnableAI
+
+	var aiCfg *schema.AIConfig
+	if adl.Spec.Development != nil {
+		aiCfg = adl.Spec.Development.AI
+	}
+	aiToggles := schema.ResolveAIAgentToggles(aiCfg, legacyAIEnabled)
+	if aiToggles.Any() {
 		if adl.Spec.Development == nil {
 			adl.Spec.Development = &schema.DevelopmentConfig{}
 		}
 		if adl.Spec.Development.AI == nil {
-			adl.Spec.Development.AI = &schema.AIConfig{Enabled: true}
-		} else {
-			adl.Spec.Development.AI.Enabled = true
+			adl.Spec.Development.AI = &schema.AIConfig{}
 		}
+		applyAITogglesToConfig(adl.Spec.Development.AI, aiToggles)
+		g.config.EnableAI = true
 	}
+	g.config.AIToggles = aiToggles
 	if adl.Spec.SCM != nil {
 		if adl.Spec.SCM.CI {
 			g.config.GenerateCI = true
@@ -147,8 +204,9 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 	language := templates.DetectLanguageFromADL(adl)
 
 	registry, err := templates.NewRegistryWithOptions(templates.RegistryOptions{
-		Language: language,
-		EnableAI: g.config.EnableAI,
+		Language:  language,
+		EnableAI:  g.config.EnableAI,
+		AIToggles: g.config.AIToggles,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create template registry: %w", err)
@@ -180,6 +238,36 @@ func (g *Generator) parseADL(adlFile string) (*schema.ADL, error) {
 	}
 
 	return &adl, nil
+}
+
+// detectLegacyAIEnabled reads the raw manifest and reports whether the
+// deprecated `spec.development.ai.enabled` flag is set. The v0.8.0
+// schema replaced that flag with per-agent toggles (claudecode/
+// codex/gemini/opencode/infer) but JSON Schema's default
+// additionalProperties:true still lets `enabled` slip through
+// validation, so we need to peek at the raw YAML to honour pre-v0.8.0
+// manifests that rely on it.
+func (g *Generator) detectLegacyAIEnabled(adlFile string) (bool, error) {
+	data, err := os.ReadFile(adlFile)
+	if err != nil {
+		return false, err
+	}
+	var raw struct {
+		Spec struct {
+			Development struct {
+				AI struct {
+					Enabled *bool `yaml:"enabled"`
+				} `yaml:"ai"`
+			} `yaml:"development"`
+		} `yaml:"spec"`
+	}
+	if err := yaml.Unmarshal(data, &raw); err != nil {
+		return false, err
+	}
+	if raw.Spec.Development.AI.Enabled == nil {
+		return false, nil
+	}
+	return *raw.Spec.Development.AI.Enabled, nil
 }
 
 // validateADL validates the ADL structure for code generation requirements
@@ -342,6 +430,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		GenerateCI:      g.config.GenerateCI,
 		GenerateCD:      g.config.GenerateCD,
 		EnableAI:        g.config.EnableAI,
+		AIToggles:       g.config.AIToggles,
 		GenerateCommand: g.buildGenerateCommand(),
 		Skills:          skillViews,
 		BuiltinConfigs:  builtinConfigs,
@@ -559,6 +648,90 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		if err := g.generateCD(adl, outputDir, ignoreChecker); err != nil {
 			return fmt.Errorf("failed to generate CD configuration: %w", err)
 		}
+	}
+
+	if err := g.generateAIWorkflows(adl, ctx, outputDir, ignoreChecker); err != nil {
+		return fmt.Errorf("failed to generate AI assistant workflows: %w", err)
+	}
+
+	return nil
+}
+
+// generateAIWorkflows emits per-agent GitHub Actions workflows under
+// .github/workflows/ for every enabled AI assistant that has an
+// upstream action (see schema.AIHasOfficialAction). Currently that
+// covers claudecode, codex, and gemini; opencode and infer ship docs
+// only because no first-party action exists yet.
+//
+// The workflows are generated regardless of GenerateCI/GenerateCD —
+// they're orthogonal to the language CI/CD pipelines. SCM provider is
+// honoured so non-GitHub repos skip this step entirely.
+func (g *Generator) generateAIWorkflows(adl *schema.ADL, ctx templates.Context, outputDir string, ignoreChecker *IgnoreChecker) error {
+	if !g.config.AIToggles.Any() {
+		return nil
+	}
+	if g.detectSCMProvider(adl) != string(schema.SCMProviderGithub) {
+		return nil
+	}
+
+	type aiWorkflow struct {
+		enabled bool
+		key     string
+		path    string
+		label   string
+	}
+	workflows := []aiWorkflow{
+		{
+			enabled: g.config.AIToggles.ClaudeCode && schema.AIHasOfficialAction("claudecode"),
+			key:     "github/workflows/ai-claude-code.yaml",
+			path:    ".github/workflows/claude-code.yml",
+			label:   "Claude Code",
+		},
+		{
+			enabled: g.config.AIToggles.Codex && schema.AIHasOfficialAction("codex"),
+			key:     "github/workflows/ai-codex.yaml",
+			path:    ".github/workflows/codex.yml",
+			label:   "Codex",
+		},
+		{
+			enabled: g.config.AIToggles.Gemini && schema.AIHasOfficialAction("gemini"),
+			key:     "github/workflows/ai-gemini.yaml",
+			path:    ".github/workflows/gemini.yml",
+			label:   "Gemini",
+		},
+	}
+
+	language := g.detectLanguage(adl)
+	registry, err := templates.NewRegistryWithOptions(templates.RegistryOptions{
+		Language:  language,
+		EnableAI:  g.config.EnableAI,
+		AIToggles: g.config.AIToggles,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create template registry for AI workflows: %w", err)
+	}
+	engine := templates.NewWithRegistry("", registry)
+
+	for _, wf := range workflows {
+		if !wf.enabled {
+			continue
+		}
+		if ignoreChecker.ShouldIgnore(wf.path) {
+			fmt.Printf("🚫 Ignoring file (matches .adl-ignore): %s\n", wf.path)
+			continue
+		}
+		content, err := engine.ExecuteTemplate(wf.key, ctx)
+		if err != nil {
+			return fmt.Errorf("failed to execute %s workflow template: %w", wf.label, err)
+		}
+		header := templates.GetGeneratedFileHeader("yaml", ctx.Metadata.CLIVersion, ctx.Metadata.GeneratedAt)
+		content = header + content
+
+		fullPath := filepath.Join(outputDir, wf.path)
+		if err := g.writeFile(fullPath, content); err != nil {
+			return fmt.Errorf("failed to write %s workflow: %w", wf.label, err)
+		}
+		fmt.Printf("📁 %s workflow: %s\n", wf.label, wf.path)
 	}
 
 	return nil
@@ -877,6 +1050,7 @@ func (g *Generator) generateGitHubActionsWorkflow(adl *schema.ADL, outputDir str
 		GenerateCI:      g.config.GenerateCI,
 		GenerateCD:      g.config.GenerateCD,
 		EnableAI:        g.config.EnableAI,
+		AIToggles:       g.config.AIToggles,
 		GenerateCommand: g.buildGenerateCommand(),
 	}
 
@@ -1013,6 +1187,7 @@ func (g *Generator) generateGitHubCDWorkflow(adl *schema.ADL, outputDir string, 
 		GenerateCI:      g.config.GenerateCI,
 		GenerateCD:      g.config.GenerateCD,
 		EnableAI:        g.config.EnableAI,
+		AIToggles:       g.config.AIToggles,
 		GenerateCommand: g.buildGenerateCommand(),
 	}
 

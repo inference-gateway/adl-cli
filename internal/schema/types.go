@@ -18,11 +18,25 @@ type ADL struct {
 	Spec Spec `json:"spec" yaml:"spec" mapstructure:"spec"`
 }
 
-// Toggle generation of AI-assistant documentation (CLAUDE.md, AGENTS.md) and
-// provisioning of claude-code in sandbox environments.
+// Configures generation of AI-assistant documentation (CLAUDE.md, AGENTS.md) and
+// provisioning of coding agents (Claude Code, Codex, Gemini, OpenCode, Infer, ...)
+// inside sandbox environments. Each coding agent is toggled independently via its
+// own subsection; by default every agent is disabled.
 type AIConfig struct {
-	// Enabled corresponds to the JSON schema field "enabled".
-	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
+	// Claudecode corresponds to the JSON schema field "claudecode".
+	Claudecode *ClaudeCodeConfig `json:"claudecode,omitempty,omitzero" yaml:"claudecode,omitempty" mapstructure:"claudecode,omitempty"`
+
+	// Codex corresponds to the JSON schema field "codex".
+	Codex *CodexConfig `json:"codex,omitempty,omitzero" yaml:"codex,omitempty" mapstructure:"codex,omitempty"`
+
+	// Gemini corresponds to the JSON schema field "gemini".
+	Gemini *GeminiConfig `json:"gemini,omitempty,omitzero" yaml:"gemini,omitempty" mapstructure:"gemini,omitempty"`
+
+	// Infer corresponds to the JSON schema field "infer".
+	Infer *InferConfig `json:"infer,omitempty,omitzero" yaml:"infer,omitempty" mapstructure:"infer,omitempty"`
+
+	// Opencode corresponds to the JSON schema field "opencode".
+	Opencode *OpenCodeConfig `json:"opencode,omitempty,omitzero" yaml:"opencode,omitempty" mapstructure:"opencode,omitempty"`
 }
 
 type Agent struct {
@@ -98,6 +112,12 @@ type Card struct {
 	URL string `json:"url,omitempty,omitzero" yaml:"url,omitempty" mapstructure:"url,omitempty"`
 }
 
+// Provision Anthropic's Claude Code coding agent inside the sandbox.
+type ClaudeCodeConfig struct {
+	// Enabled corresponds to the JSON schema field "enabled".
+	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
+}
+
 type CloudRunConfig struct {
 	// Environment corresponds to the JSON schema field "environment".
 	Environment CloudRunConfigEnvironment `json:"environment,omitempty,omitzero" yaml:"environment,omitempty" mapstructure:"environment,omitempty"`
@@ -116,6 +136,12 @@ type CloudRunConfig struct {
 }
 
 type CloudRunConfigEnvironment map[string]string
+
+// Provision OpenAI's Codex coding agent inside the sandbox.
+type CodexConfig struct {
+	// Enabled corresponds to the JSON schema field "enabled".
+	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
+}
 
 type DeploymentConfig struct {
 	// CloudRun corresponds to the JSON schema field "cloudrun".
@@ -159,6 +185,12 @@ type FloxConfig struct {
 	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
 }
 
+// Provision Google's Gemini coding agent inside the sandbox.
+type GeminiConfig struct {
+	// Enabled corresponds to the JSON schema field "enabled".
+	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
+}
+
 type GoConfig struct {
 	// Module corresponds to the JSON schema field "module".
 	Module string `json:"module" yaml:"module" mapstructure:"module"`
@@ -186,6 +218,12 @@ type ImageConfig struct {
 	UseCloudBuild bool `json:"useCloudBuild,omitempty,omitzero" yaml:"useCloudBuild,omitempty" mapstructure:"useCloudBuild,omitempty"`
 }
 
+// Provision the Inference Gateway 'infer' coding agent inside the sandbox.
+type InferConfig struct {
+	// Enabled corresponds to the JSON schema field "enabled".
+	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
+}
+
 type KubernetesConfig struct {
 	// Image corresponds to the JSON schema field "image".
 	Image *ImageConfig `json:"image,omitempty,omitzero" yaml:"image,omitempty" mapstructure:"image,omitempty"`
@@ -211,6 +249,12 @@ type Metadata struct {
 
 	// Version corresponds to the JSON schema field "version".
 	Version string `json:"version" yaml:"version" mapstructure:"version"`
+}
+
+// Provision the OpenCode coding agent inside the sandbox.
+type OpenCodeConfig struct {
+	// Enabled corresponds to the JSON schema field "enabled".
+	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
 }
 
 type ResourcesConfig struct {

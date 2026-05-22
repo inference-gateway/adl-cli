@@ -44,7 +44,7 @@ func init() {
 	generateCmd.Flags().StringVar(&deploymentType, "deployment", "", "Deployment type (kubernetes, cloudrun, defaults to empty for no deployment)")
 	generateCmd.Flags().BoolVar(&enableFlox, "flox", false, "Enable Flox environment")
 	generateCmd.Flags().BoolVar(&enableDevContainer, "devcontainer", false, "Enable DevContainer environment")
-	generateCmd.Flags().BoolVar(&enableAI, "ai", false, "Generate AI assistant instructions (CLAUDE.md) and add claude-code to sandbox environments")
+	generateCmd.Flags().BoolVar(&enableAI, "ai", false, "Legacy fallback: enable CLAUDE.md + AGENTS.md and the claude-code sandbox extension when no per-agent toggles are set under spec.development.ai. Prefer the per-agent toggles in v0.8.0+ manifests.")
 	generateCmd.Flags().BoolVar(&offlineMode, "offline", false, "Skip the skills registry; require every non-bare skill to already be in the local cache")
 }
 

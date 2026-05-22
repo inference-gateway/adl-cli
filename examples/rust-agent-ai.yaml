@@ -75,5 +75,17 @@ spec:
         enabled: true
       devcontainer:
         enabled: false
+    # Per-agent AI assistant toggles. Each block is independent; default
+    # is disabled. Pre-v0.8.0 manifests using the single `enabled: true`
+    # flag still work and resolve to claudecode + AGENTS.md (legacy).
     ai:
-      enabled: true
+      claudecode:
+        enabled: true
+      gemini:
+        enabled: false
+      codex:
+        enabled: false
+      opencode:
+        enabled: false
+      infer:
+        enabled: false
