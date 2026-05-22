@@ -14,6 +14,7 @@ type Frontmatter struct {
 	Description string   `yaml:"description"`
 	Tags        []string `yaml:"tags,omitempty"`
 	Version     string   `yaml:"version,omitempty"`
+	License     string   `yaml:"license,omitempty"`
 }
 
 // SkillDocument is a parsed skill markdown: frontmatter plus body.

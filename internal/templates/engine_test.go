@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/inference-gateway/adl-cli/internal/schema"
@@ -353,5 +354,70 @@ func TestGetDefaultAcronyms(t *testing.T) {
 
 	if len(acronyms) < 10 {
 		t.Errorf("getDefaultAcronyms() returned %d acronyms, expected at least 10", len(acronyms))
+	}
+}
+
+func TestSkillScaffoldTemplate_License(t *testing.T) {
+	registry, err := NewRegistry("go")
+	if err != nil {
+		t.Fatalf("NewRegistry: %v", err)
+	}
+	engine := NewWithRegistry("minimal", registry)
+
+	tests := []struct {
+		name        string
+		skill       map[string]any
+		wantSubstr  string
+		notExpected string
+	}{
+		{
+			name: "with SPDX license renders license frontmatter",
+			skill: map[string]any{
+				"ID":          "company-policy",
+				"Name":        "company-policy",
+				"Description": "Internal rules",
+				"Tags":        []string{"policy"},
+				"License":     "Apache-2.0",
+			},
+			wantSubstr: "\nlicense: Apache-2.0\n",
+		},
+		{
+			name: "without license omits the field entirely",
+			skill: map[string]any{
+				"ID":          "company-policy",
+				"Name":        "company-policy",
+				"Description": "Internal rules",
+				"Tags":        []string{"policy"},
+				"License":     "",
+			},
+			notExpected: "license:",
+		},
+		{
+			name: "Proprietary license is rendered verbatim",
+			skill: map[string]any{
+				"ID":          "internal-runbook",
+				"Name":        "internal-runbook",
+				"Description": "Closed-source runbook",
+				"License":     "Proprietary",
+			},
+			wantSubstr: "\nlicense: Proprietary\n",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			out, err := engine.ExecuteToolTemplateWithContext("skills/skill.md", tc.skill, Context{
+				ADL: &schema.ADL{},
+			})
+			if err != nil {
+				t.Fatalf("ExecuteToolTemplateWithContext: %v", err)
+			}
+			if tc.wantSubstr != "" && !strings.Contains(out, tc.wantSubstr) {
+				t.Errorf("rendered output missing %q\n---\n%s\n---", tc.wantSubstr, out)
+			}
+			if tc.notExpected != "" && strings.Contains(out, tc.notExpected) {
+				t.Errorf("rendered output unexpectedly contains %q\n---\n%s\n---", tc.notExpected, out)
+			}
+		})
 	}
 }
