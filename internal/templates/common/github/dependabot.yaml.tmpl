@@ -45,6 +45,15 @@ updates:
     directory: /
     schedule:
       interval: weekly
+{{- if .ADL.Spec.Language.Go }}
+    ignore:
+      - dependency-name: golang
+        versions:
+          - ">{{ .ADL.Spec.Language.Go.Version }}"
+      - dependency-name: ubuntu
+        versions:
+          - ">24.04"
+{{- end }}
     groups:
       docker:
         patterns:

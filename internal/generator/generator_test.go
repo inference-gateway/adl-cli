@@ -628,8 +628,17 @@ func TestGenerator_Dependabot(t *testing.T) {
 			adl:              makeADL("go-agent", true, goLang, nil),
 			registryLang:     "go",
 			expectDependabot: true,
-			mustContain:      []string{"package-ecosystem: gomod", "package-ecosystem: github-actions", "package-ecosystem: docker"},
-			mustNotContain:   []string{"package-ecosystem: cargo", "package-ecosystem: npm", "package-ecosystem: devcontainers"},
+			mustContain: []string{
+				"package-ecosystem: gomod",
+				"package-ecosystem: github-actions",
+				"package-ecosystem: docker",
+				"ignore:",
+				"dependency-name: golang",
+				`">1.26.2"`,
+				"dependency-name: ubuntu",
+				`">24.04"`,
+			},
+			mustNotContain: []string{"package-ecosystem: cargo", "package-ecosystem: npm", "package-ecosystem: devcontainers"},
 		},
 		{
 			name:             "rust agent with dependabot: cargo ecosystem present",
@@ -637,7 +646,7 @@ func TestGenerator_Dependabot(t *testing.T) {
 			registryLang:     "rust",
 			expectDependabot: true,
 			mustContain:      []string{"package-ecosystem: cargo", "package-ecosystem: github-actions", "package-ecosystem: docker"},
-			mustNotContain:   []string{"package-ecosystem: gomod", "package-ecosystem: npm"},
+			mustNotContain:   []string{"package-ecosystem: gomod", "package-ecosystem: npm", "dependency-name: golang", "dependency-name: ubuntu"},
 		},
 		{
 			name: "devcontainer enabled: devcontainers ecosystem included",
@@ -646,7 +655,7 @@ func TestGenerator_Dependabot(t *testing.T) {
 			}),
 			registryLang:     "go",
 			expectDependabot: true,
-			mustContain:      []string{"package-ecosystem: devcontainers"},
+			mustContain:      []string{"package-ecosystem: devcontainers", "dependency-name: golang"},
 		},
 	}
 
