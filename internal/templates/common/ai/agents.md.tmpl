@@ -153,13 +153,23 @@ Key environment variables you'll need to configure:
 - `PORT` - Server port (configured: {{ .ADL.Spec.Server.Port }})
 
 ### Development Environment
+{{- $sandbox := false }}
 {{- if and .ADL.Spec.Development .ADL.Spec.Development.Sandbox }}
-{{- if .ADL.Spec.Development.Sandbox.Flox }}
-**Flox Environment**: ✅ Configured for reproducible development setup
+{{- if and .ADL.Spec.Development.Sandbox.Flox .ADL.Spec.Development.Sandbox.Flox.Enabled }}
+{{- $sandbox = true }}
+- **Flox Environment**: ✅ Configured for reproducible development setup (`flox activate`)
 {{- end }}
-{{- if .ADL.Spec.Development.Sandbox.DevContainer }}
-**DevContainer**: ✅ VS Code DevContainer configuration available
+{{- if and .ADL.Spec.Development.Sandbox.DevContainer .ADL.Spec.Development.Sandbox.DevContainer.Enabled }}
+{{- $sandbox = true }}
+- **DevContainer**: ✅ VS Code DevContainer configuration available (`.devcontainer/devcontainer.json`)
 {{- end }}
+{{- if and .ADL.Spec.Development.Sandbox.DockerCompose .ADL.Spec.Development.Sandbox.DockerCompose.Enabled }}
+{{- $sandbox = true }}
+- **Docker Compose**: ✅ Local service stack available (`docker compose up`)
+{{- end }}
+{{- end }}
+{{- if not $sandbox }}
+No sandboxed environments are configured. Set up your local toolchain manually (language runtime, Task runner, etc.) before running the agent.
 {{- end }}
 
 ## Usage
