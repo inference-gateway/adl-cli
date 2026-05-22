@@ -56,6 +56,7 @@ func init() {
 	initCmd.Flags().String("typescript-name", "", "TypeScript package name")
 	initCmd.Flags().Bool("flox", false, "Enable Flox environment")
 	initCmd.Flags().Bool("devcontainer", false, "Enable DevContainer environment")
+	initCmd.Flags().Bool("docker-compose", false, "Enable Docker Compose environment")
 	initCmd.Flags().Bool("ai", false, "Enable AI assistant docs (CLAUDE.md/AGENTS.md) and claude-code in sandboxes")
 	initCmd.Flags().Bool("ci", false, "Enable CI workflow generation")
 	initCmd.Flags().Bool("cd", false, "Enable CD pipeline generation")
@@ -267,6 +268,9 @@ type adlData struct {
 				DevContainer *struct {
 					Enabled bool `yaml:"enabled"`
 				} `yaml:"devcontainer,omitempty"`
+				DockerCompose *struct {
+					Enabled bool `yaml:"enabled"`
+				} `yaml:"dockerCompose,omitempty"`
 			} `yaml:"sandbox,omitempty"`
 			AI *struct {
 				Enabled bool `yaml:"enabled"`
@@ -678,35 +682,35 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 
 	floxEnabled := promptBoolWithConfig("flox", useDefaults, "Enable Flox environment", false)
 	devcontainerEnabled := promptBoolWithConfig("devcontainer", useDefaults, "Enable DevContainer environment", false)
+	dockerComposeEnabled := promptBoolWithConfig("docker-compose", useDefaults, "Enable Docker Compose environment", false)
 
-	if floxEnabled || devcontainerEnabled {
-		ensureDevelopment(adl)
-		sandboxConfig := &struct {
-			Flox *struct {
-				Enabled bool `yaml:"enabled"`
-			} `yaml:"flox,omitempty"`
-			DevContainer *struct {
-				Enabled bool `yaml:"enabled"`
-			} `yaml:"devcontainer,omitempty"`
-		}{}
-
-		if floxEnabled {
-			sandboxConfig.Flox = &struct {
-				Enabled bool `yaml:"enabled"`
-			}{
-				Enabled: true,
-			}
-		}
-
-		if devcontainerEnabled {
-			sandboxConfig.DevContainer = &struct {
-				Enabled bool `yaml:"enabled"`
-			}{
-				Enabled: true,
-			}
-		}
-
-		adl.Spec.Development.Sandbox = sandboxConfig
+	ensureDevelopment(adl)
+	adl.Spec.Development.Sandbox = &struct {
+		Flox *struct {
+			Enabled bool `yaml:"enabled"`
+		} `yaml:"flox,omitempty"`
+		DevContainer *struct {
+			Enabled bool `yaml:"enabled"`
+		} `yaml:"devcontainer,omitempty"`
+		DockerCompose *struct {
+			Enabled bool `yaml:"enabled"`
+		} `yaml:"dockerCompose,omitempty"`
+	}{
+		Flox: &struct {
+			Enabled bool `yaml:"enabled"`
+		}{
+			Enabled: floxEnabled,
+		},
+		DevContainer: &struct {
+			Enabled bool `yaml:"enabled"`
+		}{
+			Enabled: devcontainerEnabled,
+		},
+		DockerCompose: &struct {
+			Enabled bool `yaml:"enabled"`
+		}{
+			Enabled: dockerComposeEnabled,
+		},
 	}
 
 	fmt.Println("\n🚀 Deployment Configuration")
@@ -773,13 +777,11 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 	fmt.Println("\n🤖 AI Assistant Documentation")
 	fmt.Println("-----------------------------")
 	aiEnabled := promptBoolWithConfig("ai", useDefaults, "Enable AI assistant docs (CLAUDE.md/AGENTS.md) and claude-code in sandboxes", false)
-	if aiEnabled {
-		ensureDevelopment(adl)
-		adl.Spec.Development.AI = &struct {
-			Enabled bool `yaml:"enabled"`
-		}{
-			Enabled: true,
-		}
+	ensureDevelopment(adl)
+	adl.Spec.Development.AI = &struct {
+		Enabled bool `yaml:"enabled"`
+	}{
+		Enabled: aiEnabled,
 	}
 
 	return adl
@@ -800,6 +802,9 @@ func ensureDevelopment(adl *adlData) {
 			DevContainer *struct {
 				Enabled bool `yaml:"enabled"`
 			} `yaml:"devcontainer,omitempty"`
+			DockerCompose *struct {
+				Enabled bool `yaml:"enabled"`
+			} `yaml:"dockerCompose,omitempty"`
 		} `yaml:"sandbox,omitempty"`
 		AI *struct {
 			Enabled bool `yaml:"enabled"`
