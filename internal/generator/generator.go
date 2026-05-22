@@ -410,7 +410,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 				}
 			}
 		} else if (templateKey == "tool.go" || templateKey == "tool.rs" || templateKey == "tool.ts" ||
-			strings.HasPrefix(templateKey, "builtin/")) && strings.Contains(fileName, "/") {
+			(strings.HasPrefix(templateKey, "builtin/") && !isBuiltinTestTemplate(templateKey))) && strings.Contains(fileName, "/") {
 			parts := strings.Split(fileName, "/")
 			if len(parts) >= 2 {
 				toolFileName := parts[len(parts)-1]
@@ -1089,4 +1089,16 @@ func titleCase(s string) string {
 		return s
 	}
 	return strings.ToUpper(s[:1]) + s[1:]
+}
+
+// isBuiltinTestTemplate reports whether templateKey points to a built-in
+// tool's *_test.<ext> template. These templates don't need the per-tool
+// context (Config/ID/Name/...) the regular built-in path injects, so the
+// generator routes them through the plain ExecuteTemplate path instead.
+func isBuiltinTestTemplate(templateKey string) bool {
+	if !strings.HasPrefix(templateKey, "builtin/") {
+		return false
+	}
+	base := strings.TrimSuffix(filepath.Base(templateKey), filepath.Ext(templateKey))
+	return strings.HasSuffix(base, "_test")
 }

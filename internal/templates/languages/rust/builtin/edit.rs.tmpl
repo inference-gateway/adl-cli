@@ -117,3 +117,113 @@ fn validate_path(allowed_roots: &[String], p: &str) -> anyhow::Result<()> {
     }
     bail!("path {:?} is outside the configured allowed_roots", p);
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+    use tempfile::TempDir;
+
+    fn enabled_cfg() -> Config {
+        Config {
+            enabled: true,
+            allowed_roots: vec![],
+        }
+    }
+
+    #[tokio::test]
+    async fn disabled_returns_error() {
+        let cfg = Config {
+            enabled: false,
+            ..enabled_cfg()
+        };
+        let err = handle(
+            json!({"file_path": "x", "old_string": "a", "new_string": "b"}),
+            cfg,
+        )
+        .await
+        .unwrap_err();
+        assert!(err.to_string().contains("disabled"));
+    }
+
+    #[tokio::test]
+    async fn requires_arguments() {
+        let err = handle(json!({"old_string": "a", "new_string": "b"}), enabled_cfg())
+            .await
+            .unwrap_err();
+        assert!(err.to_string().contains("file_path"));
+
+        let err = handle(
+            json!({"file_path": "x", "old_string": "", "new_string": "b"}),
+            enabled_cfg(),
+        )
+        .await
+        .unwrap_err();
+        assert!(err.to_string().contains("old_string"));
+    }
+
+    #[tokio::test]
+    async fn replaces_unique_match() {
+        let dir = TempDir::new().expect("tempdir");
+        let path = dir.path().join("f.txt");
+        tokio::fs::write(&path, b"hello world\n").await.unwrap();
+
+        handle(
+            json!({
+                "file_path": path.to_string_lossy(),
+                "old_string": "world",
+                "new_string": "there",
+            }),
+            enabled_cfg(),
+        )
+        .await
+        .expect("handle");
+        let got = tokio::fs::read_to_string(&path).await.unwrap();
+        assert_eq!(got, "hello there\n");
+    }
+
+    #[tokio::test]
+    async fn rejects_missing_old_string() {
+        let dir = TempDir::new().expect("tempdir");
+        let path = dir.path().join("f.txt");
+        tokio::fs::write(&path, b"hello\n").await.unwrap();
+
+        let err = handle(
+            json!({
+                "file_path": path.to_string_lossy(),
+                "old_string": "missing",
+                "new_string": "x",
+            }),
+            enabled_cfg(),
+        )
+        .await
+        .unwrap_err();
+        assert!(err.to_string().contains("not found"));
+    }
+
+    #[tokio::test]
+    async fn rejects_ambiguous_old_string() {
+        let dir = TempDir::new().expect("tempdir");
+        let path = dir.path().join("f.txt");
+        tokio::fs::write(&path, b"dup\ndup\n").await.unwrap();
+
+        let err = handle(
+            json!({
+                "file_path": path.to_string_lossy(),
+                "old_string": "dup",
+                "new_string": "x",
+            }),
+            enabled_cfg(),
+        )
+        .await
+        .unwrap_err();
+        assert!(err.to_string().contains("times"));
+    }
+
+    #[test]
+    fn validate_path_enforces_roots() {
+        let roots = vec!["/srv/agent".to_string()];
+        assert!(validate_path(&roots, "/srv/agent/x.txt").is_ok());
+        assert!(validate_path(&roots, "/etc/passwd").is_err());
+    }
+}

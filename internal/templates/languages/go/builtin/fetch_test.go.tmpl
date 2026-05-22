@@ -1,0 +1,243 @@
+package tools
+
+import (
+	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+	"time"
+
+	zap "go.uber.org/zap"
+)
+
+// newTestFetchTool builds a Fetch tool with the supplied config and a
+// short-timeout HTTP client, bypassing envconfig so each test pins the
+// exact behavior under test.
+func newTestFetchTool(cfg FetchConfig) *FetchTool {
+	if cfg.TimeoutSeconds <= 0 {
+		cfg.TimeoutSeconds = 5
+	}
+	if cfg.MaxBytes <= 0 {
+		cfg.MaxBytes = defaultMaxBytes
+	}
+	if cfg.DownloadDir == "" {
+		cfg.DownloadDir = "/tmp"
+	}
+	return &FetchTool{
+		logger: zap.NewNop(),
+		cfg:    cfg,
+		client: &http.Client{Timeout: time.Duration(cfg.TimeoutSeconds) * time.Second},
+	}
+}
+
+func TestFetchTool_DisabledReturnsError(t *testing.T) {
+	t.Parallel()
+	tool := newTestFetchTool(FetchConfig{Enabled: false})
+	if _, err := tool.Handler(context.Background(), map[string]any{"url": "https://example.com"}); err == nil {
+		t.Fatalf("expected error when tool is disabled, got nil")
+	}
+}
+
+func TestFetchTool_RequiresURL(t *testing.T) {
+	t.Parallel()
+	tool := newTestFetchTool(FetchConfig{Enabled: true})
+	if _, err := tool.Handler(context.Background(), map[string]any{}); err == nil {
+		t.Fatalf("expected error when url is missing, got nil")
+	}
+}
+
+func TestFetchTool_RejectsUnsupportedScheme(t *testing.T) {
+	t.Parallel()
+	tool := newTestFetchTool(FetchConfig{Enabled: true})
+	if _, err := tool.Handler(context.Background(), map[string]any{"url": "ftp://example.com"}); err == nil {
+		t.Fatalf("expected error for ftp scheme, got nil")
+	}
+}
+
+func TestFetchTool_RejectsUnsupportedMethod(t *testing.T) {
+	t.Parallel()
+	tool := newTestFetchTool(FetchConfig{Enabled: true})
+	if _, err := tool.Handler(context.Background(), map[string]any{
+		"url":    "https://example.com",
+		"method": "POST",
+	}); err == nil {
+		t.Fatalf("expected error for POST method, got nil")
+	}
+}
+
+func TestFetchTool_EnforcesAllowedDomains(t *testing.T) {
+	t.Parallel()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte("ok"))
+	}))
+	defer server.Close()
+
+	parsed, _ := url.Parse(server.URL)
+	tool := newTestFetchTool(FetchConfig{
+		Enabled:        true,
+		AllowedDomains: []string{"example.com"},
+	})
+
+	if _, err := tool.Handler(context.Background(), map[string]any{"url": server.URL}); err == nil {
+		t.Fatalf("expected non-whitelisted host %q to be rejected, got nil", parsed.Host)
+	}
+}
+
+func TestFetchTool_GetReadsBody(t *testing.T) {
+	t.Parallel()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("hello-fetch"))
+	}))
+	defer server.Close()
+
+	tool := newTestFetchTool(FetchConfig{Enabled: true})
+	out, err := tool.Handler(context.Background(), map[string]any{"url": server.URL})
+	if err != nil {
+		t.Fatalf("Handler returned error: %v", err)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal([]byte(out), &payload); err != nil {
+		t.Fatalf("unmarshal payload: %v", err)
+	}
+	if status := int(payload["status_code"].(float64)); status != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", status)
+	}
+	if body := payload["body"].(string); body != "hello-fetch" {
+		t.Fatalf("expected body 'hello-fetch', got %q", body)
+	}
+}
+
+func TestFetchTool_HeadOmitsBody(t *testing.T) {
+	t.Parallel()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodHead {
+			t.Errorf("expected HEAD, got %s", r.Method)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	tool := newTestFetchTool(FetchConfig{Enabled: true})
+	out, err := tool.Handler(context.Background(), map[string]any{"url": server.URL, "method": "HEAD"})
+	if err != nil {
+		t.Fatalf("Handler returned error: %v", err)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal([]byte(out), &payload); err != nil {
+		t.Fatalf("unmarshal payload: %v", err)
+	}
+	if _, ok := payload["body"]; ok {
+		t.Fatalf("HEAD response should not include body, got %v", payload["body"])
+	}
+}
+
+func TestFetchTool_TruncatesBodyOverMaxBytes(t *testing.T) {
+	t.Parallel()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(strings.Repeat("x", 32)))
+	}))
+	defer server.Close()
+
+	tool := newTestFetchTool(FetchConfig{Enabled: true, MaxBytes: 10})
+	out, err := tool.Handler(context.Background(), map[string]any{"url": server.URL})
+	if err != nil {
+		t.Fatalf("Handler returned error: %v", err)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal([]byte(out), &payload); err != nil {
+		t.Fatalf("unmarshal payload: %v", err)
+	}
+	if !payload["truncated"].(bool) {
+		t.Fatalf("expected truncated=true when body exceeds max_bytes")
+	}
+	if br := int(payload["bytes_read"].(float64)); br != 10 {
+		t.Fatalf("expected bytes_read=10, got %d", br)
+	}
+}
+
+func TestFetchTool_DownloadsToSavePath(t *testing.T) {
+	t.Parallel()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte("saved-body"))
+	}))
+	defer server.Close()
+
+	dir := t.TempDir()
+	tool := newTestFetchTool(FetchConfig{
+		Enabled:        true,
+		AllowDownloads: true,
+		DownloadDir:    dir,
+	})
+	out, err := tool.Handler(context.Background(), map[string]any{
+		"url":       server.URL,
+		"save_path": "downloaded.txt",
+	})
+	if err != nil {
+		t.Fatalf("Handler returned error: %v", err)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal([]byte(out), &payload); err != nil {
+		t.Fatalf("unmarshal payload: %v", err)
+	}
+	saved := payload["saved_to"].(string)
+	got, err := os.ReadFile(saved)
+	if err != nil {
+		t.Fatalf("read back saved file: %v", err)
+	}
+	if string(got) != "saved-body" {
+		t.Fatalf("expected saved-body, got %q", string(got))
+	}
+	if !strings.HasPrefix(saved, dir) {
+		t.Fatalf("expected save_path under download_dir, got %q", saved)
+	}
+	if filepath.Base(saved) != "downloaded.txt" {
+		t.Fatalf("expected file named downloaded.txt, got %q", filepath.Base(saved))
+	}
+}
+
+func TestFetchTool_RejectsSavePathWhenDownloadsDisabled(t *testing.T) {
+	t.Parallel()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte("body"))
+	}))
+	defer server.Close()
+
+	tool := newTestFetchTool(FetchConfig{Enabled: true, AllowDownloads: false})
+	if _, err := tool.Handler(context.Background(), map[string]any{
+		"url":       server.URL,
+		"save_path": "should-fail.txt",
+	}); err == nil {
+		t.Fatalf("expected error when save_path requested but downloads disabled, got nil")
+	}
+}
+
+func TestFetchTool_RejectsParentDirTraversalInSavePath(t *testing.T) {
+	t.Parallel()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte("body"))
+	}))
+	defer server.Close()
+
+	dir := t.TempDir()
+	tool := newTestFetchTool(FetchConfig{
+		Enabled:        true,
+		AllowDownloads: true,
+		DownloadDir:    dir,
+	})
+	if _, err := tool.Handler(context.Background(), map[string]any{
+		"url":       server.URL,
+		"save_path": "../escaped.txt",
+	}); err == nil {
+		t.Fatalf("expected error for parent-dir traversal save_path, got nil")
+	}
+}

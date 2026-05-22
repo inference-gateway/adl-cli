@@ -304,3 +304,119 @@ fn flatten_headers(h: &HeaderMap) -> Value {
     }
     Value::Object(out)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    fn enabled_cfg() -> Config {
+        Config {
+            enabled: true,
+            allowed_domains: vec![],
+            max_bytes: DEFAULT_MAX_BYTES,
+            timeout_seconds: DEFAULT_TIMEOUT_SECONDS,
+            download_dir: "/tmp".to_string(),
+            allow_downloads: false,
+        }
+    }
+
+    #[tokio::test]
+    async fn disabled_returns_error() {
+        let cfg = Config {
+            enabled: false,
+            ..enabled_cfg()
+        };
+        let err = handle(json!({"url": "https://example.com"}), cfg)
+            .await
+            .unwrap_err();
+        assert!(err.to_string().contains("disabled"));
+    }
+
+    #[tokio::test]
+    async fn requires_url() {
+        let err = handle(json!({}), enabled_cfg()).await.unwrap_err();
+        assert!(err.to_string().contains("url"));
+    }
+
+    #[tokio::test]
+    async fn rejects_unsupported_scheme() {
+        let err = handle(json!({"url": "ftp://example.com"}), enabled_cfg())
+            .await
+            .unwrap_err();
+        assert!(err.to_string().contains("scheme"));
+    }
+
+    #[tokio::test]
+    async fn rejects_unsupported_method() {
+        let err = handle(
+            json!({"url": "https://example.com", "method": "POST"}),
+            enabled_cfg(),
+        )
+        .await
+        .unwrap_err();
+        assert!(err.to_string().contains("method"));
+    }
+
+    #[tokio::test]
+    async fn rejects_non_whitelisted_host() {
+        let cfg = Config {
+            allowed_domains: vec!["example.com".to_string()],
+            ..enabled_cfg()
+        };
+        let err = handle(json!({"url": "https://other.test/"}), cfg)
+            .await
+            .unwrap_err();
+        assert!(err.to_string().contains("allowed_domains"));
+    }
+
+    #[tokio::test]
+    async fn rejects_save_path_when_downloads_disabled() {
+        let err = handle(
+            json!({"url": "https://example.com", "save_path": "x.bin"}),
+            enabled_cfg(),
+        )
+        .await
+        .unwrap_err();
+        assert!(err.to_string().contains("disabled"));
+    }
+
+    #[test]
+    fn check_domain_allows_empty_list() {
+        assert!(check_domain(&[], "example.com").is_ok());
+    }
+
+    #[test]
+    fn check_domain_exact_match() {
+        let allowed = vec!["example.com".to_string()];
+        assert!(check_domain(&allowed, "example.com").is_ok());
+        assert!(check_domain(&allowed, "Example.COM").is_ok());
+        assert!(check_domain(&allowed, "sub.example.com").is_err());
+    }
+
+    #[test]
+    fn check_domain_dot_suffix_matches_subdomains() {
+        let allowed = vec![".example.com".to_string()];
+        assert!(check_domain(&allowed, "example.com").is_ok());
+        assert!(check_domain(&allowed, "api.example.com").is_ok());
+        assert!(check_domain(&allowed, "a.b.example.com").is_ok());
+        assert!(check_domain(&allowed, "evil-example.com").is_err());
+    }
+
+    #[test]
+    fn resolve_download_path_joins_under_root() {
+        let resolved = resolve_download_path("/tmp/cache", "out.txt").unwrap();
+        assert_eq!(resolved, PathBuf::from("/tmp/cache/out.txt"));
+    }
+
+    #[test]
+    fn resolve_download_path_rejects_absolute() {
+        assert!(resolve_download_path("/tmp/cache", "/etc/passwd").is_err());
+    }
+
+    #[test]
+    fn resolve_download_path_rejects_traversal() {
+        assert!(resolve_download_path("/tmp/cache", "../escape").is_err());
+        assert!(resolve_download_path("/tmp/cache", "a/../../escape").is_err());
+    }
+}

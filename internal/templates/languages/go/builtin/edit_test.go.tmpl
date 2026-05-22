@@ -1,0 +1,149 @@
+package tools
+
+import (
+	"context"
+	"os"
+	"path/filepath"
+	"testing"
+
+	zap "go.uber.org/zap"
+)
+
+// newTestEditTool builds an Edit tool with the supplied config, bypassing
+// envconfig so each test pins the exact behavior under test.
+func newTestEditTool(cfg EditConfig) *EditTool {
+	return &EditTool{logger: zap.NewNop(), cfg: cfg}
+}
+
+func TestEditTool_DisabledReturnsError(t *testing.T) {
+	t.Parallel()
+	tool := newTestEditTool(EditConfig{Enabled: false})
+	if _, err := tool.Handler(context.Background(), map[string]any{
+		"file_path":  "x",
+		"old_string": "a",
+		"new_string": "b",
+	}); err == nil {
+		t.Fatalf("expected error when tool is disabled, got nil")
+	}
+}
+
+func TestEditTool_ValidatesRequiredArgs(t *testing.T) {
+	t.Parallel()
+	tool := newTestEditTool(EditConfig{Enabled: true})
+
+	if _, err := tool.Handler(context.Background(), map[string]any{
+		"old_string": "a",
+		"new_string": "b",
+	}); err == nil {
+		t.Fatalf("expected error when file_path is missing, got nil")
+	}
+	if _, err := tool.Handler(context.Background(), map[string]any{
+		"file_path":  "x",
+		"new_string": "b",
+	}); err == nil {
+		t.Fatalf("expected error when old_string is missing, got nil")
+	}
+	if _, err := tool.Handler(context.Background(), map[string]any{
+		"file_path":  "x",
+		"old_string": "",
+		"new_string": "b",
+	}); err == nil {
+		t.Fatalf("expected error when old_string is empty, got nil")
+	}
+}
+
+func TestEditTool_ReplacesUniqueMatch(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	path := filepath.Join(dir, "f.txt")
+	if err := os.WriteFile(path, []byte("hello world\n"), 0o644); err != nil {
+		t.Fatalf("seed file: %v", err)
+	}
+
+	tool := newTestEditTool(EditConfig{Enabled: true})
+	if _, err := tool.Handler(context.Background(), map[string]any{
+		"file_path":  path,
+		"old_string": "world",
+		"new_string": "there",
+	}); err != nil {
+		t.Fatalf("Handler returned error: %v", err)
+	}
+
+	got, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read back: %v", err)
+	}
+	if string(got) != "hello there\n" {
+		t.Fatalf("expected substitution applied, got %q", string(got))
+	}
+}
+
+func TestEditTool_RejectsMissingOldString(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	path := filepath.Join(dir, "f.txt")
+	if err := os.WriteFile(path, []byte("hello\n"), 0o644); err != nil {
+		t.Fatalf("seed file: %v", err)
+	}
+
+	tool := newTestEditTool(EditConfig{Enabled: true})
+	if _, err := tool.Handler(context.Background(), map[string]any{
+		"file_path":  path,
+		"old_string": "missing",
+		"new_string": "x",
+	}); err == nil {
+		t.Fatalf("expected error when old_string is not found, got nil")
+	}
+}
+
+func TestEditTool_RejectsAmbiguousOldString(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	path := filepath.Join(dir, "f.txt")
+	if err := os.WriteFile(path, []byte("dup\ndup\n"), 0o644); err != nil {
+		t.Fatalf("seed file: %v", err)
+	}
+
+	tool := newTestEditTool(EditConfig{Enabled: true})
+	if _, err := tool.Handler(context.Background(), map[string]any{
+		"file_path":  path,
+		"old_string": "dup",
+		"new_string": "x",
+	}); err == nil {
+		t.Fatalf("expected error when old_string appears multiple times, got nil")
+	}
+}
+
+func TestEditTool_EnforcesAllowedRoots(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	allowed := filepath.Join(dir, "allowed")
+	if err := os.MkdirAll(allowed, 0o755); err != nil {
+		t.Fatalf("mkdir allowed: %v", err)
+	}
+	insidePath := filepath.Join(allowed, "ok.txt")
+	if err := os.WriteFile(insidePath, []byte("hello world\n"), 0o644); err != nil {
+		t.Fatalf("seed inside: %v", err)
+	}
+	outsidePath := filepath.Join(dir, "outside.txt")
+	if err := os.WriteFile(outsidePath, []byte("hello world\n"), 0o644); err != nil {
+		t.Fatalf("seed outside: %v", err)
+	}
+
+	tool := newTestEditTool(EditConfig{Enabled: true, AllowedRoots: []string{allowed}})
+
+	if _, err := tool.Handler(context.Background(), map[string]any{
+		"file_path":  insidePath,
+		"old_string": "world",
+		"new_string": "there",
+	}); err != nil {
+		t.Fatalf("expected edit inside allowed root to succeed, got: %v", err)
+	}
+	if _, err := tool.Handler(context.Background(), map[string]any{
+		"file_path":  outsidePath,
+		"old_string": "world",
+		"new_string": "there",
+	}); err == nil {
+		t.Fatalf("expected edit outside allowed root to be rejected, got nil")
+	}
+}

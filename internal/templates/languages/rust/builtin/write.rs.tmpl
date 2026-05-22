@@ -98,3 +98,83 @@ fn validate_path(allowed_roots: &[String], p: &str) -> anyhow::Result<()> {
     }
     bail!("path {:?} is outside the configured allowed_roots", p);
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+    use tempfile::TempDir;
+
+    fn enabled_cfg() -> Config {
+        Config {
+            enabled: true,
+            allowed_roots: vec![],
+        }
+    }
+
+    #[tokio::test]
+    async fn disabled_returns_error() {
+        let cfg = Config {
+            enabled: false,
+            ..enabled_cfg()
+        };
+        let err = handle(json!({"file_path": "x", "content": "y"}), cfg)
+            .await
+            .unwrap_err();
+        assert!(err.to_string().contains("disabled"));
+    }
+
+    #[tokio::test]
+    async fn requires_file_path_and_content() {
+        let err = handle(json!({"content": "y"}), enabled_cfg())
+            .await
+            .unwrap_err();
+        assert!(err.to_string().contains("file_path"));
+
+        let err = handle(json!({"file_path": "x"}), enabled_cfg())
+            .await
+            .unwrap_err();
+        assert!(err.to_string().contains("content"));
+    }
+
+    #[tokio::test]
+    async fn writes_file_and_creates_parent_dirs() {
+        let dir = TempDir::new().expect("tempdir");
+        let target = dir.path().join("nested/deep/out.txt");
+
+        let out = handle(
+            json!({"file_path": target.to_string_lossy(), "content": "payload"}),
+            enabled_cfg(),
+        )
+        .await
+        .expect("handle");
+        let parsed: serde_json::Value = serde_json::from_str(&out).unwrap();
+        assert_eq!(parsed["bytes_written"], json!(7));
+
+        let got = tokio::fs::read_to_string(&target).await.unwrap();
+        assert_eq!(got, "payload");
+    }
+
+    #[tokio::test]
+    async fn overwrites_existing_file() {
+        let dir = TempDir::new().expect("tempdir");
+        let target = dir.path().join("out.txt");
+        tokio::fs::write(&target, b"old").await.unwrap();
+
+        handle(
+            json!({"file_path": target.to_string_lossy(), "content": "new"}),
+            enabled_cfg(),
+        )
+        .await
+        .expect("handle");
+        let got = tokio::fs::read_to_string(&target).await.unwrap();
+        assert_eq!(got, "new");
+    }
+
+    #[test]
+    fn validate_path_enforces_roots() {
+        let roots = vec!["/srv/agent".to_string()];
+        assert!(validate_path(&roots, "/srv/agent/out.txt").is_ok());
+        assert!(validate_path(&roots, "/etc/passwd").is_err());
+    }
+}
