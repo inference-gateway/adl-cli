@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.32.0](https://github.com/inference-gateway/adl-cli/compare/v0.31.0...v0.32.0) (2026-05-22)
+
+### ✨ Features
+
+* **schema:** Add declarative spec.ai/spec.scm.ci/spec.scm.cd flags ([#123](https://github.com/inference-gateway/adl-cli/issues/123)) ([05f2d02](https://github.com/inference-gateway/adl-cli/commit/05f2d025fb3efca58861125b26ad1bf2cbe565f1)), closes [#122](https://github.com/inference-gateway/adl-cli/issues/122)
+
+### 🔧 Miscellaneous
+
+* **deps:** Update adl.flake version to v0.31.0 in manifest.toml and README.md ([621005d](https://github.com/inference-gateway/adl-cli/commit/621005d0bbdaae81c49ffd88523904f4f3c54c92))
+
 ## [0.31.0](https://github.com/inference-gateway/adl-cli/compare/v0.30.10...v0.31.0) (2026-05-22)
 
 ### ✨ Features
