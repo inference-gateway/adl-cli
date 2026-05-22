@@ -46,7 +46,6 @@ func TestGoMainTemplate_IsCobraCLI(t *testing.T) {
 		}
 	}
 
-	// The bare `func main()` must remain - it's the binary's entry point.
 	if !strings.Contains(rendered, "func main() {") {
 		t.Errorf("generated main.go is missing func main()")
 	}
