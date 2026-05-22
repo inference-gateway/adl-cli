@@ -206,41 +206,6 @@ func TestGenerator_AI_AllAgentsEnabled(t *testing.T) {
 	assertFile(t, out, ".github/workflows/gemini.yml", true)
 }
 
-func TestGenerator_AI_LegacyEnabledFallback(t *testing.T) {
-	// Pre-v0.8.0 manifests used `spec.development.ai.enabled: true` to
-	// turn on CLAUDE.md and AGENTS.md. The v0.8.0 schema drops that
-	// field but the validator's JSON Schema still tolerates it
-	// (additionalProperties default is true), so the generator must
-	// translate it into the per-agent set the legacy behaviour
-	// expected.
-	tmp := t.TempDir()
-	manifest := writeManifest(t, tmp, `  development:
-    ai:
-      enabled: true
-`)
-	out := filepath.Join(tmp, "out")
-
-	mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
-
-	assertFile(t, out, "CLAUDE.md", true)
-	assertFile(t, out, "AGENTS.md", true)
-	assertFile(t, out, "GEMINI.md", false)
-}
-
-func TestGenerator_AI_CLIFlagDoesLegacyFallback(t *testing.T) {
-	// --ai with no manifest-level toggles is the second source of the
-	// legacy CLAUDE.md + AGENTS.md behaviour. Same fallback applies.
-	tmp := t.TempDir()
-	manifest := writeManifest(t, tmp, "")
-	out := filepath.Join(tmp, "out")
-
-	mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test", EnableAI: true})
-
-	assertFile(t, out, "CLAUDE.md", true)
-	assertFile(t, out, "AGENTS.md", true)
-	assertFile(t, out, "GEMINI.md", false)
-}
-
 func TestGenerator_AI_NoWorkflowsWhenSCMNotGithub(t *testing.T) {
 	tmp := t.TempDir()
 	manifest := writeManifest(t, tmp, `  scm:

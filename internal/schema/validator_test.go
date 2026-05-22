@@ -274,6 +274,32 @@ spec:
 `,
 			errSub: "spec.ai -> spec.development.ai",
 		},
+		{
+			name: "legacy spec.development.ai.enabled (pre-v0.8.0 single-flag shape)",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: legacy-ai-enabled
+  description: legacy
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  server:
+    port: 8080
+    debug: false
+  language:
+    go:
+      module: github.com/test/legacy
+      version: "1.26.2"
+  development:
+    ai:
+      enabled: true
+`,
+			errSub: "spec.development.ai.enabled",
+		},
 	}
 
 	for _, tc := range cases {

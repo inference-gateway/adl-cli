@@ -97,9 +97,13 @@ func (v *Validator) ValidateFile(filePath string) ([]string, error) {
 }
 
 // checkLegacySpecFields rejects manifests that still use the pre-v0.6.0
-// shape where `sandbox` and `ai` sat directly under `spec`. In v0.6.0
-// they were grouped under `spec.development.{sandbox,ai}`. This catches
-// the typo before YAML unmarshal silently drops the unknown fields.
+// shape where `sandbox` and `ai` sat directly under `spec` (in v0.6.0
+// they were grouped under `spec.development.{sandbox,ai}`) and the
+// pre-v0.8.0 single-flag AI shape `spec.development.ai.enabled: true`
+// (replaced by per-agent toggles claudecode/codex/gemini/opencode/infer).
+// JSON Schema's default additionalProperties:true would otherwise silently
+// drop these unknown fields, so we surface them as errors before they
+// confuse the user.
 func checkLegacySpecFields(yamlData any) error {
 	root, ok := yamlData.(map[string]any)
 	if !ok {
@@ -110,19 +114,27 @@ func checkLegacySpecFields(yamlData any) error {
 		return nil
 	}
 
-	var legacy []string
+	var legacyV6 []string
 	if _, exists := spec["sandbox"]; exists {
-		legacy = append(legacy, "spec.sandbox -> spec.development.sandbox")
+		legacyV6 = append(legacyV6, "spec.sandbox -> spec.development.sandbox")
 	}
 	if _, exists := spec["ai"]; exists {
-		legacy = append(legacy, "spec.ai -> spec.development.ai")
+		legacyV6 = append(legacyV6, "spec.ai -> spec.development.ai")
 	}
-	if len(legacy) == 0 {
-		return nil
+	if len(legacyV6) > 0 {
+		return fmt.Errorf("manifest uses pre-v0.6.0 schema fields; move them under spec.development:\n  - %s\nThe ADL schema is pinned at v0.6.0+ (see https://github.com/inference-gateway/adl/releases/tag/v0.6.0)",
+			joinWithIndent(legacyV6, "\n  - "))
 	}
 
-	return fmt.Errorf("manifest uses pre-v0.6.0 schema fields; move them under spec.development:\n  - %s\nThe ADL schema is pinned at v0.6.0 (see https://github.com/inference-gateway/adl/releases/tag/v0.6.0)",
-		joinWithIndent(legacy, "\n  - "))
+	if dev, ok := spec["development"].(map[string]any); ok {
+		if ai, ok := dev["ai"].(map[string]any); ok {
+			if _, exists := ai["enabled"]; exists {
+				return fmt.Errorf("manifest uses the pre-v0.8.0 single-flag AI shape `spec.development.ai.enabled`; this field was removed in ADL v0.8.0. Move it to a per-agent toggle under spec.development.ai, e.g.:\n\n  spec:\n    development:\n      ai:\n        claudecode:\n          enabled: true   # generates CLAUDE.md + .github/workflows/claude-code.yml\n        # codex / gemini / opencode / infer are independent toggles\n\nSee https://github.com/inference-gateway/adl/releases/tag/v0.8.0 for the full per-agent matrix")
+			}
+		}
+	}
+
+	return nil
 }
 
 // joinWithIndent is a tiny helper so we don't pull in strings just for one

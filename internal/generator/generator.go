@@ -31,53 +31,16 @@ type Config struct {
 	DeploymentType     string
 	EnableFlox         bool
 	EnableDevContainer bool
-	EnableAI           bool
 	Offline            bool
 	ADLFile            string
 	OutputDir          string
+	// EnableAI is the derived "any AI assistant is on" state. Computed
+	// in Generate() from AIToggles.Any(); not set by callers.
+	EnableAI bool
 	// AIToggles is the resolved per-agent state derived from
-	// spec.development.ai (with legacy `enabled` and --ai fall-back
-	// applied). Computed in Generate() before templating; not set by
-	// callers.
+	// spec.development.ai. Computed in Generate() before templating;
+	// not set by callers.
 	AIToggles schema.AIAgentToggles
-}
-
-// applyAITogglesToConfig mirrors the resolved per-agent toggles back
-// onto AIConfig so templates that read directly from
-// spec.development.ai see the same effective state as the generator.
-// This keeps the --ai CLI flag and legacy `enabled: true` working
-// without forcing every template to consult AIToggles independently.
-func applyAITogglesToConfig(ai *schema.AIConfig, t schema.AIAgentToggles) {
-	if t.ClaudeCode {
-		if ai.Claudecode == nil {
-			ai.Claudecode = &schema.ClaudeCodeConfig{}
-		}
-		ai.Claudecode.Enabled = true
-	}
-	if t.Codex {
-		if ai.Codex == nil {
-			ai.Codex = &schema.CodexConfig{}
-		}
-		ai.Codex.Enabled = true
-	}
-	if t.Gemini {
-		if ai.Gemini == nil {
-			ai.Gemini = &schema.GeminiConfig{}
-		}
-		ai.Gemini.Enabled = true
-	}
-	if t.OpenCode {
-		if ai.Opencode == nil {
-			ai.Opencode = &schema.OpenCodeConfig{}
-		}
-		ai.Opencode.Enabled = true
-	}
-	if t.Infer {
-		if ai.Infer == nil {
-			ai.Infer = &schema.InferConfig{}
-		}
-		ai.Infer.Enabled = true
-	}
 }
 
 // New creates a new generator
@@ -99,38 +62,25 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 	}
 
 	// Reconcile CLI flags with manifest fields. The CLI flag is OR'd on top
-	// of the manifest value, so passing --ai/--ci/--cd at the command line
+	// of the manifest value, so passing --ci/--cd at the command line
 	// always wins; omitting the flag falls back to the manifest. After this
 	// block, both g.config.* and adl.Spec.Development.* reflect the same
 	// effective state so templates (e.g. .gitattributes) can read either
 	// source of truth.
 	//
-	// Per-agent toggles (claudecode/codex/gemini/opencode/infer) live on
-	// adl.Spec.Development.AI in v0.8.0+. The legacy `enabled` flag was
-	// dropped from the schema but is still tolerated for backwards
-	// compatibility — detectLegacyAIEnabled peeks at the raw YAML for it.
-	legacyAIEnabled, err := g.detectLegacyAIEnabled(adlFile)
-	if err != nil {
-		return fmt.Errorf("failed to inspect manifest for legacy AI flag: %w", err)
-	}
-	legacyAIEnabled = legacyAIEnabled || g.config.EnableAI
-
+	// Per-agent AI toggles (claudecode/codex/gemini/opencode/infer) live on
+	// adl.Spec.Development.AI as of ADL v0.8.0. The pre-v0.8.0 single-flag
+	// `enabled` shape is rejected by the schema validator (see
+	// checkLegacySpecFields in internal/schema/validator.go), so no
+	// translation is needed here.
 	var aiCfg *schema.AIConfig
 	if adl.Spec.Development != nil {
 		aiCfg = adl.Spec.Development.AI
 	}
-	aiToggles := schema.ResolveAIAgentToggles(aiCfg, legacyAIEnabled)
-	if aiToggles.Any() {
-		if adl.Spec.Development == nil {
-			adl.Spec.Development = &schema.DevelopmentConfig{}
-		}
-		if adl.Spec.Development.AI == nil {
-			adl.Spec.Development.AI = &schema.AIConfig{}
-		}
-		applyAITogglesToConfig(adl.Spec.Development.AI, aiToggles)
-		g.config.EnableAI = true
-	}
+	aiToggles := schema.ResolveAIAgentToggles(aiCfg)
 	g.config.AIToggles = aiToggles
+	g.config.EnableAI = aiToggles.Any()
+
 	if adl.Spec.SCM != nil {
 		if adl.Spec.SCM.CI {
 			g.config.GenerateCI = true
@@ -238,36 +188,6 @@ func (g *Generator) parseADL(adlFile string) (*schema.ADL, error) {
 	}
 
 	return &adl, nil
-}
-
-// detectLegacyAIEnabled reads the raw manifest and reports whether the
-// deprecated `spec.development.ai.enabled` flag is set. The v0.8.0
-// schema replaced that flag with per-agent toggles (claudecode/
-// codex/gemini/opencode/infer) but JSON Schema's default
-// additionalProperties:true still lets `enabled` slip through
-// validation, so we need to peek at the raw YAML to honour pre-v0.8.0
-// manifests that rely on it.
-func (g *Generator) detectLegacyAIEnabled(adlFile string) (bool, error) {
-	data, err := os.ReadFile(adlFile)
-	if err != nil {
-		return false, err
-	}
-	var raw struct {
-		Spec struct {
-			Development struct {
-				AI struct {
-					Enabled *bool `yaml:"enabled"`
-				} `yaml:"ai"`
-			} `yaml:"development"`
-		} `yaml:"spec"`
-	}
-	if err := yaml.Unmarshal(data, &raw); err != nil {
-		return false, err
-	}
-	if raw.Spec.Development.AI.Enabled == nil {
-		return false, nil
-	}
-	return *raw.Spec.Development.AI.Enabled, nil
 }
 
 // validateADL validates the ADL structure for code generation requirements
@@ -843,10 +763,6 @@ func (g *Generator) buildGenerateCommand() string {
 
 	if g.config.EnableDevContainer {
 		parts = append(parts, "--devcontainer")
-	}
-
-	if g.config.EnableAI {
-		parts = append(parts, "--ai")
 	}
 
 	return strings.Join(parts, " ")

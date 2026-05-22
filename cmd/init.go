@@ -790,10 +790,10 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 
 	fmt.Println("\n🤖 AI Assistant Documentation")
 	fmt.Println("-----------------------------")
-	// Legacy `--ai` flag is a shortcut for "enable claudecode" so the
-	// init UX still matches what the flag historically meant
-	// (CLAUDE.md + claude-code in sandboxes). Per-agent toggles can be
-	// edited in agent.yaml after init.
+	// `--ai` is a UX shortcut for "enable claudecode" so users can
+	// turn on CLAUDE.md + claude-code in sandboxes from a single flag.
+	// Other agents (codex/gemini/opencode/infer) can be toggled by
+	// editing the generated agent.yaml after init.
 	aiEnabled := promptBoolWithConfig("ai", useDefaults, "Enable Claude Code (CLAUDE.md + claude-code in sandboxes)", false)
 	ensureDevelopment(adl)
 	adl.Spec.Development.AI = &struct {

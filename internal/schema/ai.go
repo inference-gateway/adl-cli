@@ -2,14 +2,8 @@ package schema
 
 // AIAgentToggles reports which per-agent AI assistant toggles in
 // spec.development.ai are enabled. The fields mirror AIConfig's
-// per-agent subsections (claudecode, codex, gemini, opencode, infer).
-//
-// AIConfig in ADL v0.8.0 replaces the single `enabled` flag with
-// independent per-agent toggles. ResolveAIAgentToggles centralises that
-// logic so the generator and templates don't each re-implement the
-// branching, and bakes in the legacy `spec.development.ai.enabled`
-// fallback (pre-v0.8.0 manifests still validate because the schema
-// allows additional properties — see ResolveAIAgentToggles).
+// per-agent subsections (claudecode, codex, gemini, opencode, infer)
+// introduced in ADL v0.8.0.
 type AIAgentToggles struct {
 	ClaudeCode bool
 	Codex      bool
@@ -31,50 +25,30 @@ func (t AIAgentToggles) AnyAgentsMD() bool {
 }
 
 // ResolveAIAgentToggles inspects spec.development.ai (the v0.8.0 shape)
-// and an optional legacyEnabled hint to produce the effective set of
-// per-agent toggles.
-//
-// legacyEnabled captures two pre-v0.8.0 sources that flowed through a
-// single `enabled` flag:
-//
-//   - The deprecated spec.development.ai.enabled field. The schema in
-//     v0.8.0 dropped this property, but it's still permitted by JSON
-//     Schema's default additionalProperties:true so old manifests
-//     continue to parse. The caller is responsible for surfacing it
-//     (the generator reads the raw YAML up front).
-//   - The CLI's --ai flag, which historically toggled
-//     CLAUDE.md + AGENTS.md generation.
-//
-// When legacyEnabled is true and no per-agent toggle is set, this
-// resolves to claudecode + infer so the generator emits CLAUDE.md and
-// AGENTS.md — the exact set of files the pre-v0.8.0 path produced. If
-// any per-agent toggle is already set the legacy flag is ignored: an
-// explicit modern manifest always wins.
-func ResolveAIAgentToggles(ai *AIConfig, legacyEnabled bool) AIAgentToggles {
+// and returns the effective set of per-agent toggles. The pre-v0.8.0
+// single-flag `spec.development.ai.enabled` shape is rejected by the
+// validator (see checkLegacySpecFields), so this function only needs to
+// honour the modern per-agent shape.
+func ResolveAIAgentToggles(ai *AIConfig) AIAgentToggles {
 	var t AIAgentToggles
-	if ai != nil {
-		if ai.Claudecode != nil && ai.Claudecode.Enabled {
-			t.ClaudeCode = true
-		}
-		if ai.Codex != nil && ai.Codex.Enabled {
-			t.Codex = true
-		}
-		if ai.Gemini != nil && ai.Gemini.Enabled {
-			t.Gemini = true
-		}
-		if ai.Opencode != nil && ai.Opencode.Enabled {
-			t.OpenCode = true
-		}
-		if ai.Infer != nil && ai.Infer.Enabled {
-			t.Infer = true
-		}
+	if ai == nil {
+		return t
 	}
-
-	if !t.Any() && legacyEnabled {
+	if ai.Claudecode != nil && ai.Claudecode.Enabled {
 		t.ClaudeCode = true
+	}
+	if ai.Codex != nil && ai.Codex.Enabled {
+		t.Codex = true
+	}
+	if ai.Gemini != nil && ai.Gemini.Enabled {
+		t.Gemini = true
+	}
+	if ai.Opencode != nil && ai.Opencode.Enabled {
+		t.OpenCode = true
+	}
+	if ai.Infer != nil && ai.Infer.Enabled {
 		t.Infer = true
 	}
-
 	return t
 }
 

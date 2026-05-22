@@ -317,7 +317,10 @@ spec:
 	}
 }
 
-func TestGenerateWithAI(t *testing.T) {
+// TestGenerateWithAIFromManifest verifies that declaring per-agent AI toggles
+// in the manifest activates the matching docs + sandbox extensions. No CLI
+// flag is involved — AI assistants are entirely manifest-driven post-v0.8.0.
+func TestGenerateWithAIFromManifest(t *testing.T) {
 	tempDir := t.TempDir()
 	outputPath := filepath.Join(tempDir, "test-ai-output")
 
@@ -345,6 +348,11 @@ spec:
         enabled: true
       devcontainer:
         enabled: true
+    ai:
+      claudecode:
+        enabled: true
+      codex:
+        enabled: true
 `
 	adlPath := filepath.Join(tempDir, "agent.yaml")
 	if err := os.WriteFile(adlPath, []byte(adlContent), 0644); err != nil {
@@ -353,25 +361,21 @@ spec:
 
 	originalADLFile := adlFile
 	originalOutputDir := outputDir
-	originalEnableAI := enableAI
 	defer func() {
 		adlFile = originalADLFile
 		outputDir = originalOutputDir
-		enableAI = originalEnableAI
 	}()
 
 	adlFile = adlPath
 	outputDir = outputPath
-	enableAI = true
 
-	err := runGenerate(generateCmd, []string{})
-	if err != nil {
+	if err := runGenerate(generateCmd, []string{}); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
 	claudeMdPath := filepath.Join(outputPath, "CLAUDE.md")
 	if _, err := os.Stat(claudeMdPath); os.IsNotExist(err) {
-		t.Errorf("expected CLAUDE.md to be generated when --ai flag is enabled")
+		t.Errorf("expected CLAUDE.md to be generated when spec.development.ai.claudecode.enabled is true")
 	}
 
 	claudeMdContent, err := os.ReadFile(claudeMdPath)
@@ -395,7 +399,7 @@ spec:
 		t.Fatalf("failed to read devcontainer.json: %v", err)
 	}
 	if !containsString(string(devcontainerContent), "anthropic.claude-code") {
-		t.Errorf("expected devcontainer.json to contain claude-code extension when --ai flag is enabled")
+		t.Errorf("expected devcontainer.json to contain claude-code extension when claudecode is enabled")
 	}
 
 	floxManifestPath := filepath.Join(outputPath, ".flox/env/manifest.toml")
@@ -408,63 +412,7 @@ spec:
 		t.Fatalf("failed to read manifest.toml: %v", err)
 	}
 	if !containsString(string(floxContent), "claude-code.pkg-path") {
-		t.Errorf("expected manifest.toml to contain claude-code package when --ai flag is enabled")
-	}
-}
-
-// TestGenerateWithAIFromManifest verifies that declaring spec.development.ai.enabled: true
-// in the manifest activates AI assistant docs without needing the --ai CLI flag.
-func TestGenerateWithAIFromManifest(t *testing.T) {
-	tempDir := t.TempDir()
-	outputPath := filepath.Join(tempDir, "ai-from-manifest")
-
-	adlContent := `apiVersion: adl.inference-gateway.com/v1
-kind: Agent
-metadata:
-  name: manifest-ai-agent
-  description: AI enabled declaratively
-  version: 1.0.0
-spec:
-  capabilities:
-    streaming: true
-    pushNotifications: false
-    stateTransitionHistory: false
-  server:
-    port: 8080
-    debug: false
-  language:
-    go:
-      module: github.com/test/manifest-ai
-      version: "1.26.2"
-  development:
-    ai:
-      enabled: true
-`
-	adlPath := filepath.Join(tempDir, "agent.yaml")
-	if err := os.WriteFile(adlPath, []byte(adlContent), 0644); err != nil {
-		t.Fatalf("failed to write ADL file: %v", err)
-	}
-
-	originalADLFile := adlFile
-	originalOutputDir := outputDir
-	originalEnableAI := enableAI
-	defer func() {
-		adlFile = originalADLFile
-		outputDir = originalOutputDir
-		enableAI = originalEnableAI
-	}()
-
-	adlFile = adlPath
-	outputDir = outputPath
-	enableAI = false
-
-	if err := runGenerate(generateCmd, []string{}); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	claudeMdPath := filepath.Join(outputPath, "CLAUDE.md")
-	if _, err := os.Stat(claudeMdPath); os.IsNotExist(err) {
-		t.Errorf("expected CLAUDE.md to be generated when spec.development.ai.enabled is true (without --ai flag)")
+		t.Errorf("expected manifest.toml to contain claude-code package when claudecode is enabled")
 	}
 
 	gitattributesPath := filepath.Join(outputPath, ".gitattributes")
@@ -478,6 +426,62 @@ spec:
 	}
 	if !containsString(gitattributesContent, "AGENTS.md linguist-generated=true") {
 		t.Errorf("expected .gitattributes to mark AGENTS.md as linguist-generated, got:\n%s", gitattributesContent)
+	}
+}
+
+// TestGenerateRejectsLegacyAIEnabled locks in the v0.8.0 migration:
+// `spec.development.ai.enabled: true` must be rejected by the validator
+// with a hint pointing users at the per-agent toggles.
+func TestGenerateRejectsLegacyAIEnabled(t *testing.T) {
+	tempDir := t.TempDir()
+	outputPath := filepath.Join(tempDir, "legacy-ai-enabled")
+
+	adlContent := `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: legacy-ai-agent
+  description: Pre-v0.8.0 manifest using the single-flag AI shape
+  version: 1.0.0
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  server:
+    port: 8080
+    debug: false
+  language:
+    go:
+      module: github.com/test/legacy-ai
+      version: "1.26.2"
+  development:
+    ai:
+      enabled: true
+`
+	adlPath := filepath.Join(tempDir, "agent.yaml")
+	if err := os.WriteFile(adlPath, []byte(adlContent), 0644); err != nil {
+		t.Fatalf("failed to write ADL file: %v", err)
+	}
+
+	originalADLFile := adlFile
+	originalOutputDir := outputDir
+	defer func() {
+		adlFile = originalADLFile
+		outputDir = originalOutputDir
+	}()
+
+	adlFile = adlPath
+	outputDir = outputPath
+
+	err := runGenerate(generateCmd, []string{})
+	if err == nil {
+		t.Fatalf("expected runGenerate to fail when spec.development.ai.enabled is set")
+	}
+	if !containsString(err.Error(), "spec.development.ai.enabled") {
+		t.Errorf("expected error to mention spec.development.ai.enabled, got: %v", err)
+	}
+	if !containsString(err.Error(), "claudecode") {
+		t.Errorf("expected error to point at the per-agent toggles (e.g. claudecode), got: %v", err)
 	}
 }
 
@@ -600,9 +604,11 @@ spec:
 	}
 }
 
-// TestGenerateCLIFlagOverridesManifest verifies that the --ai/--ci/--cd flags
+// TestGenerateCLIFlagOverridesManifest verifies that the --ci/--cd flags
 // OR on top of the manifest value: setting the flag wins even if the manifest
-// has the field unset or false.
+// has the field unset or false. AI assistants are no longer CLI-controlled
+// (the legacy --ai fallback was removed in favour of per-agent manifest
+// toggles in spec.development.ai), so this only covers --ci and --cd.
 func TestGenerateCLIFlagOverridesManifest(t *testing.T) {
 	tempDir := t.TempDir()
 	outputPath := filepath.Join(tempDir, "cli-overrides")
@@ -611,7 +617,7 @@ func TestGenerateCLIFlagOverridesManifest(t *testing.T) {
 kind: Agent
 metadata:
   name: cli-overrides-agent
-  description: Manifest leaves AI/CI/CD off but flags turn them on
+  description: Manifest leaves CI/CD off but flags turn them on
   version: 1.0.0
 spec:
   capabilities:
@@ -630,9 +636,6 @@ spec:
     url: https://github.com/test/cli-overrides
     ci: false
     cd: false
-  development:
-    ai:
-      enabled: false
 `
 	adlPath := filepath.Join(tempDir, "agent.yaml")
 	if err := os.WriteFile(adlPath, []byte(adlContent), 0644); err != nil {
@@ -641,20 +644,17 @@ spec:
 
 	originalADLFile := adlFile
 	originalOutputDir := outputDir
-	originalEnableAI := enableAI
 	originalGenerateCI := generateCI
 	originalGenerateCD := generateCD
 	defer func() {
 		adlFile = originalADLFile
 		outputDir = originalOutputDir
-		enableAI = originalEnableAI
 		generateCI = originalGenerateCI
 		generateCD = originalGenerateCD
 	}()
 
 	adlFile = adlPath
 	outputDir = outputPath
-	enableAI = true
 	generateCI = true
 	generateCD = true
 
@@ -663,7 +663,6 @@ spec:
 	}
 
 	for _, want := range []string{
-		"CLAUDE.md",
 		".github/workflows/ci.yml",
 		".github/workflows/cd.yml",
 	} {
@@ -751,7 +750,10 @@ spec:
       version: "1.26.2"
   development:
     ai:
-      enabled: true
+      claudecode:
+        enabled: true
+      codex:
+        enabled: true
     sandbox:
       flox:
         enabled: ` + boolStr(tc.floxEnabled) + `
@@ -767,16 +769,13 @@ spec:
 
 			originalADLFile := adlFile
 			originalOutputDir := outputDir
-			originalEnableAI := enableAI
 			defer func() {
 				adlFile = originalADLFile
 				outputDir = originalOutputDir
-				enableAI = originalEnableAI
 			}()
 
 			adlFile = adlPath
 			outputDir = outputPath
-			enableAI = false
 
 			if err := runGenerate(generateCmd, []string{}); err != nil {
 				t.Fatalf("unexpected error: %v", err)

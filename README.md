@@ -271,13 +271,11 @@ The init command supports extensive configuration options:
 
 **Pipeline / AI Options (declarative, written into the manifest as `false` by default):**
 
-- `--ai` - Legacy compatibility flag. With v0.8.0+ manifests, prefer per-agent
-  toggles under `spec.development.ai.{claudecode,codex,gemini,opencode,infer}.enabled`
-  (see [Per-agent AI assistants](#per-agent-ai-assistants)). When `--ai` is
-  passed (or the legacy `spec.development.ai.enabled: true` flag is set) and
-  no per-agent toggle is provided, the generator falls back to enabling
-  `claudecode` + `infer` so the previous `CLAUDE.md`/`AGENTS.md` output is
-  preserved.
+- `--ai` - Shortcut for the init wizard: writes
+  `spec.development.ai.claudecode.enabled: true` into the generated `agent.yaml`.
+  Every other per-agent toggle (`codex`, `gemini`, `opencode`, `infer`) stays
+  off; edit `agent.yaml` after init to enable additional agents
+  (see [Per-agent AI assistants](#per-agent-ai-assistants)).
 - `--ci` - Sets `spec.scm.ci: true` (generate CI workflow on `adl generate`)
 - `--cd` - Sets `spec.scm.cd: true` (generate CD pipeline + semantic-release on `adl generate`)
 
@@ -292,9 +290,6 @@ adl generate --file agent.yaml --output ./test-my-agent --overwrite
 
 # Generate with CI workflow configuration
 adl generate --file agent.yaml --output ./test-my-agent --ci
-
-# Generate with AI assistant instructions and claude-code integration
-adl generate --file agent.yaml --output ./test-my-agent --ai
 
 # Generate with CloudRun deployment configuration
 adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun
@@ -314,12 +309,12 @@ adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun --
 | `--ci`             | Generate CI workflow configuration (GitHub Actions). Overrides `spec.scm.ci`.              |
 | `--cd`             | Generate CD pipeline configuration with semantic-release. Overrides `spec.scm.cd`.         |
 | `--deployment`     | Generate deployment configuration (`kubernetes`, `cloudrun`)                               |
-| `--ai`             | Legacy fallback: enable `CLAUDE.md` + `AGENTS.md` generation when the manifest has no per-agent toggles set. Prefer per-agent toggles under `spec.development.ai.<agent>.enabled` (see [Per-agent AI assistants](#per-agent-ai-assistants)). |
 
 > **Declarative equivalents:** `--ci` and `--cd` are mirrored by `spec.scm.ci`
 > and `spec.scm.cd`. The CLI flag is OR'd on top of the manifest value (passing
-> the flag wins; omitting it falls back to the manifest). AI assistants are now
-> per-agent in `spec.development.ai` — see the matrix below.
+> the flag wins; omitting it falls back to the manifest). AI assistants are
+> entirely manifest-driven via the per-agent toggles in `spec.development.ai`
+> — see the matrix below.
 > `adl init` writes all toggles as `false` by default — they're opt-in. Generated files
 > (`CLAUDE.md`, `GEMINI.md`, `AGENTS.md`, `.github/workflows/ci.yml`,
 > `.github/workflows/cd.yml`, `.github/workflows/claude-code.yml`,
@@ -382,9 +377,10 @@ spec:
 - `CLAUDE.md` and `GEMINI.md` are agent-specific and only appear when the
   matching toggle is on.
 - If no toggles are enabled, no AI docs or workflows are emitted.
-- Pre-v0.8.0 manifests using `spec.development.ai.enabled: true` (or
-  invoking `--ai`) still work and fall back to enabling `claudecode` +
-  `infer`, producing the previous `CLAUDE.md`/`AGENTS.md` pair.
+- Pre-v0.8.0 manifests using `spec.development.ai.enabled: true` are no longer
+  accepted — `adl validate` and `adl generate` will fail with a migration hint
+  pointing at the per-agent toggles. Move `enabled: true` to the specific agent
+  you want (e.g. `claudecode.enabled: true`).
 - When `claudecode` is enabled, sandbox environments (Flox, DevContainer)
   also gain the `claude-code` CLI / extension automatically.
 
@@ -1118,7 +1114,7 @@ my-go-agent/
 ├── .gitignore                 # Standard Git ignore patterns
 ├── .gitattributes             # Git attributes configuration
 ├── .editorconfig              # Editor configuration
-├── CLAUDE.md                  # AI assistant instructions (generated with --ai flag)
+├── CLAUDE.md                  # AI assistant instructions (spec.development.ai.claudecode.enabled: true)
 └── README.md                  # Project documentation with setup instructions
 ```
 
@@ -1151,7 +1147,7 @@ my-rust-agent/
 │   └── deployment.yaml        # Kubernetes deployment
 ├── cloudrun/
 │   └── deploy.sh              # CloudRun deployment script (with --deployment cloudrun)
-├── CLAUDE.md                  # AI assistant instructions (generated with --ai flag)
+├── CLAUDE.md                  # AI assistant instructions (spec.development.ai.claudecode.enabled: true)
 └── README.md                  # Documentation
 ```
 
@@ -1174,8 +1170,11 @@ All projects include these essential files regardless of language:
 - **Development Environment** - Based on `sandbox` configuration:
   - **Flox**: `.flox/` directory with environment configuration when `sandbox.flox.enabled: true`
   - **DevContainer**: `.devcontainer/devcontainer.json` when `sandbox.devcontainer.enabled: true`
-- **AI Assistant Instructions** - When using `--ai` flag:
-  - **CLAUDE.md**: AI assistant instructions tailored to your agent configuration
+- **AI Assistant Instructions** - Per-agent toggles under `spec.development.ai`
+  (see [Per-agent AI assistants](#per-agent-ai-assistants)):
+  - **CLAUDE.md** when `spec.development.ai.claudecode.enabled: true`
+  - **GEMINI.md** when `spec.development.ai.gemini.enabled: true`
+  - **AGENTS.md** (shared) when any of `codex`, `opencode`, or `infer` is enabled
 
 ### CI Integration
 
