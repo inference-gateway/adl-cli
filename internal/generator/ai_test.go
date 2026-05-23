@@ -86,7 +86,6 @@ func TestGenerator_AI_ClaudeCodeOnly(t *testing.T) {
 	assertFile(t, out, "CLAUDE.md", true)
 	assertFile(t, out, ".github/workflows/claude.yml", true)
 
-	// Sibling agents must stay off when only claudecode is enabled.
 	assertFile(t, out, "AGENTS.md", false)
 	assertFile(t, out, "GEMINI.md", false)
 	assertFile(t, out, ".github/workflows/codex.yml", false)
@@ -263,49 +262,38 @@ func TestGenerator_AI_ClaudeWorkflowGoContent(t *testing.T) {
 
 	body := readGenerated(t, out, ".github/workflows/claude.yml")
 
-	// Filename invariants — the file is named claude.yml, not the
-	// old claude-code.yml. The old name lives only in the changelog
-	// note about the rename.
 	assertNotContains(t, body, "claude-code.yml", "Claude Code workflow body")
 
-	// The redundant comment block describing CLAUDE.md should be gone.
 	assertNotContains(t, body, "picks up CLAUDE.md", "Claude Code workflow body")
 
-	// YAML triggers use bullet-list form, not the inline [created] form.
 	assertContains(t, body, "issue_comment:\n    types:\n      - created", "Claude Code workflow body")
 	assertContains(t, body, "issues:\n    types:\n      - opened\n      - assigned", "Claude Code workflow body")
 	assertNotContains(t, body, "types: [created]", "Claude Code workflow body")
 
-	// New permission for the action's internal poller.
 	assertContains(t, body, "actions: read", "Claude Code workflow body")
 
-	// Go-specific setup must appear; Rust-specific setup must not.
 	assertContains(t, body, "Set up Go", "Claude Code workflow body (go)")
 	assertContains(t, body, "actions/setup-go@v6.4.0", "Claude Code workflow body (go)")
 	assertContains(t, body, "Install golangci-lint", "Claude Code workflow body (go)")
 	assertNotContains(t, body, "Set up Rust", "Claude Code workflow body (go)")
 	assertNotContains(t, body, "actions-rs/toolchain", "Claude Code workflow body (go)")
 
-	// Shared setup steps.
 	assertContains(t, body, "arduino/setup-task@v2.0.0", "Claude Code workflow body")
 	assertContains(t, body, "Install maintainer skill", "Claude Code workflow body")
 	assertContains(t, body, "raw.githubusercontent.com/inference-gateway/skills/main/skills/maintainer/SKILL.md", "Claude Code workflow body")
 
-	// New Run Claude Code step shape.
 	assertContains(t, body, "anthropics/claude-code-action@v1.0.131", "Claude Code workflow body")
 	assertContains(t, body, "claude_code_oauth_token:", "Claude Code workflow body")
 	assertContains(t, body, "use_commit_signing: true", "Claude Code workflow body")
 	assertContains(t, body, "branch_prefix: 'claude/'", "Claude Code workflow body")
 	assertContains(t, body, "--model claude-opus-4-7", "Claude Code workflow body")
 
-	// Language-specific Bash allowlist: Go gets Bash(go:*), not Bash(cargo:*).
 	assertContains(t, body, "Bash(go:*)", "Claude Code workflow body (go)")
 	assertNotContains(t, body, "Bash(cargo:*)", "Claude Code workflow body (go)")
 }
 
 func TestGenerator_AI_ClaudeWorkflowRustContent(t *testing.T) {
 	tmp := t.TempDir()
-	// Override the language block — Rust instead of Go.
 	manifest := filepath.Join(tmp, "agent.yaml")
 	body := `apiVersion: adl.inference-gateway.com/v1
 kind: Agent
@@ -337,7 +325,6 @@ spec:
 
 	wf := readGenerated(t, out, ".github/workflows/claude.yml")
 
-	// Rust-specific setup must appear; Go-specific setup must not.
 	assertContains(t, wf, "Set up Rust", "Claude Code workflow body (rust)")
 	assertContains(t, wf, "actions-rs/toolchain@v1", "Claude Code workflow body (rust)")
 	assertContains(t, wf, "1.94.1", "Claude Code workflow body (rust)")
@@ -345,7 +332,6 @@ spec:
 	assertNotContains(t, wf, "actions/setup-go", "Claude Code workflow body (rust)")
 	assertNotContains(t, wf, "Install golangci-lint", "Claude Code workflow body (rust)")
 
-	// Language-specific Bash allowlist: Rust gets Bash(cargo:*), not Bash(go:*).
 	assertContains(t, wf, "Bash(cargo:*)", "Claude Code workflow body (rust)")
 	assertNotContains(t, wf, "Bash(go:*)", "Claude Code workflow body (rust)")
 }
