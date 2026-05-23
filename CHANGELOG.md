@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.36.3](https://github.com/inference-gateway/adl-cli/compare/v0.36.2...v0.36.3) (2026-05-23)
+
+### 🐛 Bug Fixes
+
+* **generator:** Stop leaking declarative flags into generated Taskfile ([#147](https://github.com/inference-gateway/adl-cli/issues/147)) ([172108e](https://github.com/inference-gateway/adl-cli/commit/172108e535d48fe97f3b08391516ba1466101248)), closes [#146](https://github.com/inference-gateway/adl-cli/issues/146) [#146](https://github.com/inference-gateway/adl-cli/issues/146)
+
 ## [0.36.2](https://github.com/inference-gateway/adl-cli/compare/v0.36.1...v0.36.2) (2026-05-23)
 
 ### 🔧 Miscellaneous
