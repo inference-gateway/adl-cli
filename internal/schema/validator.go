@@ -129,7 +129,7 @@ func checkLegacySpecFields(yamlData any) error {
 	if dev, ok := spec["development"].(map[string]any); ok {
 		if ai, ok := dev["ai"].(map[string]any); ok {
 			if _, exists := ai["enabled"]; exists {
-				return fmt.Errorf("manifest uses the pre-v0.8.0 single-flag AI shape `spec.development.ai.enabled`; this field was removed in ADL v0.8.0. Move it to a per-agent toggle under spec.development.ai, e.g.:\n\n  spec:\n    development:\n      ai:\n        claudecode:\n          enabled: true   # generates CLAUDE.md + .github/workflows/claude-code.yml\n        # codex / gemini / opencode / infer are independent toggles\n\nSee https://github.com/inference-gateway/adl/releases/tag/v0.8.0 for the full per-agent matrix")
+				return fmt.Errorf("manifest uses the pre-v0.8.0 single-flag AI shape `spec.development.ai.enabled`; this field was removed in ADL v0.8.0. Move it to a per-agent toggle under spec.development.ai, e.g.:\n\n  spec:\n    development:\n      ai:\n        claudecode:\n          enabled: true   # generates CLAUDE.md + .github/workflows/claude.yml\n        # codex / gemini / opencode / infer are independent toggles\n\nSee https://github.com/inference-gateway/adl/releases/tag/v0.8.0 for the full per-agent matrix")
 			}
 		}
 	}

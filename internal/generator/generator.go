@@ -598,7 +598,7 @@ func (g *Generator) generateAIWorkflows(adl *schema.ADL, ctx templates.Context, 
 		{
 			enabled: g.config.AIToggles.ClaudeCode && schema.AIHasOfficialAction("claudecode"),
 			key:     "github/workflows/ai-claude-code.yaml",
-			path:    ".github/workflows/claude-code.yml",
+			path:    ".github/workflows/claude.yml",
 			label:   "Claude Code",
 		},
 		{
