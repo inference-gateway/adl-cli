@@ -209,6 +209,11 @@ spec:
     go:
       module: "github.com/inference-gateway/adl-cli/test-output"
       version: "1.26.2"
+      vendor:
+        deps:
+          - github.com/stretchr/testify@v1.10.0
+        devdeps:
+          - golang.org/x/tools/cmd/stringer@v0.20.0
   scm:
     provider: github
     url: "https://github.com/inference-gateway/adl-cli"

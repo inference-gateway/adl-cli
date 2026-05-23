@@ -68,6 +68,10 @@ spec:
       packageName: "rust-agent"
       version: "1.94.1"
       edition: "2024"
+      vendor:
+        devdeps:
+          - mockall@0.12.1
+          - pretty_assertions@1.4.0
   development:
     sandbox:
       flox:

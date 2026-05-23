@@ -605,6 +605,86 @@ spec:
         enabled: true
 ```
 
+### Extra dependencies (`spec.language.<lang>.vendor`)
+
+Every language config block accepts an optional `vendor` section that lets
+the manifest extend the generator's built-in dependency set. Use `deps`
+for runtime/production dependencies and `devdeps` for development-only
+ones. The exact meaning of `devdeps` depends on the language - see the
+mapping table below. Each entry must be `<package>@<version>` using
+the target language's native package and version syntax - the schema
+validates the shape up front (`^\S+@\S+$`) and points at the offending
+key if you mistype it (e.g. `spec.language.go.vendor.deps.0`).
+
+**Conflict policy:** generator built-ins always win. If your manifest
+lists a package that the generator already pins (e.g.
+`github.com/inference-gateway/adk` for Go, `tokio` for Rust), the
+vendor entry is silently dropped and a `⚠️  vendor … collides with
+built-in …` warning is printed to stderr. This prevents accidental
+downgrades of the core runtime SDK.
+
+**Output mapping per language:**
+
+| Language   | `deps` lands in               | `devdeps` lands in                 |
+| ---------- | ----------------------------- | ---------------------------------- |
+| Go         | `go.mod` `require` block      | `go.mod` [`tool` directive](https://go.dev/doc/modules/managing-dependencies#tools) (executable dev tools: code generators, linters, etc.) plus an `// indirect` entry in `require` so the module is downloadable. Test libraries that you `import` (testify, go-cmp, …) belong in `deps`, not `devdeps`. |
+| Rust       | `Cargo.toml` `[dependencies]` | `Cargo.toml` `[dev-dependencies]`  |
+| TypeScript | `package.json` `dependencies` | `package.json` `devDependencies` _(plumbed end-to-end once the TypeScript generator templates land - the schema and validator already accept the field)_ |
+
+For Go, supply the **full tool package path** (the binary's `main` package,
+e.g. `golang.org/x/tools/cmd/stringer`) with a version. After generation,
+run `go mod tidy` so Go normalises the indirect `require` entry to the
+actual module root.
+
+Examples per language:
+
+```yaml
+# Go: uuid for runtime, stringer + mockgen as dev tools.
+spec:
+  language:
+    go:
+      module: github.com/example/agent
+      version: "1.26.2"
+      vendor:
+        deps:
+          - github.com/google/uuid@v1.6.0
+          - github.com/stretchr/testify@v1.10.0  # imported by *_test.go
+        devdeps:
+          - golang.org/x/tools/cmd/stringer@v0.20.0
+          - github.com/golang/mock/mockgen@v1.6.0
+```
+
+```yaml
+# Rust: regex at runtime, mockall + pretty_assertions for tests.
+spec:
+  language:
+    rust:
+      packageName: agent
+      version: "1.94.1"
+      edition: "2024"
+      vendor:
+        deps:
+          - regex@1.10.0
+        devdeps:
+          - mockall@0.12.1
+          - pretty_assertions@1.4.0
+```
+
+```yaml
+# TypeScript: axios at runtime, vitest + @types/node for tests.
+spec:
+  language:
+    typescript:
+      packageName: "@example/agent"
+      nodeVersion: "20"
+      vendor:
+        deps:
+          - axios@1.7.0
+        devdeps:
+          - "@types/node@20.11.0"
+          - vitest@1.6.0
+```
+
 ## Skills vs. Tools
 
 The ADL spec distinguishes two complementary concepts:

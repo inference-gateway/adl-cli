@@ -3,10 +3,12 @@ package generator
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/inference-gateway/adl-cli/internal/schema"
 	"github.com/inference-gateway/adl-cli/internal/templates"
+	"github.com/inference-gateway/adl-cli/internal/vendor"
 )
 
 func TestGenerator_Generate(t *testing.T) {
@@ -895,4 +897,188 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestGenerator_VendorWiring exercises the go.mod / Cargo.toml templates
+// end-to-end with vendor.deps / vendor.devdeps populated. The cases cover
+// every state from acceptance criteria #6 in issue #152: empty/missing
+// vendor, runtime-only, dev-only, both, dedup against built-ins, and
+// dedup against a runtime entry (Rust's [dependencies] / [dev-dependencies]
+// dual-section rule).
+func TestGenerator_VendorWiring(t *testing.T) {
+	makeGo := func(v *schema.VendorConfig) *schema.ADL {
+		return &schema.ADL{
+			APIVersion: "adl.inference-gateway.com/v1",
+			Kind:       "Agent",
+			Metadata:   schema.Metadata{Name: "agent", Description: "x", Version: "1.0.0"},
+			Spec: schema.Spec{
+				Capabilities: schema.Capabilities{},
+				Server:       schema.Server{Port: 8080},
+				Language: schema.Language{
+					Go: &schema.GoConfig{
+						Module:  "github.com/example/agent",
+						Version: "1.26.2",
+						Vendor:  v,
+					},
+				},
+			},
+		}
+	}
+	makeRust := func(v *schema.VendorConfig) *schema.ADL {
+		return &schema.ADL{
+			APIVersion: "adl.inference-gateway.com/v1",
+			Kind:       "Agent",
+			Metadata:   schema.Metadata{Name: "agent", Description: "x", Version: "1.0.0"},
+			Spec: schema.Spec{
+				Capabilities: schema.Capabilities{},
+				Server:       schema.Server{Port: 8080},
+				Language: schema.Language{
+					Rust: &schema.RustConfig{
+						PackageName: "agent",
+						Version:     "1.94.1",
+						Edition:     "2024",
+						Vendor:      v,
+					},
+				},
+			},
+		}
+	}
+
+	render := func(t *testing.T, lang, tmplKey string, adl *schema.ADL) string {
+		t.Helper()
+		registry, err := templates.NewRegistry(lang)
+		if err != nil {
+			t.Fatalf("NewRegistry: %v", err)
+		}
+		engine := templates.NewWithRegistry("", registry)
+		view, err := vendor.ResolveADL(adl)
+		if err != nil {
+			t.Fatalf("vendor.ResolveADL: %v", err)
+		}
+		out, err := engine.ExecuteTemplate(tmplKey, templates.Context{
+			ADL:      adl,
+			Language: lang,
+			Vendor:   view,
+		})
+		if err != nil {
+			t.Fatalf("ExecuteTemplate %s: %v", tmplKey, err)
+		}
+		return out
+	}
+
+	t.Run("go: no vendor block renders unchanged require list and no tool directive", func(t *testing.T) {
+		got := render(t, "go", "go.mod", makeGo(nil))
+		if !strings.Contains(got, "github.com/inference-gateway/adk v0.18.4") {
+			t.Fatalf("expected built-in ADK in require, got:\n%s", got)
+		}
+		if strings.Contains(got, "stretchr/testify") {
+			t.Fatalf("unexpected vendor entry leaked, got:\n%s", got)
+		}
+		if strings.Contains(got, "tool (") {
+			t.Fatalf("expected no tool directive when vendor is empty, got:\n%s", got)
+		}
+	})
+
+	t.Run("go: deps land in require sorted+deduped; devdeps populate require // indirect and tool block", func(t *testing.T) {
+		got := render(t, "go", "go.mod", makeGo(&schema.VendorConfig{
+			Deps:    []string{"github.com/google/uuid@v1.6.0", "github.com/google/uuid@v1.5.0"},
+			Devdeps: []string{"golang.org/x/tools/cmd/stringer@v0.20.0"},
+		}))
+		if !strings.Contains(got, "github.com/google/uuid v1.6.0") {
+			t.Fatalf("expected uuid v1.6.0 in require, got:\n%s", got)
+		}
+		if strings.Contains(got, "v1.5.0") {
+			t.Fatalf("expected duplicate uuid v1.5.0 to be deduped (first-wins), got:\n%s", got)
+		}
+		if !strings.Contains(got, "golang.org/x/tools/cmd/stringer v0.20.0 // indirect") {
+			t.Fatalf("expected stringer in require as // indirect, got:\n%s", got)
+		}
+		toolIdx := strings.Index(got, "tool (")
+		if toolIdx == -1 {
+			t.Fatalf("expected tool directive, got:\n%s", got)
+		}
+		toolSection := got[toolIdx:]
+		if !strings.Contains(toolSection, "golang.org/x/tools/cmd/stringer") {
+			t.Fatalf("expected stringer in tool block, got:\n%s", toolSection)
+		}
+		if strings.Contains(toolSection, "v0.20.0") {
+			t.Fatalf("tool block must list bare package paths (no version), got:\n%s", toolSection)
+		}
+	})
+
+	t.Run("go: dev-only vendor still emits a tool directive without deps", func(t *testing.T) {
+		got := render(t, "go", "go.mod", makeGo(&schema.VendorConfig{
+			Devdeps: []string{"github.com/golang/mock/mockgen@v1.6.0"},
+		}))
+		if !strings.Contains(got, "github.com/golang/mock/mockgen v1.6.0 // indirect") {
+			t.Fatalf("expected mockgen as // indirect require, got:\n%s", got)
+		}
+		if !strings.Contains(got, "tool (") {
+			t.Fatalf("expected tool directive when only devdeps set, got:\n%s", got)
+		}
+	})
+
+	t.Run("go: built-in conflict is dropped before the template renders", func(t *testing.T) {
+		got := render(t, "go", "go.mod", makeGo(&schema.VendorConfig{
+			Deps: []string{"github.com/inference-gateway/adk@v0.0.1"},
+		}))
+		if !strings.Contains(got, "github.com/inference-gateway/adk v0.18.4") {
+			t.Fatalf("expected built-in version preserved, got:\n%s", got)
+		}
+		if strings.Contains(got, "v0.0.1") {
+			t.Fatalf("expected conflicting vendor entry to be dropped, got:\n%s", got)
+		}
+	})
+
+	t.Run("rust: deps go to [dependencies], devdeps go to [dev-dependencies]", func(t *testing.T) {
+		got := render(t, "rust", "Cargo.toml", makeRust(&schema.VendorConfig{
+			Deps:    []string{"regex@1.10.0"},
+			Devdeps: []string{"mockall@0.12.1", "pretty_assertions@1.4.0"},
+		}))
+		depsSection := got[strings.Index(got, "[dependencies]"):strings.Index(got, "[dev-dependencies]")]
+		devSection := got[strings.Index(got, "[dev-dependencies]"):]
+		if !strings.Contains(depsSection, `regex = "1.10.0"`) {
+			t.Fatalf("expected regex in [dependencies], got:\n%s", depsSection)
+		}
+		if !strings.Contains(devSection, `mockall = "0.12.1"`) || !strings.Contains(devSection, `pretty_assertions = "1.4.0"`) {
+			t.Fatalf("expected mockall + pretty_assertions in [dev-dependencies], got:\n%s", devSection)
+		}
+		if strings.Index(devSection, "mockall") > strings.Index(devSection, "pretty_assertions") {
+			t.Fatalf("expected dev-dependencies sorted, got:\n%s", devSection)
+		}
+	})
+
+	t.Run("rust: dev-only vendor still emits the dev-dependencies section even without built-in tools", func(t *testing.T) {
+		got := render(t, "rust", "Cargo.toml", makeRust(&schema.VendorConfig{
+			Devdeps: []string{"mockall@0.12.1"},
+		}))
+		if !strings.Contains(got, "[dev-dependencies]") {
+			t.Fatalf("expected [dev-dependencies] section, got:\n%s", got)
+		}
+		if !strings.Contains(got, `mockall = "0.12.1"`) {
+			t.Fatalf("expected mockall in [dev-dependencies], got:\n%s", got)
+		}
+		if strings.Contains(got, "tempfile") {
+			t.Fatalf("expected no tempfile when no built-in tools enabled, got:\n%s", got)
+		}
+	})
+
+	t.Run("rust: built-in runtime crate is rejected from devdeps too (dual-section guard)", func(t *testing.T) {
+		got := render(t, "rust", "Cargo.toml", makeRust(&schema.VendorConfig{
+			Devdeps: []string{"tokio@0.1.0"},
+		}))
+		if strings.Contains(got, `tokio = "0.1.0"`) {
+			t.Fatalf("expected conflicting tokio vendor entry to be dropped, got:\n%s", got)
+		}
+		if !strings.Contains(got, `tokio = { version = "1"`) {
+			t.Fatalf("expected built-in tokio preserved, got:\n%s", got)
+		}
+	})
+
+	t.Run("rust: empty vendor block + no built-in tools omits [dev-dependencies]", func(t *testing.T) {
+		got := render(t, "rust", "Cargo.toml", makeRust(nil))
+		if strings.Contains(got, "[dev-dependencies]") {
+			t.Fatalf("expected no [dev-dependencies] section, got:\n%s", got)
+		}
+	})
 }

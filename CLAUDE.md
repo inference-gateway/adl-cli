@@ -146,6 +146,35 @@ is documented in the generated `.env.example` - not baked into `main.rs`. When
 `spec.development.sandbox.dockerCompose.enabled: true` is also set, a working
 `docker-compose.yaml` with a Redis service is produced alongside the agent.
 
+### Vendor (extra dependencies)
+
+Every `spec.language.<lang>` config accepts an optional `vendor.{deps,devdeps}`
+block whose entries follow the `<package>@<version>` form. They are resolved
+by `internal/vendor` (parsed, deduped against the generator's built-in
+dependency set, sorted), exposed on `templates.Context.Vendor` as
+`GoRequires` / `GoTools` / `CargoDeps` / `CargoDevDeps` / `NpmDeps` /
+`NpmDevDeps`, and rendered into `go.mod` / `Cargo.toml` directly.
+Built-ins always win on conflict (`internal/vendor/vendor.go` lists them
+as `GoBuiltins`, `CargoBuiltinDeps`, `CargoBuiltinDevDeps`); collisions
+surface as stderr warnings from the generator. The TypeScript fields are
+validated and resolved today but only land in `package.json` once the TS
+templates exist (currently only `.gitkeep`).
+
+**Go-specific semantics:** `vendor.deps` map straight into `go.mod`'s
+`require` block (plus the built-ins). `vendor.devdeps` are treated as
+executable tool dependencies and emitted via Go 1.24+'s
+[`tool` directive](https://go.dev/doc/modules/managing-dependencies#tools);
+each entry also lands in `require` as `// indirect` so the module is
+downloadable. Users supply the full tool package path
+(e.g. `golang.org/x/tools/cmd/stringer@v0.20.0`); running `go mod tidy`
+after generation normalises the `require` entry to the module root.
+Test libraries that are `import`-ed by `*_test.go` files (testify,
+go-cmp, …) belong in `vendor.deps`, not `vendor.devdeps`.
+
+When you update a built-in dependency in a language template, mirror the
+new pin into the matching map in `internal/vendor/vendor.go` so vendor
+conflicts continue to be caught.
+
 ## Adding a New Language
 
 1. Create `internal/templates/languages/<lang>/` with templates
