@@ -317,7 +317,7 @@ adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun --
 > - see the matrix below.
 > `adl init` writes all toggles as `false` by default - they're opt-in. Generated files
 > (`CLAUDE.md`, `GEMINI.md`, `AGENTS.md`, `.github/workflows/ci.yml`,
-> `.github/workflows/cd.yml`, `.github/workflows/claude-code.yml`,
+> `.github/workflows/cd.yml`, `.github/workflows/claude.yml`,
 > `.github/workflows/codex.yml`, `.github/workflows/gemini.yml`,
 > `.releaserc.yaml`) are tagged `linguist-generated=true` in `.gitattributes`
 > so they collapse in pull request diffs.
@@ -350,7 +350,7 @@ spec:
   development:
     ai:
       claudecode:
-        enabled: true   # generates CLAUDE.md + .github/workflows/claude-code.yml
+        enabled: true   # generates CLAUDE.md + .github/workflows/claude.yml
       codex:
         enabled: false  # would generate AGENTS.md + .github/workflows/codex.yml
       gemini:
@@ -365,7 +365,7 @@ spec:
 
 | Agent toggle  | Docs file the agent reads | GitHub Actions workflow generated? |
 |---------------|---------------------------|------------------------------------|
-| `claudecode`  | `CLAUDE.md`               | yes (`.github/workflows/claude-code.yml`, uses `anthropics/claude-code-action`) |
+| `claudecode`  | `CLAUDE.md`               | yes (`.github/workflows/claude.yml`, uses `anthropics/claude-code-action`) |
 | `codex`       | `AGENTS.md` (shared)      | yes (`.github/workflows/codex.yml`, uses `openai/codex-action`) |
 | `gemini`      | `GEMINI.md`               | yes (`.github/workflows/gemini.yml`, uses `google-github-actions/run-gemini-cli`) |
 | `opencode`    | `AGENTS.md` (shared)      | no upstream action yet - docs only |
