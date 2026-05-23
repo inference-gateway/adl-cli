@@ -184,6 +184,158 @@ spec:
 	}
 }
 
+func TestValidator_VendorEntries(t *testing.T) {
+	cases := []struct {
+		name        string
+		adl         string
+		wantErr     bool
+		wantErrFrag string
+	}{
+		{
+			name: "go vendor block with well-formed entries validates",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: go-vendor
+  description: "go vendor smoke"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  server:
+    port: 8080
+  language:
+    go:
+      module: "github.com/example/agent"
+      version: "1.26.2"
+      vendor:
+        deps:
+          - github.com/google/uuid@v1.6.0
+        devdeps:
+          - github.com/stretchr/testify@v1.10.0
+`,
+			wantErr: false,
+		},
+		{
+			name: "ts vendor block with scoped package validates",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: ts-vendor
+  description: "ts vendor smoke"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  server:
+    port: 8080
+  language:
+    typescript:
+      packageName: "@example/agent"
+      nodeVersion: "20"
+      vendor:
+        deps:
+          - axios@1.7.0
+        devdeps:
+          - "@types/node@20.11.0"
+          - vitest@1.6.0
+`,
+			wantErr: false,
+		},
+		{
+			name: "vendor entry without version is rejected with a path pointing at the offending key",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: bad-vendor
+  description: "missing version"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  server:
+    port: 8080
+  language:
+    go:
+      module: "github.com/example/agent"
+      version: "1.26.2"
+      vendor:
+        deps:
+          - github.com/missing-version-here
+`,
+			wantErr:     true,
+			wantErrFrag: "spec.language.go.vendor.deps.0",
+		},
+		{
+			name: "vendor entry with whitespace is rejected",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: bad-vendor
+  description: "whitespace"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  server:
+    port: 8080
+  language:
+    rust:
+      packageName: "agent"
+      version: "1.94.1"
+      edition: "2024"
+      vendor:
+        devdeps:
+          - "mockall @ 0.12.0"
+`,
+			wantErr:     true,
+			wantErrFrag: "spec.language.rust.vendor.devdeps.0",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			tmpFile, err := os.CreateTemp("", "adl-vendor-*.yaml")
+			if err != nil {
+				t.Fatalf("temp file: %v", err)
+			}
+			defer func() {
+				if rmErr := os.Remove(tmpFile.Name()); rmErr != nil {
+					t.Logf("cleanup: %v", rmErr)
+				}
+			}()
+			if _, err := tmpFile.WriteString(tc.adl); err != nil {
+				t.Fatalf("write: %v", err)
+			}
+			if err := tmpFile.Close(); err != nil {
+				t.Fatalf("close: %v", err)
+			}
+
+			_, err = NewValidator().ValidateFile(tmpFile.Name())
+			if tc.wantErr {
+				if err == nil {
+					t.Fatalf("expected validation error, got nil")
+				}
+				if tc.wantErrFrag != "" && !strings.Contains(err.Error(), tc.wantErrFrag) {
+					t.Fatalf("error %q did not point at offending key %q", err.Error(), tc.wantErrFrag)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected validation error: %v", err)
+			}
+		})
+	}
+}
+
 func TestValidator_ValidateFile_Invalid(t *testing.T) {
 	invalidADL := `apiVersion: invalid
 kind: Agent

@@ -605,6 +605,79 @@ spec:
         enabled: true
 ```
 
+### Extra dependencies (`spec.language.<lang>.vendor`)
+
+Every language config block accepts an optional `vendor` section that lets
+the manifest extend the generator's built-in dependency set. Use `deps`
+for runtime/production dependencies and `devdeps` for test- or
+development-only ones (test frameworks, mock generators, linters that
+need to be importable). Each entry must be `<package>@<version>` using
+the target language's native package and version syntax - the schema
+validates the shape up front (`^\S+@\S+$`) and points at the offending
+key if you mistype it (e.g. `spec.language.go.vendor.deps.0`).
+
+**Conflict policy:** generator built-ins always win. If your manifest
+lists a package that the generator already pins (e.g.
+`github.com/inference-gateway/adk` for Go, `tokio` for Rust), the
+vendor entry is silently dropped and a `⚠️  vendor … collides with
+built-in …` warning is printed to stderr. This prevents accidental
+downgrades of the core runtime SDK.
+
+**Output mapping per language:**
+
+| Language   | `deps` lands in               | `devdeps` lands in                 |
+| ---------- | ----------------------------- | ---------------------------------- |
+| Go         | `go.mod` `require` block      | same `require` block (Go has no separate dev section - `go mod tidy` will reclassify entries as `// indirect` or drop them based on actual import usage) |
+| Rust       | `Cargo.toml` `[dependencies]` | `Cargo.toml` `[dev-dependencies]`  |
+| TypeScript | `package.json` `dependencies` | `package.json` `devDependencies` *(plumbed end-to-end once the TypeScript generator templates land - the schema and validator already accept the field)* |
+
+Examples per language:
+
+```yaml
+# Go: testify for tests, uuid for runtime.
+spec:
+  language:
+    go:
+      module: github.com/example/agent
+      version: "1.26.2"
+      vendor:
+        deps:
+          - github.com/google/uuid@v1.6.0
+        devdeps:
+          - github.com/stretchr/testify@v1.10.0
+```
+
+```yaml
+# Rust: regex at runtime, mockall + pretty_assertions for tests.
+spec:
+  language:
+    rust:
+      packageName: agent
+      version: "1.94.1"
+      edition: "2024"
+      vendor:
+        deps:
+          - regex@1.10.0
+        devdeps:
+          - mockall@0.12.1
+          - pretty_assertions@1.4.0
+```
+
+```yaml
+# TypeScript: axios at runtime, vitest + @types/node for tests.
+spec:
+  language:
+    typescript:
+      packageName: "@example/agent"
+      nodeVersion: "20"
+      vendor:
+        deps:
+          - axios@1.7.0
+        devdeps:
+          - "@types/node@20.11.0"
+          - vitest@1.6.0
+```
+
 ## Skills vs. Tools
 
 The ADL spec distinguishes two complementary concepts:

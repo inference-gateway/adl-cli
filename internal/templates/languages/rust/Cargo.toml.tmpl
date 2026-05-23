@@ -39,10 +39,18 @@ envy = "0.4.2"
 {{- if $hasFetch }}
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
 {{- end }}
-{{- if $hasBuiltin }}
+{{- range .Vendor.CargoDeps }}
+{{ .Name }} = "{{ .Version }}"
+{{- end }}
+{{- if or $hasBuiltin .Vendor.CargoDevDeps }}
 
 [dev-dependencies]
+{{- if $hasBuiltin }}
 tempfile = "3"
+{{- end }}
+{{- range .Vendor.CargoDevDeps }}
+{{ .Name }} = "{{ .Version }}"
+{{- end }}
 {{- end }}
 
 [profile.release]

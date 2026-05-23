@@ -6,7 +6,10 @@ vars:
   VERSION: 0.36.6
   BUILD_DIR: bin
   DIST_DIR: dist
-  ADL_SCHEMA_VERSION: v0.8.0
+  # TODO: bump to v0.9.0 once the `feat(schema): Add optional vendor.deps and
+  # vendor.devdeps to language configs` change is tagged upstream. Pinned to
+  # the merge SHA in the meantime so verify-schema stays green.
+  ADL_SCHEMA_VERSION: 5a28d5a71442e2f9fce1435a56c2058126d326cb
   ADL_SCHEMA_URL: https://raw.githubusercontent.com/inference-gateway/adl/{{.ADL_SCHEMA_VERSION}}/schema/v1/schema.json
   ADL_SCHEMA_PATH: internal/schema/schema.json
 

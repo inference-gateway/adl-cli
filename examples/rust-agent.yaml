@@ -68,6 +68,12 @@ spec:
       packageName: "rust-agent"
       version: "1.94.1"
       edition: "2024"
+      vendor:
+        # Extra crates to add to Cargo.toml beyond the generator's defaults.
+        # `deps` lands in [dependencies], `devdeps` lands in [dev-dependencies].
+        devdeps:
+          - mockall@0.12.1
+          - pretty_assertions@1.4.0
   development:
     sandbox:
       flox:

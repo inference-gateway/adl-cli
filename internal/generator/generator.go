@@ -13,6 +13,7 @@ import (
 	"github.com/inference-gateway/adl-cli/internal/registry"
 	"github.com/inference-gateway/adl-cli/internal/schema"
 	"github.com/inference-gateway/adl-cli/internal/templates"
+	"github.com/inference-gateway/adl-cli/internal/vendor"
 	"gopkg.in/yaml.v3"
 )
 
@@ -333,6 +334,16 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		return fmt.Errorf("failed to resolve built-in tool config: %w", err)
 	}
 
+	vendorView, err := vendor.ResolveADL(adl)
+	if err != nil {
+		return fmt.Errorf("failed to resolve vendor dependencies: %w", err)
+	}
+	for _, c := range vendorView.Conflicts {
+		fmt.Fprintf(os.Stderr,
+			"⚠️  vendor %s entry %s@%s collides with built-in %s; dropping the vendor entry (built-ins win)\n",
+			c.DepGroup, c.Entry.Name, c.Entry.Version, c.Builtin)
+	}
+
 	ctx := templates.Context{
 		ADL: adl,
 		Metadata: schema.GeneratedMetadata{
@@ -348,6 +359,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		GenerateCommand: g.buildGenerateCommand(),
 		Skills:          skillViews,
 		BuiltinConfigs:  builtinConfigs,
+		Vendor:          vendorView,
 	}
 
 	ignoreChecker, err := NewIgnoreChecker(outputDir)

@@ -195,6 +195,9 @@ type GoConfig struct {
 	// Module corresponds to the JSON schema field "module".
 	Module string `json:"module" yaml:"module" mapstructure:"module"`
 
+	// Vendor corresponds to the JSON schema field "vendor".
+	Vendor *VendorConfig `json:"vendor,omitempty,omitzero" yaml:"vendor,omitempty" mapstructure:"vendor,omitempty"`
+
 	// Version corresponds to the JSON schema field "version".
 	Version string `json:"version" yaml:"version" mapstructure:"version"`
 }
@@ -274,6 +277,9 @@ type RustConfig struct {
 
 	// PackageName corresponds to the JSON schema field "packageName".
 	PackageName string `json:"packageName" yaml:"packageName" mapstructure:"packageName"`
+
+	// Vendor corresponds to the JSON schema field "vendor".
+	Vendor *VendorConfig `json:"vendor,omitempty,omitzero" yaml:"vendor,omitempty" mapstructure:"vendor,omitempty"`
 
 	// Version corresponds to the JSON schema field "version".
 	Version string `json:"version" yaml:"version" mapstructure:"version"`
@@ -518,4 +524,27 @@ type TypeScriptConfig struct {
 
 	// PackageName corresponds to the JSON schema field "packageName".
 	PackageName string `json:"packageName" yaml:"packageName" mapstructure:"packageName"`
+
+	// Vendor corresponds to the JSON schema field "vendor".
+	Vendor *VendorConfig `json:"vendor,omitempty,omitzero" yaml:"vendor,omitempty" mapstructure:"vendor,omitempty"`
+}
+
+// Extra packages to vendor into the generated project on top of whatever the
+// generator pulls in by default. Use 'deps' for runtime/production dependencies
+// and 'devdeps' for development- or test-only dependencies (linters, test
+// frameworks, mock generators, etc.). Each entry follows the '<package>@<version>'
+// form using the target language's native package and version syntax (e.g.
+// 'github.com/stretchr/testify@v1.9.0' for Go, 'vitest@1.6.0' or
+// '@types/node@20.11.0' for TypeScript, 'tokio@1.36.0' for Rust). Consumers are
+// responsible for translating these into the language's lockfile / manifest
+// format.
+type VendorConfig struct {
+	// Runtime/production dependencies to add to the generated project, each in
+	// '<package>@<version>' form.
+	Deps []string `json:"deps,omitempty,omitzero" yaml:"deps,omitempty" mapstructure:"deps,omitempty"`
+
+	// Development- and test-only dependencies to add to the generated project (e.g.
+	// testing libraries, linters, mock generators), each in '<package>@<version>'
+	// form.
+	Devdeps []string `json:"devdeps,omitempty,omitzero" yaml:"devdeps,omitempty" mapstructure:"devdeps,omitempty"`
 }

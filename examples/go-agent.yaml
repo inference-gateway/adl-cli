@@ -209,6 +209,13 @@ spec:
     go:
       module: "github.com/inference-gateway/adl-cli/test-output"
       version: "1.26.2"
+      vendor:
+        # Extra modules to add to go.mod beyond the generator's defaults.
+        # Go has no separate dev section: deps and devdeps are merged into
+        # the single `require` block. `go mod tidy` will reclassify them
+        # (// indirect / drop) once your code does or doesn't import them.
+        devdeps:
+          - github.com/stretchr/testify@v1.10.0
   scm:
     provider: github
     url: "https://github.com/inference-gateway/adl-cli"

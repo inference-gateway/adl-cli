@@ -12,6 +12,7 @@ import (
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/inference-gateway/adl-cli/internal/schema"
+	"github.com/inference-gateway/adl-cli/internal/vendor"
 )
 
 // Engine handles template execution
@@ -208,7 +209,12 @@ type Context struct {
 	GenerateCommand string
 	Skills          []SkillView
 	BuiltinConfigs  schema.ResolvedBuiltinConfigs
-	customAcronyms  map[string]string
+	// Vendor holds the resolved spec.language.<lang>.vendor.{deps,devdeps}
+	// entries: parsed, deduped against the generator's built-in dependency
+	// set, and sorted. Templates render directly from this view (see
+	// go.mod.tmpl / Cargo.toml.tmpl).
+	Vendor         vendor.View
+	customAcronyms map[string]string
 }
 
 // New creates a new template engine

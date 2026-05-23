@@ -146,6 +146,24 @@ is documented in the generated `.env.example` - not baked into `main.rs`. When
 `spec.development.sandbox.dockerCompose.enabled: true` is also set, a working
 `docker-compose.yaml` with a Redis service is produced alongside the agent.
 
+### Vendor (extra dependencies)
+
+Every `spec.language.<lang>` config accepts an optional `vendor.{deps,devdeps}`
+block whose entries follow the `<package>@<version>` form. They are resolved
+by `internal/vendor` (parsed, deduped against the generator's built-in
+dependency set, sorted), exposed on `templates.Context.Vendor` as
+`GoRequires` / `CargoDeps` / `CargoDevDeps` / `NpmDeps` / `NpmDevDeps`, and
+rendered into `go.mod` / `Cargo.toml` directly. Built-ins always win on
+conflict (`internal/vendor/vendor.go` lists them as `GoBuiltins`,
+`CargoBuiltinDeps`, `CargoBuiltinDevDeps`); collisions surface as
+stderr warnings from the generator. The TypeScript fields are validated
+and resolved today but only land in `package.json` once the TS templates
+exist (currently only `.gitkeep`).
+
+When you update a built-in dependency in a language template, mirror the
+new pin into the matching map in `internal/vendor/vendor.go` so vendor
+conflicts continue to be caught.
+
 ## Adding a New Language
 
 1. Create `internal/templates/languages/<lang>/` with templates

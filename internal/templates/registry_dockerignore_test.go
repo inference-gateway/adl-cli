@@ -215,4 +215,3 @@ func TestEnvExampleTemplate_Essentials(t *testing.T) {
 		}
 	})
 }
-
