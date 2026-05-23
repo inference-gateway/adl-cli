@@ -117,7 +117,7 @@ func TestResolve_DedupesAndSorts(t *testing.T) {
 					"terraform@1.9.5",
 					"deno@2.1.4",
 					"kubectl@1.31.0",
-					"deno@2.0.0", // duplicate package name - first wins
+					"deno@2.0.0",
 				},
 			},
 		},
@@ -143,9 +143,9 @@ func TestResolve_FloxConflict(t *testing.T) {
 		Spec: schema.Spec{
 			Development: &schema.DevelopmentConfig{
 				Deps: []string{
-					"git@2.53.0",   // clashes with built-in
-					"deno@2.1.4",   // safe
-					"go-task@3.50", // clashes with built-in
+					"git@2.53.0",
+					"deno@2.1.4",
+					"go-task@3.50",
 				},
 			},
 		},
