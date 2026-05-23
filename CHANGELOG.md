@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.36.0](https://github.com/inference-gateway/adl-cli/compare/v0.35.0...v0.36.0) (2026-05-23)
+
+### ✨ Features
+
+* **agent:** Convert generated agent binary into a proper CLI ([#141](https://github.com/inference-gateway/adl-cli/issues/141)) ([7b1e7aa](https://github.com/inference-gateway/adl-cli/commit/7b1e7aae6e335c47b90f33b49897c13a89e073fb)), closes [#140](https://github.com/inference-gateway/adl-cli/issues/140)
+* **generator:** Honour per-agent toggles in spec.development.ai ([#143](https://github.com/inference-gateway/adl-cli/issues/143)) ([ac2a014](https://github.com/inference-gateway/adl-cli/commit/ac2a014191b7eea8dd724c8f0e14766a9273286e)), closes [#142](https://github.com/inference-gateway/adl-cli/issues/142)
+
+### 📚 Documentation
+
+* Update AI agents docs ([3cddd1c](https://github.com/inference-gateway/adl-cli/commit/3cddd1c3f68b4d3b0f9ae17220e7e7eb02c203eb))
+
+### 🔧 Miscellaneous
+
+* Small fix ([4c999b5](https://github.com/inference-gateway/adl-cli/commit/4c999b58cd93bbd2153feef15ea7179849e077b4))
+
 ## [0.35.0](https://github.com/inference-gateway/adl-cli/compare/v0.34.2...v0.35.0) (2026-05-22)
 
 ### ✨ Features
