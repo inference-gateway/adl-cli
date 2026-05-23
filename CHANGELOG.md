@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.36.4](https://github.com/inference-gateway/adl-cli/compare/v0.36.3...v0.36.4) (2026-05-23)
+
+### 🐛 Bug Fixes
+
+* **generator:** Emit docker-compose.yaml with gateway/CLI/debugger when sandbox.dockerCompose.enabled ([#149](https://github.com/inference-gateway/adl-cli/issues/149)) ([579f97b](https://github.com/inference-gateway/adl-cli/commit/579f97ba60da5432f7d52f48b9aace9db9ebcdc8)), closes [#148](https://github.com/inference-gateway/adl-cli/issues/148)
+
 ## [0.36.3](https://github.com/inference-gateway/adl-cli/compare/v0.36.2...v0.36.3) (2026-05-23)
 
 ### 🐛 Bug Fixes
