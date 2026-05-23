@@ -10,7 +10,7 @@ This file provides guidance to AI agents working with the **ADL CLI** repository
 
 - **Repository**: `github.com/inference-gateway/adl-cli`
 - **Language**: Go 1.26.2+
-- **License**: MIT
+- **License**: Apache-2.0
 - **Current Version**: 0.35.0
 
 ### Key Technologies

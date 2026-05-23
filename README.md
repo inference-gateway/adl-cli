@@ -7,7 +7,7 @@ _A command-line interface for generating enterprise-ready A2A (Agent-to-Agent) s
 > ⚠️ **Early Development Warning**: This project is in its early stages of development. Breaking changes are expected and acceptable until we reach a stable version. Use with caution in production environments.
 
 [![Go Version](https://img.shields.io/github/go-mod/go-version/inference-gateway/adl-cli?style=flat-square&logo=go)](https://golang.org)
-[![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat-square)](LICENSE)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/inference-gateway/adl-cli/ci.yml?style=flat-square&logo=github)](https://github.com/inference-gateway/adl-cli/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/inference-gateway/adl-cli?style=flat-square)](https://goreportcard.com/report/github.com/inference-gateway/adl-cli)
 [![Release](https://img.shields.io/github/v/release/inference-gateway/adl-cli?style=flat-square&logo=github)](https://github.com/inference-gateway/adl-cli/releases)
@@ -1932,7 +1932,7 @@ We welcome community input on our roadmap! Please:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 

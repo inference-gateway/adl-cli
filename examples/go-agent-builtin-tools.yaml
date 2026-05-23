@@ -115,7 +115,7 @@ spec:
       bare: true
       name: workspace-assistant
       description: "Use this whenever the user wants to investigate, modify, or research code in their workspace. Read first to gather context, prefer Edit over Write for in-place changes, run Bash only against the whitelist, and use Fetch (optionally with save_path) for documentation lookups on the allow-listed hosts. Decline politely if any request falls outside those allow-lists."
-      license: MIT
+      license: Apache-2.0
       tags:
         - workspace
         - filesystem

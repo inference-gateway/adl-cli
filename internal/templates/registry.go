@@ -152,6 +152,7 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		".gitattributes":              "config/gitattributes",
 		".editorconfig":               "config/editorconfig",
 		"README.md":                   "docs/README.md",
+		"LICENSE":                     "docs/LICENSE",
 	}
 
 	if adl.Spec.Deployment != nil {
@@ -215,6 +216,7 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		".gitattributes":              "config/gitattributes",
 		".editorconfig":               "config/editorconfig",
 		"README.md":                   "docs/README.md",
+		"LICENSE":                     "docs/LICENSE",
 	}
 
 	if adl.Spec.Deployment != nil {
@@ -277,6 +279,7 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		".gitattributes":              "config/gitattributes",
 		".editorconfig":               "config/editorconfig",
 		"README.md":                   "docs/README.md",
+		"LICENSE":                     "docs/LICENSE",
 	}
 
 	if adl.Spec.Deployment != nil {

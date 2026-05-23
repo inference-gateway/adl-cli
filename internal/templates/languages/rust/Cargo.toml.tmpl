@@ -4,6 +4,7 @@ version = "{{ .ADL.Metadata.Version }}"
 edition = "{{ .ADL.Spec.Language.Rust.Edition }}"
 rust-version = "{{ .ADL.Spec.Language.Rust.Version }}"
 description = "{{ .ADL.Metadata.Description }}"
+license = "Apache-2.0"
 
 [dependencies]
 {{- if .ADL.Spec.Language.Rust.Features }}

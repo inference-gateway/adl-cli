@@ -75,7 +75,7 @@ func TestResolver_FetchAndCache(t *testing.T) {
 	var calls int
 	resolver, closer := newTestResolver(t, func(w http.ResponseWriter, r *http.Request) {
 		calls++
-		_, _ = w.Write([]byte("---\nname: data-analysis\ndescription: from registry\ntags: [analytics]\nlicense: MIT\n---\nbody\n"))
+		_, _ = w.Write([]byte("---\nname: data-analysis\ndescription: from registry\ntags: [analytics]\nlicense: Apache-2.0\n---\nbody\n"))
 	})
 	defer closer()
 
@@ -91,8 +91,8 @@ func TestResolver_FetchAndCache(t *testing.T) {
 	if len(resolved.Tags) != 1 || resolved.Tags[0] != "analytics" {
 		t.Errorf("unexpected tags: %v", resolved.Tags)
 	}
-	if resolved.License != "MIT" {
-		t.Errorf("expected license MIT from frontmatter, got %q", resolved.License)
+	if resolved.License != "Apache-2.0" {
+		t.Errorf("expected license Apache-2.0 from frontmatter, got %q", resolved.License)
 	}
 	if _, ok := resolved.Files["SKILL.md"]; !ok {
 		t.Errorf("expected resolved.Files to contain SKILL.md, got keys: %v", keysOf(resolved.Files))
@@ -111,7 +111,7 @@ func TestResolver_FetchAndCache(t *testing.T) {
 
 func TestResolver_LicenseOverridesFrontmatter(t *testing.T) {
 	resolver, closer := newTestResolver(t, func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte("---\nname: report-writer\ndescription: from registry\nlicense: MIT\n---\nbody\n"))
+		_, _ = w.Write([]byte("---\nname: report-writer\ndescription: from registry\nlicense: Apache-2.0\n---\nbody\n"))
 	})
 	defer closer()
 
