@@ -75,9 +75,6 @@ spec:
         enabled: true
       devcontainer:
         enabled: false
-    # Per-agent AI assistant toggles. Each block is independent; default
-    # is disabled. The pre-v0.8.0 single-flag `enabled: true` shape has
-    # been removed — list the specific agents you want under spec.development.ai.
     ai:
       claudecode:
         enabled: true
