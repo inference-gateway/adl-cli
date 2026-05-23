@@ -234,6 +234,32 @@ task lint
 task fmt
 ```
 
+### Adding Dependencies
+
+The generator owns the baseline toolchain pins (SDK, server framework,
+logging, CLI, sandbox utilities). To extend the project without forking
+the templates, declare extras in `agent.yaml` — every empty list below
+is rendered by `adl init --defaults` precisely so it's discoverable:
+
+| Where | Purpose | Example entry | Rendered into |
+|-------|---------|---------------|---------------|
+{{- if eq .Language "go" }}
+| `spec.language.go.vendor.deps` | Runtime Go modules | `github.com/stretchr/testify@v1.10.0` | `go.mod` `require` block |
+| `spec.language.go.vendor.devdeps` | Executable dev tools (Go 1.24 `tool` directive) | `golang.org/x/tools/cmd/stringer@v0.20.0` | `go.mod` `tool` directive |
+{{- else if eq .Language "rust" }}
+| `spec.language.rust.vendor.deps` | Runtime crates | `tokio@1.36.0` | `Cargo.toml` `[dependencies]` |
+| `spec.language.rust.vendor.devdeps` | Test / dev-only crates | `mockall@0.12.0` | `Cargo.toml` `[dev-dependencies]` |
+{{- else if eq .Language "typescript" }}
+| `spec.language.typescript.vendor.deps` | Runtime npm packages | `zod@3.23.0` | `package.json` `dependencies` |
+| `spec.language.typescript.vendor.devdeps` | Test / dev-only packages | `vitest@1.6.0` | `package.json` `devDependencies` |
+{{- end }}
+| `spec.development.deps` | Cross-cutting sandbox tools (not tied to one language) | `kubectl@1.31.0`, `terraform@1.9.5`, `deno@2.1.4` | Flox `manifest.toml` / devcontainer feature |
+
+Entries use the `<package>@<version>` form. Built-in pins always win on
+conflict; the generator prints a warning and skips the user entry when
+shadowing is attempted. After editing `agent.yaml`, re-run `task generate`
+to refresh the manifests.
+
 ### Debugging
 
 Use the [A2A Debugger](https://github.com/inference-gateway/a2a-debugger) to test and debug your A2A agent during development. It provides a web interface for sending requests to your agent and inspecting responses, making it easier to troubleshoot issues and validate your implementation.

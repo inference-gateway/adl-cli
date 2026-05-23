@@ -177,6 +177,17 @@ func runInit(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// vendorBlock mirrors spec.language.<lang>.vendor in the ADL schema. The
+// `deps` and `devdeps` keys are intentionally rendered without `omitempty`
+// so the scaffolded manifest shows them as empty lists — that's the only
+// way first-time users discover where to drop `<package>@<version>`
+// entries without consulting the schema. The matching language-specific
+// generator (go.mod / Cargo.toml) treats nil and empty equivalently.
+type vendorBlock struct {
+	Deps    []string `yaml:"deps"`
+	Devdeps []string `yaml:"devdeps"`
+}
+
 type adlData struct {
 	APIVersion string `yaml:"apiVersion"`
 	Kind       string `yaml:"kind"`
@@ -238,17 +249,20 @@ type adlData struct {
 		} `yaml:"server"`
 		Language *struct {
 			Go *struct {
-				Module  string `yaml:"module"`
-				Version string `yaml:"version"`
+				Module  string       `yaml:"module"`
+				Version string       `yaml:"version"`
+				Vendor  *vendorBlock `yaml:"vendor,omitempty"`
 			} `yaml:"go,omitempty"`
 			TypeScript *struct {
-				PackageName string `yaml:"packageName"`
-				NodeVersion string `yaml:"nodeVersion"`
+				PackageName string       `yaml:"packageName"`
+				NodeVersion string       `yaml:"nodeVersion"`
+				Vendor      *vendorBlock `yaml:"vendor,omitempty"`
 			} `yaml:"typescript,omitempty"`
 			Rust *struct {
-				PackageName string `yaml:"packageName"`
-				Version     string `yaml:"version"`
-				Edition     string `yaml:"edition"`
+				PackageName string       `yaml:"packageName"`
+				Version     string       `yaml:"version"`
+				Edition     string       `yaml:"edition"`
+				Vendor      *vendorBlock `yaml:"vendor,omitempty"`
 			} `yaml:"rust,omitempty"`
 		} `yaml:"language,omitempty"`
 		SCM *struct {
@@ -289,6 +303,7 @@ type adlData struct {
 					Enabled bool `yaml:"enabled"`
 				} `yaml:"infer,omitempty"`
 			} `yaml:"ai,omitempty"`
+			Deps []string `yaml:"deps"`
 		} `yaml:"development,omitempty"`
 		Deployment *struct {
 			Type string `yaml:"type,omitempty"`
@@ -639,56 +654,67 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 
 	adl.Spec.Language = &struct {
 		Go *struct {
-			Module  string `yaml:"module"`
-			Version string `yaml:"version"`
+			Module  string       `yaml:"module"`
+			Version string       `yaml:"version"`
+			Vendor  *vendorBlock `yaml:"vendor,omitempty"`
 		} `yaml:"go,omitempty"`
 		TypeScript *struct {
-			PackageName string `yaml:"packageName"`
-			NodeVersion string `yaml:"nodeVersion"`
+			PackageName string       `yaml:"packageName"`
+			NodeVersion string       `yaml:"nodeVersion"`
+			Vendor      *vendorBlock `yaml:"vendor,omitempty"`
 		} `yaml:"typescript,omitempty"`
 		Rust *struct {
-			PackageName string `yaml:"packageName"`
-			Version     string `yaml:"version"`
-			Edition     string `yaml:"edition"`
+			PackageName string       `yaml:"packageName"`
+			Version     string       `yaml:"version"`
+			Edition     string       `yaml:"edition"`
+			Vendor      *vendorBlock `yaml:"vendor,omitempty"`
 		} `yaml:"rust,omitempty"`
 	}{}
 
 	switch language {
 	case "go":
 		adl.Spec.Language.Go = &struct {
-			Module  string `yaml:"module"`
-			Version string `yaml:"version"`
+			Module  string       `yaml:"module"`
+			Version string       `yaml:"version"`
+			Vendor  *vendorBlock `yaml:"vendor,omitempty"`
 		}{}
 		defaultModule := getDefaultGoModule(adl.Metadata.Name)
 		adl.Spec.Language.Go.Module = promptWithConfig("go-module", useDefaults, "Go module", defaultModule)
 		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.26.2")
+		adl.Spec.Language.Go.Vendor = &vendorBlock{Deps: []string{}, Devdeps: []string{}}
 
 	case "rust":
 		adl.Spec.Language.Rust = &struct {
-			PackageName string `yaml:"packageName"`
-			Version     string `yaml:"version"`
-			Edition     string `yaml:"edition"`
+			PackageName string       `yaml:"packageName"`
+			Version     string       `yaml:"version"`
+			Edition     string       `yaml:"edition"`
+			Vendor      *vendorBlock `yaml:"vendor,omitempty"`
 		}{}
 		adl.Spec.Language.Rust.PackageName = promptWithConfig("rust-package-name", useDefaults, "Rust package name", adl.Metadata.Name)
 		adl.Spec.Language.Rust.Version = promptWithConfig("rust-version", useDefaults, "Rust version", "1.89.0")
 		adl.Spec.Language.Rust.Edition = promptWithConfig("rust-edition", useDefaults, "Rust edition", "2024")
+		adl.Spec.Language.Rust.Vendor = &vendorBlock{Deps: []string{}, Devdeps: []string{}}
 
 	case "typescript":
 		adl.Spec.Language.TypeScript = &struct {
-			PackageName string `yaml:"packageName"`
-			NodeVersion string `yaml:"nodeVersion"`
+			PackageName string       `yaml:"packageName"`
+			NodeVersion string       `yaml:"nodeVersion"`
+			Vendor      *vendorBlock `yaml:"vendor,omitempty"`
 		}{}
 		adl.Spec.Language.TypeScript.PackageName = promptWithConfig("typescript-name", useDefaults, "TypeScript package name", adl.Metadata.Name)
 		adl.Spec.Language.TypeScript.NodeVersion = "24"
+		adl.Spec.Language.TypeScript.Vendor = &vendorBlock{Deps: []string{}, Devdeps: []string{}}
 
 	default:
 		adl.Spec.Language.Go = &struct {
-			Module  string `yaml:"module"`
-			Version string `yaml:"version"`
+			Module  string       `yaml:"module"`
+			Version string       `yaml:"version"`
+			Vendor  *vendorBlock `yaml:"vendor,omitempty"`
 		}{}
 		defaultModule := getDefaultGoModule(adl.Metadata.Name)
 		adl.Spec.Language.Go.Module = promptWithConfig("go-module", useDefaults, "Go module", defaultModule)
 		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.26.2")
+		adl.Spec.Language.Go.Vendor = &vendorBlock{Deps: []string{}, Devdeps: []string{}}
 	}
 
 	fmt.Println("\n🏗️ Sandbox Configuration")
@@ -832,8 +858,16 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 // ensureDevelopment lazily initialises adl.Spec.Development so that callers
 // can populate adl.Spec.Development.Sandbox / adl.Spec.Development.AI without
 // repeating the nil check at every assignment site.
+//
+// Deps is seeded as an empty (but non-nil) slice so the YAML encoder emits
+// `deps: []` rather than omitting the key — first-time users need that
+// breadcrumb to discover where to drop cross-cutting sandbox tools (e.g.
+// `kubectl@1.31.0`, `terraform@1.9.5`).
 func ensureDevelopment(adl *adlData) {
 	if adl.Spec.Development != nil {
+		if adl.Spec.Development.Deps == nil {
+			adl.Spec.Development.Deps = []string{}
+		}
 		return
 	}
 	adl.Spec.Development = &struct {
@@ -865,7 +899,10 @@ func ensureDevelopment(adl *adlData) {
 				Enabled bool `yaml:"enabled"`
 			} `yaml:"infer,omitempty"`
 		} `yaml:"ai,omitempty"`
-	}{}
+		Deps []string `yaml:"deps"`
+	}{
+		Deps: []string{},
+	}
 }
 
 func parseGitRemote() (owner, repo string) {
