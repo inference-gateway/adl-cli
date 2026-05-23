@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.36.6](https://github.com/inference-gateway/adl-cli/compare/v0.36.5...v0.36.6) (2026-05-23)
+
+### 📚 Documentation
+
+* Replace coverage badge with go report card for golang ([d37b5ed](https://github.com/inference-gateway/adl-cli/commit/d37b5edf0fe352b58f6f2aac1856467ec56e34ba))
+
+### 🔧 Miscellaneous
+
+* **deps:** Bump claude-code version 2.1.141 -> 2.1.145 ([7c94d23](https://github.com/inference-gateway/adl-cli/commit/7c94d234d383c35dd244a418e5d734c4f1ce94dd))
+* **license:** Update license to Apache 2.0 ([b39fa3f](https://github.com/inference-gateway/adl-cli/commit/b39fa3f1f83746ab1251ef44fa0e935271bc22ee))
+
 ## [0.36.5](https://github.com/inference-gateway/adl-cli/compare/v0.36.4...v0.36.5) (2026-05-23)
 
 ### ♻️ Improvements
