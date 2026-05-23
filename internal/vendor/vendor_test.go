@@ -230,9 +230,6 @@ func TestResolveADL_GoSplitsDepsAndToolDevDeps(t *testing.T) {
 }
 
 func TestResolveADL_GoToolDevDepDedupedAgainstDeps(t *testing.T) {
-	// If a user lists the same module path in both deps and devdeps the
-	// tool resolver must drop the devdeps entry: `require` only allows one
-	// entry per module path, and the deps version wins.
 	adl := goADLWithVendor(
 		[]string{"github.com/golang/mock/mockgen@v1.6.0"},
 		[]string{"github.com/golang/mock/mockgen@v1.5.0"},
@@ -307,11 +304,6 @@ func TestResolveADL_RustBuiltinConflictDropped(t *testing.T) {
 }
 
 func TestResolveADL_RustRuntimeBuiltinAlsoBlocksDevDeps(t *testing.T) {
-	// tokio is a runtime built-in; users sometimes try to add a different
-	// version to dev-dependencies. Cargo rejects the same crate appearing
-	// in both [dependencies] and [dev-dependencies], so we must drop it
-	// from devdeps too. Regression guard for the bug fixed in the rust-agent
-	// smoke test where tokio@0.1.0 leaked into [dev-dependencies].
 	adl := rustADLWithVendor(nil, []string{"tokio@0.1.0"})
 	view, err := ResolveADL(adl)
 	if err != nil {
