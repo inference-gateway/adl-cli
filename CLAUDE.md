@@ -198,13 +198,13 @@ Merge policy is **additive**: the template's built-in toolchain
 and user `deps` are appended on top. If a user entry's package name
 collides with one of these built-ins (e.g. `git@2.53.0`), the
 generator prints a `⚠️  spec.development.deps … collides with a Flox
-built-in …` warning to stderr but still renders the user entry — the
+built-in …` warning to stderr but still renders the user entry - the
 maintainer's pin wins on version conflict. The conflict-detection
 map lives in `internal/sandbox/deps.go` (`floxBuiltinPackages` /
 `devcontainerBuiltinPackages`); keep them in sync if you add new
 packages to the sandbox templates.
 
-`dockerCompose` is out of scope for now — the docker-compose dev image
+`dockerCompose` is out of scope for now - the docker-compose dev image
 doesn't consume `spec.development.deps`. Tracked in issue #154.
 
 ## Adding a New Language
