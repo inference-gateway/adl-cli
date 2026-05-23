@@ -314,7 +314,7 @@ adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun --
 > and `spec.scm.cd`. The CLI flag is OR'd on top of the manifest value (passing
 > the flag wins; omitting it falls back to the manifest). AI assistants are
 > entirely manifest-driven via the per-agent toggles in `spec.development.ai`
-> — see the matrix below.
+> - see the matrix below.
 > `adl init` writes all toggles as `false` by default - they're opt-in. Generated files
 > (`CLAUDE.md`, `GEMINI.md`, `AGENTS.md`, `.github/workflows/ci.yml`,
 > `.github/workflows/cd.yml`, `.github/workflows/claude-code.yml`,
