@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.36.1](https://github.com/inference-gateway/adl-cli/compare/v0.36.0...v0.36.1) (2026-05-23)
+
+### 🐛 Bug Fixes
+
+* **templates:** Rework generated Claude Code workflow ([#145](https://github.com/inference-gateway/adl-cli/issues/145)) ([e37b7f5](https://github.com/inference-gateway/adl-cli/commit/e37b7f5ebfad23c74467bbb040efb550194bc6e1)), closes [#144](https://github.com/inference-gateway/adl-cli/issues/144)
+
 ## [0.36.0](https://github.com/inference-gateway/adl-cli/compare/v0.35.0...v0.36.0) (2026-05-23)
 
 ### ✨ Features
