@@ -606,9 +606,6 @@ spec:
 
 // TestGenerateCLIFlagOverridesManifest verifies that the --ci/--cd flags
 // OR on top of the manifest value: setting the flag wins even if the manifest
-// has the field unset or false. AI assistants are no longer CLI-controlled
-// (the legacy --ai fallback was removed in favour of per-agent manifest
-// toggles in spec.development.ai), so this only covers --ci and --cd.
 func TestGenerateCLIFlagOverridesManifest(t *testing.T) {
 	tempDir := t.TempDir()
 	outputPath := filepath.Join(tempDir, "cli-overrides")
