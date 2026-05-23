@@ -351,12 +351,12 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 	}
 	for _, c := range sandboxView.FloxConflicts {
 		fmt.Fprintf(os.Stderr,
-			"⚠️  spec.development.deps entry %s@%s collides with a Flox built-in (%s); the user entry is rendered in addition to the template default — review the generated .flox/env/manifest.toml\n",
+			"⚠️  spec.development.deps entry %s@%s collides with a Flox built-in (%s); the user entry is rendered in addition to the template default - review the generated .flox/env/manifest.toml\n",
 			c.Entry.Name, c.Entry.Version, c.Builtin)
 	}
 	for _, c := range sandboxView.DevContainerConflicts {
 		fmt.Fprintf(os.Stderr,
-			"⚠️  spec.development.deps entry %s@%s collides with a devcontainer built-in (%s); the user entry is still emitted — review the generated .devcontainer/devcontainer.json\n",
+			"⚠️  spec.development.deps entry %s@%s collides with a devcontainer built-in (%s); the user entry is still emitted - review the generated .devcontainer/devcontainer.json\n",
 			c.Entry.Name, c.Entry.Version, c.Builtin)
 	}
 
