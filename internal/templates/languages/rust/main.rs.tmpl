@@ -18,10 +18,10 @@ mod tools;
 /// {{ .ADL.Metadata.Description }}
 #[derive(Parser, Debug)]
 #[command(
-    name = "{{ .ADL.Metadata.Name }}",
+    name = {{ .ADL.Metadata.Name | toJson }},
     version,
-    about = "{{ .ADL.Metadata.Description }}",
-    long_about = "{{ .ADL.Metadata.Description }}\n\nThis is an A2A (Agent-to-Agent) protocol server. Use the `start` subcommand to run it.",
+    about = {{ .ADL.Metadata.Description | toJson }},
+    long_about = {{ printf "%s\n\nThis is an A2A (Agent-to-Agent) protocol server. Use the `start` subcommand to run it." .ADL.Metadata.Description | toJson }},
 )]
 struct Cli {
     #[command(subcommand)]

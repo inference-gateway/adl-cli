@@ -1,15 +1,15 @@
 {
-	"name": "{{ .ADL.Metadata.Name }}",
-	"version": "{{ .ADL.Metadata.Version }}",
-	"description": "{{ .ADL.Metadata.Description }}",
-	"protocolVersion": "{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.ProtocolVersion }}{{ .ADL.Spec.Card.ProtocolVersion }}{{- else }}0.3.0{{- end }}{{- else }}0.3.0{{- end }}",
-	"url": "{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.URL }}{{ .ADL.Spec.Card.URL }}{{- else }}{{- end }}{{- else }}{{- end }}",
-	"preferredTransport": "{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.PreferredTransport }}{{ .ADL.Spec.Card.PreferredTransport }}{{- else }}JSONRPC{{- end }}{{- else }}JSONRPC{{- end }}",
+	"name": {{ .ADL.Metadata.Name | toJson }},
+	"version": {{ .ADL.Metadata.Version | toJson }},
+	"description": {{ .ADL.Metadata.Description | toJson }},
+	"protocolVersion": {{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.ProtocolVersion }} {{ .ADL.Spec.Card.ProtocolVersion | toJson }}{{- else }} "0.3.0"{{- end }}{{- else }} "0.3.0"{{- end }},
+	"url": {{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.URL }} {{ .ADL.Spec.Card.URL | toJson }}{{- else }} ""{{- end }}{{- else }} ""{{- end }},
+	"preferredTransport": {{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.PreferredTransport }} {{ .ADL.Spec.Card.PreferredTransport | toJson }}{{- else }} "JSONRPC"{{- end }}{{- else }} "JSONRPC"{{- end }},
 	{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.DocumentationURL }}
-	"documentationUrl": "{{ .ADL.Spec.Card.DocumentationURL }}",
+	"documentationUrl": {{ .ADL.Spec.Card.DocumentationURL | toJson }},
 	{{- end }}{{- end }}
 	{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.IconURL }}
-	"iconUrl": "{{ .ADL.Spec.Card.IconURL }}",
+	"iconUrl": {{ .ADL.Spec.Card.IconURL | toJson }},
 	{{- end }}{{- end }}
 	"defaultInputModes": {{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.DefaultInputModes }} {{ .ADL.Spec.Card.DefaultInputModes | toJson }}{{- else }} ["text"]{{- end }}{{- else }} ["text"]{{- end }},
 	"defaultOutputModes": {{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.DefaultOutputModes }} {{ .ADL.Spec.Card.DefaultOutputModes | toJson }}{{- else }} ["text"]{{- end }}{{- else }} ["text"]{{- end }},
@@ -28,12 +28,12 @@
 		{{- range $index, $skill := .Skills }}
 		{{- if $index }},{{ end }}
 		{
-			"id": "{{ $skill.ID }}",
-			"name": "{{ $skill.Name }}",
-			"description": "{{ $skill.Description }}",
+			"id": {{ $skill.ID | toJson }},
+			"name": {{ $skill.Name | toJson }},
+			"description": {{ $skill.Description | toJson }},
 			"tags": {{ if $skill.Tags }}{{ $skill.Tags | toJson }}{{ else }}[]{{ end }}
 			{{- if $skill.Version }},
-			"version": "{{ $skill.Version }}"
+			"version": {{ $skill.Version | toJson }}
 			{{- end }}
 		}
 		{{- end }}
