@@ -15,6 +15,7 @@ type Registry struct {
 	templates map[string]string
 	language  string
 	enableAI  bool
+	aiToggles schema.AIAgentToggles
 }
 
 // Embed template files at compile time
@@ -24,8 +25,9 @@ var templateFS embed.FS
 
 // RegistryOptions holds options for creating a new registry
 type RegistryOptions struct {
-	Language string
-	EnableAI bool
+	Language  string
+	EnableAI  bool
+	AIToggles schema.AIAgentToggles
 }
 
 // NewRegistry creates a new template registry for the specified language
@@ -42,6 +44,7 @@ func NewRegistryWithOptions(opts RegistryOptions) (*Registry, error) {
 		templates: make(map[string]string),
 		language:  opts.Language,
 		enableAI:  opts.EnableAI,
+		aiToggles: opts.AIToggles,
 	}
 
 	if err := r.loadTemplates(); err != nil {
@@ -293,10 +296,25 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 	return files
 }
 
-// addAIFiles adds AI-related files to the file mapping when EnableAI is true
+// addAIFiles maps per-agent AI assistant documentation onto the
+// generated project layout. Each agent's toggle in spec.development.ai
+// is consulted independently:
+//
+//   - CLAUDE.md  ← claudecode.enabled
+//   - GEMINI.md  ← gemini.enabled
+//   - AGENTS.md  ← any of codex / opencode / infer (single shared file)
+//
+// AGENTS.md is shared by the three "AGENTS.md"-flavoured agents and
+// is emitted once even when more than one of them is enabled.
 func (r *Registry) addAIFiles(files map[string]string) {
-	if r.enableAI {
+	t := r.aiToggles
+	if t.ClaudeCode {
 		files["CLAUDE.md"] = "ai/claude.md"
+	}
+	if t.Gemini {
+		files["GEMINI.md"] = "ai/gemini.md"
+	}
+	if t.AnyAgentsMD() {
 		files["AGENTS.md"] = "ai/agents.md"
 	}
 }

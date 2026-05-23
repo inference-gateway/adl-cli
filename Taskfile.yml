@@ -6,7 +6,7 @@ vars:
   VERSION: 0.35.0
   BUILD_DIR: bin
   DIST_DIR: dist
-  ADL_SCHEMA_VERSION: v0.7.0
+  ADL_SCHEMA_VERSION: v0.8.0
   ADL_SCHEMA_URL: https://raw.githubusercontent.com/inference-gateway/adl/{{.ADL_SCHEMA_VERSION}}/schema/v1/schema.json
   ADL_SCHEMA_PATH: internal/schema/schema.json
 

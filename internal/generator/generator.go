@@ -31,10 +31,16 @@ type Config struct {
 	DeploymentType     string
 	EnableFlox         bool
 	EnableDevContainer bool
-	EnableAI           bool
 	Offline            bool
 	ADLFile            string
 	OutputDir          string
+	// EnableAI is the derived "any AI assistant is on" state. Computed
+	// in Generate() from AIToggles.Any(); not set by callers.
+	EnableAI bool
+	// AIToggles is the resolved per-agent state derived from
+	// spec.development.ai. Computed in Generate() before templating;
+	// not set by callers.
+	AIToggles schema.AIAgentToggles
 }
 
 // New creates a new generator
@@ -56,24 +62,19 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 	}
 
 	// Reconcile CLI flags with manifest fields. The CLI flag is OR'd on top
-	// of the manifest value, so passing --ai/--ci/--cd at the command line
+	// of the manifest value, so passing --ci/--cd at the command line
 	// always wins; omitting the flag falls back to the manifest. After this
 	// block, both g.config.* and adl.Spec.Development.* reflect the same
 	// effective state so templates (e.g. .gitattributes) can read either
 	// source of truth.
-	if adl.Spec.Development != nil && adl.Spec.Development.AI != nil && adl.Spec.Development.AI.Enabled {
-		g.config.EnableAI = true
+	var aiCfg *schema.AIConfig
+	if adl.Spec.Development != nil {
+		aiCfg = adl.Spec.Development.AI
 	}
-	if g.config.EnableAI {
-		if adl.Spec.Development == nil {
-			adl.Spec.Development = &schema.DevelopmentConfig{}
-		}
-		if adl.Spec.Development.AI == nil {
-			adl.Spec.Development.AI = &schema.AIConfig{Enabled: true}
-		} else {
-			adl.Spec.Development.AI.Enabled = true
-		}
-	}
+	aiToggles := schema.ResolveAIAgentToggles(aiCfg)
+	g.config.AIToggles = aiToggles
+	g.config.EnableAI = aiToggles.Any()
+
 	if adl.Spec.SCM != nil {
 		if adl.Spec.SCM.CI {
 			g.config.GenerateCI = true
@@ -147,8 +148,9 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 	language := templates.DetectLanguageFromADL(adl)
 
 	registry, err := templates.NewRegistryWithOptions(templates.RegistryOptions{
-		Language: language,
-		EnableAI: g.config.EnableAI,
+		Language:  language,
+		EnableAI:  g.config.EnableAI,
+		AIToggles: g.config.AIToggles,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create template registry: %w", err)
@@ -342,6 +344,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		GenerateCI:      g.config.GenerateCI,
 		GenerateCD:      g.config.GenerateCD,
 		EnableAI:        g.config.EnableAI,
+		AIToggles:       g.config.AIToggles,
 		GenerateCommand: g.buildGenerateCommand(),
 		Skills:          skillViews,
 		BuiltinConfigs:  builtinConfigs,
@@ -561,6 +564,90 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		}
 	}
 
+	if err := g.generateAIWorkflows(adl, ctx, outputDir, ignoreChecker); err != nil {
+		return fmt.Errorf("failed to generate AI assistant workflows: %w", err)
+	}
+
+	return nil
+}
+
+// generateAIWorkflows emits per-agent GitHub Actions workflows under
+// .github/workflows/ for every enabled AI assistant that has an
+// upstream action (see schema.AIHasOfficialAction). Currently that
+// covers claudecode, codex, and gemini; opencode and infer ship docs
+// only because no first-party action exists yet.
+//
+// The workflows are generated regardless of GenerateCI/GenerateCD -
+// they're orthogonal to the language CI/CD pipelines. SCM provider is
+// honoured so non-GitHub repos skip this step entirely.
+func (g *Generator) generateAIWorkflows(adl *schema.ADL, ctx templates.Context, outputDir string, ignoreChecker *IgnoreChecker) error {
+	if !g.config.AIToggles.Any() {
+		return nil
+	}
+	if g.detectSCMProvider(adl) != string(schema.SCMProviderGithub) {
+		return nil
+	}
+
+	type aiWorkflow struct {
+		enabled bool
+		key     string
+		path    string
+		label   string
+	}
+	workflows := []aiWorkflow{
+		{
+			enabled: g.config.AIToggles.ClaudeCode && schema.AIHasOfficialAction("claudecode"),
+			key:     "github/workflows/ai-claude-code.yaml",
+			path:    ".github/workflows/claude-code.yml",
+			label:   "Claude Code",
+		},
+		{
+			enabled: g.config.AIToggles.Codex && schema.AIHasOfficialAction("codex"),
+			key:     "github/workflows/ai-codex.yaml",
+			path:    ".github/workflows/codex.yml",
+			label:   "Codex",
+		},
+		{
+			enabled: g.config.AIToggles.Gemini && schema.AIHasOfficialAction("gemini"),
+			key:     "github/workflows/ai-gemini.yaml",
+			path:    ".github/workflows/gemini.yml",
+			label:   "Gemini",
+		},
+	}
+
+	language := g.detectLanguage(adl)
+	registry, err := templates.NewRegistryWithOptions(templates.RegistryOptions{
+		Language:  language,
+		EnableAI:  g.config.EnableAI,
+		AIToggles: g.config.AIToggles,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create template registry for AI workflows: %w", err)
+	}
+	engine := templates.NewWithRegistry("", registry)
+
+	for _, wf := range workflows {
+		if !wf.enabled {
+			continue
+		}
+		if ignoreChecker.ShouldIgnore(wf.path) {
+			fmt.Printf("🚫 Ignoring file (matches .adl-ignore): %s\n", wf.path)
+			continue
+		}
+		content, err := engine.ExecuteTemplate(wf.key, ctx)
+		if err != nil {
+			return fmt.Errorf("failed to execute %s workflow template: %w", wf.label, err)
+		}
+		header := templates.GetGeneratedFileHeader("yaml", ctx.Metadata.CLIVersion, ctx.Metadata.GeneratedAt)
+		content = header + content
+
+		fullPath := filepath.Join(outputDir, wf.path)
+		if err := g.writeFile(fullPath, content); err != nil {
+			return fmt.Errorf("failed to write %s workflow: %w", wf.label, err)
+		}
+		fmt.Printf("📁 %s workflow: %s\n", wf.label, wf.path)
+	}
+
 	return nil
 }
 
@@ -670,10 +757,6 @@ func (g *Generator) buildGenerateCommand() string {
 
 	if g.config.EnableDevContainer {
 		parts = append(parts, "--devcontainer")
-	}
-
-	if g.config.EnableAI {
-		parts = append(parts, "--ai")
 	}
 
 	return strings.Join(parts, " ")
@@ -877,6 +960,7 @@ func (g *Generator) generateGitHubActionsWorkflow(adl *schema.ADL, outputDir str
 		GenerateCI:      g.config.GenerateCI,
 		GenerateCD:      g.config.GenerateCD,
 		EnableAI:        g.config.EnableAI,
+		AIToggles:       g.config.AIToggles,
 		GenerateCommand: g.buildGenerateCommand(),
 	}
 
@@ -1013,6 +1097,7 @@ func (g *Generator) generateGitHubCDWorkflow(adl *schema.ADL, outputDir string, 
 		GenerateCI:      g.config.GenerateCI,
 		GenerateCD:      g.config.GenerateCD,
 		EnableAI:        g.config.EnableAI,
+		AIToggles:       g.config.AIToggles,
 		GenerateCommand: g.buildGenerateCommand(),
 	}
 

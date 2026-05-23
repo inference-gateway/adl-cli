@@ -747,9 +747,8 @@ func TestGenerator_buildGenerateCommand(t *testing.T) {
 				DeploymentType:     "kubernetes",
 				EnableFlox:         true,
 				EnableDevContainer: true,
-				EnableAI:           true,
 			},
-			expectedCmd: "adl generate --file agent.yaml --output . --template custom --overwrite --ci --cd --deployment kubernetes --flox --devcontainer --ai",
+			expectedCmd: "adl generate --file agent.yaml --output . --template custom --overwrite --ci --cd --deployment kubernetes --flox --devcontainer",
 		},
 		{
 			name: "config reproducing the issue scenario",

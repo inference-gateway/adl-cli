@@ -271,7 +271,11 @@ The init command supports extensive configuration options:
 
 **Pipeline / AI Options (declarative, written into the manifest as `false` by default):**
 
-- `--ai` - Sets `spec.development.ai.enabled: true` (generate `CLAUDE.md`/`AGENTS.md`, add claude-code to sandboxes)
+- `--ai` - Shortcut for the init wizard: writes
+  `spec.development.ai.claudecode.enabled: true` into the generated `agent.yaml`.
+  Every other per-agent toggle (`codex`, `gemini`, `opencode`, `infer`) stays
+  off; edit `agent.yaml` after init to enable additional agents
+  (see [Per-agent AI assistants](#per-agent-ai-assistants)).
 - `--ci` - Sets `spec.scm.ci: true` (generate CI workflow on `adl generate`)
 - `--cd` - Sets `spec.scm.cd: true` (generate CD pipeline + semantic-release on `adl generate`)
 
@@ -286,9 +290,6 @@ adl generate --file agent.yaml --output ./test-my-agent --overwrite
 
 # Generate with CI workflow configuration
 adl generate --file agent.yaml --output ./test-my-agent --ci
-
-# Generate with AI assistant instructions and claude-code integration
-adl generate --file agent.yaml --output ./test-my-agent --ai
 
 # Generate with CloudRun deployment configuration
 adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun
@@ -308,15 +309,18 @@ adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun --
 | `--ci`             | Generate CI workflow configuration (GitHub Actions). Overrides `spec.scm.ci`.              |
 | `--cd`             | Generate CD pipeline configuration with semantic-release. Overrides `spec.scm.cd`.         |
 | `--deployment`     | Generate deployment configuration (`kubernetes`, `cloudrun`)                               |
-| `--ai`             | Generate AI assistant instructions (CLAUDE.md) and add claude-code to sandbox environments. Overrides `spec.development.ai.enabled`. |
 
-> **Declarative equivalents:** `--ai`, `--ci`, and `--cd` can also be set in the manifest as
-> `spec.development.ai.enabled: true`, `spec.scm.ci: true`, and `spec.scm.cd: true`. The CLI flag is OR'd
-> on top of the manifest value (passing the flag wins; omitting it falls back to the manifest).
-> `adl init` writes all three as `false` by default — they're opt-in. Generated files
-> (`CLAUDE.md`, `AGENTS.md`, `.github/workflows/ci.yml`, `.github/workflows/cd.yml`,
-> `.releaserc.yaml`) are tagged `linguist-generated=true` in `.gitattributes` so they collapse
-> in pull request diffs.
+> **Declarative equivalents:** `--ci` and `--cd` are mirrored by `spec.scm.ci`
+> and `spec.scm.cd`. The CLI flag is OR'd on top of the manifest value (passing
+> the flag wins; omitting it falls back to the manifest). AI assistants are
+> entirely manifest-driven via the per-agent toggles in `spec.development.ai`
+> - see the matrix below.
+> `adl init` writes all toggles as `false` by default - they're opt-in. Generated files
+> (`CLAUDE.md`, `GEMINI.md`, `AGENTS.md`, `.github/workflows/ci.yml`,
+> `.github/workflows/cd.yml`, `.github/workflows/claude-code.yml`,
+> `.github/workflows/codex.yml`, `.github/workflows/gemini.yml`,
+> `.releaserc.yaml`) are tagged `linguist-generated=true` in `.gitattributes`
+> so they collapse in pull request diffs.
 
 **CI Generation Features:**
 
@@ -337,17 +341,48 @@ adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun --
 - **Deployment Integration**: Supports automatic deployment to Kubernetes and Cloud Run after successful releases
 
 **AI Integration Features:**
-The `--ai` flag enables enhanced development experience with AI assistant capabilities:
 
-- **CLAUDE.md Generation**: Creates AI assistant instructions tailored to your agent
-  - Project-specific guidelines based on your ADL configuration
-  - Language-specific development patterns and best practices
-  - Skills implementation guidance with TODO placeholders context
-  - Testing strategies and development workflow recommendations
-- **Claude Code Integration**: Automatically adds claude-code to sandbox environments
-  - DevContainer integration for seamless AI-assisted development
-  - Flox environment integration with claude-code tooling
-  - Improved development experience with AI pair programming capabilities
+The ADL CLI honours the per-agent toggles in `spec.development.ai` (introduced
+in ADL schema v0.8.0). Each entry is independent and defaults to `false`:
+
+```yaml
+spec:
+  development:
+    ai:
+      claudecode:
+        enabled: true   # generates CLAUDE.md + .github/workflows/claude-code.yml
+      codex:
+        enabled: false  # would generate AGENTS.md + .github/workflows/codex.yml
+      gemini:
+        enabled: false  # would generate GEMINI.md + .github/workflows/gemini.yml
+      opencode:
+        enabled: false  # would generate AGENTS.md (no upstream action yet)
+      infer:
+        enabled: false  # would generate AGENTS.md (no upstream action yet)
+```
+
+#### Per-agent AI assistants
+
+| Agent toggle  | Docs file the agent reads | GitHub Actions workflow generated? |
+|---------------|---------------------------|------------------------------------|
+| `claudecode`  | `CLAUDE.md`               | yes (`.github/workflows/claude-code.yml`, uses `anthropics/claude-code-action`) |
+| `codex`       | `AGENTS.md` (shared)      | yes (`.github/workflows/codex.yml`, uses `openai/codex-action`) |
+| `gemini`      | `GEMINI.md`               | yes (`.github/workflows/gemini.yml`, uses `google-github-actions/run-gemini-cli`) |
+| `opencode`    | `AGENTS.md` (shared)      | no upstream action yet - docs only |
+| `infer`       | `AGENTS.md` (shared)      | no workflow scaffolded yet - docs only |
+
+- `AGENTS.md` is generated **once** and is shared by every enabled agent that
+  reads from it (`codex`, `opencode`, `infer`); the file's contents are
+  agent-agnostic.
+- `CLAUDE.md` and `GEMINI.md` are agent-specific and only appear when the
+  matching toggle is on.
+- If no toggles are enabled, no AI docs or workflows are emitted.
+- Pre-v0.8.0 manifests using `spec.development.ai.enabled: true` are no longer
+  accepted - `adl validate` and `adl generate` will fail with a migration hint
+  pointing at the per-agent toggles. Move `enabled: true` to the specific agent
+  you want (e.g. `claudecode.enabled: true`).
+- When `claudecode` is enabled, sandbox environments (Flox, DevContainer)
+  also gain the `claude-code` CLI / extension automatically.
 
 **Deployment Generation Features:**
 The `--deployment` flag generates platform-specific deployment configurations:
@@ -1079,7 +1114,7 @@ my-go-agent/
 ├── .gitignore                 # Standard Git ignore patterns
 ├── .gitattributes             # Git attributes configuration
 ├── .editorconfig              # Editor configuration
-├── CLAUDE.md                  # AI assistant instructions (generated with --ai flag)
+├── CLAUDE.md                  # AI assistant instructions (spec.development.ai.claudecode.enabled: true)
 └── README.md                  # Project documentation with setup instructions
 ```
 
@@ -1112,7 +1147,7 @@ my-rust-agent/
 │   └── deployment.yaml        # Kubernetes deployment
 ├── cloudrun/
 │   └── deploy.sh              # CloudRun deployment script (with --deployment cloudrun)
-├── CLAUDE.md                  # AI assistant instructions (generated with --ai flag)
+├── CLAUDE.md                  # AI assistant instructions (spec.development.ai.claudecode.enabled: true)
 └── README.md                  # Documentation
 ```
 
@@ -1135,8 +1170,11 @@ All projects include these essential files regardless of language:
 - **Development Environment** - Based on `sandbox` configuration:
   - **Flox**: `.flox/` directory with environment configuration when `sandbox.flox.enabled: true`
   - **DevContainer**: `.devcontainer/devcontainer.json` when `sandbox.devcontainer.enabled: true`
-- **AI Assistant Instructions** - When using `--ai` flag:
-  - **CLAUDE.md**: AI assistant instructions tailored to your agent configuration
+- **AI Assistant Instructions** - Per-agent toggles under `spec.development.ai`
+  (see [Per-agent AI assistants](#per-agent-ai-assistants)):
+  - **CLAUDE.md** when `spec.development.ai.claudecode.enabled: true`
+  - **GEMINI.md** when `spec.development.ai.gemini.enabled: true`
+  - **AGENTS.md** (shared) when any of `codex`, `opencode`, or `infer` is enabled
 
 ### CI Integration
 

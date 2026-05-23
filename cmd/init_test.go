@@ -248,8 +248,14 @@ func TestInitAICICDDefaults(t *testing.T) {
 		t.Errorf("expected SCM.CD to default to false")
 	}
 
-	if adl.Spec.Development != nil && adl.Spec.Development.AI != nil && adl.Spec.Development.AI.Enabled {
-		t.Errorf("expected spec.development.ai to be omitted or disabled by default, got enabled=true")
+	if adl.Spec.Development != nil && adl.Spec.Development.AI != nil {
+		if ai := adl.Spec.Development.AI; ai.Claudecode != nil && ai.Claudecode.Enabled ||
+			ai.Codex != nil && ai.Codex.Enabled ||
+			ai.Gemini != nil && ai.Gemini.Enabled ||
+			ai.Opencode != nil && ai.Opencode.Enabled ||
+			ai.Infer != nil && ai.Infer.Enabled {
+			t.Errorf("expected every spec.development.ai.<agent>.enabled to default to false, got at least one true")
+		}
 	}
 
 	contentStr := string(content)
@@ -293,13 +299,14 @@ func TestInitAIFlag(t *testing.T) {
 		t.Fatalf("failed to parse ADL YAML: %v", err)
 	}
 
-	if adl.Spec.Development == nil || adl.Spec.Development.AI == nil || !adl.Spec.Development.AI.Enabled {
-		t.Errorf("expected spec.development.ai.enabled to be true when --ai is passed to init")
+	if adl.Spec.Development == nil || adl.Spec.Development.AI == nil ||
+		adl.Spec.Development.AI.Claudecode == nil || !adl.Spec.Development.AI.Claudecode.Enabled {
+		t.Errorf("expected spec.development.ai.claudecode.enabled to be true when --ai is passed to init")
 	}
 
 	contentStr := string(content)
-	if !strings.Contains(contentStr, "development:") || !strings.Contains(contentStr, "ai:") || !strings.Contains(contentStr, "enabled: true") {
-		t.Errorf("ADL file should contain development.ai.enabled: true, got:\n%s", contentStr)
+	if !strings.Contains(contentStr, "development:") || !strings.Contains(contentStr, "claudecode:") || !strings.Contains(contentStr, "enabled: true") {
+		t.Errorf("ADL file should contain development.ai.claudecode.enabled: true, got:\n%s", contentStr)
 	}
 }
 
@@ -349,8 +356,15 @@ func TestInitDevelopmentDefaultsEmitted(t *testing.T) {
 	if adl.Spec.Development.Sandbox.DockerCompose == nil || adl.Spec.Development.Sandbox.DockerCompose.Enabled {
 		t.Errorf("expected spec.development.sandbox.dockerCompose.enabled to be false by default")
 	}
-	if adl.Spec.Development.AI == nil || adl.Spec.Development.AI.Enabled {
-		t.Errorf("expected spec.development.ai.enabled to be false by default")
+	if adl.Spec.Development.AI == nil {
+		t.Fatalf("expected spec.development.ai to be present by default")
+	}
+	if ai := adl.Spec.Development.AI; (ai.Claudecode != nil && ai.Claudecode.Enabled) ||
+		(ai.Codex != nil && ai.Codex.Enabled) ||
+		(ai.Gemini != nil && ai.Gemini.Enabled) ||
+		(ai.Opencode != nil && ai.Opencode.Enabled) ||
+		(ai.Infer != nil && ai.Infer.Enabled) {
+		t.Errorf("expected every spec.development.ai.<agent>.enabled to default to false")
 	}
 
 	contentStr := string(content)
@@ -361,6 +375,11 @@ func TestInitDevelopmentDefaultsEmitted(t *testing.T) {
 		"devcontainer:",
 		"dockerCompose:",
 		"ai:",
+		"claudecode:",
+		"codex:",
+		"gemini:",
+		"opencode:",
+		"infer:",
 	} {
 		if !strings.Contains(contentStr, want) {
 			t.Errorf("ADL file should contain %q, got:\n%s", want, contentStr)

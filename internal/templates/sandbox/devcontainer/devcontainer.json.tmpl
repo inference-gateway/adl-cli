@@ -22,7 +22,7 @@
         "ms-vscode.vscode-typescript-next",
         {{- end }}
         "ms-azuretools.vscode-docker",
-        "redhat.vscode-yaml"{{- if .EnableAI }},
+        "redhat.vscode-yaml"{{- if .AIToggles.ClaudeCode }},
         "anthropic.claude-code"{{- end }}
       ],
       "settings": {

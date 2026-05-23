@@ -50,7 +50,7 @@ git.pkg-group = "common"
 docker.pkg-path = "docker"
 docker.version = "^29.4.3"
 docker.pkg-group = "common"
-{{- if .EnableAI }}
+{{- if .AIToggles.ClaudeCode }}
 
 claude-code.pkg-path = "claude-code"
 claude-code.version = "^2.1.141"

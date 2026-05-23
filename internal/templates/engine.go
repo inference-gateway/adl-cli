@@ -204,6 +204,7 @@ type Context struct {
 	GenerateCI      bool
 	GenerateCD      bool
 	EnableAI        bool
+	AIToggles       schema.AIAgentToggles
 	GenerateCommand string
 	Skills          []SkillView
 	BuiltinConfigs  schema.ResolvedBuiltinConfigs
