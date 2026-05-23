@@ -210,13 +210,6 @@ spec:
       module: "github.com/inference-gateway/adl-cli/test-output"
       version: "1.26.2"
       vendor:
-        # Extra modules to add to go.mod beyond the generator's defaults.
-        # `deps` map straight into the `require` block (test libraries that
-        # you `import` from *_test.go go here too). `devdeps` are treated
-        # as Go 1.24+ tool dependencies and emitted via the `tool` directive
-        # plus an `// indirect` entry in `require`; supply the full tool
-        # package path with a version, then run `go mod tidy` to normalise
-        # the require entry to the owning module root.
         deps:
           - github.com/stretchr/testify@v1.10.0
         devdeps:
