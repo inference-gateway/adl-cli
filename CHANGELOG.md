@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.36.5](https://github.com/inference-gateway/adl-cli/compare/v0.36.4...v0.36.5) (2026-05-23)
+
+### ♻️ Improvements
+
+* More import sorting ([e9a6a13](https://github.com/inference-gateway/adl-cli/commit/e9a6a13fab3500e3c27f15ee37695447c5d3972b))
+* Sort imports from inference gateway related imports to external providers ([a2ea423](https://github.com/inference-gateway/adl-cli/commit/a2ea42380983f6562fa2b4ffd85a660c02c0c2ab))
+
+### 🐛 Bug Fixes
+
+* **templates:** JSON-encode metadata/skill strings to escape inner quotes ([#151](https://github.com/inference-gateway/adl-cli/issues/151)) ([1937b04](https://github.com/inference-gateway/adl-cli/commit/1937b04776edab28507c96c6c9b505162f8d10ad)), closes [#150](https://github.com/inference-gateway/adl-cli/issues/150)
+
 ## [0.36.4](https://github.com/inference-gateway/adl-cli/compare/v0.36.3...v0.36.4) (2026-05-23)
 
 ### 🐛 Bug Fixes
