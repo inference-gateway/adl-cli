@@ -1,0 +1,122 @@
+{{- $port := .ADL.Spec.Server.Port | default 8080 -}}
+{{- $name := .ADL.Metadata.Name -}}
+{{- $hasRedis := false -}}
+{{- if .ADL.Spec.Language.Rust -}}
+{{- if has "redis" .ADL.Spec.Language.Rust.Features -}}
+{{- $hasRedis = true -}}
+{{- end -}}
+{{- end -}}
+# Local development stack for {{ $name }}.
+#
+# Brings up the Inference Gateway, this A2A agent (built from the local
+# Dockerfile so code changes are picked up), and gives you opt-in profiles
+# for the `infer` CLI and the `a2a-debugger` so the agent can be exercised
+# end-to-end without manual wiring.
+#
+#   docker compose up --build                             # gateway + agent{{ if $hasRedis }} + redis{{ end }}
+#   docker compose --profile cli run --rm cli chat        # interactive infer CLI
+#   docker compose --profile debugger run --rm debugger --server-url http://{{ $name }}:{{ $port }} tasks submit-streaming "What are your skills?"
+---
+services:
+  gateway:
+    image: ghcr.io/inference-gateway/inference-gateway:latest
+    pull_policy: always
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: "8080"
+
+  {{ $name }}:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      A2A_SERVER_PORT: "{{ $port }}"
+      A2A_DEBUG: "${A2A_DEBUG:-false}"
+      {{- if .ADL.Spec.Agent }}
+      A2A_AGENT_CLIENT_PROVIDER: "${A2A_AGENT_CLIENT_PROVIDER:-{{ .ADL.Spec.Agent.Provider }}}"
+      A2A_AGENT_CLIENT_MODEL: "${A2A_AGENT_CLIENT_MODEL:-{{ .ADL.Spec.Agent.Model }}}"
+      A2A_AGENT_CLIENT_BASE_URL: "${A2A_AGENT_CLIENT_BASE_URL:-http://gateway:8080/v1}"
+      {{- end }}
+      {{- if $hasRedis }}
+      A2A_QUEUE_PROVIDER: redis
+      A2A_QUEUE_URL: "redis://redis:6379"
+      A2A_QUEUE_NAMESPACE: a2a
+      {{- end }}
+    depends_on:
+      gateway:
+        condition: service_started
+      {{- if $hasRedis }}
+      redis:
+        condition: service_healthy
+      {{- end }}
+
+  cli:
+    image: ghcr.io/inference-gateway/cli:latest
+    profiles:
+      - cli
+    pull_policy: always
+    stdin_open: true
+    tty: true
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      INFER_GATEWAY_URL: "http://gateway:8080"
+      INFER_A2A_ENABLED: "true"
+      INFER_TOOLS_ENABLED: true
+      INFER_A2A_TOOLS_QUERY_AGENT_ENABLED: true
+      INFER_A2A_TOOLS_SUBMIT_TASK_ENABLED: true
+      INFER_TOOLS_BASH_ENABLED: false
+      INFER_TOOLS_TODO_WRITE_ENABLED: false
+      INFER_TOOLS_WRITE_ENABLED: false
+      INFER_TOOLS_READ_ENABLED: false
+      INFER_TOOLS_DELETE_ENABLED: false
+      INFER_TOOLS_EDIT_ENABLED: false
+      INFER_TOOLS_GREP_ENABLED: false
+      INFER_TOOLS_TREE_ENABLED: false
+      INFER_TOOLS_WEB_FETCH_ENABLED: false
+      INFER_TOOLS_WEB_SEARCH_ENABLED: false
+      INFER_TOOLS_GITHUB_ENABLED: false
+      {{- if .ADL.Spec.Agent }}
+      INFER_AGENT_MODEL: ${CLI_PROVIDER:-{{ .ADL.Spec.Agent.Provider }}}/${CLI_MODEL:-{{ .ADL.Spec.Agent.Model }}}
+      {{- end }}
+      INFER_A2A_AGENTS: |
+        http://{{ $name }}:{{ $port }}
+    depends_on:
+      gateway:
+        condition: service_started
+
+  debugger:
+    image: ghcr.io/inference-gateway/a2a-debugger:latest
+    profiles:
+      - debugger
+    pull_policy: always
+    stdin_open: true
+    tty: true
+    depends_on:
+      {{ $name }}:
+        condition: service_started
+{{- if $hasRedis }}
+
+  redis:
+    image: redis:8-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:
+{{- end }}

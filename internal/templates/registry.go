@@ -147,6 +147,7 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		".well-known/agent-card.json": "config/agent.json",
 		"Taskfile.yml":                "taskfile/taskfile.yml",
 		"Dockerfile":                  "docker/dockerfile.go",
+		".dockerignore":               "config/dockerignore",
 		".gitignore":                  "config/gitignore",
 		".gitattributes":              "config/gitattributes",
 		".editorconfig":               "config/editorconfig",
@@ -185,6 +186,14 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		files[fmt.Sprintf("internal/%s/%s.go", snakeCaseName, snakeCaseName)] = "service.go"
 	}
 
+	if adl.Spec.Development != nil &&
+		adl.Spec.Development.Sandbox != nil &&
+		adl.Spec.Development.Sandbox.DockerCompose != nil &&
+		adl.Spec.Development.Sandbox.DockerCompose.Enabled {
+		files["docker-compose.yaml"] = "docker/docker-compose.yaml"
+		files[".env.example"] = "config/env.example"
+	}
+
 	r.addSandboxFiles(adl, files)
 	r.addAIFiles(files)
 	r.addIssueTemplateFiles(adl, files)
@@ -201,10 +210,10 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		".well-known/agent-card.json": "config/agent.json",
 		"Taskfile.yml":                "taskfile/taskfile.yml",
 		"Dockerfile":                  "docker/dockerfile.rust",
+		".dockerignore":               "config/dockerignore",
 		".gitignore":                  "config/gitignore",
 		".gitattributes":              "config/gitattributes",
 		".editorconfig":               "config/editorconfig",
-		".env.example":                "env.example",
 		"README.md":                   "docs/README.md",
 	}
 
@@ -242,7 +251,8 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		adl.Spec.Development.Sandbox != nil &&
 		adl.Spec.Development.Sandbox.DockerCompose != nil &&
 		adl.Spec.Development.Sandbox.DockerCompose.Enabled {
-		files["docker-compose.yaml"] = "docker-compose.yaml"
+		files["docker-compose.yaml"] = "docker/docker-compose.yaml"
+		files[".env.example"] = "config/env.example"
 	}
 
 	r.addSandboxFiles(adl, files)
@@ -262,6 +272,7 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		".well-known/agent-card.json": "config/agent.json",
 		"Taskfile.yml":                "taskfile/taskfile.yml",
 		"Dockerfile":                  "docker/dockerfile.ts",
+		".dockerignore":               "config/dockerignore",
 		".gitignore":                  "config/gitignore",
 		".gitattributes":              "config/gitattributes",
 		".editorconfig":               "config/editorconfig",
@@ -286,6 +297,14 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		if skill.Bare {
 			files[fmt.Sprintf("skills/%s/SKILL.md", skill.ID)] = "skills/skill.md"
 		}
+	}
+
+	if adl.Spec.Development != nil &&
+		adl.Spec.Development.Sandbox != nil &&
+		adl.Spec.Development.Sandbox.DockerCompose != nil &&
+		adl.Spec.Development.Sandbox.DockerCompose.Enabled {
+		files["docker-compose.yaml"] = "docker/docker-compose.yaml"
+		files[".env.example"] = "config/env.example"
 	}
 
 	r.addSandboxFiles(adl, files)

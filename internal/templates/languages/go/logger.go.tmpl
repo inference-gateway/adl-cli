@@ -13,7 +13,7 @@ import (
 func NewLogger(ctx context.Context, cfg *config.Config) (*zap.Logger, error) {
 	var zapConfig zap.Config
 	
-	if cfg.Environment == "development" {
+	if cfg.A2A.Debug {
 		zapConfig = zap.NewDevelopmentConfig()
 		zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	} else {
