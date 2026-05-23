@@ -53,6 +53,8 @@ main.go                       # Entry point, sets version
     │   ├── frontmatter.go   # YAML frontmatter parser for skill markdown
     │   ├── installer.go     # GitHub-source skill installer (trees API + raw.githubusercontent.com)
     │   └── resolver.go      # Coordinates fetch/cache/scaffold for skills
+    ├── sandbox/             # Resolver for spec.development.deps (sandbox-level extras)
+    │   └── deps.go          # Parse/dedupe/sort `<pkg>@<ver>` entries, flag flox/devcontainer conflicts
     ├── schema/              # ADL schema definitions
     │   ├── types.go         # All ADL type definitions (ADL, Spec, Tool, Skill, etc.)
     │   └── validator.go     # JSON Schema validation
@@ -78,7 +80,7 @@ main.go                       # Entry point, sets version
 
 - `ADL` - Root structure with `apiVersion`, `kind`, `metadata`, `spec`
 - `Spec` - Contains `capabilities`, `agent`, `tools`, `skills`, `services`, `server`, `language`, `deployment`, `development`
-- `DevelopmentConfig` - Local development experience under `spec.development`: `sandbox` (flox/devcontainer/dockerCompose) and `ai` (CLAUDE.md/AGENTS.md generation). Introduced in ADL v0.6.0 - previously these sat directly under `spec`.
+- `DevelopmentConfig` - Local development experience under `spec.development`: `sandbox` (flox/devcontainer/dockerCompose), `ai` (CLAUDE.md/AGENTS.md generation), and `deps` (cross-cutting sandbox-level extras like `deno`, `kubectl`, `terraform`). Introduced in ADL v0.6.0 (sandbox+ai); `deps` added in ADL v0.10.0.
 - `Tool` - Function-call entrypoint with `id` (only `id` is required since v0.4.0). User-defined tools also set `name`, `description`, `tags`, `schema`, optional `inject`. Reserved IDs (`read`, `bash`, `write`, `edit`) take `id` alone - the generator owns metadata. See `internal/schema/builtin_config.go` for the reserved-ID set.
 - `Skill` - Markdown playbook with `id` plus optional `version`/`source`/`bare`/`name`/`description`/`tags`/`license`. Generated as `skills/<id>/SKILL.md`. **At runtime, only the frontmatter is consumed** - the body lives on disk and the model reads it on demand via the `Read` built-in. `license` accepts the SPDX identifiers enumerated in the schema (`MIT`, `Apache-2.0`, `BSD-2-Clause`, `BSD-3-Clause`, `GPL-2.0`, `GPL-3.0`, `LGPL-2.1`, `LGPL-3.0`, `MPL-2.0`, `ISC`, `CC0-1.0`, `CC-BY-4.0`, `CC-BY-SA-4.0`, `Unlicense`) plus `Proprietary` for closed-source skills. The resolver mirrors it into the generated `SKILL.md` frontmatter so the licence travels with the playbook; when both the ADL entry and the fetched frontmatter set `license`, the ADL value wins.
 - `Service` - Injectable service with `interface`, `factory`, `description`
@@ -174,6 +176,36 @@ go-cmp, …) belong in `vendor.deps`, not `vendor.devdeps`.
 When you update a built-in dependency in a language template, mirror the
 new pin into the matching map in `internal/vendor/vendor.go` so vendor
 conflicts continue to be caught.
+
+### Sandbox extras (`spec.development.deps`)
+
+`spec.development.deps` is the cross-cutting equivalent of
+`vendor.deps` - same `<package>@<version>` shape, but resolved into the
+sandbox manifests instead of `go.mod` / `Cargo.toml`. Entries are parsed
+by `internal/sandbox`, deduped (first wins), sorted alphabetically, and
+exposed on `templates.Context.SandboxDeps`. Two backends render from
+this view today:
+
+- **flox** - each entry appends `<pkg>.pkg-path = "<pkg>"` /
+  `<pkg>.version = "<version>"` lines under `[install]` in
+  `.flox/env/manifest.toml`. Resolved against Nixpkgs.
+- **devcontainer** - all entries are joined into a single
+  `ghcr.io/devcontainers-extra/features/apt-packages:1` feature entry
+  with a comma-separated `<pkg>=<version>` list.
+
+Merge policy is **additive**: the template's built-in toolchain
+(`go`/`cargo`/`nodejs`, `git`, `docker`, `go-task`) is always emitted,
+and user `deps` are appended on top. If a user entry's package name
+collides with one of these built-ins (e.g. `git@2.53.0`), the
+generator prints a `⚠️  spec.development.deps … collides with a Flox
+built-in …` warning to stderr but still renders the user entry - the
+maintainer's pin wins on version conflict. The conflict-detection
+map lives in `internal/sandbox/deps.go` (`floxBuiltinPackages` /
+`devcontainerBuiltinPackages`); keep them in sync if you add new
+packages to the sandbox templates.
+
+`dockerCompose` is out of scope for now - the docker-compose dev image
+doesn't consume `spec.development.deps`. Tracked in issue #154.
 
 ## Adding a New Language
 

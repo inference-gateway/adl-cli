@@ -165,11 +165,22 @@ type DevContainerConfig struct {
 }
 
 // Local development experience for the agent: sandboxed dev environments (flox,
-// devcontainer, dockerCompose) and AI-assistant integration (CLAUDE.md/AGENTS.md
-// generation, claude-code provisioning).
+// devcontainer, dockerCompose), AI-assistant integration (CLAUDE.md/AGENTS.md
+// generation, claude-code provisioning), and extra sandbox-level dependencies
+// (deps) for tools that don't belong to any single language's package manager
+// (e.g. deno, kubectl, terraform).
 type DevelopmentConfig struct {
 	// AI corresponds to the JSON schema field "ai".
 	AI *AIConfig `json:"ai,omitempty,omitzero" yaml:"ai,omitempty" mapstructure:"ai,omitempty"`
+
+	// Extra packages to install into the development sandbox (flox, devcontainer,
+	// dockerCompose) on top of whatever the generator pulls in by default. Use this
+	// for cross-cutting tools that aren't tied to one of the project's languages —
+	// e.g. 'deno@2.1.4', 'kubectl@1.31.0', 'terraform@1.9.5'. Each entry follows the
+	// '<package>@<version>' form; consumers are responsible for resolving the package
+	// against the sandbox's native package source (Nixpkgs for flox, apt/apk/feature
+	// for devcontainer, image layers for dockerCompose).
+	Deps []string `json:"deps,omitempty,omitzero" yaml:"deps,omitempty" mapstructure:"deps,omitempty"`
 
 	// Sandbox corresponds to the JSON schema field "sandbox".
 	Sandbox *SandboxConfig `json:"sandbox,omitempty,omitzero" yaml:"sandbox,omitempty" mapstructure:"sandbox,omitempty"`

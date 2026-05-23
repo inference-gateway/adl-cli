@@ -11,6 +11,7 @@ import (
 	"unicode"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/inference-gateway/adl-cli/internal/sandbox"
 	"github.com/inference-gateway/adl-cli/internal/schema"
 	"github.com/inference-gateway/adl-cli/internal/vendor"
 )
@@ -209,11 +210,8 @@ type Context struct {
 	GenerateCommand string
 	Skills          []SkillView
 	BuiltinConfigs  schema.ResolvedBuiltinConfigs
-	// Vendor holds the resolved spec.language.<lang>.vendor.{deps,devdeps}
-	// entries: parsed, deduped against the generator's built-in dependency
-	// set, and sorted. Templates render directly from this view (see
-	// go.mod.tmpl / Cargo.toml.tmpl).
-	Vendor         vendor.View
+	Vendor vendor.View
+	SandboxDeps    sandbox.View
 	customAcronyms map[string]string
 }
 

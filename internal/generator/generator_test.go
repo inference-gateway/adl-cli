@@ -9,6 +9,7 @@ import (
 	"github.com/inference-gateway/adl-cli/internal/schema"
 	"github.com/inference-gateway/adl-cli/internal/templates"
 	"github.com/inference-gateway/adl-cli/internal/vendor"
+	"gopkg.in/yaml.v3"
 )
 
 func TestGenerator_Generate(t *testing.T) {
@@ -1081,4 +1082,163 @@ func TestGenerator_VendorWiring(t *testing.T) {
 			t.Fatalf("expected no [dev-dependencies] section, got:\n%s", got)
 		}
 	})
+}
+
+// TestGenerator_SandboxDevelopmentDeps exercises the end-to-end pipeline
+// from a manifest with spec.development.deps through generator.Generate()
+// to the on-disk .flox/env/manifest.toml and .devcontainer/devcontainer.json.
+// This is the acceptance-criteria flox test from issue #154: "Tests cover
+// at least the flox path end-to-end (manifest -> generated manifest.toml)."
+func TestGenerator_SandboxDevelopmentDeps(t *testing.T) {
+	adl := &schema.ADL{
+		APIVersion: "adl.inference-gateway.com/v1",
+		Kind:       "Agent",
+		Metadata: schema.Metadata{
+			Name:        "deps-agent",
+			Description: "tests spec.development.deps wiring",
+			Version:     "1.0.0",
+		},
+		Spec: schema.Spec{
+			Capabilities: schema.Capabilities{},
+			Server:       schema.Server{Port: 8080},
+			Language: schema.Language{
+				Go: &schema.GoConfig{
+					Module:  "github.com/example/deps-agent",
+					Version: "1.26.2",
+				},
+			},
+			Development: &schema.DevelopmentConfig{
+				Sandbox: &schema.SandboxConfig{
+					Flox:         &schema.FloxConfig{Enabled: true},
+					DevContainer: &schema.DevContainerConfig{Enabled: true},
+				},
+				Deps: []string{
+					"deno@2.1.4",
+					"kubectl@1.31.0",
+					"terraform@1.9.5",
+				},
+			},
+		},
+	}
+
+	tmpDir, err := os.MkdirTemp("", "adl-sandbox-deps-*")
+	if err != nil {
+		t.Fatalf("MkdirTemp: %v", err)
+	}
+	defer func() { _ = os.RemoveAll(tmpDir) }()
+
+	adlPath := filepath.Join(tmpDir, "agent.yaml")
+	writeYAML(t, adlPath, adl)
+
+	outDir := filepath.Join(tmpDir, "out")
+	gen := New(Config{Template: "minimal", Overwrite: true, Version: "test"})
+	if err := gen.Generate(adlPath, outDir); err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+
+	manifestBytes, err := os.ReadFile(filepath.Join(outDir, ".flox", "env", "manifest.toml"))
+	if err != nil {
+		t.Fatalf("read manifest.toml: %v", err)
+	}
+	manifest := string(manifestBytes)
+	for _, frag := range []string{
+		`deno.pkg-path = "deno"`,
+		`deno.version = "2.1.4"`,
+		`kubectl.pkg-path = "kubectl"`,
+		`kubectl.version = "1.31.0"`,
+		`terraform.pkg-path = "terraform"`,
+		`terraform.version = "1.9.5"`,
+	} {
+		if !strings.Contains(manifest, frag) {
+			t.Errorf("manifest.toml missing %q\n---\n%s", frag, manifest)
+		}
+	}
+
+	devcontainerBytes, err := os.ReadFile(filepath.Join(outDir, ".devcontainer", "devcontainer.json"))
+	if err != nil {
+		t.Fatalf("read devcontainer.json: %v", err)
+	}
+	devcontainer := string(devcontainerBytes)
+	if !strings.Contains(devcontainer, "apt-packages") {
+		t.Errorf("devcontainer.json missing apt-packages feature\n---\n%s", devcontainer)
+	}
+	for _, want := range []string{"deno=2.1.4", "kubectl=1.31.0", "terraform=1.9.5"} {
+		if !strings.Contains(devcontainer, want) {
+			t.Errorf("devcontainer.json missing %q\n---\n%s", want, devcontainer)
+		}
+	}
+}
+
+// TestGenerator_SandboxDevelopmentDeps_AbsentIsNoop verifies that the
+// generated manifest.toml and devcontainer.json look identical to a
+// pre-feature build when spec.development.deps is absent. Guards the
+// "Behavior is unchanged when the field is absent or empty." AC.
+func TestGenerator_SandboxDevelopmentDeps_AbsentIsNoop(t *testing.T) {
+	adl := &schema.ADL{
+		APIVersion: "adl.inference-gateway.com/v1",
+		Kind:       "Agent",
+		Metadata: schema.Metadata{
+			Name:        "no-deps-agent",
+			Description: "no spec.development.deps",
+			Version:     "1.0.0",
+		},
+		Spec: schema.Spec{
+			Capabilities: schema.Capabilities{},
+			Server:       schema.Server{Port: 8080},
+			Language: schema.Language{
+				Go: &schema.GoConfig{Module: "github.com/example/x", Version: "1.26.2"},
+			},
+			Development: &schema.DevelopmentConfig{
+				Sandbox: &schema.SandboxConfig{
+					Flox:         &schema.FloxConfig{Enabled: true},
+					DevContainer: &schema.DevContainerConfig{Enabled: true},
+				},
+			},
+		},
+	}
+
+	tmpDir, err := os.MkdirTemp("", "adl-sandbox-deps-absent-*")
+	if err != nil {
+		t.Fatalf("MkdirTemp: %v", err)
+	}
+	defer func() { _ = os.RemoveAll(tmpDir) }()
+
+	adlPath := filepath.Join(tmpDir, "agent.yaml")
+	writeYAML(t, adlPath, adl)
+
+	outDir := filepath.Join(tmpDir, "out")
+	gen := New(Config{Template: "minimal", Overwrite: true, Version: "test"})
+	if err := gen.Generate(adlPath, outDir); err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+
+	manifestBytes, err := os.ReadFile(filepath.Join(outDir, ".flox", "env", "manifest.toml"))
+	if err != nil {
+		t.Fatalf("read manifest.toml: %v", err)
+	}
+	if strings.Contains(string(manifestBytes), "spec.development.deps") {
+		t.Fatalf("manifest.toml leaked spec.development.deps banner when no deps declared\n---\n%s", manifestBytes)
+	}
+
+	devcontainerBytes, err := os.ReadFile(filepath.Join(outDir, ".devcontainer", "devcontainer.json"))
+	if err != nil {
+		t.Fatalf("read devcontainer.json: %v", err)
+	}
+	if strings.Contains(string(devcontainerBytes), "apt-packages") {
+		t.Fatalf("devcontainer.json leaked apt-packages feature when no deps declared\n---\n%s", devcontainerBytes)
+	}
+}
+
+// writeYAML is a tiny helper to serialise an ADL struct out to a file
+// for the end-to-end Generate() tests. We use yaml.v3 directly so we
+// don't have to depend on a separate fixtures package.
+func writeYAML(t *testing.T, path string, adl *schema.ADL) {
+	t.Helper()
+	data, err := yaml.Marshal(adl)
+	if err != nil {
+		t.Fatalf("yaml.Marshal: %v", err)
+	}
+	if err := os.WriteFile(path, data, 0644); err != nil {
+		t.Fatalf("write %s: %v", path, err)
+	}
 }

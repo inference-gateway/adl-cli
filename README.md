@@ -685,6 +685,86 @@ spec:
           - vitest@1.6.0
 ```
 
+### Extra sandbox dependencies (`spec.development.deps`)
+
+`spec.development.deps` is the cross-cutting equivalent of the per-language
+`vendor.deps` block above: it lets you install tools into the development
+sandbox (Flox, devcontainer) that don't belong to any single language's
+package manager. Use it for things like `deno`, `kubectl`, `terraform`,
+`awscli`, or any other CLI you want available inside the dev shell. Each
+entry follows the `<package>@<version>` shape, validated up front by the
+schema (`^\S+@\S+$`).
+
+```yaml
+spec:
+  development:
+    sandbox:
+      flox:
+        enabled: true
+      devcontainer:
+        enabled: true
+    deps:
+      - deno@2.1.4
+      - kubectl@1.31.0
+      - terraform@1.9.5
+```
+
+**Merge semantics:** additive. The per-language toolchain that each
+sandbox template already installs (`go`/`cargo`/`nodejs`, plus `git`,
+`docker`, `go-task`) is always emitted; `spec.development.deps` entries
+are appended on top, sorted alphabetically so the generated file diffs
+stay stable on re-run. Duplicate package names inside `deps` are deduped
+(first occurrence wins on version). When a `deps` entry's package name
+collides with one of the template's built-ins (e.g. `git@2.53.0`), the
+generator prints a `⚠️  spec.development.deps … collides with a Flox
+built-in …` warning to stderr but still renders the user entry - the
+maintainer's pin wins on version conflict.
+
+**Output mapping per backend:**
+
+| Backend         | Generated file                  | Per-entry rendering                                                                                                                                                            |
+| --------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `flox`          | `.flox/env/manifest.toml`       | A pair of TOML lines under `[install]`: `<pkg>.pkg-path = "<pkg>"` / `<pkg>.version = "<version>"`. Resolved against Nixpkgs at activation time.                               |
+| `devcontainer`  | `.devcontainer/devcontainer.json` | Added to the `features` block as `ghcr.io/devcontainers-extra/features/apt-packages:1` with the comma-joined `<pkg>=<version>` list. Resolution is best-effort against apt.    |
+| `dockerCompose` | _(out of scope for this release; see issue #154)_ | n/a                                                                                                                                                                            |
+
+If a package isn't published under its short attribute path in Nixpkgs,
+or isn't available as an apt package on the devcontainer base image,
+add the file to your project's `.adl-ignore` and hand-author the
+override - this is the same escape hatch we use for any sandbox file
+the template can't infer.
+
+Worked example per backend:
+
+```yaml
+# Flox: pin deno + kubectl + terraform alongside the Go toolchain
+spec:
+  language:
+    go: { module: github.com/example/agent, version: "1.26.2" }
+  development:
+    sandbox:
+      flox:
+        enabled: true
+    deps:
+      - deno@2.1.4
+      - kubectl@1.31.0
+      - terraform@1.9.5
+```
+
+```yaml
+# Devcontainer: same deps, rendered as an apt-packages feature
+spec:
+  language:
+    go: { module: github.com/example/agent, version: "1.26.2" }
+  development:
+    sandbox:
+      devcontainer:
+        enabled: true
+    deps:
+      - deno@2.1.4
+      - kubectl@1.31.0
+```
+
 ## Skills vs. Tools
 
 The ADL spec distinguishes two complementary concepts:

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/inference-gateway/adl-cli/internal/registry"
+	"github.com/inference-gateway/adl-cli/internal/sandbox"
 	"github.com/inference-gateway/adl-cli/internal/schema"
 	"github.com/inference-gateway/adl-cli/internal/templates"
 	"github.com/inference-gateway/adl-cli/internal/vendor"
@@ -344,6 +345,21 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 			c.DepGroup, c.Entry.Name, c.Entry.Version, c.Builtin)
 	}
 
+	sandboxView, err := sandbox.Resolve(adl)
+	if err != nil {
+		return fmt.Errorf("failed to resolve sandbox deps: %w", err)
+	}
+	for _, c := range sandboxView.FloxConflicts {
+		fmt.Fprintf(os.Stderr,
+			"⚠️  spec.development.deps entry %s@%s collides with a Flox built-in (%s); the user entry is rendered in addition to the template default - review the generated .flox/env/manifest.toml\n",
+			c.Entry.Name, c.Entry.Version, c.Builtin)
+	}
+	for _, c := range sandboxView.DevContainerConflicts {
+		fmt.Fprintf(os.Stderr,
+			"⚠️  spec.development.deps entry %s@%s collides with a devcontainer built-in (%s); the user entry is still emitted - review the generated .devcontainer/devcontainer.json\n",
+			c.Entry.Name, c.Entry.Version, c.Builtin)
+	}
+
 	ctx := templates.Context{
 		ADL: adl,
 		Metadata: schema.GeneratedMetadata{
@@ -360,6 +376,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		Skills:          skillViews,
 		BuiltinConfigs:  builtinConfigs,
 		Vendor:          vendorView,
+		SandboxDeps:     sandboxView,
 	}
 
 	ignoreChecker, err := NewIgnoreChecker(outputDir)
