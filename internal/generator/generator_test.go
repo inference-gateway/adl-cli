@@ -97,12 +97,6 @@ func TestGenerator_validateADL(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		// "missing capabilities" / "missing language" test cases were removed
-		// when types.go switched to schema-generated types. Capabilities and
-		// Language are required by the JSON Schema and are non-pointer struct
-		// fields after generation, so a missing-field test case is no longer
-		// expressible at the Go type level. The JSON Schema validator
-		// (internal/schema/validator.go) covers the case at parse time.
 		{
 			name: "missing Go module",
 			adl: &schema.ADL{
@@ -748,10 +742,10 @@ func TestGenerator_buildGenerateCommand(t *testing.T) {
 				EnableFlox:         true,
 				EnableDevContainer: true,
 			},
-			expectedCmd: "adl generate --file agent.yaml --output . --template custom --overwrite --ci --cd --deployment kubernetes --flox --devcontainer",
+			expectedCmd: "adl generate --file agent.yaml --output . --template custom --overwrite",
 		},
 		{
-			name: "config reproducing the issue scenario",
+			name: "config reproducing the issue scenario (#146): legacy CI/CD/sandbox flags must not leak into the Taskfile",
 			config: Config{
 				ADLFile:    "agent.yaml",
 				OutputDir:  ".",
@@ -760,7 +754,7 @@ func TestGenerator_buildGenerateCommand(t *testing.T) {
 				GenerateCD: true,
 				EnableFlox: true,
 			},
-			expectedCmd: "adl generate --file agent.yaml --output . --overwrite --ci --cd --flox",
+			expectedCmd: "adl generate --file agent.yaml --output . --overwrite",
 		},
 		{
 			name: "config with default template (should not include template flag)",
