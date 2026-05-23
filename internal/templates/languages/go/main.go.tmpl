@@ -12,11 +12,12 @@ import (
 	"strings"
 	"syscall"
 
-	server "github.com/inference-gateway/adk/server"
 	envconfig "github.com/sethvargo/go-envconfig"
-	cobra "github.com/spf13/cobra"
 	zap "go.uber.org/zap"
 	yaml "gopkg.in/yaml.v3"
+	cobra "github.com/spf13/cobra"
+
+	server "github.com/inference-gateway/adk/server"
 
 	config "{{ .ADL.Spec.Language.Go.Module }}/config"
 {{- if .ADL.Spec.Tools }}
