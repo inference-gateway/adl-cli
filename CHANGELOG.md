@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.36.2](https://github.com/inference-gateway/adl-cli/compare/v0.36.1...v0.36.2) (2026-05-23)
+
+### 🔧 Miscellaneous
+
+* **deps:** Bump anthropics/claude-code-action v1.0.131 -> v1.0.133 ([dde5113](https://github.com/inference-gateway/adl-cli/commit/dde51137bbe6dce6dfe405ffee6b72f7c1fd0332))
+* **deps:** Bump docker/setup-buildx-action v4.0.0 -> v4.1.0 ([e1bc2d9](https://github.com/inference-gateway/adl-cli/commit/e1bc2d908669f3565a9e13065857ec3015d29566))
+* **deps:** Bump github.com/spf13/cobra 1.10.1 -> 1.10.2 ([80023e2](https://github.com/inference-gateway/adl-cli/commit/80023e273f29ca81e0c580478a368624d2d845d1))
+* **deps:** Bump golangci-lint-action ([9914884](https://github.com/inference-gateway/adl-cli/commit/9914884396f4e5b749d24724c18d3843f7dc3352))
+
 ## [0.36.1](https://github.com/inference-gateway/adl-cli/compare/v0.36.0...v0.36.1) (2026-05-23)
 
 ### 🐛 Bug Fixes
