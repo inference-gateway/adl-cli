@@ -13,47 +13,35 @@
 # for the `infer` CLI and the `a2a-debugger` so the agent can be exercised
 # end-to-end without manual wiring.
 #
-#   docker compose up --build              # gateway + agent{{ if $hasRedis }} + redis{{ end }}
-#   docker compose --profile cli run --rm cli         # interactive infer CLI
-#   docker compose --profile debugger run --rm debugger \
-#     --server-url http://{{ $name }}:{{ $port }} tasks list
-#
-# The `gateway` service reads provider API keys from `.env` if present
-# (copy `.env.example` -> `.env` and fill in keys). Override host port
-# mappings via GATEWAY_HOST_PORT / AGENT_HOST_PORT, e.g.
-#   GATEWAY_HOST_PORT=8090 docker compose up
-
+#   docker compose up --build                             # gateway + agent{{ if $hasRedis }} + redis{{ end }}
+#   docker compose --profile cli run --rm cli chat        # interactive infer CLI
+#   docker compose --profile debugger run --rm debugger --server-url http://{{ $name }}:{{ $port }} tasks submit-streaming "What are your skills?"
+---
 services:
   gateway:
     image: ghcr.io/inference-gateway/inference-gateway:latest
     pull_policy: always
     restart: unless-stopped
-    ports:
-      - "${GATEWAY_HOST_PORT:-8080}:8080"
     env_file:
       - path: .env
         required: false
     environment:
-      ENVIRONMENT: development
+      ENVIRONMENT: ${ENVIRONMENT:-production}
       SERVER_HOST: 0.0.0.0
       SERVER_PORT: "8080"
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-      start_period: 5s
 
   {{ $name }}:
     build: .
     restart: unless-stopped
-    ports:
-      - "${AGENT_HOST_PORT:-{{ $port }}}:{{ $port }}"
+    env_file:
+      - path: .env
+        required: false
     environment:
       A2A_SERVER_PORT: "{{ $port }}"
+      A2A_DEBUG: "${A2A_DEBUG:-false}"
       {{- if .ADL.Spec.Agent }}
-      A2A_AGENT_CLIENT_PROVIDER: "{{ .ADL.Spec.Agent.Provider }}"
-      A2A_AGENT_CLIENT_MODEL: "{{ .ADL.Spec.Agent.Model }}"
+      A2A_AGENT_CLIENT_PROVIDER: "${A2A_AGENT_CLIENT_PROVIDER:-{{ .ADL.Spec.Agent.Provider }}}"
+      A2A_AGENT_CLIENT_MODEL: "${A2A_AGENT_CLIENT_MODEL:-{{ .ADL.Spec.Agent.Model }}}"
       A2A_AGENT_CLIENT_BASE_URL: "${A2A_AGENT_CLIENT_BASE_URL:-http://gateway:8080/v1}"
       {{- end }}
       {{- if $hasRedis }}
@@ -63,17 +51,16 @@ services:
       {{- end }}
     depends_on:
       gateway:
-        condition: service_healthy
+        condition: service_started
       {{- if $hasRedis }}
       redis:
         condition: service_healthy
       {{- end }}
 
-  # Inference Gateway CLI - opt-in via `--profile cli`.
-  # Talks to the gateway over the compose network as `gateway:8080`.
   cli:
     image: ghcr.io/inference-gateway/cli:latest
-    profiles: ["cli"]
+    profiles:
+      - cli
     pull_policy: always
     stdin_open: true
     tty: true
@@ -81,18 +68,35 @@ services:
       - path: .env
         required: false
     environment:
-      GATEWAY_URL: "http://gateway:8080"
+      INFER_GATEWAY_URL: "http://gateway:8080"
+      INFER_A2A_ENABLED: "true"
+      INFER_TOOLS_ENABLED: true
+      INFER_A2A_TOOLS_QUERY_AGENT_ENABLED: true
+      INFER_A2A_TOOLS_SUBMIT_TASK_ENABLED: true
+      INFER_TOOLS_BASH_ENABLED: false
+      INFER_TOOLS_TODO_WRITE_ENABLED: false
+      INFER_TOOLS_WRITE_ENABLED: false
+      INFER_TOOLS_READ_ENABLED: false
+      INFER_TOOLS_DELETE_ENABLED: false
+      INFER_TOOLS_EDIT_ENABLED: false
+      INFER_TOOLS_GREP_ENABLED: false
+      INFER_TOOLS_TREE_ENABLED: false
+      INFER_TOOLS_WEB_FETCH_ENABLED: false
+      INFER_TOOLS_WEB_SEARCH_ENABLED: false
+      INFER_TOOLS_GITHUB_ENABLED: false
+      {{- if .ADL.Spec.Agent }}
+      INFER_AGENT_MODEL: ${CLI_PROVIDER:-{{ .ADL.Spec.Agent.Provider }}}/${CLI_MODEL:-{{ .ADL.Spec.Agent.Model }}}
+      {{- end }}
+      INFER_A2A_AGENTS: |
+        http://{{ $name }}:{{ $port }}
     depends_on:
       gateway:
-        condition: service_healthy
+        condition: service_started
 
-  # A2A Debugger - opt-in via `--profile debugger`.
-  # Example:
-  #   docker compose --profile debugger run --rm debugger \
-  #     --server-url http://{{ $name }}:{{ $port }} tasks submit "What are your skills?"
   debugger:
     image: ghcr.io/inference-gateway/a2a-debugger:latest
-    profiles: ["debugger"]
+    profiles:
+      - debugger
     pull_policy: always
     stdin_open: true
     tty: true

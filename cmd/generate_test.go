@@ -889,14 +889,25 @@ spec:
 		"build: .",
 		"image: ghcr.io/inference-gateway/cli:latest",
 		"image: ghcr.io/inference-gateway/a2a-debugger:latest",
-		`profiles: ["cli"]`,
-		`profiles: ["debugger"]`,
+		"profiles:\n      - cli",
+		"profiles:\n      - debugger",
 		"A2A_AGENT_CLIENT_BASE_URL",
 		"compose-agent:",
+		"condition: service_started",
 	}
 	for _, frag := range wantFragments {
 		if !strings.Contains(content, frag) {
 			t.Errorf("docker-compose.yaml missing %q\n---\n%s", frag, content)
 		}
+	}
+
+	envExamplePath := filepath.Join(outputPath, ".env.example")
+	if _, err := os.Stat(envExamplePath); err != nil {
+		t.Fatalf(".env.example was not generated alongside docker-compose: %v", err)
+	}
+
+	dockerignorePath := filepath.Join(outputPath, ".dockerignore")
+	if _, err := os.Stat(dockerignorePath); err != nil {
+		t.Fatalf(".dockerignore was not generated: %v", err)
 	}
 }

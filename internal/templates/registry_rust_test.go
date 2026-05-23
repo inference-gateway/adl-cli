@@ -30,14 +30,24 @@ func minimalRustADL() *schema.ADL {
 	}
 }
 
-func TestRegistry_getRustFiles_AlwaysIncludesEnvExample(t *testing.T) {
+func TestRegistry_getRustFiles_EnvExampleGatedOnDockerCompose(t *testing.T) {
 	r, err := NewRegistry("rust")
 	if err != nil {
 		t.Fatalf("NewRegistry: %v", err)
 	}
-	files := r.getRustFiles(minimalRustADL())
-	if _, ok := files[".env.example"]; !ok {
-		t.Fatalf(".env.example missing from generated files: %v", files)
+
+	adl := minimalRustADL()
+	if _, ok := r.getRustFiles(adl)[".env.example"]; ok {
+		t.Fatalf(".env.example unexpectedly emitted when sandbox.dockerCompose disabled")
+	}
+
+	adl.Spec.Development = &schema.DevelopmentConfig{
+		Sandbox: &schema.SandboxConfig{
+			DockerCompose: &schema.DockerComposeConfig{Enabled: true},
+		},
+	}
+	if _, ok := r.getRustFiles(adl)[".env.example"]; !ok {
+		t.Fatalf(".env.example missing when sandbox.dockerCompose.enabled=true")
 	}
 }
 

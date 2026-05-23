@@ -140,10 +140,11 @@ func TestDockerComposeTemplate_ContainsRequiredServices(t *testing.T) {
 				"image: ghcr.io/inference-gateway/cli:latest",
 				"image: ghcr.io/inference-gateway/a2a-debugger:latest",
 				"build: .",
-				`profiles: ["cli"]`,
-				`profiles: ["debugger"]`,
+				"profiles:\n      - cli",
+				"profiles:\n      - debugger",
 				"gateway:",
 				"depends_on:",
+				"condition: service_started",
 			}
 			for _, frag := range wantFragments {
 				if !strings.Contains(out, frag) {

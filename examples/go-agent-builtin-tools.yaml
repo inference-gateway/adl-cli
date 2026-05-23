@@ -144,3 +144,5 @@ spec:
         enabled: true
       devcontainer:
         enabled: false
+      dockerCompose:
+        enabled: true
