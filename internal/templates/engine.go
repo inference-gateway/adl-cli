@@ -11,6 +11,7 @@ import (
 	"unicode"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/inference-gateway/adl-cli/internal/sandbox"
 	"github.com/inference-gateway/adl-cli/internal/schema"
 	"github.com/inference-gateway/adl-cli/internal/vendor"
 )
@@ -213,7 +214,12 @@ type Context struct {
 	// entries: parsed, deduped against the generator's built-in dependency
 	// set, and sorted. Templates render directly from this view (see
 	// go.mod.tmpl / Cargo.toml.tmpl).
-	Vendor         vendor.View
+	Vendor vendor.View
+	// SandboxDeps holds the resolved spec.development.deps entries:
+	// parsed, deduped, and sorted. Templates render from this view to
+	// extend the sandbox manifests (Flox `manifest.toml`, devcontainer
+	// features) on top of whatever the generator installs by default.
+	SandboxDeps    sandbox.View
 	customAcronyms map[string]string
 }
 

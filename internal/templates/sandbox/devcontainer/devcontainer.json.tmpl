@@ -9,7 +9,11 @@
   {{- end }}
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {},
-    "ghcr.io/devcontainers/features/git:1": {}
+    "ghcr.io/devcontainers/features/git:1": {}{{- if .SandboxDeps.HasDeps }},
+    "ghcr.io/devcontainers-extra/features/apt-packages:1": {
+      "packages": "{{- range $i, $e := .SandboxDeps.Deps }}{{ if $i }},{{ end }}{{ $e.Name }}={{ $e.Version }}{{- end }}"
+    }
+    {{- end }}
   },
   "customizations": {
     "vscode": {

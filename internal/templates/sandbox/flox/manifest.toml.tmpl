@@ -56,6 +56,18 @@ claude-code.pkg-path = "claude-code"
 claude-code.version = "^2.1.145"
 claude-code.pkg-group = "common"
 {{- end }}
+{{- if .SandboxDeps.HasDeps }}
+
+# Extra packages declared in spec.development.deps. Each entry is rendered
+# as a Flox install line resolved against Nixpkgs. The package name from
+# the ADL ('<package>@<version>') becomes the Nixpkgs attribute path; if a
+# package is exposed under a different attribute path in Nixpkgs you may
+# need to add it under .adl-ignore and hand-author the override.
+{{- range .SandboxDeps.Deps }}
+{{ .Name }}.pkg-path = "{{ .Name }}"
+{{ .Name }}.version = "{{ .Version }}"
+{{- end }}
+{{- end }}
 
 [hook]
 on-activate = '''
