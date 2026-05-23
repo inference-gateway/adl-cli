@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.38.0](https://github.com/inference-gateway/adl-cli/compare/v0.37.0...v0.38.0) (2026-05-23)
+
+### ✨ Features
+
+* **sandbox:** Honor spec.development.deps when generating sandbox configs ([#155](https://github.com/inference-gateway/adl-cli/issues/155)) ([2d17269](https://github.com/inference-gateway/adl-cli/commit/2d17269e8b329fcad1d78c5e142978b8be0730fc)), closes [inference-gateway/adl#17](https://github.com/inference-gateway/adl/issues/17) [#154](https://github.com/inference-gateway/adl-cli/issues/154)
+
 ## [0.37.0](https://github.com/inference-gateway/adl-cli/compare/v0.36.6...v0.37.0) (2026-05-23)
 
 ### ✨ Features
