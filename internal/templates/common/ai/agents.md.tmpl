@@ -165,7 +165,7 @@ Key environment variables you'll need to configure:
 {{- end }}
 {{- if and .ADL.Spec.Development.Sandbox.DockerCompose .ADL.Spec.Development.Sandbox.DockerCompose.Enabled }}
 {{- $sandbox = true }}
-- **Docker Compose**: ✅ Local service stack available (`docker compose up`)
+- **Docker Compose**: ✅ Local service stack defined in `docker-compose.yaml` - brings up the Inference Gateway and this agent (built from `Dockerfile`) with `docker compose up --build`. Opt-in profiles `cli` and `debugger` expose the `infer` CLI and `a2a-debugger` for end-to-end testing.
 {{- end }}
 {{- end }}
 {{- if not $sandbox }}

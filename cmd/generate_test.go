@@ -819,3 +819,84 @@ func boolStr(b bool) string {
 	}
 	return "false"
 }
+
+// TestGenerateDockerComposeFileEmitted asserts that running `generate` on a
+// Go ADL with `spec.development.sandbox.dockerCompose.enabled: true`
+// actually writes a docker-compose.yaml to the output directory and that
+// the file wires up the gateway, the agent (built from source), the infer
+// CLI, and the a2a-debugger. Regression guard for issue #148, where the
+// flag was advertised in CLAUDE.md but the file generator never produced
+// the compose file for Go projects.
+func TestGenerateDockerComposeFileEmitted(t *testing.T) {
+	tempDir := t.TempDir()
+	outputPath := filepath.Join(tempDir, "out")
+
+	adlContent := `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: compose-agent
+  description: Agent for verifying docker-compose generation
+  version: 1.0.0
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  server:
+    port: 8443
+    debug: false
+  agent:
+    provider: openai
+    model: gpt-5-mini
+    systemPrompt: hello
+  language:
+    go:
+      module: github.com/test/compose-agent
+      version: "1.26.2"
+  development:
+    sandbox:
+      dockerCompose:
+        enabled: true
+`
+	adlPath := filepath.Join(tempDir, "agent.yaml")
+	if err := os.WriteFile(adlPath, []byte(adlContent), 0644); err != nil {
+		t.Fatalf("failed to write ADL file: %v", err)
+	}
+
+	originalADLFile := adlFile
+	originalOutputDir := outputDir
+	defer func() {
+		adlFile = originalADLFile
+		outputDir = originalOutputDir
+	}()
+
+	adlFile = adlPath
+	outputDir = outputPath
+
+	if err := runGenerate(generateCmd, []string{}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	composePath := filepath.Join(outputPath, "docker-compose.yaml")
+	bytes, err := os.ReadFile(composePath)
+	if err != nil {
+		t.Fatalf("docker-compose.yaml was not generated (issue #148 regression): %v", err)
+	}
+	content := string(bytes)
+
+	wantFragments := []string{
+		"image: ghcr.io/inference-gateway/inference-gateway:latest",
+		"build: .",
+		"image: ghcr.io/inference-gateway/cli:latest",
+		"image: ghcr.io/inference-gateway/a2a-debugger:latest",
+		`profiles: ["cli"]`,
+		`profiles: ["debugger"]`,
+		"A2A_AGENT_CLIENT_BASE_URL",
+		"compose-agent:",
+	}
+	for _, frag := range wantFragments {
+		if !strings.Contains(content, frag) {
+			t.Errorf("docker-compose.yaml missing %q\n---\n%s", frag, content)
+		}
+	}
+}

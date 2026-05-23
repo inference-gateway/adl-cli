@@ -185,6 +185,13 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		files[fmt.Sprintf("internal/%s/%s.go", snakeCaseName, snakeCaseName)] = "service.go"
 	}
 
+	if adl.Spec.Development != nil &&
+		adl.Spec.Development.Sandbox != nil &&
+		adl.Spec.Development.Sandbox.DockerCompose != nil &&
+		adl.Spec.Development.Sandbox.DockerCompose.Enabled {
+		files["docker-compose.yaml"] = "docker/docker-compose.yaml"
+	}
+
 	r.addSandboxFiles(adl, files)
 	r.addAIFiles(files)
 	r.addIssueTemplateFiles(adl, files)
@@ -242,7 +249,7 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 		adl.Spec.Development.Sandbox != nil &&
 		adl.Spec.Development.Sandbox.DockerCompose != nil &&
 		adl.Spec.Development.Sandbox.DockerCompose.Enabled {
-		files["docker-compose.yaml"] = "docker-compose.yaml"
+		files["docker-compose.yaml"] = "docker/docker-compose.yaml"
 	}
 
 	r.addSandboxFiles(adl, files)
@@ -286,6 +293,13 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		if skill.Bare {
 			files[fmt.Sprintf("skills/%s/SKILL.md", skill.ID)] = "skills/skill.md"
 		}
+	}
+
+	if adl.Spec.Development != nil &&
+		adl.Spec.Development.Sandbox != nil &&
+		adl.Spec.Development.Sandbox.DockerCompose != nil &&
+		adl.Spec.Development.Sandbox.DockerCompose.Enabled {
+		files["docker-compose.yaml"] = "docker/docker-compose.yaml"
 	}
 
 	r.addSandboxFiles(adl, files)

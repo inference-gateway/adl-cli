@@ -161,7 +161,7 @@ When implementing tests:
 {{- end }}
 {{- if and .ADL.Spec.Development.Sandbox.DockerCompose .ADL.Spec.Development.Sandbox.DockerCompose.Enabled }}
 {{- $sandbox = true }}
-- **Docker Compose**: ✅ Local service stack defined in `docker-compose.yaml`. Start dependencies (e.g. Redis) with `docker compose up`.
+- **Docker Compose**: ✅ Local service stack defined in `docker-compose.yaml`. Bring up the Inference Gateway and the agent (built from the local `Dockerfile`) with `docker compose up --build`. Opt-in profiles add the `infer` CLI (`docker compose --profile cli run --rm cli`) and the `a2a-debugger` (`docker compose --profile debugger run --rm debugger --server-url http://{{ .ADL.Metadata.Name }}:{{ .ADL.Spec.Server.Port | default 8080 }} tasks list`).
 {{- end }}
 {{- end }}
 {{- if not $sandbox }}
