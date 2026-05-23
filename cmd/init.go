@@ -303,11 +303,6 @@ type adlData struct {
 					Enabled bool `yaml:"enabled"`
 				} `yaml:"infer,omitempty"`
 			} `yaml:"ai,omitempty"`
-			// Deps is rendered without omitempty so an empty list still
-			// appears in the scaffolded manifest. That makes the cross-cutting
-			// sandbox-deps extension point discoverable to first-time users
-			// — they can drop tools like `kubectl@1.31.0` or `deno@2.1.4`
-			// here without having to read the schema first.
 			Deps []string `yaml:"deps"`
 		} `yaml:"development,omitempty"`
 		Deployment *struct {
