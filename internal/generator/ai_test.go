@@ -199,8 +199,6 @@ func TestGenerator_AI_AllAgentsEnabled(t *testing.T) {
 	assertFile(t, out, "GEMINI.md", true)
 	assertFile(t, out, "AGENTS.md", true)
 
-	// Workflows only ship for agents with an upstream action — opencode
-	// and infer must not produce one.
 	assertFile(t, out, ".github/workflows/claude-code.yml", true)
 	assertFile(t, out, ".github/workflows/codex.yml", true)
 	assertFile(t, out, ".github/workflows/gemini.yml", true)
