@@ -609,9 +609,9 @@ spec:
 
 Every language config block accepts an optional `vendor` section that lets
 the manifest extend the generator's built-in dependency set. Use `deps`
-for runtime/production dependencies and `devdeps` for test- or
-development-only ones (test frameworks, mock generators, linters that
-need to be importable). Each entry must be `<package>@<version>` using
+for runtime/production dependencies and `devdeps` for development-only
+ones. The exact meaning of `devdeps` depends on the language - see the
+mapping table below. Each entry must be `<package>@<version>` using
 the target language's native package and version syntax - the schema
 validates the shape up front (`^\S+@\S+$`) and points at the offending
 key if you mistype it (e.g. `spec.language.go.vendor.deps.0`).
@@ -627,14 +627,19 @@ downgrades of the core runtime SDK.
 
 | Language   | `deps` lands in               | `devdeps` lands in                 |
 | ---------- | ----------------------------- | ---------------------------------- |
-| Go         | `go.mod` `require` block      | same `require` block (Go has no separate dev section - `go mod tidy` will reclassify entries as `// indirect` or drop them based on actual import usage) |
+| Go         | `go.mod` `require` block      | `go.mod` [`tool` directive](https://go.dev/doc/modules/managing-dependencies#tools) (executable dev tools: code generators, linters, etc.) plus an `// indirect` entry in `require` so the module is downloadable. Test libraries that you `import` (testify, go-cmp, …) belong in `deps`, not `devdeps`. |
 | Rust       | `Cargo.toml` `[dependencies]` | `Cargo.toml` `[dev-dependencies]`  |
-| TypeScript | `package.json` `dependencies` | `package.json` `devDependencies` *(plumbed end-to-end once the TypeScript generator templates land - the schema and validator already accept the field)* |
+| TypeScript | `package.json` `dependencies` | `package.json` `devDependencies` _(plumbed end-to-end once the TypeScript generator templates land - the schema and validator already accept the field)_ |
+
+For Go, supply the **full tool package path** (the binary's `main` package,
+e.g. `golang.org/x/tools/cmd/stringer`) with a version. After generation,
+run `go mod tidy` so Go normalises the indirect `require` entry to the
+actual module root.
 
 Examples per language:
 
 ```yaml
-# Go: testify for tests, uuid for runtime.
+# Go: uuid for runtime, stringer + mockgen as dev tools.
 spec:
   language:
     go:
@@ -643,8 +648,10 @@ spec:
       vendor:
         deps:
           - github.com/google/uuid@v1.6.0
+          - github.com/stretchr/testify@v1.10.0  # imported by *_test.go
         devdeps:
-          - github.com/stretchr/testify@v1.10.0
+          - golang.org/x/tools/cmd/stringer@v0.20.0
+          - github.com/golang/mock/mockgen@v1.6.0
 ```
 
 ```yaml

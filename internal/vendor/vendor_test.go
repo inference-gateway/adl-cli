@@ -212,20 +212,43 @@ func TestResolveADL_NoVendor(t *testing.T) {
 	}
 }
 
-func TestResolveADL_GoMergesDepsAndDevDeps(t *testing.T) {
+func TestResolveADL_GoSplitsDepsAndToolDevDeps(t *testing.T) {
 	adl := goADLWithVendor(
 		[]string{"github.com/stretchr/testify@v1.10.0"},
-		[]string{"github.com/google/go-cmp@v0.6.0"},
+		[]string{"golang.org/x/tools/cmd/stringer@v0.20.0"},
 	)
 	view, err := ResolveADL(adl)
 	if err != nil {
 		t.Fatalf("ResolveADL: %v", err)
 	}
-	if len(view.GoRequires) != 2 {
-		t.Fatalf("expected 2 entries, got %+v", view.GoRequires)
+	if len(view.GoRequires) != 1 || view.GoRequires[0].Name != "github.com/stretchr/testify" {
+		t.Fatalf("expected testify in GoRequires, got %+v", view.GoRequires)
 	}
-	if view.GoRequires[0].Name != "github.com/google/go-cmp" {
-		t.Fatalf("expected go-cmp first (sorted), got %+v", view.GoRequires)
+	if len(view.GoTools) != 1 || view.GoTools[0].Name != "golang.org/x/tools/cmd/stringer" {
+		t.Fatalf("expected stringer in GoTools, got %+v", view.GoTools)
+	}
+}
+
+func TestResolveADL_GoToolDevDepDedupedAgainstDeps(t *testing.T) {
+	// If a user lists the same module path in both deps and devdeps the
+	// tool resolver must drop the devdeps entry: `require` only allows one
+	// entry per module path, and the deps version wins.
+	adl := goADLWithVendor(
+		[]string{"github.com/golang/mock/mockgen@v1.6.0"},
+		[]string{"github.com/golang/mock/mockgen@v1.5.0"},
+	)
+	view, err := ResolveADL(adl)
+	if err != nil {
+		t.Fatalf("ResolveADL: %v", err)
+	}
+	if len(view.GoRequires) != 1 || view.GoRequires[0].Version != "v1.6.0" {
+		t.Fatalf("expected deps to win at v1.6.0, got %+v", view.GoRequires)
+	}
+	if len(view.GoTools) != 0 {
+		t.Fatalf("expected duplicate tool entry to be dropped, got %+v", view.GoTools)
+	}
+	if len(view.Conflicts) != 1 || view.Conflicts[0].DepGroup != "devdeps" {
+		t.Fatalf("expected single devdeps conflict, got %+v", view.Conflicts)
 	}
 }
 

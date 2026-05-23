@@ -156,9 +156,20 @@ var NpmBuiltinDevDeps = map[string]string{}
 // Each field is a sorted, deduped slice ready to be rendered by the
 // language-specific template.
 type View struct {
-	// GoRequires is the merged deps+devdeps set for Go (go.mod has no
-	// notion of a separate dev section; see README for context).
+	// GoRequires holds Go runtime dependencies (`vendor.deps`) that the
+	// `go.mod` template appends to the built-in `require` block. Test
+	// libraries that are `import`-ed by `*_test.go` belong here too:
+	// Go has no separate test-dependency notion.
 	GoRequires []Entry
+
+	// GoTools holds Go executable dev tools (`vendor.devdeps`). Each
+	// entry is rendered both as a `// indirect` line in `require` (so
+	// the module is downloadable) and as a bare package path inside the
+	// `tool ( ... )` block introduced in Go 1.24. Users supply the full
+	// tool package path (e.g. `golang.org/x/tools/cmd/stringer`); a
+	// post-generation `go mod tidy` normalises the require entry to the
+	// owning module root.
+	GoTools []Entry
 
 	// CargoDeps / CargoDevDeps map to the matching Cargo.toml sections.
 	// CargoDevDeps is additionally deduped against CargoDeps so we never
@@ -191,13 +202,26 @@ func ResolveADL(adl *schema.ADL) (View, error) {
 	lang := adl.Spec.Language
 
 	if lang.Go != nil && lang.Go.Vendor != nil {
-		merged := mergeRaw(lang.Go.Vendor.Deps, lang.Go.Vendor.Devdeps)
-		entries, conflicts, err := Resolve(merged, GoBuiltins, "deps+devdeps")
+		deps, depConflicts, err := Resolve(lang.Go.Vendor.Deps, GoBuiltins, "deps")
 		if err != nil {
-			return View{}, fmt.Errorf("spec.language.go.vendor: %w", err)
+			return View{}, fmt.Errorf("spec.language.go.vendor.deps: %w", err)
 		}
-		view.GoRequires = entries
-		view.Conflicts = append(view.Conflicts, conflicts...)
+		view.GoRequires = deps
+		view.Conflicts = append(view.Conflicts, depConflicts...)
+
+		// devdeps become Go 1.24 `tool` directive entries. Dedupe against
+		// built-ins AND against anything already accepted into deps so
+		// the same module never appears in both lists.
+		toolEffectiveBuiltins := cloneMap(GoBuiltins)
+		for _, e := range deps {
+			toolEffectiveBuiltins[e.Name] = e.Version
+		}
+		tools, toolConflicts, err := Resolve(lang.Go.Vendor.Devdeps, toolEffectiveBuiltins, "devdeps")
+		if err != nil {
+			return View{}, fmt.Errorf("spec.language.go.vendor.devdeps: %w", err)
+		}
+		view.GoTools = tools
+		view.Conflicts = append(view.Conflicts, toolConflicts...)
 	}
 
 	if lang.Rust != nil && lang.Rust.Vendor != nil {
@@ -259,16 +283,6 @@ func ResolveADL(adl *schema.ADL) (View, error) {
 	}
 
 	return view, nil
-}
-
-func mergeRaw(a, b []string) []string {
-	if len(a) == 0 && len(b) == 0 {
-		return nil
-	}
-	out := make([]string, 0, len(a)+len(b))
-	out = append(out, a...)
-	out = append(out, b...)
-	return out
 }
 
 func cloneMap(m map[string]string) map[string]string {

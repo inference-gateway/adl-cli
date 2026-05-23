@@ -966,7 +966,7 @@ func TestGenerator_VendorWiring(t *testing.T) {
 		return out
 	}
 
-	t.Run("go: no vendor block renders unchanged require list", func(t *testing.T) {
+	t.Run("go: no vendor block renders unchanged require list and no tool directive", func(t *testing.T) {
 		got := render(t, "go", "go.mod", makeGo(nil))
 		if !strings.Contains(got, "github.com/inference-gateway/adk v0.18.4") {
 			t.Fatalf("expected built-in ADK in require, got:\n%s", got)
@@ -974,23 +974,47 @@ func TestGenerator_VendorWiring(t *testing.T) {
 		if strings.Contains(got, "stretchr/testify") {
 			t.Fatalf("unexpected vendor entry leaked, got:\n%s", got)
 		}
+		if strings.Contains(got, "tool (") {
+			t.Fatalf("expected no tool directive when vendor is empty, got:\n%s", got)
+		}
 	})
 
-	t.Run("go: deps and devdeps both land in require, sorted, deduped", func(t *testing.T) {
+	t.Run("go: deps land in require sorted+deduped; devdeps populate require // indirect and tool block", func(t *testing.T) {
 		got := render(t, "go", "go.mod", makeGo(&schema.VendorConfig{
 			Deps:    []string{"github.com/google/uuid@v1.6.0", "github.com/google/uuid@v1.5.0"},
-			Devdeps: []string{"github.com/stretchr/testify@v1.10.0"},
+			Devdeps: []string{"golang.org/x/tools/cmd/stringer@v0.20.0"},
 		}))
-		uuidIdx := strings.Index(got, "github.com/google/uuid v1.6.0")
-		testifyIdx := strings.Index(got, "github.com/stretchr/testify v1.10.0")
-		if uuidIdx == -1 || testifyIdx == -1 {
-			t.Fatalf("expected uuid v1.6.0 and testify v1.10.0 in require block, got:\n%s", got)
-		}
-		if uuidIdx > testifyIdx {
-			t.Fatalf("expected sorted order (google < stretchr), got:\n%s", got)
+		if !strings.Contains(got, "github.com/google/uuid v1.6.0") {
+			t.Fatalf("expected uuid v1.6.0 in require, got:\n%s", got)
 		}
 		if strings.Contains(got, "v1.5.0") {
 			t.Fatalf("expected duplicate uuid v1.5.0 to be deduped (first-wins), got:\n%s", got)
+		}
+		if !strings.Contains(got, "golang.org/x/tools/cmd/stringer v0.20.0 // indirect") {
+			t.Fatalf("expected stringer in require as // indirect, got:\n%s", got)
+		}
+		toolIdx := strings.Index(got, "tool (")
+		if toolIdx == -1 {
+			t.Fatalf("expected tool directive, got:\n%s", got)
+		}
+		toolSection := got[toolIdx:]
+		if !strings.Contains(toolSection, "golang.org/x/tools/cmd/stringer") {
+			t.Fatalf("expected stringer in tool block, got:\n%s", toolSection)
+		}
+		if strings.Contains(toolSection, "v0.20.0") {
+			t.Fatalf("tool block must list bare package paths (no version), got:\n%s", toolSection)
+		}
+	})
+
+	t.Run("go: dev-only vendor still emits a tool directive without deps", func(t *testing.T) {
+		got := render(t, "go", "go.mod", makeGo(&schema.VendorConfig{
+			Devdeps: []string{"github.com/golang/mock/mockgen@v1.6.0"},
+		}))
+		if !strings.Contains(got, "github.com/golang/mock/mockgen v1.6.0 // indirect") {
+			t.Fatalf("expected mockgen as // indirect require, got:\n%s", got)
+		}
+		if !strings.Contains(got, "tool (") {
+			t.Fatalf("expected tool directive when only devdeps set, got:\n%s", got)
 		}
 	})
 
