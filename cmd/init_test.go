@@ -380,6 +380,12 @@ func TestInitDevelopmentDefaultsEmitted(t *testing.T) {
 		"gemini:",
 		"opencode:",
 		"infer:",
+		// Empty-list extension points must be rendered explicitly so
+		// first-time users see where to drop additional dependencies
+		// without consulting the schema.
+		"vendor:",
+		"deps: []",
+		"devdeps: []",
 	} {
 		if !strings.Contains(contentStr, want) {
 			t.Errorf("ADL file should contain %q, got:\n%s", want, contentStr)
@@ -387,6 +393,84 @@ func TestInitDevelopmentDefaultsEmitted(t *testing.T) {
 	}
 
 	t.Logf("Generated ADL content:\n%s", contentStr)
+}
+
+// TestInitDefaultsEmitsVendorAndSandboxDeps asserts that `adl init --defaults`
+// writes the three list-shaped extension points (`spec.language.go.vendor.deps`,
+// `spec.language.go.vendor.devdeps`, `spec.development.deps`) as explicit empty
+// lists. These keys are how users discover where to add extra Go modules /
+// dev tools / cross-cutting sandbox packages; omitting them on init forces
+// users to consult the schema. See issue #156.
+func TestInitDefaultsEmitsVendorAndSandboxDeps(t *testing.T) {
+	tempDir := t.TempDir()
+	outputPath := filepath.Join(tempDir, "test-output")
+
+	cmd := initCmd
+	if err := cmd.Flags().Set("defaults", "true"); err != nil {
+		t.Fatal(err)
+	}
+	if err := cmd.Flags().Set("path", outputPath); err != nil {
+		t.Fatal(err)
+	}
+	if err := cmd.Flags().Set("language", "go"); err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = cmd.Flags().Set("language", "") }()
+
+	if err := runInit(cmd, []string{"test-agent"}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	adlPath := filepath.Join(outputPath, "agent.yaml")
+	content, err := os.ReadFile(adlPath)
+	if err != nil {
+		t.Fatalf("failed to read ADL file: %v", err)
+	}
+
+	var adl adlData
+	if err := yaml.Unmarshal(content, &adl); err != nil {
+		t.Fatalf("failed to parse ADL YAML: %v", err)
+	}
+
+	if adl.Spec.Language == nil || adl.Spec.Language.Go == nil {
+		t.Fatalf("expected spec.language.go to be present")
+	}
+	if adl.Spec.Language.Go.Vendor == nil {
+		t.Fatalf("expected spec.language.go.vendor to be present by default")
+	}
+	if adl.Spec.Language.Go.Vendor.Deps == nil {
+		t.Errorf("expected spec.language.go.vendor.deps to be an empty list (not nil)")
+	}
+	if len(adl.Spec.Language.Go.Vendor.Deps) != 0 {
+		t.Errorf("expected spec.language.go.vendor.deps to be empty, got %v", adl.Spec.Language.Go.Vendor.Deps)
+	}
+	if adl.Spec.Language.Go.Vendor.Devdeps == nil {
+		t.Errorf("expected spec.language.go.vendor.devdeps to be an empty list (not nil)")
+	}
+	if len(adl.Spec.Language.Go.Vendor.Devdeps) != 0 {
+		t.Errorf("expected spec.language.go.vendor.devdeps to be empty, got %v", adl.Spec.Language.Go.Vendor.Devdeps)
+	}
+
+	if adl.Spec.Development == nil {
+		t.Fatalf("expected spec.development to be present by default")
+	}
+	if adl.Spec.Development.Deps == nil {
+		t.Errorf("expected spec.development.deps to be an empty list (not nil)")
+	}
+	if len(adl.Spec.Development.Deps) != 0 {
+		t.Errorf("expected spec.development.deps to be empty, got %v", adl.Spec.Development.Deps)
+	}
+
+	contentStr := string(content)
+	for _, want := range []string{
+		"vendor:",
+		"deps: []",
+		"devdeps: []",
+	} {
+		if !strings.Contains(contentStr, want) {
+			t.Errorf("ADL file should contain %q, got:\n%s", want, contentStr)
+		}
+	}
 }
 
 // TestInitDockerComposeFlag verifies that the --docker-compose flag at init
