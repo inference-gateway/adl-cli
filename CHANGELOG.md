@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.37.0](https://github.com/inference-gateway/adl-cli/compare/v0.36.6...v0.37.0) (2026-05-23)
+
+### ✨ Features
+
+* **generator:** Wire spec.language.*.vendor.{deps,devdeps} through Go and Rust generators ([#153](https://github.com/inference-gateway/adl-cli/issues/153)) ([358dd01](https://github.com/inference-gateway/adl-cli/commit/358dd01e6ceca5bde83b60d45f690cb04804ef7e)), closes [inference-gateway/adl#13](https://github.com/inference-gateway/adl/issues/13) [#152](https://github.com/inference-gateway/adl-cli/issues/152)
+
 ## [0.36.6](https://github.com/inference-gateway/adl-cli/compare/v0.36.5...v0.36.6) (2026-05-23)
 
 ### 📚 Documentation
