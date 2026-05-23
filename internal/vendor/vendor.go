@@ -209,9 +209,6 @@ func ResolveADL(adl *schema.ADL) (View, error) {
 		view.GoRequires = deps
 		view.Conflicts = append(view.Conflicts, depConflicts...)
 
-		// devdeps become Go 1.24 `tool` directive entries. Dedupe against
-		// built-ins AND against anything already accepted into deps so
-		// the same module never appears in both lists.
 		toolEffectiveBuiltins := cloneMap(GoBuiltins)
 		for _, e := range deps {
 			toolEffectiveBuiltins[e.Name] = e.Version
@@ -232,11 +229,6 @@ func ResolveADL(adl *schema.ADL) (View, error) {
 		view.CargoDeps = deps
 		view.Conflicts = append(view.Conflicts, conflicts...)
 
-		// When checking dev-dependencies, treat as built-in: real dev
-		// built-ins (tempfile), the runtime built-ins (tokio, etc.), AND
-		// any vendor entry already accepted for `[dependencies]`. Cargo
-		// rejects a crate appearing in both sections of the manifest, so
-		// devdeps must be deduped against every prior dep we plan to emit.
 		devEffectiveBuiltins := cloneMap(CargoBuiltinDevDeps)
 		for k, v := range CargoBuiltinDeps {
 			if _, set := devEffectiveBuiltins[k]; !set {
@@ -262,9 +254,6 @@ func ResolveADL(adl *schema.ADL) (View, error) {
 		view.NpmDeps = deps
 		view.Conflicts = append(view.Conflicts, conflicts...)
 
-		// Same dedupe-against-everything-prior reasoning as the Rust
-		// branch above: a package in `dependencies` cannot also live in
-		// `devDependencies`.
 		devEffectiveBuiltins := cloneMap(NpmBuiltinDevDeps)
 		for k, v := range NpmBuiltinDeps {
 			if _, set := devEffectiveBuiltins[k]; !set {
