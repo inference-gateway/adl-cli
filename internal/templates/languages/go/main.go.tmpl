@@ -45,9 +45,9 @@ import (
 // via `-ldflags "-X 'main.Version=...'"` (see Dockerfile). They default
 // to the values declared in the ADL.
 var (
-	Version          = "{{ .ADL.Metadata.Version }}"
-	AgentName        = "{{ .ADL.Metadata.Name }}"
-	AgentDescription = "{{ .ADL.Metadata.Description }}"
+	Version          = {{ .ADL.Metadata.Version | toJson }}
+	AgentName        = {{ .ADL.Metadata.Name | toJson }}
+	AgentDescription = {{ .ADL.Metadata.Description | toJson }}
 )
 
 // skillsDir is the directory the runtime scans for skill manifests at
