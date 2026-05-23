@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.38.1](https://github.com/inference-gateway/adl-cli/compare/v0.38.0...v0.38.1) (2026-05-23)
+
+### 🐛 Bug Fixes
+
+* **init:** Emit vendor and sandbox deps as empty lists in defaults ([#157](https://github.com/inference-gateway/adl-cli/issues/157)) ([f3f4c0e](https://github.com/inference-gateway/adl-cli/commit/f3f4c0ee7da53c2a7859db04367c6d011249dac0)), closes [#156](https://github.com/inference-gateway/adl-cli/issues/156)
+
 ## [0.38.0](https://github.com/inference-gateway/adl-cli/compare/v0.37.0...v0.38.0) (2026-05-23)
 
 ### ✨ Features
