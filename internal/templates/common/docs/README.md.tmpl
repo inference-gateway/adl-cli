@@ -6,7 +6,9 @@
 {{ if and .ADL.Spec.SCM (eq .ADL.Spec.SCM.Provider "github") .ADL.Spec.SCM.URL -}}
 {{ $url := .ADL.Spec.SCM.URL | trimSuffix ".git" | trimPrefix "https://github.com/" | trimPrefix "git@github.com:" -}}
 [![CI](https://github.com/{{ $url }}/workflows/CI/badge.svg)](https://github.com/{{ $url }}/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/codecov/c/github/{{ $url }}?label=coverage&logo=codecov)](https://codecov.io/gh/{{ $url }})
+{{ if eq .Language "go" -}}
+[![Go Report Card](https://img.shields.io/badge/Go%20Report%20Card-A+-brightgreen?style=flat&logo=go&logoColor=white)](https://goreportcard.com/report/github.com/{{ $url }})
+{{ end -}}
 {{ end -}}
 {{ end -}}
 {{ if eq .Language "go" -}}
