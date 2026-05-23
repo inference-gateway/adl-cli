@@ -71,12 +71,12 @@ jobs:
           version: 3.48.0
           repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
-      - name: Install maintainer skill
+      - name: Install ADL skill
         run: |
-          mkdir -p ~/.claude/skills/maintainer
+          mkdir -p ~/.claude/skills/adl
           curl -fsSL \
-            https://raw.githubusercontent.com/inference-gateway/skills/main/skills/maintainer/SKILL.md \
-            -o ~/.claude/skills/maintainer/SKILL.md
+            https://raw.githubusercontent.com/inference-gateway/skills/main/skills/adl/SKILL.md \
+            -o ~/.claude/skills/adl/SKILL.md
 
       - name: Run Claude Code
         id: claude
