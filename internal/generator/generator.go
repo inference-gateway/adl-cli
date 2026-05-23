@@ -726,6 +726,13 @@ func (g *Generator) getVersion() string {
 // generated Taskfile. Paths are always the in-project canonical values
 // (agent.yaml at the project root) so the task works after `cd` into the
 // generated project, regardless of how `adl generate` was originally invoked.
+//
+// Only flags that are NOT declarative in the manifest are emitted here.
+// CI/CD, deployment type, and sandbox toggles (flox/devcontainer) all live in
+// the ADL itself (spec.scm.ci, spec.scm.cd, spec.deployment.type,
+// spec.development.sandbox.flox.enabled, spec.development.sandbox.devContainer.enabled)
+// so re-emitting them as CLI flags would duplicate state and silently rewrite
+// the Taskfile on every regeneration (see issue #146).
 func (g *Generator) buildGenerateCommand() string {
 	var parts []string
 
@@ -737,26 +744,6 @@ func (g *Generator) buildGenerateCommand() string {
 
 	if g.config.Overwrite {
 		parts = append(parts, "--overwrite")
-	}
-
-	if g.config.GenerateCI {
-		parts = append(parts, "--ci")
-	}
-
-	if g.config.GenerateCD {
-		parts = append(parts, "--cd")
-	}
-
-	if g.config.DeploymentType != "" {
-		parts = append(parts, "--deployment", g.config.DeploymentType)
-	}
-
-	if g.config.EnableFlox {
-		parts = append(parts, "--flox")
-	}
-
-	if g.config.EnableDevContainer {
-		parts = append(parts, "--devcontainer")
 	}
 
 	return strings.Join(parts, " ")

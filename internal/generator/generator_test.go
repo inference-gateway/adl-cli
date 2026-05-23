@@ -748,10 +748,13 @@ func TestGenerator_buildGenerateCommand(t *testing.T) {
 				EnableFlox:         true,
 				EnableDevContainer: true,
 			},
-			expectedCmd: "adl generate --file agent.yaml --output . --template custom --overwrite --ci --cd --deployment kubernetes --flox --devcontainer",
+			// Only --template and --overwrite leak into the embedded Taskfile
+			// command. Everything else is declarative in the manifest and would
+			// duplicate state if re-emitted as a flag (see issue #146).
+			expectedCmd: "adl generate --file agent.yaml --output . --template custom --overwrite",
 		},
 		{
-			name: "config reproducing the issue scenario",
+			name: "config reproducing the issue scenario (#146): legacy CI/CD/sandbox flags must not leak into the Taskfile",
 			config: Config{
 				ADLFile:    "agent.yaml",
 				OutputDir:  ".",
@@ -760,7 +763,7 @@ func TestGenerator_buildGenerateCommand(t *testing.T) {
 				GenerateCD: true,
 				EnableFlox: true,
 			},
-			expectedCmd: "adl generate --file agent.yaml --output . --overwrite --ci --cd --flox",
+			expectedCmd: "adl generate --file agent.yaml --output . --overwrite",
 		},
 		{
 			name: "config with default template (should not include template flag)",
