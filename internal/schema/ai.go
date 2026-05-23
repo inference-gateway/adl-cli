@@ -18,7 +18,7 @@ func (t AIAgentToggles) Any() bool {
 }
 
 // AnyAgentsMD reports whether AGENTS.md should be generated. AGENTS.md
-// is shared by codex, opencode, and infer — generate it once if any of
+// is shared by codex, opencode, and infer - generate it once if any of
 // those three are enabled.
 func (t AIAgentToggles) AnyAgentsMD() bool {
 	return t.Codex || t.OpenCode || t.Infer

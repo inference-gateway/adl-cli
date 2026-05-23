@@ -368,8 +368,8 @@ spec:
 | `claudecode`  | `CLAUDE.md`               | yes (`.github/workflows/claude-code.yml`, uses `anthropics/claude-code-action`) |
 | `codex`       | `AGENTS.md` (shared)      | yes (`.github/workflows/codex.yml`, uses `openai/codex-action`) |
 | `gemini`      | `GEMINI.md`               | yes (`.github/workflows/gemini.yml`, uses `google-github-actions/run-gemini-cli`) |
-| `opencode`    | `AGENTS.md` (shared)      | no upstream action yet — docs only |
-| `infer`       | `AGENTS.md` (shared)      | no workflow scaffolded yet — docs only |
+| `opencode`    | `AGENTS.md` (shared)      | no upstream action yet - docs only |
+| `infer`       | `AGENTS.md` (shared)      | no workflow scaffolded yet - docs only |
 
 - `AGENTS.md` is generated **once** and is shared by every enabled agent that
   reads from it (`codex`, `opencode`, `infer`); the file's contents are
@@ -378,7 +378,7 @@ spec:
   matching toggle is on.
 - If no toggles are enabled, no AI docs or workflows are emitted.
 - Pre-v0.8.0 manifests using `spec.development.ai.enabled: true` are no longer
-  accepted — `adl validate` and `adl generate` will fail with a migration hint
+  accepted - `adl validate` and `adl generate` will fail with a migration hint
   pointing at the per-agent toggles. Move `enabled: true` to the specific agent
   you want (e.g. `claudecode.enabled: true`).
 - When `claudecode` is enabled, sandbox environments (Flox, DevContainer)

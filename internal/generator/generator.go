@@ -67,12 +67,6 @@ func (g *Generator) Generate(adlFile, outputDir string) error {
 	// block, both g.config.* and adl.Spec.Development.* reflect the same
 	// effective state so templates (e.g. .gitattributes) can read either
 	// source of truth.
-	//
-	// Per-agent AI toggles (claudecode/codex/gemini/opencode/infer) live on
-	// adl.Spec.Development.AI as of ADL v0.8.0. The pre-v0.8.0 single-flag
-	// `enabled` shape is rejected by the schema validator (see
-	// checkLegacySpecFields in internal/schema/validator.go), so no
-	// translation is needed here.
 	var aiCfg *schema.AIConfig
 	if adl.Spec.Development != nil {
 		aiCfg = adl.Spec.Development.AI
@@ -583,7 +577,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 // covers claudecode, codex, and gemini; opencode and infer ship docs
 // only because no first-party action exists yet.
 //
-// The workflows are generated regardless of GenerateCI/GenerateCD —
+// The workflows are generated regardless of GenerateCI/GenerateCD -
 // they're orthogonal to the language CI/CD pipelines. SCM provider is
 // honoured so non-GitHub repos skip this step entirely.
 func (g *Generator) generateAIWorkflows(adl *schema.ADL, ctx templates.Context, outputDir string, ignoreChecker *IgnoreChecker) error {

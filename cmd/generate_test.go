@@ -319,7 +319,7 @@ spec:
 
 // TestGenerateWithAIFromManifest verifies that declaring per-agent AI toggles
 // in the manifest activates the matching docs + sandbox extensions. No CLI
-// flag is involved — AI assistants are entirely manifest-driven post-v0.8.0.
+// flag is involved - AI assistants are entirely manifest-driven post-v0.8.0.
 func TestGenerateWithAIFromManifest(t *testing.T) {
 	tempDir := t.TempDir()
 	outputPath := filepath.Join(tempDir, "test-ai-output")
