@@ -717,7 +717,7 @@ stay stable on re-run. Duplicate package names inside `deps` are deduped
 (first occurrence wins on version). When a `deps` entry's package name
 collides with one of the template's built-ins (e.g. `git@2.53.0`), the
 generator prints a `⚠️  spec.development.deps … collides with a Flox
-built-in …` warning to stderr but still renders the user entry — the
+built-in …` warning to stderr but still renders the user entry - the
 maintainer's pin wins on version conflict.
 
 **Output mapping per backend:**
@@ -731,7 +731,7 @@ maintainer's pin wins on version conflict.
 If a package isn't published under its short attribute path in Nixpkgs,
 or isn't available as an apt package on the devcontainer base image,
 add the file to your project's `.adl-ignore` and hand-author the
-override — this is the same escape hatch we use for any sandbox file
+override - this is the same escape hatch we use for any sandbox file
 the template can't infer.
 
 Worked example per backend:
