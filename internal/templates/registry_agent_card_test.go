@@ -215,8 +215,6 @@ func TestRustMainTemplate_EscapesQuotesInDescription(t *testing.T) {
 		t.Errorf("main.rs did not contain properly escaped about literal\nwant substring: %s\n--- rendered ---\n%s", wantAbout, rendered)
 	}
 
-	// long_about must concatenate the description with the trailing boilerplate
-	// AND keep inner quotes escaped.
 	wantLongAbout := `long_about = "Agent for \"PromQL\" and \"sum by\" queries\n\nThis is an A2A (Agent-to-Agent) protocol server. Use the ` + "`start`" + ` subcommand to run it."`
 	if !strings.Contains(rendered, wantLongAbout) {
 		t.Errorf("main.rs did not contain properly escaped long_about literal\nwant substring: %s\n--- rendered ---\n%s", wantLongAbout, rendered)
