@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.39.0](https://github.com/inference-gateway/adl-cli/compare/v0.38.1...v0.39.0) (2026-05-24)
+
+### ✨ Features
+
+* **templates:** Wire artifacts server in generated docker-compose ([#159](https://github.com/inference-gateway/adl-cli/issues/159)) ([02177cc](https://github.com/inference-gateway/adl-cli/commit/02177cca42542fdba054d678e5ff4ce63b288feb)), closes [#158](https://github.com/inference-gateway/adl-cli/issues/158)
+
 ## [0.38.1](https://github.com/inference-gateway/adl-cli/compare/v0.38.0...v0.38.1) (2026-05-23)
 
 ### 🐛 Bug Fixes
