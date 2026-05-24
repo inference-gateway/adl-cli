@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.39.2](https://github.com/inference-gateway/adl-cli/compare/v0.39.1...v0.39.2) (2026-05-24)
+
+### 🐛 Bug Fixes
+
+* **ci:** Warning that arduino/setup-task uses old nodejs version - a deprecated one nodejs 20 ([42706f3](https://github.com/inference-gateway/adl-cli/commit/42706f3140aa5b3ac2d06a90a60a1a2db7332606))
+
 ## [0.39.1](https://github.com/inference-gateway/adl-cli/compare/v0.39.0...v0.39.1) (2026-05-24)
 
 ### 🔧 Miscellaneous
