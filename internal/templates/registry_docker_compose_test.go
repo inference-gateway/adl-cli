@@ -155,6 +155,97 @@ func TestDockerComposeTemplate_ContainsRequiredServices(t *testing.T) {
 	}
 }
 
+// TestDockerComposeTemplate_ArtifactsWiring verifies that when
+// spec.artifacts.enabled is true, the generated compose file pre-wires
+// the artifacts server on the agent and the matching infer CLI plumbing
+// so users can fetch artifacts end-to-end without manual edits. When the
+// flag is unset/false, none of the wiring is emitted and the CLI's web
+// fetch tool stays disabled (no behavior change for non-artifact agents).
+func TestDockerComposeTemplate_ArtifactsWiring(t *testing.T) {
+	cases := []struct {
+		name             string
+		artifactsEnabled bool
+		wantPresent      []string
+		wantAbsent       []string
+	}{
+		{
+			name:             "artifacts disabled",
+			artifactsEnabled: false,
+			wantPresent: []string{
+				"INFER_TOOLS_WEB_FETCH_ENABLED: false",
+			},
+			wantAbsent: []string{
+				"A2A_ARTIFACTS_ENABLE",
+				"A2A_ARTIFACTS_SERVER_HOST",
+				"A2A_ARTIFACTS_SERVER_PORT",
+				"INFER_TOOLS_WEB_FETCH_WHITELISTED_DOMAINS",
+				"./tmp:/home/infer/.infer/tmp",
+			},
+		},
+		{
+			name:             "artifacts enabled",
+			artifactsEnabled: true,
+			wantPresent: []string{
+				"A2A_ARTIFACTS_ENABLE: true",
+				"A2A_ARTIFACTS_SERVER_HOST: browser-agent",
+				"A2A_ARTIFACTS_SERVER_PORT: 8081",
+				"INFER_TOOLS_WEB_FETCH_ENABLED: true",
+				"INFER_TOOLS_WEB_FETCH_WHITELISTED_DOMAINS: |\n        - browser-agent",
+				"./tmp:/home/infer/.infer/tmp",
+			},
+			wantAbsent: []string{
+				"INFER_TOOLS_WEB_FETCH_ENABLED: false",
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			registry, err := NewRegistry("go")
+			if err != nil {
+				t.Fatalf("NewRegistry: %v", err)
+			}
+			engine := NewWithRegistry("minimal", registry)
+			adl := &schema.ADL{
+				APIVersion: "adl.inference-gateway.com/v1",
+				Kind:       "Agent",
+				Metadata:   schema.Metadata{Name: "browser-agent", Description: "x", Version: "1.0.0"},
+				Spec: schema.Spec{
+					Capabilities: schema.Capabilities{Streaming: true},
+					Server:       schema.Server{Port: 8080},
+					Agent: &schema.Agent{
+						Provider:     "openai",
+						Model:        "gpt-5-mini",
+						SystemPrompt: "hello",
+					},
+					Language: schema.Language{
+						Go: &schema.GoConfig{Module: "example.com/agent", Version: "1.26.2"},
+					},
+				},
+			}
+			if tc.artifactsEnabled {
+				adl.Spec.Artifacts = &schema.ArtifactsConfig{Enabled: true}
+			}
+
+			out, err := engine.ExecuteTemplate("docker/docker-compose.yaml", Context{ADL: adl})
+			if err != nil {
+				t.Fatalf("ExecuteTemplate: %v", err)
+			}
+
+			for _, want := range tc.wantPresent {
+				if !strings.Contains(out, want) {
+					t.Errorf("compose output missing %q\n---\n%s", want, out)
+				}
+			}
+			for _, notWant := range tc.wantAbsent {
+				if strings.Contains(out, notWant) {
+					t.Errorf("compose output unexpectedly contains %q\n---\n%s", notWant, out)
+				}
+			}
+		})
+	}
+}
+
 // TestDockerComposeTemplate_RedisOnlyWithRustFeature confirms that the
 // Redis service is added when (and only when) the Rust `redis` Cargo
 // feature is enabled - the queue stack stays out of the way for Go and
