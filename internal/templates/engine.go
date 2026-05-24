@@ -187,7 +187,7 @@ func toUpperSnakeCaseWithAcronyms(s string, acronyms map[string]string) string {
 }
 
 // SkillView is the resolved view of a markdown skill that templates can
-// safely render — frontmatter only, body lives on disk.
+// safely render - frontmatter only, body lives on disk.
 type SkillView struct {
 	ID          string
 	Name        string
@@ -246,7 +246,7 @@ func toGoMap(v any) string {
 
 // convertToGoMapLiteral recursively converts values to Go map literal format.
 // Uses reflection so named map/slice types (e.g. schema.ToolSchema) decoded by
-// yaml.v3 — which propagates the named type to nested maps — are handled the
+// yaml.v3 - which propagates the named type to nested maps - are handled the
 // same as plain map[string]any / []any.
 func convertToGoMapLiteral(v any) string {
 	if s, ok := v.(string); ok {

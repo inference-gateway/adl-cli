@@ -16,7 +16,7 @@ const SkillFile = "SKILL.md"
 // non-bare skills, Files contains every blob fetched from the source
 // (the registry default, or a GitHub tree URL via Installer), keyed by
 // path relative to the skill's directory. SKILL.md is always present
-// for non-bare skills. For bare skills, Files is empty — the template
+// for non-bare skills. For bare skills, Files is empty - the template
 // engine scaffolds SKILL.md from the ADL metadata.
 type ResolvedSkill struct {
 	ID          string

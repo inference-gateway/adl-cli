@@ -103,7 +103,7 @@ func ParseGitHubTreeURL(rawURL string) (*GitHubLocation, error) {
 
 	parts := strings.Split(strings.Trim(u.Path, "/"), "/")
 	if len(parts) >= 3 && parts[2] == "blob" {
-		return nil, fmt.Errorf("URL points to a file (/blob/) — pass the directory URL (/tree/) instead: %s", rawURL)
+		return nil, fmt.Errorf("URL points to a file (/blob/) - pass the directory URL (/tree/) instead: %s", rawURL)
 	}
 	if len(parts) < treePartsExpected || parts[2] != "tree" {
 		return nil, fmt.Errorf("URL must be of the form https://github.com/<owner>/<repo>/tree/<ref>/<path>: got %s", rawURL)
@@ -168,7 +168,7 @@ func (i *Installer) Fetch(ctx context.Context, loc *GitHubLocation) (map[string]
 		blobs = append(blobs, e)
 	}
 	if len(blobs) == 0 {
-		return nil, fmt.Errorf("no files found under %s/%s/%s @ %s — check the URL", loc.Owner, loc.Repo, loc.Path, loc.Ref)
+		return nil, fmt.Errorf("no files found under %s/%s/%s @ %s - check the URL", loc.Owner, loc.Repo, loc.Path, loc.Ref)
 	}
 
 	files := make(map[string][]byte, len(blobs))
@@ -214,7 +214,7 @@ func (i *Installer) fetchTree(ctx context.Context, loc *GitHubLocation) (*treeRe
 		return nil, fmt.Errorf("failed to parse tree response: %w", err)
 	}
 	if tree.Truncated {
-		return nil, fmt.Errorf("repository tree was truncated by GitHub (repo too large) — cannot reliably install")
+		return nil, fmt.Errorf("repository tree was truncated by GitHub (repo too large) - cannot reliably install")
 	}
 	return &tree, nil
 }

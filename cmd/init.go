@@ -179,7 +179,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 // vendorBlock mirrors spec.language.<lang>.vendor in the ADL schema. The
 // `deps` and `devdeps` keys are intentionally rendered without `omitempty`
-// so the scaffolded manifest shows them as empty lists — that's the only
+// so the scaffolded manifest shows them as empty lists - that's the only
 // way first-time users discover where to drop `<package>@<version>`
 // entries without consulting the schema. The matching language-specific
 // generator (go.mod / Cargo.toml) treats nil and empty equivalently.
@@ -860,7 +860,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 // repeating the nil check at every assignment site.
 //
 // Deps is seeded as an empty (but non-nil) slice so the YAML encoder emits
-// `deps: []` rather than omitting the key — first-time users need that
+// `deps: []` rather than omitting the key - first-time users need that
 // breadcrumb to discover where to drop cross-cutting sandbox tools (e.g.
 // `kubectl@1.31.0`, `terraform@1.9.5`).
 func ensureDevelopment(adl *adlData) {

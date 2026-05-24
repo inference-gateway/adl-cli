@@ -36,7 +36,7 @@ func IsReservedToolID(id string) bool {
 }
 
 // BuiltinToolMeta is the documentation-facing view of a reserved built-in
-// tool — the same information the generator bakes into the per-language
+// tool - the same information the generator bakes into the per-language
 // runtime descriptor, surfaced here so templates (README, CLAUDE.md) can
 // render a uniform table without each template re-stating it.
 type BuiltinToolMeta struct {

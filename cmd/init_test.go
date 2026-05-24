@@ -210,7 +210,7 @@ func TestInitDoesNotGenerateCode(t *testing.T) {
 }
 
 // TestInitAICICDDefaults verifies that `adl init --defaults` writes
-// ai/ci/cd as false (or omitted) by default — they should be opt-in.
+// ai/ci/cd as false (or omitted) by default - they should be opt-in.
 func TestInitAICICDDefaults(t *testing.T) {
 	tempDir := t.TempDir()
 	outputPath := filepath.Join(tempDir, "test-output")

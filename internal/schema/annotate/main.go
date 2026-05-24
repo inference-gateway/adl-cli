@@ -13,7 +13,7 @@
 // "goJSONSchema": {"pointer": false}.
 //
 // Nested optional structs ($ref to another definition) are left alone so the
-// generator keeps emitting *T for them — callers in internal/generator rely
+// generator keeps emitting *T for them - callers in internal/generator rely
 // on nil-checks against those substructures.
 package main
 

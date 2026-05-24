@@ -228,7 +228,7 @@ func (v *Validator) validateTools(adl *ADL) error {
 // should list `- id: read` AND enable `spec.config.tools.read.enabled:
 // true`, otherwise it can't load SKILL.md bodies at runtime. Returns
 // warnings (not errors) for the read-tool case so partially configured
-// manifests still pass validation — the warning prompts the user to fix
+// manifests still pass validation - the warning prompts the user to fix
 // it.
 func (v *Validator) validateSkills(adl *ADL) ([]string, error) {
 	for _, skill := range adl.Spec.Skills {

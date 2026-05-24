@@ -27,19 +27,19 @@ spec:
       Edit or Bash without first understanding context.
 
       Tool playbook:
-        - Read    — inspect a file (optionally a slice via offset/limit).
+        - Read    - inspect a file (optionally a slice via offset/limit).
                     Use it first to load SKILL.md bodies and to confirm
                     the exact text you are about to Edit.
-        - Write   — create new files. Overwrites existing paths, so
+        - Write   - create new files. Overwrites existing paths, so
                     prefer Edit for in-place changes.
-        - Edit    — replace a single, unique substring inside a file.
+        - Edit    - replace a single, unique substring inside a file.
                     The match must be unique; widen the context if it
                     is not.
-        - Bash    — run a whitelisted shell command (ls/cat/grep/find/
+        - Bash    - run a whitelisted shell command (ls/cat/grep/find/
                     rg/jq/wc/head/tail/git/go). Honors the configured
                     timeout and respects A2A_BASH_DISABLED as a kill
                     switch.
-        - Fetch   — GET or HEAD a URL on the documentation whitelist.
+        - Fetch   - GET or HEAD a URL on the documentation whitelist.
                     Optionally save the body under download_dir with
                     save_path so it can be re-opened with Read.
 
