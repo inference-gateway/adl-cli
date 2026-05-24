@@ -54,6 +54,11 @@ services:
       A2A_ARTIFACTS_ENABLE: true
       A2A_ARTIFACTS_SERVER_HOST: {{ $name }}
       A2A_ARTIFACTS_SERVER_PORT: 8081
+      A2A_ARTIFACTS_STORAGE_PROVIDER: filesystem
+      A2A_ARTIFACTS_STORAGE_BASE_PATH: /tmp/artifacts
+      A2A_ARTIFACTS_RETENTION_MAX_ARTIFACTS: 10
+      A2A_ARTIFACTS_RETENTION_MAX_AGE: 24h
+      A2A_ARTIFACTS_RETENTION_CLEANUP_INTERVAL: 24h
       {{- end }}
       {{- if $hasRedis }}
       A2A_QUEUE_PROVIDER: redis
@@ -80,10 +85,11 @@ services:
         required: false
     environment:
       INFER_GATEWAY_URL: "http://gateway:8080"
-      INFER_A2A_ENABLED: "true"
+      INFER_A2A_ENABLED: true
       INFER_TOOLS_ENABLED: true
       INFER_A2A_TOOLS_QUERY_AGENT_ENABLED: true
       INFER_A2A_TOOLS_SUBMIT_TASK_ENABLED: true
+      INFER_A2A_TOOLS_QUERY_TASK_ENABLED: true
       INFER_TOOLS_BASH_ENABLED: false
       INFER_TOOLS_TODO_WRITE_ENABLED: false
       INFER_TOOLS_WRITE_ENABLED: false
