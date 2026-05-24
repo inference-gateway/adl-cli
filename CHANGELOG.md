@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.39.1](https://github.com/inference-gateway/adl-cli/compare/v0.39.0...v0.39.1) (2026-05-24)
+
+### 🔧 Miscellaneous
+
+* **deps:** ⬆️ Bump Go ADK to v0.19.0 ([7db9272](https://github.com/inference-gateway/adl-cli/commit/7db9272bdbf830733ef9e860130ed8fc359e32d6))
+
 ## [0.39.0](https://github.com/inference-gateway/adl-cli/compare/v0.38.1...v0.39.0) (2026-05-24)
 
 ### ✨ Features
