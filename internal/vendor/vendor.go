@@ -105,7 +105,7 @@ func Resolve(raws []string, builtins map[string]string, depGroup string) ([]Entr
 // tests will fail loudly if a built-in is added there without being
 // mirrored here.
 var GoBuiltins = map[string]string{
-	"github.com/inference-gateway/adk":  "v0.18.4",
+	"github.com/inference-gateway/adk":  "v0.19.0",
 	"github.com/sethvargo/go-envconfig": "v1.3.0",
 	"github.com/spf13/cobra":            "v1.10.2",
 	"go.uber.org/zap":                   "v1.28.0",

@@ -969,7 +969,7 @@ func TestGenerator_VendorWiring(t *testing.T) {
 
 	t.Run("go: no vendor block renders unchanged require list and no tool directive", func(t *testing.T) {
 		got := render(t, "go", "go.mod", makeGo(nil))
-		if !strings.Contains(got, "github.com/inference-gateway/adk v0.18.4") {
+		if !strings.Contains(got, "github.com/inference-gateway/adk v0.19.0") {
 			t.Fatalf("expected built-in ADK in require, got:\n%s", got)
 		}
 		if strings.Contains(got, "stretchr/testify") {
@@ -1023,7 +1023,7 @@ func TestGenerator_VendorWiring(t *testing.T) {
 		got := render(t, "go", "go.mod", makeGo(&schema.VendorConfig{
 			Deps: []string{"github.com/inference-gateway/adk@v0.0.1"},
 		}))
-		if !strings.Contains(got, "github.com/inference-gateway/adk v0.18.4") {
+		if !strings.Contains(got, "github.com/inference-gateway/adk v0.19.0") {
 			t.Fatalf("expected built-in version preserved, got:\n%s", got)
 		}
 		if strings.Contains(got, "v0.0.1") {
