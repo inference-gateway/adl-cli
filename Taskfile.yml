@@ -40,7 +40,7 @@ tasks:
   format:
     desc: Run prettier formatter
     cmd: |
-      prettier . --write --ignore-path CHANGELOG.md
+      prettier . --write
 
   vet:
     desc: Run go vet
