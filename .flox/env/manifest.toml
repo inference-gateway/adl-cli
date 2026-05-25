@@ -12,10 +12,10 @@ goreleaser.version = "^2.15.4"
 go-task.pkg-path = "go-task"
 go-task.version = "^3.48.0"
 prettier.pkg-path = "prettier"
-prettier.version = "^3.6.2"
+prettier.version = "^3.8.2"
 markdownlint-cli.pkg-path = "markdownlint-cli"
 markdownlint-cli.version = "0.48.0"
-infer.flake = "github:inference-gateway/cli/v0.109.11"
+infer.flake = "github:inference-gateway/cli/v0.112.0"
 adl.flake = "github:inference-gateway/adl-cli/v0.34.2"
 
 [hook]

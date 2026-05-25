@@ -300,27 +300,28 @@ adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun --
 
 #### Generate Flags
 
-| Flag               | Description                                                                                |
-| ------------------ | ------------------------------------------------------------------------------------------ |
-| `--file`, `-f`     | ADL file to generate from (default: "agent.yaml")                                          |
-| `--output`, `-o`   | Output directory for generated code (default: ".")                                         |
-| `--template`, `-t` | Template to use (default: "minimal")                                                       |
-| `--overwrite`      | Overwrite existing files (respects .adl-ignore)                                            |
-| `--ci`             | Generate CI workflow configuration (GitHub Actions). Overrides `spec.scm.ci`.              |
-| `--cd`             | Generate CD pipeline configuration with semantic-release. Overrides `spec.scm.cd`.         |
-| `--deployment`     | Generate deployment configuration (`kubernetes`, `cloudrun`)                               |
+| Flag               | Description                                                                        |
+| ------------------ | ---------------------------------------------------------------------------------- |
+| `--file`, `-f`     | ADL file to generate from (default: "agent.yaml")                                  |
+| `--output`, `-o`   | Output directory for generated code (default: ".")                                 |
+| `--template`, `-t` | Template to use (default: "minimal")                                               |
+| `--overwrite`      | Overwrite existing files (respects .adl-ignore)                                    |
+| `--ci`             | Generate CI workflow configuration (GitHub Actions). Overrides `spec.scm.ci`.      |
+| `--cd`             | Generate CD pipeline configuration with semantic-release. Overrides `spec.scm.cd`. |
+| `--deployment`     | Generate deployment configuration (`kubernetes`, `cloudrun`)                       |
 
 > **Declarative equivalents:** `--ci` and `--cd` are mirrored by `spec.scm.ci`
 > and `spec.scm.cd`. The CLI flag is OR'd on top of the manifest value (passing
 > the flag wins; omitting it falls back to the manifest). AI assistants are
 > entirely manifest-driven via the per-agent toggles in `spec.development.ai`
+>
 > - see the matrix below.
-> `adl init` writes all toggles as `false` by default - they're opt-in. Generated files
-> (`CLAUDE.md`, `GEMINI.md`, `AGENTS.md`, `.github/workflows/ci.yml`,
-> `.github/workflows/cd.yml`, `.github/workflows/claude.yml`,
-> `.github/workflows/codex.yml`, `.github/workflows/gemini.yml`,
-> `.releaserc.yaml`) are tagged `linguist-generated=true` in `.gitattributes`
-> so they collapse in pull request diffs.
+>   `adl init` writes all toggles as `false` by default - they're opt-in. Generated files
+>   (`CLAUDE.md`, `GEMINI.md`, `AGENTS.md`, `.github/workflows/ci.yml`,
+>   `.github/workflows/cd.yml`, `.github/workflows/claude.yml`,
+>   `.github/workflows/codex.yml`, `.github/workflows/gemini.yml`,
+>   `.releaserc.yaml`) are tagged `linguist-generated=true` in `.gitattributes`
+>   so they collapse in pull request diffs.
 
 **CI Generation Features:**
 
@@ -350,26 +351,26 @@ spec:
   development:
     ai:
       claudecode:
-        enabled: true   # generates CLAUDE.md + .github/workflows/claude.yml
+        enabled: true # generates CLAUDE.md + .github/workflows/claude.yml
       codex:
-        enabled: false  # would generate AGENTS.md + .github/workflows/codex.yml
+        enabled: false # would generate AGENTS.md + .github/workflows/codex.yml
       gemini:
-        enabled: false  # would generate GEMINI.md + .github/workflows/gemini.yml
+        enabled: false # would generate GEMINI.md + .github/workflows/gemini.yml
       opencode:
-        enabled: false  # would generate AGENTS.md (no upstream action yet)
+        enabled: false # would generate AGENTS.md (no upstream action yet)
       infer:
-        enabled: false  # would generate AGENTS.md (no upstream action yet)
+        enabled: false # would generate AGENTS.md (no upstream action yet)
 ```
 
 #### Per-agent AI assistants
 
-| Agent toggle  | Docs file the agent reads | GitHub Actions workflow generated? |
-|---------------|---------------------------|------------------------------------|
-| `claudecode`  | `CLAUDE.md`               | yes (`.github/workflows/claude.yml`, uses `anthropics/claude-code-action`) |
-| `codex`       | `AGENTS.md` (shared)      | yes (`.github/workflows/codex.yml`, uses `openai/codex-action`) |
-| `gemini`      | `GEMINI.md`               | yes (`.github/workflows/gemini.yml`, uses `google-github-actions/run-gemini-cli`) |
-| `opencode`    | `AGENTS.md` (shared)      | no upstream action yet - docs only |
-| `infer`       | `AGENTS.md` (shared)      | no workflow scaffolded yet - docs only |
+| Agent toggle | Docs file the agent reads | GitHub Actions workflow generated?                                                |
+| ------------ | ------------------------- | --------------------------------------------------------------------------------- |
+| `claudecode` | `CLAUDE.md`               | yes (`.github/workflows/claude.yml`, uses `anthropics/claude-code-action`)        |
+| `codex`      | `AGENTS.md` (shared)      | yes (`.github/workflows/codex.yml`, uses `openai/codex-action`)                   |
+| `gemini`     | `GEMINI.md`               | yes (`.github/workflows/gemini.yml`, uses `google-github-actions/run-gemini-cli`) |
+| `opencode`   | `AGENTS.md` (shared)      | no upstream action yet - docs only                                                |
+| `infer`      | `AGENTS.md` (shared)      | no workflow scaffolded yet - docs only                                            |
 
 - `AGENTS.md` is generated **once** and is shared by every enabled agent that
   reads from it (`codex`, `opencode`, `infer`); the file's contents are
@@ -625,11 +626,11 @@ downgrades of the core runtime SDK.
 
 **Output mapping per language:**
 
-| Language   | `deps` lands in               | `devdeps` lands in                 |
-| ---------- | ----------------------------- | ---------------------------------- |
+| Language   | `deps` lands in               | `devdeps` lands in                                                                                                                                                                                                                                                                                        |
+| ---------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Go         | `go.mod` `require` block      | `go.mod` [`tool` directive](https://go.dev/doc/modules/managing-dependencies#tools) (executable dev tools: code generators, linters, etc.) plus an `// indirect` entry in `require` so the module is downloadable. Test libraries that you `import` (testify, go-cmp, …) belong in `deps`, not `devdeps`. |
-| Rust       | `Cargo.toml` `[dependencies]` | `Cargo.toml` `[dev-dependencies]`  |
-| TypeScript | `package.json` `dependencies` | `package.json` `devDependencies` _(plumbed end-to-end once the TypeScript generator templates land - the schema and validator already accept the field)_ |
+| Rust       | `Cargo.toml` `[dependencies]` | `Cargo.toml` `[dev-dependencies]`                                                                                                                                                                                                                                                                         |
+| TypeScript | `package.json` `dependencies` | `package.json` `devDependencies` _(plumbed end-to-end once the TypeScript generator templates land - the schema and validator already accept the field)_                                                                                                                                                  |
 
 For Go, supply the **full tool package path** (the binary's `main` package,
 e.g. `golang.org/x/tools/cmd/stringer`) with a version. After generation,
@@ -648,7 +649,7 @@ spec:
       vendor:
         deps:
           - github.com/google/uuid@v1.6.0
-          - github.com/stretchr/testify@v1.10.0  # imported by *_test.go
+          - github.com/stretchr/testify@v1.10.0 # imported by *_test.go
         devdeps:
           - golang.org/x/tools/cmd/stringer@v0.20.0
           - github.com/golang/mock/mockgen@v1.6.0
@@ -704,9 +705,9 @@ spec:
       devcontainer:
         enabled: true
     deps:
-      - deno@2.1.4
-      - kubectl@1.31.0
-      - terraform@1.9.5
+      - deno@^2.7.14
+      - kubectl@^1.36.1
+      - terraform@^1.15.3
 ```
 
 **Merge semantics:** additive. The per-language toolchain that each
@@ -722,11 +723,11 @@ maintainer's pin wins on version conflict.
 
 **Output mapping per backend:**
 
-| Backend         | Generated file                  | Per-entry rendering                                                                                                                                                            |
-| --------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `flox`          | `.flox/env/manifest.toml`       | A pair of TOML lines under `[install]`: `<pkg>.pkg-path = "<pkg>"` / `<pkg>.version = "<version>"`. Resolved against Nixpkgs at activation time.                               |
-| `devcontainer`  | `.devcontainer/devcontainer.json` | Added to the `features` block as `ghcr.io/devcontainers-extra/features/apt-packages:1` with the comma-joined `<pkg>=<version>` list. Resolution is best-effort against apt.    |
-| `dockerCompose` | _(out of scope for this release; see issue #154)_ | n/a                                                                                                                                                                            |
+| Backend         | Generated file                                    | Per-entry rendering                                                                                                                                                         |
+| --------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `flox`          | `.flox/env/manifest.toml`                         | A pair of TOML lines under `[install]`: `<pkg>.pkg-path = "<pkg>"` / `<pkg>.version = "<version>"`. Resolved against Nixpkgs at activation time.                            |
+| `devcontainer`  | `.devcontainer/devcontainer.json`                 | Added to the `features` block as `ghcr.io/devcontainers-extra/features/apt-packages:1` with the comma-joined `<pkg>=<version>` list. Resolution is best-effort against apt. |
+| `dockerCompose` | _(out of scope for this release; see issue #154)_ | n/a                                                                                                                                                                         |
 
 If a package isn't published under its short attribute path in Nixpkgs,
 or isn't available as an apt package on the devcontainer base image,
@@ -747,7 +748,7 @@ spec:
         enabled: true
     deps:
       - deno@2.1.4
-      - kubectl@1.31.0
+      - kubectl@1.36.1
       - terraform@1.9.5
 ```
 
@@ -762,7 +763,7 @@ spec:
         enabled: true
     deps:
       - deno@2.1.4
-      - kubectl@1.31.0
+      - kubectl@1.36.1
 ```
 
 ## Skills vs. Tools
@@ -777,16 +778,16 @@ A skill entry is small:
 ```yaml
 spec:
   skills:
-    - id: data-analysis          # pulled from registry.inference-gateway.com/skills/
-      version: 0.1.0             # optional pin
-    - id: report-writing         # pulled at the default version
-    - id: company-policy         # scaffolded locally (not fetched)
+    - id: data-analysis # pulled from registry.inference-gateway.com/skills/
+      version: 0.1.0 # optional pin
+    - id: report-writing # pulled at the default version
+    - id: company-policy # scaffolded locally (not fetched)
       bare: true
       name: company-policy
       description: "Internal compliance rules to follow"
-      license: Proprietary       # optional SPDX id or "Proprietary"
+      license: Proprietary # optional SPDX id or "Proprietary"
       tags: [policy, compliance]
-    - id: pdf                    # pull a full skill directory from GitHub
+    - id: pdf # pull a full skill directory from GitHub
       source: anthropics/skills/pdf
     - id: skill-creator
       source: skill-creator@v1.0 # pin to a tag/branch/sha
@@ -816,13 +817,13 @@ Use `adl generate --offline` to skip network access - every non-bare skill must 
 
 Every form below resolves to a GitHub `tree/<ref>/<path>` URL. An optional `@<tag>` suffix pins a branch, tag, or commit SHA; omit it to use the default `main` branch.
 
-| Shorthand                        | Expands to                                                                   |
-| -------------------------------- | ---------------------------------------------------------------------------- |
-| `<skill>`                        | `https://github.com/inference-gateway/skills/tree/main/skills/<skill>`       |
-| `<skill>@<tag>`                  | `https://github.com/inference-gateway/skills/tree/<tag>/skills/<skill>`      |
-| `<owner>/<repo>/<skill>`         | `https://github.com/<owner>/<repo>/tree/main/skills/<skill>`                 |
-| `<owner>/<repo>/<skill>@<tag>`   | `https://github.com/<owner>/<repo>/tree/<tag>/skills/<skill>`                |
-| Full `https://github.com/...` URL | passed through unchanged                                                    |
+| Shorthand                         | Expands to                                                              |
+| --------------------------------- | ----------------------------------------------------------------------- |
+| `<skill>`                         | `https://github.com/inference-gateway/skills/tree/main/skills/<skill>`  |
+| `<skill>@<tag>`                   | `https://github.com/inference-gateway/skills/tree/<tag>/skills/<skill>` |
+| `<owner>/<repo>/<skill>`          | `https://github.com/<owner>/<repo>/tree/main/skills/<skill>`            |
+| `<owner>/<repo>/<skill>@<tag>`    | `https://github.com/<owner>/<repo>/tree/<tag>/skills/<skill>`           |
+| Full `https://github.com/...` URL | passed through unchanged                                                |
 
 Concrete examples:
 
@@ -872,13 +873,13 @@ The model loads each SKILL.md body on demand via the `Read` built-in tool, and e
 
 `spec.tools` accepts five reserved IDs that map to framework-supplied implementations:
 
-| Reserved ID | Generated as            | Purpose                                                                              |
-| ----------- | ----------------------- | ------------------------------------------------------------------------------------ |
-| `read`      | `tools/read.go` etc.    | Read a file (`file_path`, optional `offset`/`limit`).                                |
-| `bash`      | `tools/bash.go` etc.    | Execute a shell command (subject to whitelist + timeout).                            |
-| `write`     | `tools/write.go` etc.   | Write content to a file (creates parent dirs).                                       |
-| `edit`      | `tools/edit.go` etc.    | Replace a unique string in a file (`old_string` → `new_string`).                     |
-| `fetch`     | `tools/fetch.go` etc.   | Fetch an http(s) URL (whitelist, max-bytes cap, optional save-to-disk inside `/tmp`).|
+| Reserved ID | Generated as          | Purpose                                                                               |
+| ----------- | --------------------- | ------------------------------------------------------------------------------------- |
+| `read`      | `tools/read.go` etc.  | Read a file (`file_path`, optional `offset`/`limit`).                                 |
+| `bash`      | `tools/bash.go` etc.  | Execute a shell command (subject to whitelist + timeout).                             |
+| `write`     | `tools/write.go` etc. | Write content to a file (creates parent dirs).                                        |
+| `edit`      | `tools/edit.go` etc.  | Replace a unique string in a file (`old_string` → `new_string`).                      |
+| `fetch`     | `tools/fetch.go` etc. | Fetch an http(s) URL (whitelist, max-bytes cap, optional save-to-disk inside `/tmp`). |
 
 Opt in by listing the id alone - the generator owns `name`, `description`, and the JSON schema:
 
@@ -887,7 +888,7 @@ spec:
   tools:
     - id: read
     - id: bash
-    - id: query_database       # user tool: full entry still required
+    - id: query_database # user tool: full entry still required
       name: query_database
       description: "..."
       schema: { type: object, ... }
@@ -901,25 +902,25 @@ spec:
     tools:
       read:
         enabled: true
-        max_lines: 2000          # offset/limit default window
-        allowed_roots: []        # empty = project-wide
+        max_lines: 2000 # offset/limit default window
+        allowed_roots: [] # empty = project-wide
       bash:
         enabled: true
         whitelist: [ls, cat, grep, jq]
         timeout_seconds: 30
       write:
-        enabled: false           # listed but explicitly disabled
+        enabled: false # listed but explicitly disabled
       edit:
         enabled: true
       fetch:
         enabled: true
-        allowed_domains:         # whitelist of hosts (empty = unrestricted, discouraged)
+        allowed_domains: # whitelist of hosts (empty = unrestricted, discouraged)
           - example.com
-          - .api.dev             # entries starting with "." match any subdomain
-        max_bytes: 10485760      # 10 MiB cap on response body (default)
-        timeout_seconds: 30      # total request timeout (default)
-        download_dir: /tmp       # root for save_path writes (default /tmp)
-        allow_downloads: false   # set true to allow writing response bodies to disk
+          - .api.dev # entries starting with "." match any subdomain
+        max_bytes: 10485760 # 10 MiB cap on response body (default)
+        timeout_seconds: 30 # total request timeout (default)
+        download_dir: /tmp # root for save_path writes (default /tmp)
+        allow_downloads: false # set true to allow writing response bodies to disk
 ```
 
 Values are baked into the generated constructor as compile-time literals - there's no `ToolsConfig` struct in `config/config.go` because reserved-namespace sections are intentionally skipped. The validator decodes each `spec.config.tools.<id>` block into the built-in's typed shape and rejects unknown keys (typos like `tymeout_seconds` fail with `spec.config.tools.bash.tymeout_seconds`).
@@ -1051,7 +1052,7 @@ spec:
       inject:
         - logger
         - database
-        - config.email  # Inject only the email config subsection
+        - config.email # Inject only the email config subsection
       schema:
         type: object
         properties:
@@ -1113,11 +1114,11 @@ toolBox.AddTool(exportReportSkill)
 
 ```yaml
 inject:
-  - logger                 # Built-in logger service
-  - config                 # Entire config object (*config.Config)
-  - config.database        # Database config subsection (*config.DatabaseConfig)
-  - config.email           # Email config subsection (*config.EmailConfig)
-  - myService              # Custom service from spec.services
+  - logger # Built-in logger service
+  - config # Entire config object (*config.Config)
+  - config.database # Database config subsection (*config.DatabaseConfig)
+  - config.email # Email config subsection (*config.EmailConfig)
+  - myService # Custom service from spec.services
 ```
 
 ### Service Architecture
@@ -1667,9 +1668,10 @@ spec:
     enabled: true
 ```
 
-Configure storage via environment variables (see generated README for A2A_ARTIFACT_* variables). Supports both filesystem and MinIO/S3 storage backends.
+Configure storage via environment variables (see generated README for A2A*ARTIFACT*\* variables). Supports both filesystem and MinIO/S3 storage backends.
 
 **Examples:**
+
 - `examples/go-agent-artifacts-filesystem.yaml` - Filesystem storage example
 - `examples/go-agent-artifacts-minio.yaml` - MinIO storage example
 

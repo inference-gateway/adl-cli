@@ -180,14 +180,14 @@ spec:
             type: string
             description: "Output format"
             enum:
-            - pdf
-            - excel
-            - json
-            - html
+              - pdf
+              - excel
+              - json
+              - html
         required:
-        - report_type
-        - date_range
-        - format
+          - report_type
+          - date_range
+          - format
   skills:
     - id: incident-response
       bare: true

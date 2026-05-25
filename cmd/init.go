@@ -862,7 +862,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 // Deps is seeded as an empty (but non-nil) slice so the YAML encoder emits
 // `deps: []` rather than omitting the key - first-time users need that
 // breadcrumb to discover where to drop cross-cutting sandbox tools (e.g.
-// `kubectl@1.31.0`, `terraform@1.9.5`).
+// `kubectl@^1.36.1`, `terraform@^1.15.3`).
 func ensureDevelopment(adl *adlData) {
 	if adl.Spec.Development != nil {
 		if adl.Spec.Development.Deps == nil {

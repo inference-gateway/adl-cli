@@ -15,28 +15,28 @@ This file provides guidance to AI agents working with the **ADL CLI** repository
 
 ### Key Technologies
 
-| Technology | Purpose |
-|---|---|
-| Go 1.26.2+ | Primary language |
-| [Cobra](https://github.com/spf13/cobra) | CLI framework (`github.com/spf13/cobra v1.10.2`) |
-| [Viper](https://github.com/spf13/viper) | Configuration management (`github.com/spf13/viper v1.21.0`) |
-| [Sprig v3](https://github.com/Masterminds/sprig) | Template function library (`github.com/Masterminds/sprig/v3 v3.3.0`) |
-| [go-jsonschema](https://github.com/atombender/go-jsonschema) | Go type generation from JSON Schema |
-| [gojsonschema](https://github.com/xeipuuv/gojsonschema) | JSON Schema validation (`github.com/xeipuuv/gojsonschema v1.2.0`) |
-| [mapstructure](https://github.com/go-viper/mapstructure) | Struct decoding for built-in tool configs |
-| [Task](https://taskfile.dev/) | Task runner (build, test, lint) |
-| [golangci-lint](https://golangci-lint.run/) | Linting |
-| [GoReleaser](https://goreleaser.com/) | Release building |
-| [semantic-release](https://semantic-release.gitbook.io/) | Automated releases |
-| [Nix Flake](https://nixos.wiki/wiki/Flakes) | Development shell |
-| [Flox](https://flox.dev) | Development environment |
+| Technology                                                   | Purpose                                                              |
+| ------------------------------------------------------------ | -------------------------------------------------------------------- |
+| Go 1.26.2+                                                   | Primary language                                                     |
+| [Cobra](https://github.com/spf13/cobra)                      | CLI framework (`github.com/spf13/cobra v1.10.2`)                     |
+| [Viper](https://github.com/spf13/viper)                      | Configuration management (`github.com/spf13/viper v1.21.0`)          |
+| [Sprig v3](https://github.com/Masterminds/sprig)             | Template function library (`github.com/Masterminds/sprig/v3 v3.3.0`) |
+| [go-jsonschema](https://github.com/atombender/go-jsonschema) | Go type generation from JSON Schema                                  |
+| [gojsonschema](https://github.com/xeipuuv/gojsonschema)      | JSON Schema validation (`github.com/xeipuuv/gojsonschema v1.2.0`)    |
+| [mapstructure](https://github.com/go-viper/mapstructure)     | Struct decoding for built-in tool configs                            |
+| [Task](https://taskfile.dev/)                                | Task runner (build, test, lint)                                      |
+| [golangci-lint](https://golangci-lint.run/)                  | Linting                                                              |
+| [GoReleaser](https://goreleaser.com/)                        | Release building                                                     |
+| [semantic-release](https://semantic-release.gitbook.io/)     | Automated releases                                                   |
+| [Nix Flake](https://nixos.wiki/wiki/Flakes)                  | Development shell                                                    |
+| [Flox](https://flox.dev)                                     | Development environment                                              |
 
 ### Generated Language Targets
 
-| Language | Status | Key Templates |
-|---|---|---|
-| Go | Full support | `internal/templates/languages/go/` |
-| Rust | Full support | `internal/templates/languages/rust/` |
+| Language   | Status                                            | Key Templates                              |
+| ---------- | ------------------------------------------------- | ------------------------------------------ |
+| Go         | Full support                                      | `internal/templates/languages/go/`         |
+| Rust       | Full support                                      | `internal/templates/languages/rust/`       |
 | TypeScript | Template structure exists, implementation planned | `internal/templates/languages/typescript/` |
 
 ---
@@ -119,12 +119,12 @@ The `adl generate` command follows this pipeline:
 
 These tools have framework-supplied implementations generated when listed in `spec.tools`:
 
-| ID | Generated as | Config namespace | Runtime overrides |
-|---|---|---|---|
-| `read` | `tools/read.go` | `spec.config.tools.read` | None |
-| `bash` | `tools/bash.go` | `spec.config.tools.bash` | `A2A_BASH_DISABLED`, `A2A_BASH_WHITELIST` |
-| `write` | `tools/write.go` | `spec.config.tools.write` | None |
-| `edit` | `tools/edit.go` | `spec.config.tools.edit` | None |
+| ID      | Generated as     | Config namespace          | Runtime overrides                         |
+| ------- | ---------------- | ------------------------- | ----------------------------------------- |
+| `read`  | `tools/read.go`  | `spec.config.tools.read`  | None                                      |
+| `bash`  | `tools/bash.go`  | `spec.config.tools.bash`  | `A2A_BASH_DISABLED`, `A2A_BASH_WHITELIST` |
+| `write` | `tools/write.go` | `spec.config.tools.write` | None                                      |
+| `edit`  | `tools/edit.go`  | `spec.config.tools.edit`  | None                                      |
 | `fetch` | `tools/fetch.go` | `spec.config.tools.fetch` | Go: `TOOLS_FETCH_*` / Rust: `A2A_FETCH_*` |
 
 **All five default to `enabled: false`.** Activate via `spec.config.tools.<id>.enabled: true`.
@@ -182,50 +182,50 @@ flox activate
 
 ### Build & Run
 
-| Command | Description |
-|---|---|
-| `task build` | Build binary to `bin/adl` |
-| `task install` | Install to `$GOPATH/bin/adl` |
+| Command              | Description                                                   |
+| -------------------- | ------------------------------------------------------------- |
+| `task build`         | Build binary to `bin/adl`                                     |
+| `task install`       | Install to `$GOPATH/bin/adl`                                  |
 | `task dev -- <args>` | Build + run with CLI args (e.g., `task dev -- init my-agent`) |
-| `task clean` | Remove `bin/` and `dist/` |
+| `task clean`         | Remove `bin/` and `dist/`                                     |
 
 ### Testing
 
-| Command | Description |
-|---|---|
-| `task test` | Run all tests (`go test -v ./...`) |
-| `task test:coverage` | Run tests with coverage (`go test -v -cover ./...`) |
-| `go test -v ./cmd -run TestInit` | Run specific test by name |
-| `go test -v ./internal/generator` | Test specific package |
-| `task examples:test` | Validate all example ADL files |
-| `task examples:generate` | Generate projects from all examples |
+| Command                           | Description                                         |
+| --------------------------------- | --------------------------------------------------- |
+| `task test`                       | Run all tests (`go test -v ./...`)                  |
+| `task test:coverage`              | Run tests with coverage (`go test -v -cover ./...`) |
+| `go test -v ./cmd -run TestInit`  | Run specific test by name                           |
+| `go test -v ./internal/generator` | Test specific package                               |
+| `task examples:test`              | Validate all example ADL files                      |
+| `task examples:generate`          | Generate projects from all examples                 |
 
 ### Code Quality
 
-| Command | Description |
-|---|---|
-| `task fmt` | Format Go code (`go fmt ./...`) |
-| `task format` | Run Prettier formatter |
-| `task vet` | Run `go vet ./...` |
-| `task lint` | Run `golangci-lint run` |
-| `task lint:md` | Run markdownlint |
-| `task lint:md:fix` | Run markdownlint with auto-fix |
-| `task ci` | Full CI pipeline: fmt, lint, test, build, verify-schema |
+| Command            | Description                                             |
+| ------------------ | ------------------------------------------------------- |
+| `task fmt`         | Format Go code (`go fmt ./...`)                         |
+| `task format`      | Run Prettier formatter                                  |
+| `task vet`         | Run `go vet ./...`                                      |
+| `task lint`        | Run `golangci-lint run`                                 |
+| `task lint:md`     | Run markdownlint                                        |
+| `task lint:md:fix` | Run markdownlint with auto-fix                          |
+| `task ci`          | Full CI pipeline: fmt, lint, test, build, verify-schema |
 
 ### Schema & Code Generation
 
-| Command | Description |
-|---|---|
-| `task fetch-schema` | Refresh vendored `internal/schema/schema.json` from upstream ADL repo |
-| `task generate-types` | Regenerate `internal/schema/types.go` from vendored schema |
-| `task verify-schema` | CI gate: confirm committed schema matches upstream pinned version |
+| Command               | Description                                                           |
+| --------------------- | --------------------------------------------------------------------- |
+| `task fetch-schema`   | Refresh vendored `internal/schema/schema.json` from upstream ADL repo |
+| `task generate-types` | Regenerate `internal/schema/types.go` from vendored schema            |
+| `task verify-schema`  | CI gate: confirm committed schema matches upstream pinned version     |
 
 ### Release
 
-| Command | Description |
-|---|---|
-| `task release` | Build release binaries for multiple platforms (GoReleaser snapshot) |
-| `task docker:build` | Build Docker image |
+| Command             | Description                                                         |
+| ------------------- | ------------------------------------------------------------------- |
+| `task release`      | Build release binaries for multiple platforms (GoReleaser snapshot) |
+| `task docker:build` | Build Docker image                                                  |
 
 ### CLI Usage (generated project workflow)
 
@@ -278,17 +278,17 @@ outputDir = outputPath
 
 ### Test Files
 
-| File | Tests |
-|---|---|
-| `cmd/generate_test.go` | Generation command with various flags (CI/CD/AI/overrides/skills) |
-| `cmd/init_test.go` | Init command interactive flow |
-| `cmd/validate_test.go` | Validation command (if exists) |
-| `internal/generator/generator_test.go` | Core generation logic |
-| `internal/schema/validator_test.go` | Schema validation |
-| `internal/schema/builtin_config_test.go` | Built-in tool config decoding |
-| `internal/registry/*_test.go` | Registry client, cache, installer, resolver |
-| `internal/templates/*_test.go` | Template engine and registry |
-| `internal/templates/cli_template_test.go` | CLI template rendering |
+| File                                      | Tests                                                             |
+| ----------------------------------------- | ----------------------------------------------------------------- |
+| `cmd/generate_test.go`                    | Generation command with various flags (CI/CD/AI/overrides/skills) |
+| `cmd/init_test.go`                        | Init command interactive flow                                     |
+| `cmd/validate_test.go`                    | Validation command (if exists)                                    |
+| `internal/generator/generator_test.go`    | Core generation logic                                             |
+| `internal/schema/validator_test.go`       | Schema validation                                                 |
+| `internal/schema/builtin_config_test.go`  | Built-in tool config decoding                                     |
+| `internal/registry/*_test.go`             | Registry client, cache, installer, resolver                       |
+| `internal/templates/*_test.go`            | Template engine and registry                                      |
+| `internal/templates/cli_template_test.go` | CLI template rendering                                            |
 
 ---
 
@@ -349,60 +349,60 @@ The `internal/generator/ignore.go` `IgnoreChecker` handles pattern matching. Use
 
 ### Configuration & Build
 
-| File | Purpose |
-|---|---|
-| `main.go` | Entry point, sets `Version` via ldflags |
-| `go.mod` | Go module definition (`github.com/inference-gateway/adl-cli`) |
-| `Taskfile.yml` | Task runner configuration (build, test, lint, ci, etc.) |
-| `flake.nix` / `flake.lock` | Nix flake for development shell |
-| `.flox/env/manifest.toml` | Flox environment configuration |
-| `.goreleaser.yaml` | GoReleaser release configuration (if exists) |
+| File                       | Purpose                                                       |
+| -------------------------- | ------------------------------------------------------------- |
+| `main.go`                  | Entry point, sets `Version` via ldflags                       |
+| `go.mod`                   | Go module definition (`github.com/inference-gateway/adl-cli`) |
+| `Taskfile.yml`             | Task runner configuration (build, test, lint, ci, etc.)       |
+| `flake.nix` / `flake.lock` | Nix flake for development shell                               |
+| `.flox/env/manifest.toml`  | Flox environment configuration                                |
+| `.goreleaser.yaml`         | GoReleaser release configuration (if exists)                  |
 
 ### Schema & Core Types
 
-| File | Purpose |
-|---|---|
-| `internal/schema/types.go` | **Generated** Go types from JSON Schema (DO NOT EDIT BY HAND) |
-| `internal/schema/schema.json` | Vendored ADL JSON Schema (refresh via `task fetch-schema`) |
-| `internal/schema/metadata.go` | Hand-written `GeneratedMetadata` struct |
-| `internal/schema/builtin_config.go` | Reserved tool IDs and typed config structs |
-| `internal/schema/validator.go` | Schema validation + semantic checks |
+| File                                | Purpose                                                       |
+| ----------------------------------- | ------------------------------------------------------------- |
+| `internal/schema/types.go`          | **Generated** Go types from JSON Schema (DO NOT EDIT BY HAND) |
+| `internal/schema/schema.json`       | Vendored ADL JSON Schema (refresh via `task fetch-schema`)    |
+| `internal/schema/metadata.go`       | Hand-written `GeneratedMetadata` struct                       |
+| `internal/schema/builtin_config.go` | Reserved tool IDs and typed config structs                    |
+| `internal/schema/validator.go`      | Schema validation + semantic checks                           |
 
 ### Templates
 
-| Directory | Purpose |
-|---|---|
-| `internal/templates/languages/go/` | Go project templates |
-| `internal/templates/languages/go/builtin/` | Built-in tool Go templates (read, bash, write, edit, fetch) |
-| `internal/templates/languages/rust/` | Rust project templates |
-| `internal/templates/languages/rust/builtin/` | Built-in tool Rust templates |
-| `internal/templates/common/` | Universal templates (CI/CD, Docker, docs, config, skills) |
-| `internal/templates/sandbox/` | Development environment templates (flox, devcontainer) |
+| Directory                                    | Purpose                                                     |
+| -------------------------------------------- | ----------------------------------------------------------- |
+| `internal/templates/languages/go/`           | Go project templates                                        |
+| `internal/templates/languages/go/builtin/`   | Built-in tool Go templates (read, bash, write, edit, fetch) |
+| `internal/templates/languages/rust/`         | Rust project templates                                      |
+| `internal/templates/languages/rust/builtin/` | Built-in tool Rust templates                                |
+| `internal/templates/common/`                 | Universal templates (CI/CD, Docker, docs, config, skills)   |
+| `internal/templates/sandbox/`                | Development environment templates (flox, devcontainer)      |
 
 ### Registry
 
-| File | Purpose |
-|---|---|
-| `internal/registry/client.go` | HTTP client for default skills registry |
-| `internal/registry/cache.go` | On-disk cache at `~/.adl/skills-cache/` |
-| `internal/registry/installer.go` | GitHub-source skill installer |
-| `internal/registry/resolver.go` | Coordinates fetch/cache/scaffold for skills |
-| `internal/registry/frontmatter.go` | YAML frontmatter parser for SKILL.md |
+| File                               | Purpose                                     |
+| ---------------------------------- | ------------------------------------------- |
+| `internal/registry/client.go`      | HTTP client for default skills registry     |
+| `internal/registry/cache.go`       | On-disk cache at `~/.adl/skills-cache/`     |
+| `internal/registry/installer.go`   | GitHub-source skill installer               |
+| `internal/registry/resolver.go`    | Coordinates fetch/cache/scaffold for skills |
+| `internal/registry/frontmatter.go` | YAML frontmatter parser for SKILL.md        |
 
 ### Examples
 
-| File | Purpose |
-|---|---|
-| `examples/go-agent.yaml` | Basic Go agent example |
-| `examples/rust-agent.yaml` | Basic Rust agent example |
-| `examples/go-agent-builtin-tools.yaml` | Go agent with built-in tools |
+| File                                          | Purpose                            |
+| --------------------------------------------- | ---------------------------------- |
+| `examples/go-agent.yaml`                      | Basic Go agent example             |
+| `examples/rust-agent.yaml`                    | Basic Rust agent example           |
+| `examples/go-agent-builtin-tools.yaml`        | Go agent with built-in tools       |
 | `examples/go-agent-artifacts-filesystem.yaml` | Go agent with filesystem artifacts |
-| `examples/go-agent-artifacts-minio.yaml` | Go agent with MinIO artifacts |
-| `examples/cloudrun-agent.yaml` | CloudRun deployment with GCR |
-| `examples/cloudrun-ghcr-agent.yaml` | CloudRun deployment with GHCR |
-| `examples/kubernetes-agent.yaml` | Kubernetes deployment |
-| `examples/rust-agent-ai.yaml` | Rust AI agent |
-| `examples/rust-agent-redis.yaml` | Rust agent with Redis |
+| `examples/go-agent-artifacts-minio.yaml`      | Go agent with MinIO artifacts      |
+| `examples/cloudrun-agent.yaml`                | CloudRun deployment with GCR       |
+| `examples/cloudrun-ghcr-agent.yaml`           | CloudRun deployment with GHCR      |
+| `examples/kubernetes-agent.yaml`              | Kubernetes deployment              |
+| `examples/rust-agent-ai.yaml`                 | Rust AI agent                      |
+| `examples/rust-agent-redis.yaml`              | Rust agent with Redis              |
 
 ---
 
@@ -428,6 +428,7 @@ The `internal/generator/ignore.go` `IgnoreChecker` handles pattern matching. Use
 The canonical ADL JSON Schema lives in the separate [`inference-gateway/adl`](https://github.com/inference-gateway/adl) repository. This CLI vendors a pinned copy at `internal/schema/schema.json`.
 
 Update flow:
+
 ```bash
 # 1. Bump ADL_SCHEMA_VERSION in Taskfile.yml
 # 2. Refresh vendored schema
