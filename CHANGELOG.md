@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.39.3](https://github.com/inference-gateway/adl-cli/compare/v0.39.2...v0.39.3) (2026-05-26)
+
+### 🐛 Bug Fixes
+
+* **templates:** Render README title via toTitleCase helper that honors acronyms ([#160](https://github.com/inference-gateway/adl-cli/issues/160)) ([3c87a94](https://github.com/inference-gateway/adl-cli/commit/3c87a9438f72d92d9c96670c4af84c7a668cdf79))
+
+### 🔧 Miscellaneous
+
+* Delete AGENTS.md ([df61631](https://github.com/inference-gateway/adl-cli/commit/df616311d74631d0ffcaab7aa3ce5c9350c9ba5a))
+* **deps:** Add codex ([da5caaa](https://github.com/inference-gateway/adl-cli/commit/da5caaa992d28f82082af49b786be68ab20adcf8))
+* **deps:** Bump claude-code version ^2.1.141 -> ^2.1.148 ([532a962](https://github.com/inference-gateway/adl-cli/commit/532a9628ad13484ca7641f7a87959d805cf58800))
+* **deps:** Bump claude-code version ^2.1.145 -> ^2.1.148 ([984c5e3](https://github.com/inference-gateway/adl-cli/commit/984c5e36d7d98a63ef5b9bd4ee31008306e40a01))
+* **deps:** Bump dev dependecies ([91de008](https://github.com/inference-gateway/adl-cli/commit/91de00889111ec60e0ee6068c97963913445895e))
+* **deps:** Bump prettier to version 3.8.3 ([cb866f5](https://github.com/inference-gateway/adl-cli/commit/cb866f57967d46b05d2360971e25df9b878a4210))
+* **docs:** Generate AGENTS.md file ([86fb76b](https://github.com/inference-gateway/adl-cli/commit/86fb76bc8acaa1421597457bfeb975c1c3e9ae9d))
+* **flox:** Bump schema version ([f81e5db](https://github.com/inference-gateway/adl-cli/commit/f81e5dbc2a554af80409b821ec77fc2287a5c0c2))
+* Generate CLAUDE.md file ([1d7ff3e](https://github.com/inference-gateway/adl-cli/commit/1d7ff3e94f3af8dd347855f04510e9d228d72df7))
+* Remove CLAUDE.md file ([80bab54](https://github.com/inference-gateway/adl-cli/commit/80bab54a5e6d6d143817f2e60ca41284b89cf594))
+* Replace em dashes with normal dashes ([d329899](https://github.com/inference-gateway/adl-cli/commit/d3298998a2eefab7f20972be27f070af22292dcd))
+* Update infer configurations ([b2eaf63](https://github.com/inference-gateway/adl-cli/commit/b2eaf63a6cf34bb9b5df3b5a2f9056e0e6464483))
+
 ## [0.39.2](https://github.com/inference-gateway/adl-cli/compare/v0.39.1...v0.39.2) (2026-05-24)
 
 ### 🐛 Bug Fixes
