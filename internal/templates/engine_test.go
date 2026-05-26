@@ -332,6 +332,144 @@ func TestEngine_Execute_WithCustomAcronyms(t *testing.T) {
 	}
 }
 
+func TestToTitleCaseWithAcronyms(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		acronyms []string
+		expected string
+	}{
+		{
+			name:     "lowercase brand acronym preserved",
+			input:    "n8n-agent",
+			acronyms: []string{"n8n"},
+			expected: "n8n Agent",
+		},
+		{
+			name:     "uppercase acronym preserved",
+			input:    "api-server",
+			acronyms: []string{"API"},
+			expected: "API Server",
+		},
+		{
+			name:     "mixed-case brand acronym preserved",
+			input:    "postgresql-driver",
+			acronyms: []string{"PostgreSQL"},
+			expected: "PostgreSQL Driver",
+		},
+		{
+			name:     "multiple acronyms in one name",
+			input:    "n8n-graphql-bridge",
+			acronyms: []string{"n8n", "GraphQL"},
+			expected: "n8n GraphQL Bridge",
+		},
+		{
+			name:     "snake_case input",
+			input:    "weather_agent",
+			acronyms: nil,
+			expected: "Weather Agent",
+		},
+		{
+			name:     "no acronyms",
+			input:    "weather-agent",
+			acronyms: nil,
+			expected: "Weather Agent",
+		},
+		{
+			name:     "empty string",
+			input:    "",
+			acronyms: []string{"n8n"},
+			expected: "",
+		},
+		{
+			name:     "single word non-acronym",
+			input:    "agent",
+			acronyms: []string{"n8n"},
+			expected: "Agent",
+		},
+		{
+			name:     "acronym match is case-insensitive against input",
+			input:    "N8N-agent",
+			acronyms: []string{"n8n"},
+			expected: "n8n Agent",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := toTitleCaseWithAcronyms(tt.input, tt.acronyms)
+			if got != tt.expected {
+				t.Errorf("toTitleCaseWithAcronyms(%q, %v) = %q, want %q", tt.input, tt.acronyms, got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestREADMETemplate_TitleIsHumanized(t *testing.T) {
+	registry, err := NewRegistry("go")
+	if err != nil {
+		t.Fatalf("NewRegistry: %v", err)
+	}
+	engine := NewWithRegistry("minimal", registry)
+
+	tests := []struct {
+		name      string
+		metadata  schema.Metadata
+		acronyms  []string
+		wantTitle string
+	}{
+		{
+			name:      "lowercase brand acronym preserved in title",
+			metadata:  schema.Metadata{Name: "n8n-agent", Version: "0.1.0"},
+			acronyms:  []string{"n8n"},
+			wantTitle: "# n8n Agent",
+		},
+		{
+			name:      "no acronyms renders standard title case",
+			metadata:  schema.Metadata{Name: "weather-agent", Version: "0.1.0"},
+			wantTitle: "# Weather Agent",
+		},
+		{
+			name:      "mixed-case brand acronym preserved",
+			metadata:  schema.Metadata{Name: "postgresql-driver", Version: "0.1.0"},
+			acronyms:  []string{"PostgreSQL"},
+			wantTitle: "# PostgreSQL Driver",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			adl := &schema.ADL{
+				Metadata: tt.metadata,
+				Spec: schema.Spec{
+					Acronyms: tt.acronyms,
+					Language: schema.Language{
+						Go: &schema.GoConfig{Module: "example.com/x", Version: "1.26.2"},
+					},
+				},
+			}
+			ctx := Context{ADL: adl, Language: "go"}
+
+			out, err := engine.ExecuteTemplate("docs/README.md", ctx)
+			if err != nil {
+				t.Fatalf("ExecuteTemplate(README.md): %v", err)
+			}
+
+			lines := strings.Split(out, "\n")
+			var got string
+			for _, line := range lines {
+				if strings.HasPrefix(line, "# ") {
+					got = line
+					break
+				}
+			}
+			if got != tt.wantTitle {
+				t.Errorf("README title = %q, want %q", got, tt.wantTitle)
+			}
+		})
+	}
+}
+
 func TestGetDefaultAcronyms(t *testing.T) {
 	acronyms := getDefaultAcronyms()
 

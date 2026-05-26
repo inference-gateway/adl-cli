@@ -57,7 +57,11 @@ func getDefaultAcronyms() map[string]string {
 	}
 }
 
-// buildAcronymsMap builds the acronyms map from default + custom acronyms
+// buildAcronymsMap builds the acronyms map from default + custom acronyms.
+// Values are uppercased so they slot cleanly into PascalCase / camelCase /
+// UPPER_SNAKE_CASE identifiers. For human-readable title rendering that
+// preserves brand casing (e.g. "n8n", "iPhone"), see toTitleCaseWithAcronyms,
+// which consumes the raw user list directly.
 func buildAcronymsMap(customAcronyms []string) map[string]string {
 	acronyms := getDefaultAcronyms()
 
@@ -161,6 +165,40 @@ func toUpperSnakeCase(s string) string {
 	s = strings.ReplaceAll(s, "-", "_")
 
 	return strings.ToUpper(s)
+}
+
+// toTitleCaseWithAcronyms converts a dash-/snake-case identifier into a human
+// readable Title Case string with whitespace separation, preserving the casing
+// of any user-supplied acronyms. Used for display-only contexts such as the
+// generated README title, where brand names like "n8n", "iPhone", or
+// "PostgreSQL" must render with their canonical casing rather than being
+// force-uppercased like code identifiers.
+func toTitleCaseWithAcronyms(s string, acronyms []string) string {
+	if s == "" {
+		return s
+	}
+
+	preserved := make(map[string]string, len(acronyms))
+	for _, a := range acronyms {
+		preserved[strings.ToLower(a)] = a
+	}
+
+	s = strings.ReplaceAll(s, "-", " ")
+	s = strings.ReplaceAll(s, "_", " ")
+	words := strings.Fields(s)
+	for i, w := range words {
+		if orig, ok := preserved[strings.ToLower(w)]; ok {
+			words[i] = orig
+			continue
+		}
+		runes := []rune(w)
+		runes[0] = unicode.ToUpper(runes[0])
+		for j := 1; j < len(runes); j++ {
+			runes[j] = unicode.ToLower(runes[j])
+		}
+		words[i] = string(runes)
+	}
+	return strings.Join(words, " ")
 }
 
 // toUpperSnakeCaseWithAcronyms converts camelCase, dash-case, or snake_case to UPPER_SNAKE_CASE with acronym support
@@ -326,6 +364,7 @@ func customFuncMap() template.FuncMap {
 	funcMap["toSnakeCase"] = toSnakeCase
 	funcMap["toUpperCase"] = strings.ToUpper
 	funcMap["toUpperSnakeCase"] = toUpperSnakeCase
+	funcMap["toTitleCase"] = toTitleCaseWithAcronyms
 	funcMap["toJson"] = toJson
 	funcMap["toGoMap"] = toGoMap
 	funcMap["findDependencyByID"] = findDependencyByID
@@ -356,6 +395,7 @@ func customFuncMapWithAcronyms(acronyms map[string]string) template.FuncMap {
 	funcMap["toUpperSnakeCase"] = func(s string) string {
 		return toUpperSnakeCaseWithAcronyms(s, acronyms)
 	}
+	funcMap["toTitleCase"] = toTitleCaseWithAcronyms
 	funcMap["toJson"] = toJson
 	funcMap["toGoMap"] = toGoMap
 	funcMap["findDependencyByID"] = findDependencyByID

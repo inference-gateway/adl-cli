@@ -1,6 +1,6 @@
 <div align="center">
 
-# {{ .ADL.Metadata.Name | title }}
+# {{ toTitleCase .ADL.Metadata.Name .ADL.Spec.Acronyms }}
 
 {{ if .GenerateCI -}}
 {{ if and .ADL.Spec.SCM (eq .ADL.Spec.SCM.Provider "github") .ADL.Spec.SCM.URL -}}
