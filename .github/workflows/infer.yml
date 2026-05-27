@@ -15,8 +15,19 @@ permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
 jobs:
   infer:
+    if: |
+      github.event.sender.type != 'Bot' &&
+      !endsWith(github.actor, '[bot]') &&
+      (
+        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@infer')) ||
+        (github.event_name == 'issues' && (contains(github.event.issue.body, '@infer') || contains(github.event.issue.title, '@infer')))
+      )
     runs-on: ubuntu-24.04
     steps:
       - name: Generate GitHub App Token
