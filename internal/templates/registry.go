@@ -319,8 +319,8 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 }
 
 // addAIFiles maps per-agent AI assistant documentation onto the
-// generated project layout. Each agent's toggle in spec.development.ai
-// is consulted independently:
+// generated project layout. Each agent's toggle in
+// spec.development.ai.orchestrators is consulted independently:
 //
 //   - CLAUDE.md  ← claudecode.enabled
 //   - GEMINI.md  ← gemini.enabled

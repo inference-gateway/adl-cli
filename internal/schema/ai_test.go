@@ -14,20 +14,29 @@ func TestResolveAIAgentToggles(t *testing.T) {
 			want: AIAgentToggles{},
 		},
 		{
+			name: "orchestrators present but empty is all-off",
+			ai:   &AIConfig{Orchestrators: &OrchestratorsConfig{}},
+			want: AIAgentToggles{},
+		},
+		{
 			name: "claudecode only",
 			ai: &AIConfig{
-				Claudecode: &ClaudeCodeConfig{Enabled: true},
+				Orchestrators: &OrchestratorsConfig{
+					Claudecode: &ClaudeCodeConfig{Enabled: true},
+				},
 			},
 			want: AIAgentToggles{ClaudeCode: true},
 		},
 		{
 			name: "every agent enabled",
 			ai: &AIConfig{
-				Claudecode: &ClaudeCodeConfig{Enabled: true},
-				Codex:      &CodexConfig{Enabled: true},
-				Gemini:     &GeminiConfig{Enabled: true},
-				Opencode:   &OpenCodeConfig{Enabled: true},
-				Infer:      &InferConfig{Enabled: true},
+				Orchestrators: &OrchestratorsConfig{
+					Claudecode: &ClaudeCodeConfig{Enabled: true},
+					Codex:      &CodexConfig{Enabled: true},
+					Gemini:     &GeminiConfig{Enabled: true},
+					Opencode:   &OpenCodeConfig{Enabled: true},
+					Infer:      &InferConfig{Enabled: true},
+				},
 			},
 			want: AIAgentToggles{
 				ClaudeCode: true,
@@ -40,8 +49,10 @@ func TestResolveAIAgentToggles(t *testing.T) {
 		{
 			name: "agent block present but disabled is treated as off",
 			ai: &AIConfig{
-				Claudecode: &ClaudeCodeConfig{Enabled: false},
-				Codex:      &CodexConfig{Enabled: false},
+				Orchestrators: &OrchestratorsConfig{
+					Claudecode: &ClaudeCodeConfig{Enabled: false},
+					Codex:      &CodexConfig{Enabled: false},
+				},
 			},
 			want: AIAgentToggles{},
 		},

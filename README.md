@@ -272,9 +272,9 @@ The init command supports extensive configuration options:
 **Pipeline / AI Options (declarative, written into the manifest as `false` by default):**
 
 - `--ai` - Shortcut for the init wizard: writes
-  `spec.development.ai.claudecode.enabled: true` into the generated `agent.yaml`.
-  Every other per-agent toggle (`codex`, `gemini`, `opencode`, `infer`) stays
-  off; edit `agent.yaml` after init to enable additional agents
+  `spec.development.ai.orchestrators.claudecode.enabled: true` into the generated
+  `agent.yaml`. Every other per-agent toggle (`codex`, `gemini`, `opencode`,
+  `infer`) stays off; edit `agent.yaml` after init to enable additional agents
   (see [Per-agent AI assistants](#per-agent-ai-assistants)).
 - `--ci` - Sets `spec.scm.ci: true` (generate CI workflow on `adl generate`)
 - `--cd` - Sets `spec.scm.cd: true` (generate CD pipeline + semantic-release on `adl generate`)
@@ -313,7 +313,8 @@ adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun --
 > **Declarative equivalents:** `--ci` and `--cd` are mirrored by `spec.scm.ci`
 > and `spec.scm.cd`. The CLI flag is OR'd on top of the manifest value (passing
 > the flag wins; omitting it falls back to the manifest). AI assistants are
-> entirely manifest-driven via the per-agent toggles in `spec.development.ai`
+> entirely manifest-driven via the per-agent toggles in
+> `spec.development.ai.orchestrators`
 >
 > - see the matrix below.
 >   `adl init` writes all toggles as `false` by default - they're opt-in. Generated files
@@ -343,23 +344,26 @@ adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun --
 
 **AI Integration Features:**
 
-The ADL CLI honours the per-agent toggles in `spec.development.ai` (introduced
-in ADL schema v0.8.0). Each entry is independent and defaults to `false`:
+The ADL CLI honours the per-agent toggles under
+`spec.development.ai.orchestrators` (the per-agent toggles were introduced in
+ADL schema v0.8.0 and moved under `orchestrators` in adl#27). Each entry is
+independent and defaults to `false`:
 
 ```yaml
 spec:
   development:
     ai:
-      claudecode:
-        enabled: true # generates CLAUDE.md + .github/workflows/claude.yml
-      codex:
-        enabled: false # would generate AGENTS.md + .github/workflows/codex.yml
-      gemini:
-        enabled: false # would generate GEMINI.md + .github/workflows/gemini.yml
-      opencode:
-        enabled: false # would generate AGENTS.md (no upstream action yet)
-      infer:
-        enabled: false # would generate AGENTS.md (no upstream action yet)
+      orchestrators:
+        claudecode:
+          enabled: true # generates CLAUDE.md + .github/workflows/claude.yml
+        codex:
+          enabled: false # would generate AGENTS.md + .github/workflows/codex.yml
+        gemini:
+          enabled: false # would generate GEMINI.md + .github/workflows/gemini.yml
+        opencode:
+          enabled: false # would generate AGENTS.md (no upstream action yet)
+        infer:
+          enabled: false # would generate AGENTS.md (no upstream action yet)
 ```
 
 #### Per-agent AI assistants
@@ -378,10 +382,11 @@ spec:
 - `CLAUDE.md` and `GEMINI.md` are agent-specific and only appear when the
   matching toggle is on.
 - If no toggles are enabled, no AI docs or workflows are emitted.
-- Pre-v0.8.0 manifests using `spec.development.ai.enabled: true` are no longer
-  accepted - `adl validate` and `adl generate` will fail with a migration hint
-  pointing at the per-agent toggles. Move `enabled: true` to the specific agent
-  you want (e.g. `claudecode.enabled: true`).
+- Pre-v0.8.0 manifests using `spec.development.ai.enabled: true`, and the
+  flat per-agent shape `spec.development.ai.<agent>` (pre-orchestrators), are no
+  longer accepted - `adl validate` and `adl generate` fail with a migration hint
+  pointing at `spec.development.ai.orchestrators`. Move the toggle to the
+  specific agent you want (e.g. `orchestrators.claudecode.enabled: true`).
 - When `claudecode` is enabled, sandbox environments (Flox, DevContainer)
   also gain the `claude-code` CLI / extension automatically.
 
@@ -1275,7 +1280,7 @@ my-go-agent/
 ├── .gitignore                 # Standard Git ignore patterns
 ├── .gitattributes             # Git attributes configuration
 ├── .editorconfig              # Editor configuration
-├── CLAUDE.md                  # AI assistant instructions (spec.development.ai.claudecode.enabled: true)
+├── CLAUDE.md                  # AI assistant instructions (spec.development.ai.orchestrators.claudecode.enabled: true)
 └── README.md                  # Project documentation with setup instructions
 ```
 
@@ -1308,7 +1313,7 @@ my-rust-agent/
 │   └── deployment.yaml        # Kubernetes deployment
 ├── cloudrun/
 │   └── deploy.sh              # CloudRun deployment script (with --deployment cloudrun)
-├── CLAUDE.md                  # AI assistant instructions (spec.development.ai.claudecode.enabled: true)
+├── CLAUDE.md                  # AI assistant instructions (spec.development.ai.orchestrators.claudecode.enabled: true)
 └── README.md                  # Documentation
 ```
 
@@ -1331,10 +1336,10 @@ All projects include these essential files regardless of language:
 - **Development Environment** - Based on `sandbox` configuration:
   - **Flox**: `.flox/` directory with environment configuration when `sandbox.flox.enabled: true`
   - **DevContainer**: `.devcontainer/devcontainer.json` when `sandbox.devcontainer.enabled: true`
-- **AI Assistant Instructions** - Per-agent toggles under `spec.development.ai`
+- **AI Assistant Instructions** - Per-agent toggles under `spec.development.ai.orchestrators`
   (see [Per-agent AI assistants](#per-agent-ai-assistants)):
-  - **CLAUDE.md** when `spec.development.ai.claudecode.enabled: true`
-  - **GEMINI.md** when `spec.development.ai.gemini.enabled: true`
+  - **CLAUDE.md** when `spec.development.ai.orchestrators.claudecode.enabled: true`
+  - **GEMINI.md** when `spec.development.ai.orchestrators.gemini.enabled: true`
   - **AGENTS.md** (shared) when any of `codex`, `opencode`, or `infer` is enabled
 
 ### CI Integration

@@ -248,9 +248,9 @@ type Context struct {
 	GenerateCommand string
 	Skills          []SkillView
 	BuiltinConfigs  schema.ResolvedBuiltinConfigs
-	Vendor vendor.View
-	SandboxDeps    sandbox.View
-	customAcronyms map[string]string
+	Vendor          vendor.View
+	SandboxDeps     sandbox.View
+	customAcronyms  map[string]string
 }
 
 // New creates a new template engine

@@ -40,8 +40,8 @@ type Config struct {
 	// in Generate() from AIToggles.Any(); not set by callers.
 	EnableAI bool
 	// AIToggles is the resolved per-agent state derived from
-	// spec.development.ai. Computed in Generate() before templating;
-	// not set by callers.
+	// spec.development.ai.orchestrators. Computed in Generate() before
+	// templating; not set by callers.
 	AIToggles schema.AIAgentToggles
 }
 

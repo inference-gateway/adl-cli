@@ -1,9 +1,10 @@
 package schema
 
 // AIAgentToggles reports which per-agent AI assistant toggles in
-// spec.development.ai are enabled. The fields mirror AIConfig's
-// per-agent subsections (claudecode, codex, gemini, opencode, infer)
-// introduced in ADL v0.8.0.
+// spec.development.ai.orchestrators are enabled. The fields mirror
+// OrchestratorsConfig's per-agent subsections (claudecode, codex,
+// gemini, opencode, infer), nested under ai.orchestrators since the
+// ADL schema's orchestrators refactor.
 type AIAgentToggles struct {
 	ClaudeCode bool
 	Codex      bool
@@ -24,29 +25,30 @@ func (t AIAgentToggles) AnyAgentsMD() bool {
 	return t.Codex || t.OpenCode || t.Infer
 }
 
-// ResolveAIAgentToggles inspects spec.development.ai (the v0.8.0 shape)
-// and returns the effective set of per-agent toggles. The pre-v0.8.0
-// single-flag `spec.development.ai.enabled` shape is rejected by the
-// validator (see checkLegacySpecFields), so this function only needs to
-// honour the modern per-agent shape.
+// ResolveAIAgentToggles inspects spec.development.ai.orchestrators and
+// returns the effective set of per-agent toggles. The legacy flat shapes
+// (`spec.development.ai.enabled` and `spec.development.ai.<agent>`) are
+// rejected by the validator (see checkLegacySpecFields), so this function
+// only needs to honour the nested orchestrators shape.
 func ResolveAIAgentToggles(ai *AIConfig) AIAgentToggles {
 	var t AIAgentToggles
-	if ai == nil {
+	if ai == nil || ai.Orchestrators == nil {
 		return t
 	}
-	if ai.Claudecode != nil && ai.Claudecode.Enabled {
+	o := ai.Orchestrators
+	if o.Claudecode != nil && o.Claudecode.Enabled {
 		t.ClaudeCode = true
 	}
-	if ai.Codex != nil && ai.Codex.Enabled {
+	if o.Codex != nil && o.Codex.Enabled {
 		t.Codex = true
 	}
-	if ai.Gemini != nil && ai.Gemini.Enabled {
+	if o.Gemini != nil && o.Gemini.Enabled {
 		t.Gemini = true
 	}
-	if ai.Opencode != nil && ai.Opencode.Enabled {
+	if o.Opencode != nil && o.Opencode.Enabled {
 		t.OpenCode = true
 	}
-	if ai.Infer != nil && ai.Infer.Enabled {
+	if o.Infer != nil && o.Infer.Enabled {
 		t.Infer = true
 	}
 	return t

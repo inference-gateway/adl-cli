@@ -188,6 +188,28 @@ type vendorBlock struct {
 	Devdeps []string `yaml:"devdeps"`
 }
 
+// orchestratorToggle is a single coding-agent on/off switch under
+// spec.development.ai.orchestrators.<agent>.
+type orchestratorToggle struct {
+	Enabled bool `yaml:"enabled"`
+}
+
+// orchestratorsBlock mirrors spec.development.ai.orchestrators: each
+// coding agent is toggled independently and defaults to disabled.
+type orchestratorsBlock struct {
+	Claudecode *orchestratorToggle `yaml:"claudecode,omitempty"`
+	Codex      *orchestratorToggle `yaml:"codex,omitempty"`
+	Gemini     *orchestratorToggle `yaml:"gemini,omitempty"`
+	Opencode   *orchestratorToggle `yaml:"opencode,omitempty"`
+	Infer      *orchestratorToggle `yaml:"infer,omitempty"`
+}
+
+// aiBlock mirrors spec.development.ai: coding-agent orchestrators nested
+// under an `orchestrators` key.
+type aiBlock struct {
+	Orchestrators *orchestratorsBlock `yaml:"orchestrators,omitempty"`
+}
+
 type adlData struct {
 	APIVersion string `yaml:"apiVersion"`
 	Kind       string `yaml:"kind"`
@@ -286,23 +308,7 @@ type adlData struct {
 					Enabled bool `yaml:"enabled"`
 				} `yaml:"dockerCompose,omitempty"`
 			} `yaml:"sandbox,omitempty"`
-			AI *struct {
-				Claudecode *struct {
-					Enabled bool `yaml:"enabled"`
-				} `yaml:"claudecode,omitempty"`
-				Codex *struct {
-					Enabled bool `yaml:"enabled"`
-				} `yaml:"codex,omitempty"`
-				Gemini *struct {
-					Enabled bool `yaml:"enabled"`
-				} `yaml:"gemini,omitempty"`
-				Opencode *struct {
-					Enabled bool `yaml:"enabled"`
-				} `yaml:"opencode,omitempty"`
-				Infer *struct {
-					Enabled bool `yaml:"enabled"`
-				} `yaml:"infer,omitempty"`
-			} `yaml:"ai,omitempty"`
+			AI   *aiBlock `yaml:"ai,omitempty"`
 			Deps []string `yaml:"deps"`
 		} `yaml:"development,omitempty"`
 		Deployment *struct {
@@ -818,38 +824,14 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 	fmt.Println("-----------------------------")
 	aiEnabled := promptBoolWithConfig("ai", useDefaults, "Enable Claude Code (CLAUDE.md + claude-code in sandboxes)", false)
 	ensureDevelopment(adl)
-	adl.Spec.Development.AI = &struct {
-		Claudecode *struct {
-			Enabled bool `yaml:"enabled"`
-		} `yaml:"claudecode,omitempty"`
-		Codex *struct {
-			Enabled bool `yaml:"enabled"`
-		} `yaml:"codex,omitempty"`
-		Gemini *struct {
-			Enabled bool `yaml:"enabled"`
-		} `yaml:"gemini,omitempty"`
-		Opencode *struct {
-			Enabled bool `yaml:"enabled"`
-		} `yaml:"opencode,omitempty"`
-		Infer *struct {
-			Enabled bool `yaml:"enabled"`
-		} `yaml:"infer,omitempty"`
-	}{
-		Claudecode: &struct {
-			Enabled bool `yaml:"enabled"`
-		}{Enabled: aiEnabled},
-		Codex: &struct {
-			Enabled bool `yaml:"enabled"`
-		}{Enabled: false},
-		Gemini: &struct {
-			Enabled bool `yaml:"enabled"`
-		}{Enabled: false},
-		Opencode: &struct {
-			Enabled bool `yaml:"enabled"`
-		}{Enabled: false},
-		Infer: &struct {
-			Enabled bool `yaml:"enabled"`
-		}{Enabled: false},
+	adl.Spec.Development.AI = &aiBlock{
+		Orchestrators: &orchestratorsBlock{
+			Claudecode: &orchestratorToggle{Enabled: aiEnabled},
+			Codex:      &orchestratorToggle{Enabled: false},
+			Gemini:     &orchestratorToggle{Enabled: false},
+			Opencode:   &orchestratorToggle{Enabled: false},
+			Infer:      &orchestratorToggle{Enabled: false},
+		},
 	}
 
 	return adl
@@ -882,23 +864,7 @@ func ensureDevelopment(adl *adlData) {
 				Enabled bool `yaml:"enabled"`
 			} `yaml:"dockerCompose,omitempty"`
 		} `yaml:"sandbox,omitempty"`
-		AI *struct {
-			Claudecode *struct {
-				Enabled bool `yaml:"enabled"`
-			} `yaml:"claudecode,omitempty"`
-			Codex *struct {
-				Enabled bool `yaml:"enabled"`
-			} `yaml:"codex,omitempty"`
-			Gemini *struct {
-				Enabled bool `yaml:"enabled"`
-			} `yaml:"gemini,omitempty"`
-			Opencode *struct {
-				Enabled bool `yaml:"enabled"`
-			} `yaml:"opencode,omitempty"`
-			Infer *struct {
-				Enabled bool `yaml:"enabled"`
-			} `yaml:"infer,omitempty"`
-		} `yaml:"ai,omitempty"`
+		AI   *aiBlock `yaml:"ai,omitempty"`
 		Deps []string `yaml:"deps"`
 	}{
 		Deps: []string{},

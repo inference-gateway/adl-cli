@@ -452,6 +452,33 @@ spec:
 `,
 			errSub: "spec.development.ai.enabled",
 		},
+		{
+			name: "legacy flat per-agent toggles (pre-orchestrators shape)",
+			adl: `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: legacy-flat-ai
+  description: legacy
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  server:
+    port: 8080
+    debug: false
+  language:
+    go:
+      module: github.com/test/legacy
+      version: "1.26.2"
+  development:
+    ai:
+      claudecode:
+        enabled: true
+`,
+			errSub: "spec.development.ai.orchestrators",
+		},
 	}
 
 	for _, tc := range cases {

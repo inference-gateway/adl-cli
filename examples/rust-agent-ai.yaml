@@ -76,13 +76,14 @@ spec:
       devcontainer:
         enabled: false
     ai:
-      claudecode:
-        enabled: true
-      gemini:
-        enabled: false
-      codex:
-        enabled: false
-      opencode:
-        enabled: false
-      infer:
-        enabled: false
+      orchestrators:
+        claudecode:
+          enabled: true
+        gemini:
+          enabled: false
+        codex:
+          enabled: false
+        opencode:
+          enabled: false
+        infer:
+          enabled: false

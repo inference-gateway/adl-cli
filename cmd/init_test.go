@@ -248,13 +248,13 @@ func TestInitAICICDDefaults(t *testing.T) {
 		t.Errorf("expected SCM.CD to default to false")
 	}
 
-	if adl.Spec.Development != nil && adl.Spec.Development.AI != nil {
-		if ai := adl.Spec.Development.AI; ai.Claudecode != nil && ai.Claudecode.Enabled ||
-			ai.Codex != nil && ai.Codex.Enabled ||
-			ai.Gemini != nil && ai.Gemini.Enabled ||
-			ai.Opencode != nil && ai.Opencode.Enabled ||
-			ai.Infer != nil && ai.Infer.Enabled {
-			t.Errorf("expected every spec.development.ai.<agent>.enabled to default to false, got at least one true")
+	if adl.Spec.Development != nil && adl.Spec.Development.AI != nil && adl.Spec.Development.AI.Orchestrators != nil {
+		if o := adl.Spec.Development.AI.Orchestrators; o.Claudecode != nil && o.Claudecode.Enabled ||
+			o.Codex != nil && o.Codex.Enabled ||
+			o.Gemini != nil && o.Gemini.Enabled ||
+			o.Opencode != nil && o.Opencode.Enabled ||
+			o.Infer != nil && o.Infer.Enabled {
+			t.Errorf("expected every spec.development.ai.orchestrators.<agent>.enabled to default to false, got at least one true")
 		}
 	}
 
@@ -267,7 +267,8 @@ func TestInitAICICDDefaults(t *testing.T) {
 	}
 }
 
-// TestInitAIFlag verifies that `--ai` flag at init time writes spec.development.ai.enabled: true.
+// TestInitAIFlag verifies that `--ai` flag at init time writes
+// spec.development.ai.orchestrators.claudecode.enabled: true.
 func TestInitAIFlag(t *testing.T) {
 	tempDir := t.TempDir()
 	outputPath := filepath.Join(tempDir, "test-output")
@@ -300,20 +301,23 @@ func TestInitAIFlag(t *testing.T) {
 	}
 
 	if adl.Spec.Development == nil || adl.Spec.Development.AI == nil ||
-		adl.Spec.Development.AI.Claudecode == nil || !adl.Spec.Development.AI.Claudecode.Enabled {
-		t.Errorf("expected spec.development.ai.claudecode.enabled to be true when --ai is passed to init")
+		adl.Spec.Development.AI.Orchestrators == nil ||
+		adl.Spec.Development.AI.Orchestrators.Claudecode == nil ||
+		!adl.Spec.Development.AI.Orchestrators.Claudecode.Enabled {
+		t.Errorf("expected spec.development.ai.orchestrators.claudecode.enabled to be true when --ai is passed to init")
 	}
 
 	contentStr := string(content)
-	if !strings.Contains(contentStr, "development:") || !strings.Contains(contentStr, "claudecode:") || !strings.Contains(contentStr, "enabled: true") {
-		t.Errorf("ADL file should contain development.ai.claudecode.enabled: true, got:\n%s", contentStr)
+	if !strings.Contains(contentStr, "development:") || !strings.Contains(contentStr, "orchestrators:") || !strings.Contains(contentStr, "claudecode:") || !strings.Contains(contentStr, "enabled: true") {
+		t.Errorf("ADL file should contain development.ai.orchestrators.claudecode.enabled: true, got:\n%s", contentStr)
 	}
 }
 
 // TestInitDevelopmentDefaultsEmitted verifies that `adl init --defaults`
 // always writes spec.development.sandbox.{flox,devcontainer,dockerCompose}.enabled
-// and spec.development.ai.enabled as explicit `false` values, so the defaults
-// are discoverable in the generated agent.yaml rather than silently omitted.
+// and spec.development.ai.orchestrators.<agent>.enabled as explicit `false`
+// values, so the defaults are discoverable in the generated agent.yaml rather
+// than silently omitted.
 func TestInitDevelopmentDefaultsEmitted(t *testing.T) {
 	tempDir := t.TempDir()
 	outputPath := filepath.Join(tempDir, "test-output")
@@ -356,15 +360,15 @@ func TestInitDevelopmentDefaultsEmitted(t *testing.T) {
 	if adl.Spec.Development.Sandbox.DockerCompose == nil || adl.Spec.Development.Sandbox.DockerCompose.Enabled {
 		t.Errorf("expected spec.development.sandbox.dockerCompose.enabled to be false by default")
 	}
-	if adl.Spec.Development.AI == nil {
-		t.Fatalf("expected spec.development.ai to be present by default")
+	if adl.Spec.Development.AI == nil || adl.Spec.Development.AI.Orchestrators == nil {
+		t.Fatalf("expected spec.development.ai.orchestrators to be present by default")
 	}
-	if ai := adl.Spec.Development.AI; (ai.Claudecode != nil && ai.Claudecode.Enabled) ||
-		(ai.Codex != nil && ai.Codex.Enabled) ||
-		(ai.Gemini != nil && ai.Gemini.Enabled) ||
-		(ai.Opencode != nil && ai.Opencode.Enabled) ||
-		(ai.Infer != nil && ai.Infer.Enabled) {
-		t.Errorf("expected every spec.development.ai.<agent>.enabled to default to false")
+	if o := adl.Spec.Development.AI.Orchestrators; (o.Claudecode != nil && o.Claudecode.Enabled) ||
+		(o.Codex != nil && o.Codex.Enabled) ||
+		(o.Gemini != nil && o.Gemini.Enabled) ||
+		(o.Opencode != nil && o.Opencode.Enabled) ||
+		(o.Infer != nil && o.Infer.Enabled) {
+		t.Errorf("expected every spec.development.ai.orchestrators.<agent>.enabled to default to false")
 	}
 
 	contentStr := string(content)
