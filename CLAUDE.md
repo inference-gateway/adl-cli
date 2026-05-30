@@ -87,11 +87,11 @@ The generator creates a `.adl-ignore` (gitignore-style globs) listing files cont
 
 `--ci`, `--cd`, `--deployment`, `--flox`, `--devcontainer` are mirrored by declarative fields under `spec.scm`, `spec.deployment.type`, `spec.development.sandbox`. The reconciliation in `Generator.Generate` is **OR semantics**: CLI flag wins if set, manifest fills in otherwise. After reconciliation, both `g.config.*` and `adl.Spec.*` reflect the same effective state so templates can read either source.
 
-AI assistant generation (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, plus matching `.github/workflows/*.yml`) is **manifest-only** via `spec.development.ai.<agent>.enabled` toggles — there is no CLI flag for individual agents. `init`'s `--ai` flag writes `claudecode.enabled: true` into the ADL; everything downstream reads from the manifest. Each agent toggle is independent and defaults to `false`.
+AI assistant generation (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, plus matching `.github/workflows/*.yml`) is **manifest-only** via `spec.development.ai.orchestrators.<agent>.enabled` toggles — there is no CLI flag for individual agents. `init`'s `--ai` flag writes `orchestrators.claudecode.enabled: true` into the ADL; everything downstream reads from the manifest. Each agent toggle is independent and defaults to `false`.
 
 ### Legacy manifest detection
 
-`internal/schema/validator.go::checkLegacySpecFields` explicitly rejects pre-v0.6.0 (`spec.sandbox`/`spec.ai` at the root) and pre-v0.8.0 (`spec.development.ai.enabled` single flag) shapes with a migration hint. JSON Schema's `additionalProperties:true` would otherwise silently drop these fields — keep this guard updated whenever schema shape changes.
+`internal/schema/validator.go::checkLegacySpecFields` explicitly rejects pre-v0.6.0 (`spec.sandbox`/`spec.ai` at the root), pre-v0.8.0 (`spec.development.ai.enabled` single flag), and pre-orchestrators (flat `spec.development.ai.<agent>` toggles, now nested under `spec.development.ai.orchestrators`) shapes with a migration hint. JSON Schema's `additionalProperties:true` would otherwise silently drop these fields — keep this guard updated whenever schema shape changes.
 
 ### Skills registry resolver (`internal/registry/`)
 

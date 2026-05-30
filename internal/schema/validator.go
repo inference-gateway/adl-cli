@@ -96,11 +96,15 @@ func (v *Validator) ValidateFile(filePath string) ([]string, error) {
 	return warnings, nil
 }
 
-// checkLegacySpecFields rejects manifests that still use the pre-v0.6.0
-// shape where `sandbox` and `ai` sat directly under `spec` (in v0.6.0
-// they were grouped under `spec.development.{sandbox,ai}`) and the
-// pre-v0.8.0 single-flag AI shape `spec.development.ai.enabled: true`
-// (replaced by per-agent toggles claudecode/codex/gemini/opencode/infer).
+// checkLegacySpecFields rejects manifests that still use a superseded AI
+// shape. Three generations are caught here:
+//   - pre-v0.6.0: `sandbox` and `ai` directly under `spec` (now grouped
+//     under `spec.development.{sandbox,ai}`).
+//   - pre-v0.8.0: the single-flag `spec.development.ai.enabled: true`
+//     (replaced by per-agent toggles).
+//   - pre-orchestrators: the flat `spec.development.ai.<agent>` per-agent
+//     toggles (now nested under `spec.development.ai.orchestrators`).
+//
 // JSON Schema's default additionalProperties:true would otherwise silently
 // drop these unknown fields, so we surface them as errors before they
 // confuse the user.
@@ -129,7 +133,18 @@ func checkLegacySpecFields(yamlData any) error {
 	if dev, ok := spec["development"].(map[string]any); ok {
 		if ai, ok := dev["ai"].(map[string]any); ok {
 			if _, exists := ai["enabled"]; exists {
-				return fmt.Errorf("manifest uses the pre-v0.8.0 single-flag AI shape `spec.development.ai.enabled`; this field was removed in ADL v0.8.0. Move it to a per-agent toggle under spec.development.ai, e.g.:\n\n  spec:\n    development:\n      ai:\n        claudecode:\n          enabled: true   # generates CLAUDE.md + .github/workflows/claude.yml\n        # codex / gemini / opencode / infer are independent toggles\n\nSee https://github.com/inference-gateway/adl/releases/tag/v0.8.0 for the full per-agent matrix")
+				return fmt.Errorf("manifest uses the pre-v0.8.0 single-flag AI shape `spec.development.ai.enabled`; this field was removed in ADL v0.8.0. Move it to a per-agent toggle under spec.development.ai.orchestrators, e.g.:\n\n  spec:\n    development:\n      ai:\n        orchestrators:\n          claudecode:\n            enabled: true   # generates CLAUDE.md + .github/workflows/claude.yml\n          # codex / gemini / opencode / infer are independent toggles\n\nSee https://github.com/inference-gateway/adl/releases/tag/v0.8.0 for the full per-agent matrix")
+			}
+
+			var flatAgents []string
+			for _, agent := range []string{"claudecode", "codex", "gemini", "opencode", "infer"} {
+				if _, exists := ai[agent]; exists {
+					flatAgents = append(flatAgents, "spec.development.ai."+agent)
+				}
+			}
+			if len(flatAgents) > 0 {
+				return fmt.Errorf("manifest uses the legacy flat AI shape; coding-agent toggles now nest under spec.development.ai.orchestrators:\n  - %s\nMove them under an `orchestrators` block, e.g.:\n\n  spec:\n    development:\n      ai:\n        orchestrators:\n          claudecode:\n            enabled: true\n          # codex / gemini / opencode / infer are independent toggles\n\nSee inference-gateway/adl#27 for the orchestrators refactor",
+					joinWithIndent(flatAgents, "\n  - "))
 			}
 		}
 	}

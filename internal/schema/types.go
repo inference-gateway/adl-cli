@@ -18,25 +18,12 @@ type ADL struct {
 	Spec Spec `json:"spec" yaml:"spec" mapstructure:"spec"`
 }
 
-// Configures generation of AI-assistant documentation (CLAUDE.md, AGENTS.md) and
-// provisioning of coding agents (Claude Code, Codex, Gemini, OpenCode, Infer, ...)
-// inside sandbox environments. Each coding agent is toggled independently via its
-// own subsection; by default every agent is disabled.
+// Configures AI-assistant integration for the agent project: generation of
+// AI-assistant documentation (CLAUDE.md, AGENTS.md) and provisioning of
+// coding-agent orchestrators inside sandbox environments.
 type AIConfig struct {
-	// Claudecode corresponds to the JSON schema field "claudecode".
-	Claudecode *ClaudeCodeConfig `json:"claudecode,omitempty,omitzero" yaml:"claudecode,omitempty" mapstructure:"claudecode,omitempty"`
-
-	// Codex corresponds to the JSON schema field "codex".
-	Codex *CodexConfig `json:"codex,omitempty,omitzero" yaml:"codex,omitempty" mapstructure:"codex,omitempty"`
-
-	// Gemini corresponds to the JSON schema field "gemini".
-	Gemini *GeminiConfig `json:"gemini,omitempty,omitzero" yaml:"gemini,omitempty" mapstructure:"gemini,omitempty"`
-
-	// Infer corresponds to the JSON schema field "infer".
-	Infer *InferConfig `json:"infer,omitempty,omitzero" yaml:"infer,omitempty" mapstructure:"infer,omitempty"`
-
-	// Opencode corresponds to the JSON schema field "opencode".
-	Opencode *OpenCodeConfig `json:"opencode,omitempty,omitzero" yaml:"opencode,omitempty" mapstructure:"opencode,omitempty"`
+	// Orchestrators corresponds to the JSON schema field "orchestrators".
+	Orchestrators *OrchestratorsConfig `json:"orchestrators,omitempty,omitzero" yaml:"orchestrators,omitempty" mapstructure:"orchestrators,omitempty"`
 }
 
 type Agent struct {
@@ -255,20 +242,85 @@ type Language struct {
 }
 
 type Metadata struct {
+	// Author of the agent. Optional; when provided, 'name' is required. 'email' and
+	// 'url' are optional contact fields.
+	Author *MetadataAuthor `json:"author,omitempty,omitzero" yaml:"author,omitempty" mapstructure:"author,omitempty"`
+
 	// Description corresponds to the JSON schema field "description".
 	Description string `json:"description" yaml:"description" mapstructure:"description"`
 
+	// SPDX identifier under which the agent is distributed, or "Proprietary" for
+	// closed-source agents. Mirrors the enum used for Skill.license so the same
+	// accepted set applies at the agent level. New identifiers may be added in future
+	// minor versions of the schema.
+	License MetadataLicense `json:"license,omitempty,omitzero" yaml:"license,omitempty" mapstructure:"license,omitempty"`
+
 	// Name corresponds to the JSON schema field "name".
 	Name string `json:"name" yaml:"name" mapstructure:"name"`
+
+	// Discoverability tags for the agent (e.g. 'calendar', 'automation'). Consumers
+	// may merge these with tool- and skill-level tags when indexing.
+	Tags []string `json:"tags,omitempty,omitzero" yaml:"tags,omitempty" mapstructure:"tags,omitempty"`
 
 	// Version corresponds to the JSON schema field "version".
 	Version string `json:"version" yaml:"version" mapstructure:"version"`
 }
 
+// Author of the agent. Optional; when provided, 'name' is required. 'email' and
+// 'url' are optional contact fields.
+type MetadataAuthor struct {
+	// Email corresponds to the JSON schema field "email".
+	Email string `json:"email,omitempty,omitzero" yaml:"email,omitempty" mapstructure:"email,omitempty"`
+
+	// Name corresponds to the JSON schema field "name".
+	Name string `json:"name" yaml:"name" mapstructure:"name"`
+
+	// URL corresponds to the JSON schema field "url".
+	URL string `json:"url,omitempty,omitzero" yaml:"url,omitempty" mapstructure:"url,omitempty"`
+}
+
+type MetadataLicense string
+
+const MetadataLicenseApache20 MetadataLicense = "Apache-2.0"
+const MetadataLicenseBSD2Clause MetadataLicense = "BSD-2-Clause"
+const MetadataLicenseBSD3Clause MetadataLicense = "BSD-3-Clause"
+const MetadataLicenseCC010 MetadataLicense = "CC0-1.0"
+const MetadataLicenseCCBY40 MetadataLicense = "CC-BY-4.0"
+const MetadataLicenseCCBYSA40 MetadataLicense = "CC-BY-SA-4.0"
+const MetadataLicenseGPL20 MetadataLicense = "GPL-2.0"
+const MetadataLicenseGPL30 MetadataLicense = "GPL-3.0"
+const MetadataLicenseISC MetadataLicense = "ISC"
+const MetadataLicenseLGPL21 MetadataLicense = "LGPL-2.1"
+const MetadataLicenseLGPL30 MetadataLicense = "LGPL-3.0"
+const MetadataLicenseMIT MetadataLicense = "MIT"
+const MetadataLicenseMPL20 MetadataLicense = "MPL-2.0"
+const MetadataLicenseProprietary MetadataLicense = "Proprietary"
+const MetadataLicenseUnlicense MetadataLicense = "Unlicense"
+
 // Provision the OpenCode coding agent inside the sandbox.
 type OpenCodeConfig struct {
 	// Enabled corresponds to the JSON schema field "enabled".
 	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
+}
+
+// Coding-agent orchestrators to provision inside the sandbox (Claude Code, Codex,
+// Gemini, OpenCode, Infer, ...). Each orchestrator is toggled independently via
+// its own subsection; by default every orchestrator is disabled.
+type OrchestratorsConfig struct {
+	// Claudecode corresponds to the JSON schema field "claudecode".
+	Claudecode *ClaudeCodeConfig `json:"claudecode,omitempty,omitzero" yaml:"claudecode,omitempty" mapstructure:"claudecode,omitempty"`
+
+	// Codex corresponds to the JSON schema field "codex".
+	Codex *CodexConfig `json:"codex,omitempty,omitzero" yaml:"codex,omitempty" mapstructure:"codex,omitempty"`
+
+	// Gemini corresponds to the JSON schema field "gemini".
+	Gemini *GeminiConfig `json:"gemini,omitempty,omitzero" yaml:"gemini,omitempty" mapstructure:"gemini,omitempty"`
+
+	// Infer corresponds to the JSON schema field "infer".
+	Infer *InferConfig `json:"infer,omitempty,omitzero" yaml:"infer,omitempty" mapstructure:"infer,omitempty"`
+
+	// Opencode corresponds to the JSON schema field "opencode".
+	Opencode *OpenCodeConfig `json:"opencode,omitempty,omitzero" yaml:"opencode,omitempty" mapstructure:"opencode,omitempty"`
 }
 
 type ResourcesConfig struct {
@@ -400,8 +452,10 @@ const ServiceTypeMiddleware ServiceType = "middleware"
 const ServiceTypeRepository ServiceType = "repository"
 const ServiceTypeService ServiceType = "service"
 
-// Markdown playbook injected into the agent's system prompt. Pulled from the
-// skills registry or scaffolded blank with bare: true.
+// Markdown playbook the agent can discover and load on demand at runtime. Each
+// skill's metadata (name and description) is advertised to the model at startup;
+// the SKILL.md body is read lazily when the model invokes the skill. Pulled from
+// the skills registry or scaffolded blank with bare: true.
 type Skill struct {
 	// Bare corresponds to the JSON schema field "bare".
 	Bare bool `json:"bare,omitempty,omitzero" yaml:"bare,omitempty" mapstructure:"bare,omitempty"`

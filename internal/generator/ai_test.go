@@ -76,8 +76,9 @@ func TestGenerator_AI_ClaudeCodeOnly(t *testing.T) {
 	tmp := t.TempDir()
 	manifest := writeManifest(t, tmp, `  development:
     ai:
-      claudecode:
-        enabled: true
+      orchestrators:
+        claudecode:
+          enabled: true
 `)
 	out := filepath.Join(tmp, "out")
 
@@ -96,8 +97,9 @@ func TestGenerator_AI_GeminiOnly(t *testing.T) {
 	tmp := t.TempDir()
 	manifest := writeManifest(t, tmp, `  development:
     ai:
-      gemini:
-        enabled: true
+      orchestrators:
+        gemini:
+          enabled: true
 `)
 	out := filepath.Join(tmp, "out")
 
@@ -122,8 +124,9 @@ func TestGenerator_AI_AgentsMDSharedAcrossCodexOpencodeInfer(t *testing.T) {
 			name: "codex only",
 			devAI: `  development:
     ai:
-      codex:
-        enabled: true
+      orchestrators:
+        codex:
+          enabled: true
 `,
 			wantCodexWorkflow: true,
 		},
@@ -131,28 +134,31 @@ func TestGenerator_AI_AgentsMDSharedAcrossCodexOpencodeInfer(t *testing.T) {
 			name: "opencode only (no workflow)",
 			devAI: `  development:
     ai:
-      opencode:
-        enabled: true
+      orchestrators:
+        opencode:
+          enabled: true
 `,
 		},
 		{
 			name: "infer only (no workflow yet)",
 			devAI: `  development:
     ai:
-      infer:
-        enabled: true
+      orchestrators:
+        infer:
+          enabled: true
 `,
 		},
 		{
 			name: "codex + opencode + infer share a single AGENTS.md",
 			devAI: `  development:
     ai:
-      codex:
-        enabled: true
-      opencode:
-        enabled: true
-      infer:
-        enabled: true
+      orchestrators:
+        codex:
+          enabled: true
+        opencode:
+          enabled: true
+        infer:
+          enabled: true
 `,
 			wantCodexWorkflow: true,
 		},
@@ -180,16 +186,17 @@ func TestGenerator_AI_AllAgentsEnabled(t *testing.T) {
 	tmp := t.TempDir()
 	manifest := writeManifest(t, tmp, `  development:
     ai:
-      claudecode:
-        enabled: true
-      codex:
-        enabled: true
-      gemini:
-        enabled: true
-      opencode:
-        enabled: true
-      infer:
-        enabled: true
+      orchestrators:
+        claudecode:
+          enabled: true
+        codex:
+          enabled: true
+        gemini:
+          enabled: true
+        opencode:
+          enabled: true
+        infer:
+          enabled: true
 `)
 	out := filepath.Join(tmp, "out")
 
@@ -210,8 +217,9 @@ func TestGenerator_AI_NoWorkflowsWhenSCMNotGithub(t *testing.T) {
     provider: gitlab
   development:
     ai:
-      claudecode:
-        enabled: true
+      orchestrators:
+        claudecode:
+          enabled: true
 `)
 	out := filepath.Join(tmp, "out")
 
@@ -253,8 +261,9 @@ func TestGenerator_AI_ClaudeWorkflowGoContent(t *testing.T) {
 	tmp := t.TempDir()
 	manifest := writeManifest(t, tmp, `  development:
     ai:
-      claudecode:
-        enabled: true
+      orchestrators:
+        claudecode:
+          enabled: true
 `)
 	out := filepath.Join(tmp, "out")
 
@@ -317,8 +326,9 @@ spec:
       edition: "2024"
   development:
     ai:
-      claudecode:
-        enabled: true
+      orchestrators:
+        claudecode:
+          enabled: true
 `
 	if err := os.WriteFile(manifest, []byte(body), 0644); err != nil {
 		t.Fatalf("write manifest: %v", err)

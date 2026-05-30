@@ -349,10 +349,11 @@ spec:
       devcontainer:
         enabled: true
     ai:
-      claudecode:
-        enabled: true
-      codex:
-        enabled: true
+      orchestrators:
+        claudecode:
+          enabled: true
+        codex:
+          enabled: true
 `
 	adlPath := filepath.Join(tempDir, "agent.yaml")
 	if err := os.WriteFile(adlPath, []byte(adlContent), 0644); err != nil {
@@ -375,7 +376,7 @@ spec:
 
 	claudeMdPath := filepath.Join(outputPath, "CLAUDE.md")
 	if _, err := os.Stat(claudeMdPath); os.IsNotExist(err) {
-		t.Errorf("expected CLAUDE.md to be generated when spec.development.ai.claudecode.enabled is true")
+		t.Errorf("expected CLAUDE.md to be generated when spec.development.ai.orchestrators.claudecode.enabled is true")
 	}
 
 	claudeMdContent, err := os.ReadFile(claudeMdPath)
@@ -747,10 +748,11 @@ spec:
       version: "1.26.2"
   development:
     ai:
-      claudecode:
-        enabled: true
-      codex:
-        enabled: true
+      orchestrators:
+        claudecode:
+          enabled: true
+        codex:
+          enabled: true
     sandbox:
       flox:
         enabled: ` + boolStr(tc.floxEnabled) + `
