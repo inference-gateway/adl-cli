@@ -134,6 +134,10 @@ tasks:
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent-redis.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent-ai.yaml
+      # validate-only: end-to-end TypeScript generation is not wired up yet
+      # (docker/tool templates pending), so typescript-agent is excluded from
+      # examples:generate until the scaffold is complete.
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/typescript-agent.yaml
 
   examples:generate:
     desc: Generate all example projects

@@ -1,0 +1,176 @@
+{{- $systemPrompt := toJson "You are a helpful AI assistant." -}}
+{{- if and .ADL.Spec.Agent .ADL.Spec.Agent.SystemPrompt }}{{ $systemPrompt = toJson .ADL.Spec.Agent.SystemPrompt }}{{ end -}}
+{{- $hasProvider := and .ADL.Spec.Agent .ADL.Spec.Agent.Provider -}}
+{{- $hasModel := and .ADL.Spec.Agent .ADL.Spec.Agent.Model -}}
+{{- $needRequired := or (not $hasProvider) (not $hasModel) -}}
+/**
+ * Application configuration.
+ *
+ * Hand-rolled on purpose. The Go and Rust ADKs expose an envconfig-style
+ * `Config` that the scaffolder embeds under an `A2A_` prefix (Go's
+ * `serverConfig.Config`, Rust's `envy::prefixed("A2A_").from_env()`). The
+ * TypeScript ADK ships no equivalent, so this module reads the `A2A_*`
+ * environment by hand and assembles the option objects consumed by
+ * `createA2AServer`, `AgentBuilder`, and `OpenAICompatibleLLMClient`. If the
+ * TS ADK later exports an envconfig `Config`, this loader can collapse to a
+ * thin wrapper around it.
+ *
+ * Defaults are baked in from the ADL manifest at generation time; every value
+ * is overridable at runtime through the matching environment variable.
+ */
+
+/** A2A server options, sourced from `A2A_SERVER_*`. */
+export interface ServerConfig {
+  host: string;
+  port: number;
+  debug: boolean;
+}
+
+/** Agent identity and runtime knobs, sourced from `A2A_AGENT_*`. */
+export interface AgentConfig {
+  name: string;
+  description: string;
+  version: string;
+  systemPrompt: string;
+  cardPath: string;
+  skillsDir: string;
+}
+
+/** LLM client options, sourced from `A2A_AGENT_CLIENT_*`. */
+export interface LLMConfig {
+  provider: string;
+  model: string;
+  baseURL?: string;
+  apiKey?: string;
+}
+{{- range $sectionName, $sectionConfig := .ADL.Spec.Config }}
+{{- if ne $sectionName "tools" }}
+
+/** `{{ $sectionName }}` configuration, sourced from `{{ $sectionName | toUpperSnakeCase }}_*`. */
+export interface {{ $sectionName | toPascalCase }}Config {
+  {{- range $key, $value := $sectionConfig }}
+  {{- $tsType := "string" }}
+  {{- if kindIs "bool" $value }}
+    {{- $tsType = "boolean" }}
+  {{- else if or (kindIs "int" $value) (kindIs "int64" $value) (kindIs "uint64" $value) (kindIs "float64" $value) }}
+    {{- $tsType = "number" }}
+  {{- end }}
+  {{ $key | toCamelCase }}: {{ $tsType }};
+  {{- end }}
+}
+{{- end }}
+{{- end }}
+
+/** Full application configuration assembled by {@link loadConfig}. */
+export interface Config {
+  server: ServerConfig;
+  agent: AgentConfig;
+  llm: LLMConfig;
+{{- range $sectionName, $sectionConfig := .ADL.Spec.Config }}
+{{- if ne $sectionName "tools" }}
+  {{ $sectionName | toCamelCase }}: {{ $sectionName | toPascalCase }}Config;
+{{- end }}
+{{- end }}
+}
+
+/**
+ * Read the process environment and assemble the typed {@link Config}. Call
+ * once at startup: the result is a plain snapshot, not a live binding to
+ * `process.env`.
+ */
+export function loadConfig(): Config {
+{{- if $hasProvider }}
+  const provider = envString('A2A_AGENT_CLIENT_PROVIDER', {{ .ADL.Spec.Agent.Provider | toJson }});
+{{- else }}
+  const provider = required('A2A_AGENT_CLIENT_PROVIDER');
+{{- end }}
+  const baseURL = process.env['A2A_AGENT_CLIENT_BASE_URL'];
+  const apiKey =
+    process.env['A2A_AGENT_CLIENT_API_KEY'] ??
+    process.env[`${provider.toUpperCase()}_API_KEY`];
+  return {
+    server: {
+      host: envString('A2A_SERVER_HOST', '0.0.0.0'),
+      port: envNumber('A2A_SERVER_PORT', {{ .ADL.Spec.Server.Port }}),
+      debug: envBool('A2A_SERVER_DEBUG', false),
+    },
+    agent: {
+      name: envString('A2A_AGENT_NAME', {{ .ADL.Metadata.Name | toJson }}),
+      description: envString('A2A_AGENT_DESCRIPTION', {{ .ADL.Metadata.Description | toJson }}),
+      version: envString('A2A_AGENT_VERSION', {{ .ADL.Metadata.Version | toJson }}),
+      systemPrompt: envString('A2A_AGENT_SYSTEM_PROMPT', {{ $systemPrompt }}),
+      cardPath: envString('A2A_AGENT_CARD_PATH', '.well-known/agent-card.json'),
+      skillsDir: envString('A2A_SKILLS_DIR', 'skills'),
+    },
+    llm: {
+      provider,
+      model: {{ if $hasModel }}envString('A2A_AGENT_CLIENT_MODEL', {{ .ADL.Spec.Agent.Model | toJson }}){{ else }}required('A2A_AGENT_CLIENT_MODEL'){{ end }},
+      ...(baseURL !== undefined ? { baseURL } : {}),
+      ...(apiKey !== undefined ? { apiKey } : {}),
+    },
+{{- range $sectionName, $sectionConfig := .ADL.Spec.Config }}
+{{- if ne $sectionName "tools" }}
+    {{ $sectionName | toCamelCase }}: load{{ $sectionName | toPascalCase }}Config(),
+{{- end }}
+{{- end }}
+  };
+}
+{{- range $sectionName, $sectionConfig := .ADL.Spec.Config }}
+{{- if ne $sectionName "tools" }}
+
+function load{{ $sectionName | toPascalCase }}Config(): {{ $sectionName | toPascalCase }}Config {
+  return {
+    {{- range $key, $value := $sectionConfig }}
+    {{- $loader := "envString" }}
+    {{- if kindIs "bool" $value }}
+      {{- $loader = "envBool" }}
+    {{- else if or (kindIs "int" $value) (kindIs "int64" $value) (kindIs "uint64" $value) (kindIs "float64" $value) }}
+      {{- $loader = "envNumber" }}
+    {{- end }}
+    {{ $key | toCamelCase }}: {{ $loader }}('{{ $sectionName | toUpperSnakeCase }}_{{ $key | toUpperSnakeCase }}', {{ if eq $loader "envString" }}{{ if $value }}{{ $value | toJson }}{{ else }}''{{ end }}{{ else }}{{ $value }}{{ end }}),
+    {{- end }}
+  };
+}
+{{- end }}
+{{- end }}
+{{- if $needRequired }}
+
+/**
+ * Read a required environment variable, exiting the process with a clear
+ * message when it is unset or empty. Used for the LLM provider/model when the
+ * manifest declares no agent and therefore supplies no default.
+ */
+function required(name: string): string {
+  const value = process.env[name];
+  if (value === undefined || value.length === 0) {
+    console.error(`missing required environment variable: ${name}`);
+    process.exit(1);
+  }
+  return value;
+}
+{{- end }}
+
+/** Return the env var, or `fallback` when it is unset or empty. */
+function envString(name: string, fallback: string): string {
+  const value = process.env[name];
+  return value === undefined || value === '' ? fallback : value;
+}
+
+/** Parse the env var as a number, or `fallback` when it is unset, empty, or NaN. */
+function envNumber(name: string, fallback: number): number {
+  const value = process.env[name];
+  if (value === undefined || value === '') {
+    return fallback;
+  }
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? fallback : parsed;
+}
+
+/** Parse the env var as a boolean (`false`/`0`/empty are false), or `fallback` when unset. */
+function envBool(name: string, fallback: boolean): boolean {
+  const value = process.env[name];
+  if (value === undefined || value === '') {
+    return fallback;
+  }
+  return value !== 'false' && value !== '0';
+}
