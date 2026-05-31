@@ -1,10 +1,14 @@
+{{- $hasUserTools := false }}
+{{- range .ADL.Spec.Tools }}{{ if not (isBuiltinToolID .ID) }}{{ $hasUserTools = true }}{{ end }}{{ end -}}
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   AgentBuilder,
   ChatCompletionToolType,
   DefaultBackgroundTaskHandler,
+{{- if not $hasUserTools }}
   DefaultToolBox,
+{{- end }}
   InMemoryTaskStorage,
   MESSAGE_SEND_METHOD,
   MessageRole,
@@ -31,6 +35,9 @@ import {
 } from '@inference-gateway/adk';
 import { loadConfig, type Config } from './config.js';
 import { newLogger } from './logger.js';
+{{- if $hasUserTools }}
+import { buildToolBox } from './tools/index.js';
+{{- end }}
 
 // All runtime configuration - ADK options under the A2A_ prefix plus any
 // custom spec.config sections - is loaded once here. See ./config.ts for the
@@ -63,9 +70,14 @@ const agent = new AgentBuilder()
   .withSystemPrompt(systemPrompt)
   .build();
 
-// Tools are registered against this toolbox in a follow-up; the foundation
-// boots with the ADK's default toolbox only.
+{{ if $hasUserTools -}}
+// Every spec.tools[] tool (and the services it injects) is constructed and
+// registered against the toolbox here; see ./tools/index.ts.
+const toolBox = buildToolBox(logger, config);
+{{- else -}}
+// No user-defined tools yet; boot with the ADK's default (empty) toolbox.
 const toolBox = new DefaultToolBox();
+{{- end }}
 
 const handler = new DefaultBackgroundTaskHandler({
   llmClient: adaptLLMClient(agent.getLLMClient()),

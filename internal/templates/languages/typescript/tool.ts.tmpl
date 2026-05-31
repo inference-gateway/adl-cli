@@ -1,0 +1,71 @@
+{{- /*
+  Factory for a non-reserved spec.tools[] entry: one file per tool, added to
+  .adl-ignore so your execute() implementation survives regeneration. The
+  toolbox aggregator (src/tools/index.ts) calls this factory and registers the
+  result. Mirrors the Go (tool.go) and Rust (tool.rs) generators.
+*/ -}}
+import { createTool, type Tool } from '@inference-gateway/adk';
+{{- $needConfig := false }}
+{{- $configSections := list }}
+{{- range .Inject }}
+{{- if eq . "config" }}{{ $needConfig = true }}{{ else if hasPrefix "config." . }}{{ $configSections = append $configSections (trimPrefix "config." .) }}{{ end }}
+{{- end }}
+{{- if has "logger" .Inject }}
+import type { Logger } from '../logger.js';
+{{- end }}
+{{- if or $needConfig (gt (len $configSections) 0) }}
+import type {{ "{" }}{{ if $needConfig }} Config{{ if gt (len $configSections) 0 }},{{ end }}{{ end }}{{ range $i, $s := $configSections }}{{ if $i }},{{ end }} {{ $s | toPascalCase }}Config{{ end }} {{ "}" }} from '../config.js';
+{{- end }}
+{{- range $depID := .Inject }}
+{{- if and (ne $depID "logger") (ne $depID "config") (not (hasPrefix "config." $depID)) }}
+{{- $svc := index $.ServiceMap $depID }}
+import type { {{ $svc.Interface }} } from '../services/{{ $depID | replace "-" "_" }}.js';
+{{- end }}
+{{- end }}
+
+/**
+ * create{{ .Name | toPascalCase }}Tool builds the `{{ .Name }}` tool.
+ *
+ * {{ .Description }}
+ */
+export function create{{ .Name | toPascalCase }}Tool(
+{{- range $depID := .Inject }}
+{{- if eq $depID "logger" }}
+  logger: Logger,
+{{- else if eq $depID "config" }}
+  config: Config,
+{{- else if hasPrefix "config." $depID }}
+  {{ $depID | trimPrefix "config." | toCamelCase }}Config: {{ $depID | trimPrefix "config." | toPascalCase }}Config,
+{{- else }}
+{{- $svc := index $.ServiceMap $depID }}
+  {{ $depID | toCamelCase }}: {{ $svc.Interface }},
+{{- end }}
+{{- end }}
+): Tool {
+  return createTool({
+    name: {{ .Name | toJson }},
+    description: {{ .Description | toJson }},
+    parameters: {{ if .Schema }}{{ toPrettyJson .Schema | indent 4 | trimPrefix "    " }}{{ else }}{ type: 'object', properties: {} }{{ end }},
+    execute: async (args: string): Promise<string> => {
+      // TODO: implement the `{{ .Name }}` tool.
+      //
+      // Dependencies declared in `inject` are captured by this closure:
+{{- range $depID := .Inject }}
+{{- if eq $depID "logger" }}
+      //   - logger
+{{- else if eq $depID "config" }}
+      //   - config
+{{- else if hasPrefix "config." $depID }}
+      //   - {{ $depID | trimPrefix "config." | toCamelCase }}Config
+{{- else }}
+      //   - {{ $depID | toCamelCase }}
+{{- end }}
+{{- end }}
+      const params = JSON.parse(args) as Record<string, unknown>;
+      return JSON.stringify({
+        result: 'TODO: implement {{ .Name }}',
+        received: params,
+      });
+    },
+  });
+}

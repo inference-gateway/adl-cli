@@ -1,0 +1,178 @@
+---
+apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: typescript-agent-tools
+  description: "TypeScript A2A agent with tools, services, and dependency injection"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  card:
+    protocolVersion: "0.3.0"
+    preferredTransport: JSONRPC
+    defaultInputModes:
+      - text
+    defaultOutputModes:
+      - text
+  agent:
+    provider: deepseek
+    model: deepseek-v4-flash
+    systemPrompt: |
+      You are a helpful assistant with database, notification, and reporting tools.
+    maxTokens: 2048
+    temperature: 0.3
+  config:
+    database:
+      connectionString: "postgres://user:pass@localhost:5432/db"
+      maxConnections: 10
+      verbose: true
+    notifications:
+      slackWebhook: "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+      retryAttempts: 3
+  services:
+    database:
+      type: service
+      interface: DatabaseService
+      factory: NewDatabaseService
+      description: PostgreSQL database service for company data queries
+    notifications:
+      type: service
+      interface: NotificationService
+      factory: NewNotificationService
+      description: Multi-channel notification service for alerts and communications
+    reporting:
+      type: service
+      interface: ReportingService
+      factory: NewReportingService
+      description: Business report generation service with multiple output formats
+  tools:
+    - id: query_database
+      name: query_database
+      description: "Query the company database with proper authentication"
+      tags:
+        - database
+        - query
+      inject:
+        - logger
+        - database
+      schema:
+        type: object
+        properties:
+          query:
+            type: string
+            description: "SQL query to execute"
+          table:
+            type: string
+            description: "Table name to query"
+          limit:
+            type: integer
+            description: "Maximum number of results"
+            maximum: 1000
+        required:
+          - query
+          - table
+    - id: send_notification
+      name: send_notification
+      description: "Send notifications to users or teams"
+      tags:
+        - notification
+        - alert
+      inject:
+        - logger
+        - notifications
+        - config.notifications
+      schema:
+        type: object
+        properties:
+          recipient:
+            type: string
+            description: "Recipient email or team name"
+          message:
+            type: string
+            description: "Notification message"
+          priority:
+            type: string
+            description: "Priority level"
+            enum:
+              - low
+              - medium
+              - high
+              - critical
+        required:
+          - recipient
+          - message
+    - id: generate_report
+      name: generate_report
+      description: "Generate business reports based on data analysis"
+      tags:
+        - report
+        - analytics
+      inject:
+        - logger
+        - database
+        - reporting
+      schema:
+        type: object
+        properties:
+          report_type:
+            type: string
+            description: "Type of report to generate"
+            enum:
+              - sales
+              - performance
+              - compliance
+          format:
+            type: string
+            description: "Output format"
+            enum:
+              - pdf
+              - json
+              - html
+        required:
+          - report_type
+          - format
+    - id: summarize_text
+      name: summarize_text
+      description: "Summarize a block of text using the configured model"
+      tags:
+        - text
+      inject:
+        - config
+      schema:
+        type: object
+        properties:
+          text:
+            type: string
+            description: "Text to summarize"
+        required:
+          - text
+    - id: ping
+      name: ping
+      description: "Health check that echoes back its input"
+      tags:
+        - health
+      schema:
+        type: object
+        properties:
+          message:
+            type: string
+            description: "Message to echo"
+  server:
+    port: 8080
+    scheme: http
+    debug: false
+    auth:
+      enabled: false
+  language:
+    typescript:
+      packageName: "typescript-agent-tools"
+      nodeVersion: "24"
+  development:
+    sandbox:
+      flox:
+        enabled: true
+      devcontainer:
+        enabled: false

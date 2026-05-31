@@ -1,0 +1,63 @@
+{{- /*
+  Toolbox aggregator. Regenerated on every run (deliberately NOT in
+  .adl-ignore): it constructs the services declared under spec.services and
+  wires them, the logger, and configuration sections into each spec.tools[]
+  factory, registering every tool against one DefaultToolBox. Implement tool
+  logic in src/tools/<id>.ts and services in src/services/<id>.ts; this file
+  only assembles them. Mirrors the Rust src/tools/mod.rs aggregator.
+*/ -}}
+{{- $services := dict }}
+{{- range .ADL.Spec.Tools }}
+{{- if not (isBuiltinToolID .ID) }}
+{{- range .Inject }}
+{{- if and (ne . "logger") (ne . "config") (not (hasPrefix "config." .)) }}
+{{- $services = set $services . true }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end -}}
+import { DefaultToolBox, type ToolBox } from '@inference-gateway/adk';
+import type { Logger } from '../logger.js';
+import type { Config } from '../config.js';
+{{- range .ADL.Spec.Tools }}
+{{- if not (isBuiltinToolID .ID) }}
+import { create{{ .Name | toPascalCase }}Tool } from './{{ .ID | replace "-" "_" }}.js';
+{{- end }}
+{{- end }}
+{{- range $svcID, $_ := $services }}
+{{- $svc := index $.ADL.Spec.Services $svcID }}
+import { {{ $svc.Factory | toCamelCase }} } from '../services/{{ $svcID | replace "-" "_" }}.js';
+{{- end }}
+
+/**
+ * buildToolBox constructs every spec.tools[] tool, wiring in the logger,
+ * configuration sections, and services each tool declares via `inject`, and
+ * returns a ToolBox the agent server can register.
+ */
+export function buildToolBox(logger: Logger, config: Config): ToolBox {
+  const toolBox = new DefaultToolBox();
+{{- range $svcID, $_ := $services }}
+{{- $svc := index $.ADL.Spec.Services $svcID }}
+  const {{ $svcID | toCamelCase }} = {{ $svc.Factory | toCamelCase }}(logger, config);
+{{- end }}
+{{- range .ADL.Spec.Tools }}
+{{- if not (isBuiltinToolID .ID) }}
+  toolBox.addTool(
+    create{{ .Name | toPascalCase }}Tool(
+{{- range $depID := .Inject }}
+{{- if eq $depID "logger" }}
+      logger,
+{{- else if eq $depID "config" }}
+      config,
+{{- else if hasPrefix "config." $depID }}
+      config.{{ $depID | trimPrefix "config." | toCamelCase }},
+{{- else }}
+      {{ $depID | toCamelCase }},
+{{- end }}
+{{- end }}
+    ),
+  );
+{{- end }}
+{{- end }}
+  return toolBox;
+}

@@ -396,7 +396,8 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		var content string
 		var err error
 
-		if templateKey == "service.go" && strings.Contains(fileName, "internal/") && !strings.Contains(fileName, "internal/services/") {
+		if (templateKey == "service.go" && strings.Contains(fileName, "internal/") && !strings.Contains(fileName, "internal/services/")) ||
+			templateKey == "service.ts" {
 			parts := strings.Split(fileName, "/")
 			if len(parts) >= 3 {
 				serviceFileName := parts[len(parts)-1]
@@ -412,7 +413,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 				}
 
 				if foundService != "" {
-					if foundService == "logger" {
+					if foundService == "logger" && templateKey == "service.go" {
 						content, err = templateEngine.ExecuteToolTemplate("logger.go", ctx)
 						if err != nil {
 							return fmt.Errorf("failed to execute logger template: %w", err)
