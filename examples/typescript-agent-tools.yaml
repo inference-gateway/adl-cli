@@ -169,7 +169,7 @@ spec:
   language:
     typescript:
       packageName: "typescript-agent-tools"
-      nodeVersion: "24"
+      nodeVersion: "24.15.0"
   scm:
     provider: github
     dependabot: true

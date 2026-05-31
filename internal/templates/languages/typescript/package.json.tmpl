@@ -22,8 +22,8 @@
     {{ .Name | toJson }}: {{ .Version | toJson }}{{- end }}
   },
   "devDependencies": {
-    "@types/node": "^24.0.0",
-    "prettier": "^3.4.2",
+    "@types/node": "^24.1.0",
+    "prettier": "^3.8.3",
     "tsx": "^4.19.2",
     "typescript": "^6.0.3"{{- range .Vendor.NpmDevDeps }},
     {{ .Name | toJson }}: {{ .Version | toJson }}{{- end }}
