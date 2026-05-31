@@ -29,48 +29,33 @@ import {
   type Message,
   type ToolDefinition,
 } from '@inference-gateway/adk';
+import { loadConfig, type Config } from './config.js';
 import { newLogger } from './logger.js';
 
-// Defaults are baked in from the ADL manifest at generation time; every
-// value is overridable at runtime through the matching A2A_* environment
-// variable (a dedicated config module lands in a follow-up).
-const AGENT_NAME = process.env['A2A_AGENT_NAME'] ?? {{ .ADL.Metadata.Name | toJson }};
-const AGENT_DESCRIPTION =
-  process.env['A2A_AGENT_DESCRIPTION'] ?? {{ .ADL.Metadata.Description | toJson }};
-const AGENT_VERSION = process.env['A2A_AGENT_VERSION'] ?? {{ .ADL.Metadata.Version | toJson }};
-const HOST = process.env['A2A_SERVER_HOST'] ?? '0.0.0.0';
-const PORT = Number.parseInt(process.env['A2A_SERVER_PORT'] ?? '{{ .ADL.Spec.Server.Port }}', 10);
-const DEBUG = isTruthy(process.env['A2A_SERVER_DEBUG']);
-const SKILLS_DIR = process.env['A2A_SKILLS_DIR'] ?? 'skills';
-const AGENT_CARD_PATH = process.env['A2A_AGENT_CARD_PATH'] ?? '.well-known/agent-card.json';
+// All runtime configuration - ADK options under the A2A_ prefix plus any
+// custom spec.config sections - is loaded once here. See ./config.ts for the
+// (hand-rolled) loader and the rationale behind it.
+const config = loadConfig();
+const { host, port } = config.server;
 
-const BASE_SYSTEM_PROMPT =
-  process.env['A2A_AGENT_SYSTEM_PROMPT'] ??
-  {{ if and .ADL.Spec.Agent .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt | toJson }}{{ else }}'You are a helpful AI assistant.'{{ end }};
+const logger = newLogger(config.server.debug);
 
-const PROVIDER = required('A2A_AGENT_CLIENT_PROVIDER');
-const MODEL = required('A2A_AGENT_CLIENT_MODEL');
-const BASE_URL = process.env['A2A_AGENT_CLIENT_BASE_URL'];
-const API_KEY =
-  process.env['A2A_AGENT_CLIENT_API_KEY'] ??
-  process.env[`${PROVIDER.toUpperCase()}_API_KEY`];
+const card = loadAgentCard(config);
 
-const logger = newLogger(DEBUG);
-
-const card = loadAgentCard();
-
-const skillsPrompt = loadSkillsManifest(SKILLS_DIR);
+const skillsPrompt = loadSkillsManifest(config.agent.skillsDir);
 if (skillsPrompt !== '') {
-  logger.info('loaded skills manifest into system prompt', { dir: SKILLS_DIR });
+  logger.info('loaded skills manifest into system prompt', { dir: config.agent.skillsDir });
 }
 const systemPrompt =
-  skillsPrompt === '' ? BASE_SYSTEM_PROMPT : `${BASE_SYSTEM_PROMPT}\n\n${skillsPrompt}`;
+  skillsPrompt === ''
+    ? config.agent.systemPrompt
+    : `${config.agent.systemPrompt}\n\n${skillsPrompt}`;
 
 const llmClient = new OpenAICompatibleLLMClient({
-  provider: PROVIDER,
-  model: MODEL,
-  ...(BASE_URL !== undefined ? { baseURL: BASE_URL } : {}),
-  ...(API_KEY !== undefined ? { apiKey: API_KEY } : {}),
+  provider: config.llm.provider,
+  model: config.llm.model,
+  ...(config.llm.baseURL !== undefined ? { baseURL: config.llm.baseURL } : {}),
+  ...(config.llm.apiKey !== undefined ? { apiKey: config.llm.apiKey } : {}),
 });
 
 const agent = new AgentBuilder()
@@ -105,15 +90,15 @@ const worker = runWorker(abort.signal).catch((err) => {
   process.exitCode = 1;
 });
 
-await server.listen(PORT, HOST);
-logger.info(`${AGENT_NAME} listening on http://${HOST}:${PORT}`, {
-  provider: PROVIDER,
-  model: MODEL,
-  version: AGENT_VERSION,
+await server.listen(port, host);
+logger.info(`${config.agent.name} listening on http://${host}:${port}`, {
+  provider: config.llm.provider,
+  model: config.llm.model,
+  version: config.agent.version,
 });
-logger.info(`agent card: http://${HOST}:${PORT}/.well-known/agent-card.json`);
-logger.info(`health:     http://${HOST}:${PORT}/health`);
-logger.info(`rpc:        POST http://${HOST}:${PORT}/`);
+logger.info(`agent card: http://${host}:${port}/.well-known/agent-card.json`);
+logger.info(`health:     http://${host}:${port}/health`);
+logger.info(`rpc:        POST http://${host}:${port}/`);
 
 const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
   logger.info(`received ${signal}, shutting down...`);
@@ -164,18 +149,18 @@ async function runWorker(signal: AbortSignal): Promise<void> {
  * the card always reflects the live A2A_* environment. Mirrors the Go
  * scaffold's WithAgentCardFromFile override map.
  */
-function loadAgentCard(): AgentCard {
-  const raw = readFileSync(AGENT_CARD_PATH, 'utf-8');
+function loadAgentCard(config: Config): AgentCard {
+  const raw = readFileSync(config.agent.cardPath, 'utf-8');
   const parsed = JSON.parse(raw) as AgentCard;
   const url =
     parsed.url !== undefined && parsed.url !== ''
       ? parsed.url
-      : `http://${HOST}:${PORT}`;
+      : `http://${config.server.host}:${config.server.port}`;
   return {
     ...parsed,
-    name: AGENT_NAME,
-    description: AGENT_DESCRIPTION,
-    version: AGENT_VERSION,
+    name: config.agent.name,
+    description: config.agent.description,
+    version: config.agent.version,
     url,
   };
 }
@@ -270,19 +255,6 @@ function frontmatterField(frontmatter: string, key: string): string {
     return value;
   }
   return '';
-}
-
-function required(name: string): string {
-  const value = process.env[name];
-  if (value === undefined || value.length === 0) {
-    console.error(`missing required environment variable: ${name}`);
-    process.exit(1);
-  }
-  return value;
-}
-
-function isTruthy(value: string | undefined): boolean {
-  return value !== undefined && value !== '' && value !== 'false' && value !== '0';
 }
 
 /**

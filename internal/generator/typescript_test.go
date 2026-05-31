@@ -206,21 +206,197 @@ func TestGenerator_TypeScriptIndex(t *testing.T) {
 		}
 	}
 
-	// Manifest-driven values land as runtime-overridable defaults.
-	if !strings.Contains(got, `'9090'`) {
-		t.Fatalf("expected server port 9090 default, got:\n%s", got)
+	for _, want := range []string{
+		"import { loadConfig, type Config } from './config.js'",
+		"const config = loadConfig();",
+		"newLogger(config.server.debug)",
+		"loadAgentCard(config)",
+		"server.listen(port, host)",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("index.ts missing %q\n%s", want, got)
+		}
 	}
-	if !strings.Contains(got, `"ts-agent"`) {
-		t.Fatalf("expected agent name default from metadata, got:\n%s", got)
-	}
-	if !strings.Contains(got, "You are a test bot.") {
-		t.Fatalf("expected system prompt from spec.agent, got:\n%s", got)
+	for _, banned := range []string{
+		"process.env['A2A_SERVER_PORT']",
+		"process.env['A2A_AGENT_SYSTEM_PROMPT']",
+		"process.env['A2A_AGENT_CLIENT_PROVIDER']",
+	} {
+		if strings.Contains(got, banned) {
+			t.Fatalf("index.ts should no longer read %s directly\n%s", banned, got)
+		}
 	}
 }
 
-func TestGenerator_TypeScriptIndexDefaultSystemPrompt(t *testing.T) {
-	got := renderTS(t, "index.ts", makeTypeScriptADL(nil, ""))
-	if !strings.Contains(got, "You are a helpful AI assistant.") {
-		t.Fatalf("expected fallback system prompt when spec.agent is absent, got:\n%s", got)
+// makeTSConfigADL builds a TypeScript ADL with a fully specified agent
+// (provider/model/systemPrompt) plus the given custom spec.config sections, for
+// exercising the generated config module.
+func makeTSConfigADL(sections schema.SpecConfig) *schema.ADL {
+	return &schema.ADL{
+		APIVersion: "adl.inference-gateway.com/v1",
+		Kind:       "Agent",
+		Metadata: schema.Metadata{
+			Name:        "ts-agent",
+			Description: "A TypeScript test agent",
+			Version:     "2.1.0",
+		},
+		Spec: schema.Spec{
+			Capabilities: schema.Capabilities{Streaming: false},
+			Server:       schema.Server{Port: 9090},
+			Agent: &schema.Agent{
+				Provider:     "openai",
+				Model:        "gpt-4o",
+				SystemPrompt: "You are a test bot.",
+			},
+			Config: sections,
+			Language: schema.Language{
+				TypeScript: &schema.TypeScriptConfig{
+					PackageName: "@example/ts-agent",
+					NodeVersion: "24",
+				},
+			},
+		},
 	}
+}
+
+func TestGenerator_TypeScriptConfig(t *testing.T) {
+	t.Run("ADK options come from A2A_-prefixed env vars with manifest defaults", func(t *testing.T) {
+		got := renderTS(t, "config.ts", makeTSConfigADL(nil))
+		for _, want := range []string{
+			"export interface ServerConfig",
+			"export interface AgentConfig",
+			"export interface LLMConfig",
+			"export interface Config",
+			"export function loadConfig(): Config",
+			`envString('A2A_SERVER_HOST', '0.0.0.0')`,
+			`envNumber('A2A_SERVER_PORT', 9090)`,
+			`envBool('A2A_SERVER_DEBUG', false)`,
+			`envString('A2A_AGENT_NAME', "ts-agent")`,
+			`envString('A2A_AGENT_VERSION', "2.1.0")`,
+			`envString('A2A_AGENT_SYSTEM_PROMPT', "You are a test bot.")`,
+			`envString('A2A_AGENT_CARD_PATH', '.well-known/agent-card.json')`,
+			`envString('A2A_SKILLS_DIR', 'skills')`,
+			`envString('A2A_AGENT_CLIENT_PROVIDER', "openai")`,
+			`envString('A2A_AGENT_CLIENT_MODEL', "gpt-4o")`,
+			"process.env['A2A_AGENT_CLIENT_BASE_URL']",
+			"${provider.toUpperCase()}_API_KEY",
+		} {
+			if !strings.Contains(got, want) {
+				t.Fatalf("config.ts missing %q\n%s", want, got)
+			}
+		}
+		if c := strings.Count(got, "function load"); c != 1 {
+			t.Fatalf("expected only loadConfig (1 loader), got %d\n%s", c, got)
+		}
+		if strings.Contains(got, "function required(") {
+			t.Fatalf("required() must be omitted when provider/model have defaults\n%s", got)
+		}
+	})
+
+	t.Run("a single custom section yields a typed interface + loader under its own prefix", func(t *testing.T) {
+		adl := makeTSConfigADL(schema.SpecConfig{
+			"database": {
+				"connectionString": "postgres://localhost",
+				"maxConnections":   10,
+				"verbose":          true,
+				"ratio":            0.5,
+			},
+		})
+		got := renderTS(t, "config.ts", adl)
+		for _, want := range []string{
+			"export interface DatabaseConfig {",
+			"connectionString: string;",
+			"maxConnections: number;",
+			"verbose: boolean;",
+			"ratio: number;",
+			"function loadDatabaseConfig(): DatabaseConfig {",
+			`connectionString: envString('DATABASE_CONNECTION_STRING', "postgres://localhost")`,
+			`maxConnections: envNumber('DATABASE_MAX_CONNECTIONS', 10)`,
+			`verbose: envBool('DATABASE_VERBOSE', true)`,
+			`ratio: envNumber('DATABASE_RATIO', 0.5)`,
+			"database: DatabaseConfig;",
+			"database: loadDatabaseConfig(),",
+		} {
+			if !strings.Contains(got, want) {
+				t.Fatalf("config.ts missing %q\n%s", want, got)
+			}
+		}
+		if c := strings.Count(got, "function load"); c != 2 {
+			t.Fatalf("expected loadConfig + loadDatabaseConfig (2 loaders), got %d\n%s", c, got)
+		}
+	})
+
+	t.Run("multiple sections each get an interface + loader and the reserved tools namespace is skipped", func(t *testing.T) {
+		adl := makeTSConfigADL(schema.SpecConfig{
+			"tools": {
+				"read": map[string]any{"enabled": true},
+			},
+			"database": {
+				"connectionString": "postgres://localhost",
+			},
+			"notifications": {
+				"retryAttempts": 3,
+			},
+		})
+		got := renderTS(t, "config.ts", adl)
+		for _, want := range []string{
+			"export interface DatabaseConfig {",
+			"export interface NotificationsConfig {",
+			"function loadDatabaseConfig(): DatabaseConfig {",
+			"function loadNotificationsConfig(): NotificationsConfig {",
+			"database: DatabaseConfig;",
+			"notifications: NotificationsConfig;",
+			`retryAttempts: envNumber('NOTIFICATIONS_RETRY_ATTEMPTS', 3)`,
+		} {
+			if !strings.Contains(got, want) {
+				t.Fatalf("config.ts missing %q\n%s", want, got)
+			}
+		}
+		if strings.Contains(got, "ToolsConfig") || strings.Contains(got, "loadToolsConfig") {
+			t.Fatalf("the reserved tools namespace must be skipped, got:\n%s", got)
+		}
+		if c := strings.Count(got, "function load"); c != 3 {
+			t.Fatalf("expected loadConfig + 2 section loaders (3 loaders), got %d\n%s", c, got)
+		}
+	})
+
+	t.Run("declared defaults and primitive types are honored; quoted numbers stay strings", func(t *testing.T) {
+		adl := makeTSConfigADL(schema.SpecConfig{
+			"reporting": {
+				"outputPath":  "/tmp/reports",
+				"maxItems":    "50",
+				"maxFileSize": 50,
+				"compress":    false,
+			},
+		})
+		got := renderTS(t, "config.ts", adl)
+		for _, want := range []string{
+			"outputPath: string;",
+			"maxItems: string;",
+			"maxFileSize: number;",
+			"compress: boolean;",
+			`outputPath: envString('REPORTING_OUTPUT_PATH', "/tmp/reports")`,
+			`maxItems: envString('REPORTING_MAX_ITEMS', "50")`,
+			`maxFileSize: envNumber('REPORTING_MAX_FILE_SIZE', 50)`,
+			`compress: envBool('REPORTING_COMPRESS', false)`,
+		} {
+			if !strings.Contains(got, want) {
+				t.Fatalf("config.ts missing %q\n%s", want, got)
+			}
+		}
+	})
+
+	t.Run("required() guards provider/model and the default prompt is baked when the manifest declares no agent", func(t *testing.T) {
+		got := renderTS(t, "config.ts", makeTypeScriptADL(nil, ""))
+		for _, want := range []string{
+			"function required(",
+			"const provider = required('A2A_AGENT_CLIENT_PROVIDER');",
+			"required('A2A_AGENT_CLIENT_MODEL')",
+			`envString('A2A_AGENT_SYSTEM_PROMPT', "You are a helpful AI assistant.")`,
+		} {
+			if !strings.Contains(got, want) {
+				t.Fatalf("config.ts missing %q\n%s", want, got)
+			}
+		}
+	})
 }

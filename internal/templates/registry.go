@@ -269,6 +269,7 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 	files := map[string]string{
 		"src/index.ts":                "index.ts",
+		"src/config.ts":               "config.ts",
 		"src/logger.ts":               "logger.ts",
 		"package.json":                "package.json",
 		"tsconfig.json":               "tsconfig.json",

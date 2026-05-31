@@ -1,0 +1,58 @@
+---
+apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: typescript-agent
+  description: "Minimal TypeScript A2A agent built with the TypeScript ADK"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  card:
+    protocolVersion: "0.3.0"
+    preferredTransport: JSONRPC
+    defaultInputModes:
+      - text
+    defaultOutputModes:
+      - text
+  agent:
+    provider: deepseek
+    model: deepseek-v4-flash
+    systemPrompt: |
+      You are a helpful assistant.
+    maxTokens: 2048
+    temperature: 0.3
+  config:
+    # Custom configuration sections are rendered into src/config.ts as typed
+    # interfaces + loaders, each under its own <SECTION>_ env prefix. Declared
+    # values become baked-in defaults; the primitive type (string / number /
+    # boolean) selects the loader and the TypeScript field type.
+    database:
+      connectionString: "postgres://user:pass@localhost:5432/db"
+      maxConnections: 10
+      timeout: "30s"
+      verbose: true
+    notifications:
+      slackWebhook: "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+      retryAttempts: 3
+  server:
+    port: 8080
+    scheme: http
+    debug: false
+    auth:
+      enabled: false
+  language:
+    typescript:
+      packageName: "typescript-agent"
+      nodeVersion: "24"
+      vendor:
+        devdeps:
+          - vitest@1.6.0
+  development:
+    sandbox:
+      flox:
+        enabled: true
+      devcontainer:
+        enabled: false

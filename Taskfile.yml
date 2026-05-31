@@ -134,6 +134,7 @@ tasks:
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent-redis.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent-ai.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/typescript-agent.yaml
 
   examples:generate:
     desc: Generate all example projects
