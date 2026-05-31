@@ -509,8 +509,6 @@ func TestGenerator_TypeScriptTools(t *testing.T) {
 		return string(b)
 	}
 
-	// A non-reserved tool renders a factory with its injected service typed
-	// from the service module, plus schema-derived parameters and a TODO body.
 	queryDatabase := read("src/tools/query_database.ts")
 	for _, want := range []string{
 		"export function createQueryDatabaseTool(",
