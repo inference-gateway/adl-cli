@@ -5,7 +5,7 @@
   {{- else if eq .Language "rust" }}
   "image": "mcr.microsoft.com/devcontainers/rust:1-bullseye",
   {{- else if eq .Language "typescript" }}
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-{{ .ADL.Spec.Language.TypeScript.NodeVersion }}-bullseye",
   {{- end }}
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {},
