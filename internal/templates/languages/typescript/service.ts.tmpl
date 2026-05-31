@@ -1,0 +1,28 @@
+{{- /*
+  Stub for a spec.services[] entry: added to .adl-ignore so your
+  implementation survives regeneration. Constructed once by buildToolBox
+  (src/tools/index.ts) and injected into every tool that lists `{{ .ID }}` in
+  its `inject` array. Mirrors the Go service.go generator.
+*/ -}}
+import type { Logger } from '../logger.js';
+import type { Config } from '../config.js';
+
+/**
+ * {{ .Interface }} is the `{{ .ID }}` service.
+ *
+ * {{ .Description }}
+ */
+export interface {{ .Interface }} {
+  // TODO: declare the methods for the `{{ .ID }}` service, e.g.:
+  //   doSomething(input: string): Promise<string>;
+}
+
+/**
+ * {{ .Factory | toCamelCase }} constructs a {{ .Interface }}. `logger` and
+ * `config` are supplied by buildToolBox at startup.
+ */
+export function {{ .Factory | toCamelCase }}(logger: Logger, config: Config): {{ .Interface }} {
+  logger.debug('initializing {{ .ID }} service');
+  // TODO: read what you need from `config` and return your implementation.
+  return {};
+}

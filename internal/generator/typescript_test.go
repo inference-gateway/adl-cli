@@ -2,6 +2,8 @@ package generator
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -399,4 +401,212 @@ func TestGenerator_TypeScriptConfig(t *testing.T) {
 			}
 		}
 	})
+}
+
+// TestGenerator_TypeScriptTools runs the full pipeline (manifest -> Generate())
+// to lock down issue #167: non-reserved tools render one createXTool file each
+// with their injected dependencies, services produce a typed factory module,
+// the toolbox aggregator wires both together and is consumed by index.ts,
+// reserved tool IDs are skipped (built-in TS tools are a tracked follow-up),
+// and tool/service files - but not the regenerated aggregator - land in
+// .adl-ignore so user implementations survive re-generation.
+func TestGenerator_TypeScriptTools(t *testing.T) {
+	adl := &schema.ADL{
+		APIVersion: "adl.inference-gateway.com/v1",
+		Kind:       "Agent",
+		Metadata: schema.Metadata{
+			Name:        "ts-tools-agent",
+			Description: "A TypeScript agent exercising tools + services",
+			Version:     "1.0.0",
+		},
+		Spec: schema.Spec{
+			Capabilities: schema.Capabilities{Streaming: false},
+			Server:       schema.Server{Port: 8080},
+			Agent: &schema.Agent{
+				Provider:     "openai",
+				Model:        "gpt-4o",
+				SystemPrompt: "You are a test bot.",
+			},
+			Config: schema.SpecConfig{
+				"notifications": {
+					"retryAttempts": 3,
+				},
+			},
+			Services: schema.SpecServices{
+				"database": {
+					Interface:   "DatabaseService",
+					Factory:     "NewDatabaseService",
+					Type:        schema.ServiceTypeService,
+					Description: "Database access",
+				},
+				"notifications": {
+					Interface:   "NotificationService",
+					Factory:     "NewNotificationService",
+					Type:        schema.ServiceTypeClient,
+					Description: "Notification dispatch",
+				},
+			},
+			Tools: []schema.Tool{
+				// Reserved built-in: must be skipped (no src/tools/read.ts).
+				{ID: "read"},
+				{
+					ID:          "query_database",
+					Name:        "query_database",
+					Description: "Run a read-only SQL query",
+					Tags:        []string{"data"},
+					Schema: schema.ToolSchema{
+						"type": "object",
+						"properties": map[string]any{
+							"query": map[string]any{"type": "string"},
+						},
+						"required": []any{"query"},
+					},
+					Inject: []string{"logger", "database"},
+				},
+				{
+					ID:          "send_notification",
+					Name:        "send_notification",
+					Description: "Send a notification to a user",
+					Tags:        []string{"notify"},
+					Schema: schema.ToolSchema{
+						"type": "object",
+						"properties": map[string]any{
+							"message": map[string]any{"type": "string"},
+						},
+					},
+					Inject: []string{"logger", "notifications", "config.notifications"},
+				},
+			},
+			Language: schema.Language{
+				TypeScript: &schema.TypeScriptConfig{
+					PackageName: "@example/ts-tools-agent",
+					NodeVersion: "24",
+				},
+			},
+		},
+	}
+
+	tmpDir, err := os.MkdirTemp("", "adl-ts-tools-*")
+	if err != nil {
+		t.Fatalf("MkdirTemp: %v", err)
+	}
+	defer func() { _ = os.RemoveAll(tmpDir) }()
+
+	adlPath := filepath.Join(tmpDir, "agent.yaml")
+	writeYAML(t, adlPath, adl)
+
+	outDir := filepath.Join(tmpDir, "out")
+	gen := New(Config{Template: "minimal", Overwrite: true, Version: "test"})
+	if err := gen.Generate(adlPath, outDir); err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+
+	read := func(rel string) string {
+		t.Helper()
+		b, err := os.ReadFile(filepath.Join(outDir, rel))
+		if err != nil {
+			t.Fatalf("read %s: %v", rel, err)
+		}
+		return string(b)
+	}
+
+	// A non-reserved tool renders a factory with its injected service typed
+	// from the service module, plus schema-derived parameters and a TODO body.
+	queryDatabase := read("src/tools/query_database.ts")
+	for _, want := range []string{
+		"export function createQueryDatabaseTool(",
+		"logger: Logger,",
+		"database: DatabaseService,",
+		"import type { DatabaseService } from '../services/database.js';",
+		"parameters: {",
+		`"query"`,
+		"// TODO: implement the `query_database` tool.",
+	} {
+		if !strings.Contains(queryDatabase, want) {
+			t.Errorf("src/tools/query_database.ts missing %q\n---\n%s", want, queryDatabase)
+		}
+	}
+
+	// A tool injecting both a service AND a config section: the two share the
+	// base name `notifications` yet must not collide (service -> `notifications`,
+	// section -> `notificationsConfig`).
+	sendNotification := read("src/tools/send_notification.ts")
+	for _, want := range []string{
+		"export function createSendNotificationTool(",
+		"notifications: NotificationService,",
+		"notificationsConfig: NotificationsConfig,",
+	} {
+		if !strings.Contains(sendNotification, want) {
+			t.Errorf("src/tools/send_notification.ts missing %q\n---\n%s", want, sendNotification)
+		}
+	}
+
+	// Each spec.services entry produces a typed interface + factory module.
+	database := read("src/services/database.ts")
+	for _, want := range []string{
+		"export interface DatabaseService {",
+		"export function newDatabaseService(logger: Logger, config: Config): DatabaseService {",
+	} {
+		if !strings.Contains(database, want) {
+			t.Errorf("src/services/database.ts missing %q\n---\n%s", want, database)
+		}
+	}
+
+	// The toolbox aggregator constructs each service once and registers every
+	// non-reserved tool, threading logger/config/config.<section>/service args.
+	aggregator := read("src/tools/index.ts")
+	for _, want := range []string{
+		"export function buildToolBox(logger: Logger, config: Config): ToolBox",
+		"const database = newDatabaseService(logger, config);",
+		"const notifications = newNotificationService(logger, config);",
+		"createQueryDatabaseTool(",
+		"createSendNotificationTool(",
+		"config.notifications,",
+		"import { createQueryDatabaseTool } from './query_database.js';",
+	} {
+		if !strings.Contains(aggregator, want) {
+			t.Errorf("src/tools/index.ts missing %q\n---\n%s", want, aggregator)
+		}
+	}
+	for _, banned := range []string{"createReadTool", "./read.js"} {
+		if strings.Contains(aggregator, banned) {
+			t.Errorf("src/tools/index.ts must not reference the reserved read tool (%q)\n---\n%s", banned, aggregator)
+		}
+	}
+
+	// index.ts consumes the aggregator instead of booting an empty toolbox.
+	index := read("src/index.ts")
+	for _, want := range []string{
+		"import { buildToolBox } from './tools/index.js';",
+		"const toolBox = buildToolBox(logger, config);",
+	} {
+		if !strings.Contains(index, want) {
+			t.Errorf("src/index.ts missing %q\n---\n%s", want, index)
+		}
+	}
+	if strings.Contains(index, "new DefaultToolBox()") {
+		t.Errorf("src/index.ts should not boot an empty DefaultToolBox when user tools exist\n---\n%s", index)
+	}
+
+	// Reserved tool IDs are skipped: no src/tools/read.ts is emitted.
+	if _, err := os.Stat(filepath.Join(outDir, "src", "tools", "read.ts")); !os.IsNotExist(err) {
+		t.Errorf("src/tools/read.ts must NOT exist (reserved tools deferred), stat err = %v", err)
+	}
+
+	// .adl-ignore protects user-owned tool + service implementations but lets
+	// the deterministically-regenerated aggregator refresh on every run.
+	ignore := read(".adl-ignore")
+	for _, want := range []string{
+		"src/tools/query_database.ts",
+		"src/tools/send_notification.ts",
+		"src/services/database.ts",
+		"src/services/notifications.ts",
+	} {
+		if !strings.Contains(ignore, want) {
+			t.Errorf(".adl-ignore missing %q\n---\n%s", want, ignore)
+		}
+	}
+	if strings.Contains(ignore, "src/tools/index.ts") {
+		t.Errorf(".adl-ignore must NOT list the regenerated aggregator src/tools/index.ts\n---\n%s", ignore)
+	}
 }

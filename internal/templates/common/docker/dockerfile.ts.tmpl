@@ -1,0 +1,57 @@
+FROM node:{{ .ADL.Spec.Language.TypeScript.NodeVersion }}-alpine AS builder
+
+ARG VERSION="{{ .ADL.Metadata.Version }}"
+
+WORKDIR /app
+
+# Install dependencies (including dev) needed for the TypeScript build
+COPY package.json ./
+RUN npm install
+
+# Compile TypeScript to dist/
+COPY tsconfig.json ./
+COPY src ./src
+RUN npm run build
+
+# Final stage
+FROM node:{{ .ADL.Spec.Language.TypeScript.NodeVersion }}-alpine
+
+RUN apk --no-cache add ca-certificates tzdata
+
+# Create a2a group and agent user
+RUN addgroup -g 1001 a2a && \
+    adduser -D -u 1001 -G a2a agent
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Install production dependencies only
+COPY package.json ./
+RUN npm install --omit=dev && npm cache clean --force
+
+# Copy the compiled output from the builder stage
+COPY --from=builder /app/dist ./dist
+
+# Copy agent card
+COPY .well-known ./.well-known
+{{- if gt (len .ADL.Spec.Skills) 0 }}
+
+# Copy skills directory so loadSkillsManifest can read SKILL.md at runtime
+COPY skills ./skills
+{{- end }}
+
+# Change ownership to agent user
+RUN chown -R agent:a2a /app
+
+# Switch to non-root user
+USER agent
+
+# Expose port
+EXPOSE {{ .ADL.Spec.Server.Port | default 8080 }}
+
+# Set environment variables
+ENV A2A_SERVER_PORT={{ .ADL.Spec.Server.Port | default 8080 }}
+
+# Run the compiled A2A server
+CMD ["node", "dist/index.js"]

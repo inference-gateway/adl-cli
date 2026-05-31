@@ -293,9 +293,25 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		}
 	}
 
+	hasUserTools := false
 	for _, tool := range adl.Spec.Tools {
+		// Reserved/built-in tools (read/bash/write/edit/fetch) are not yet
+		// generated for TypeScript; they are tracked as a follow-up. Skipping
+		// them here keeps the toolbox aggregator and .adl-ignore consistent.
+		if schema.IsReservedToolID(tool.ID) {
+			continue
+		}
 		snakeCaseName := strings.ReplaceAll(tool.ID, "-", "_")
 		files[fmt.Sprintf("src/tools/%s.ts", snakeCaseName)] = "tool.ts"
+		hasUserTools = true
+	}
+	if hasUserTools {
+		files["src/tools/index.ts"] = "tools.index.ts"
+	}
+
+	for serviceName := range adl.Spec.Services {
+		snakeCaseName := strings.ReplaceAll(serviceName, "-", "_")
+		files[fmt.Sprintf("src/services/%s.ts", snakeCaseName)] = "service.ts"
 	}
 
 	for _, skill := range adl.Spec.Skills {
