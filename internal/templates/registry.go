@@ -295,9 +295,6 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 
 	hasUserTools := false
 	for _, tool := range adl.Spec.Tools {
-		// Reserved/built-in tools (read/bash/write/edit/fetch) are not yet
-		// generated for TypeScript; they are tracked as a follow-up. Skipping
-		// them here keeps the toolbox aggregator and .adl-ignore consistent.
 		if schema.IsReservedToolID(tool.ID) {
 			continue
 		}

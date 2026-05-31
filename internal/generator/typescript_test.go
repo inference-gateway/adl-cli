@@ -447,7 +447,6 @@ func TestGenerator_TypeScriptTools(t *testing.T) {
 				},
 			},
 			Tools: []schema.Tool{
-				// Reserved built-in: must be skipped (no src/tools/read.ts).
 				{ID: "read"},
 				{
 					ID:          "query_database",
@@ -527,9 +526,6 @@ func TestGenerator_TypeScriptTools(t *testing.T) {
 		}
 	}
 
-	// A tool injecting both a service AND a config section: the two share the
-	// base name `notifications` yet must not collide (service -> `notifications`,
-	// section -> `notificationsConfig`).
 	sendNotification := read("src/tools/send_notification.ts")
 	for _, want := range []string{
 		"export function createSendNotificationTool(",
@@ -541,7 +537,6 @@ func TestGenerator_TypeScriptTools(t *testing.T) {
 		}
 	}
 
-	// Each spec.services entry produces a typed interface + factory module.
 	database := read("src/services/database.ts")
 	for _, want := range []string{
 		"export interface DatabaseService {",
@@ -552,8 +547,6 @@ func TestGenerator_TypeScriptTools(t *testing.T) {
 		}
 	}
 
-	// The toolbox aggregator constructs each service once and registers every
-	// non-reserved tool, threading logger/config/config.<section>/service args.
 	aggregator := read("src/tools/index.ts")
 	for _, want := range []string{
 		"export function buildToolBox(logger: Logger, config: Config): ToolBox",
@@ -574,7 +567,6 @@ func TestGenerator_TypeScriptTools(t *testing.T) {
 		}
 	}
 
-	// index.ts consumes the aggregator instead of booting an empty toolbox.
 	index := read("src/index.ts")
 	for _, want := range []string{
 		"import { buildToolBox } from './tools/index.js';",
@@ -588,13 +580,10 @@ func TestGenerator_TypeScriptTools(t *testing.T) {
 		t.Errorf("src/index.ts should not boot an empty DefaultToolBox when user tools exist\n---\n%s", index)
 	}
 
-	// Reserved tool IDs are skipped: no src/tools/read.ts is emitted.
 	if _, err := os.Stat(filepath.Join(outDir, "src", "tools", "read.ts")); !os.IsNotExist(err) {
 		t.Errorf("src/tools/read.ts must NOT exist (reserved tools deferred), stat err = %v", err)
 	}
 
-	// .adl-ignore protects user-owned tool + service implementations but lets
-	// the deterministically-regenerated aggregator refresh on every run.
 	ignore := read(".adl-ignore")
 	for _, want := range []string{
 		"src/tools/query_database.ts",
