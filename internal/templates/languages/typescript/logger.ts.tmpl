@@ -1,0 +1,14 @@
+import { createLogger, type Logger } from '@inference-gateway/adk';
+
+export type { Logger };
+
+/**
+ * Build a structured logger for the agent. Mirrors the Go scaffold's
+ * internal/logger/logger.go: a single debug flag selects the level
+ * (verbose `debug` output vs. `info`), everything else is left to the
+ * ADK's logger defaults. Backed by the ADK's pino-based logger so output
+ * is structured JSON in production.
+ */
+export function newLogger(debug: boolean): Logger {
+  return createLogger({ level: debug ? 'debug' : 'info' });
+}

@@ -1,0 +1,381 @@
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import {
+  AgentBuilder,
+  ChatCompletionToolType,
+  DefaultBackgroundTaskHandler,
+  DefaultToolBox,
+  InMemoryTaskStorage,
+  MESSAGE_SEND_METHOD,
+  MessageRole,
+  OpenAICompatibleLLMClient,
+  TASK_GET_METHOD,
+  TASK_LIST_METHOD,
+  TASK_STATE,
+  createA2AServer,
+  createMessageSendHandler,
+  createTaskGetHandler,
+  createTaskListHandler,
+  isTerminal,
+  transitionTask,
+  type AgentCard,
+  type ChatMessage,
+  type CompletionResult,
+  type CreateCompletionOptions,
+  type LLMClient,
+  type LLMMessage,
+  type LLMTool,
+  type ManagedTask,
+  type Message,
+  type ToolDefinition,
+} from '@inference-gateway/adk';
+import { newLogger } from './logger.js';
+
+// Defaults are baked in from the ADL manifest at generation time; every
+// value is overridable at runtime through the matching A2A_* environment
+// variable (a dedicated config module lands in a follow-up).
+const AGENT_NAME = process.env['A2A_AGENT_NAME'] ?? {{ .ADL.Metadata.Name | toJson }};
+const AGENT_DESCRIPTION =
+  process.env['A2A_AGENT_DESCRIPTION'] ?? {{ .ADL.Metadata.Description | toJson }};
+const AGENT_VERSION = process.env['A2A_AGENT_VERSION'] ?? {{ .ADL.Metadata.Version | toJson }};
+const HOST = process.env['A2A_SERVER_HOST'] ?? '0.0.0.0';
+const PORT = Number.parseInt(process.env['A2A_SERVER_PORT'] ?? '{{ .ADL.Spec.Server.Port }}', 10);
+const DEBUG = isTruthy(process.env['A2A_SERVER_DEBUG']);
+const SKILLS_DIR = process.env['A2A_SKILLS_DIR'] ?? 'skills';
+const AGENT_CARD_PATH = process.env['A2A_AGENT_CARD_PATH'] ?? '.well-known/agent-card.json';
+
+const BASE_SYSTEM_PROMPT =
+  process.env['A2A_AGENT_SYSTEM_PROMPT'] ??
+  {{ if and .ADL.Spec.Agent .ADL.Spec.Agent.SystemPrompt }}{{ .ADL.Spec.Agent.SystemPrompt | toJson }}{{ else }}'You are a helpful AI assistant.'{{ end }};
+
+const PROVIDER = required('A2A_AGENT_CLIENT_PROVIDER');
+const MODEL = required('A2A_AGENT_CLIENT_MODEL');
+const BASE_URL = process.env['A2A_AGENT_CLIENT_BASE_URL'];
+const API_KEY =
+  process.env['A2A_AGENT_CLIENT_API_KEY'] ??
+  process.env[`${PROVIDER.toUpperCase()}_API_KEY`];
+
+const logger = newLogger(DEBUG);
+
+const card = loadAgentCard();
+
+const skillsPrompt = loadSkillsManifest(SKILLS_DIR);
+if (skillsPrompt !== '') {
+  logger.info('loaded skills manifest into system prompt', { dir: SKILLS_DIR });
+}
+const systemPrompt =
+  skillsPrompt === '' ? BASE_SYSTEM_PROMPT : `${BASE_SYSTEM_PROMPT}\n\n${skillsPrompt}`;
+
+const llmClient = new OpenAICompatibleLLMClient({
+  provider: PROVIDER,
+  model: MODEL,
+  ...(BASE_URL !== undefined ? { baseURL: BASE_URL } : {}),
+  ...(API_KEY !== undefined ? { apiKey: API_KEY } : {}),
+});
+
+const agent = new AgentBuilder()
+  .withLLMClient(llmClient)
+  .withSystemPrompt(systemPrompt)
+  .build();
+
+// Tools are registered against this toolbox in a follow-up; the foundation
+// boots with the ADK's default toolbox only.
+const toolBox = new DefaultToolBox();
+
+const handler = new DefaultBackgroundTaskHandler({
+  llmClient: adaptLLMClient(agent.getLLMClient()),
+  toolBox,
+  systemPrompt: agent.getSystemPrompt(),
+  maxIterations: agent.getMaxIterations(),
+  maxConversationHistory: agent.getMaxConversationHistory(),
+});
+handler.setEnableUsageMetadata(true);
+
+const storage = new InMemoryTaskStorage();
+const server = createA2AServer({ card });
+
+server.registerMethod(MESSAGE_SEND_METHOD, createMessageSendHandler({ storage }));
+server.registerMethod(TASK_GET_METHOD, createTaskGetHandler({ storage }));
+server.registerMethod(TASK_LIST_METHOD, createTaskListHandler({ storage }));
+
+const abort = new AbortController();
+const worker = runWorker(abort.signal).catch((err) => {
+  if (abort.signal.aborted) return;
+  logger.error('worker crashed', err);
+  process.exitCode = 1;
+});
+
+await server.listen(PORT, HOST);
+logger.info(`${AGENT_NAME} listening on http://${HOST}:${PORT}`, {
+  provider: PROVIDER,
+  model: MODEL,
+  version: AGENT_VERSION,
+});
+logger.info(`agent card: http://${HOST}:${PORT}/.well-known/agent-card.json`);
+logger.info(`health:     http://${HOST}:${PORT}/health`);
+logger.info(`rpc:        POST http://${HOST}:${PORT}/`);
+
+const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
+  logger.info(`received ${signal}, shutting down...`);
+  abort.abort();
+  await worker;
+  await server.close();
+  process.exit(0);
+};
+process.once('SIGINT', shutdown);
+process.once('SIGTERM', shutdown);
+
+/**
+ * Background worker: drains the task queue, dispatches each task to the
+ * LLM-backed handler, and records the terminal result (dead-lettering
+ * tasks that never reach a terminal state). Mirrors the Go/Rust scaffold's
+ * background task loop.
+ */
+async function runWorker(signal: AbortSignal): Promise<void> {
+  while (!signal.aborted) {
+    let task: ManagedTask;
+    try {
+      task = await storage.dequeue(signal);
+    } catch {
+      return;
+    }
+    storage.updateActive(task);
+    logger.debug(`task ${task.id} dequeued, dispatching to LLM`);
+
+    const triggering = task.messages[task.messages.length - 1] as Message;
+    const result = await handler.handle({ task, message: triggering, signal });
+
+    if (isTerminal(result.state)) {
+      storage.storeDeadLetter(result);
+      logger.debug(`task ${task.id} -> ${result.state}`);
+    } else {
+      const failed = transitionTask(result, TASK_STATE.FAILED);
+      storage.storeDeadLetter(failed);
+      logger.warn(
+        `task ${task.id} did not reach a terminal state (got ${result.state}); recorded as FAILED`
+      );
+    }
+  }
+}
+
+/**
+ * Load the agent card emitted by the scaffolder at
+ * `.well-known/agent-card.json`, then layer runtime overrides on top so
+ * the card always reflects the live A2A_* environment. Mirrors the Go
+ * scaffold's WithAgentCardFromFile override map.
+ */
+function loadAgentCard(): AgentCard {
+  const raw = readFileSync(AGENT_CARD_PATH, 'utf-8');
+  const parsed = JSON.parse(raw) as AgentCard;
+  const url =
+    parsed.url !== undefined && parsed.url !== ''
+      ? parsed.url
+      : `http://${HOST}:${PORT}`;
+  return {
+    ...parsed,
+    name: AGENT_NAME,
+    description: AGENT_DESCRIPTION,
+    version: AGENT_VERSION,
+    url,
+  };
+}
+
+/**
+ * Walk the skills directory, extract YAML frontmatter (name + description)
+ * from each `<skill>/SKILL.md`, and return an `AVAILABLE SKILLS:` block to
+ * append to the system prompt. SKILL.md bodies are NOT inlined - the model
+ * must call the Read tool to load a skill's playbook on demand. Returns an
+ * empty string when the directory is missing or has no valid manifests.
+ */
+function loadSkillsManifest(dir: string): string {
+  let ids: string[];
+  try {
+    ids = readdirSync(dir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort();
+  } catch {
+    return '';
+  }
+
+  let manifest = '';
+  for (const id of ids) {
+    const path = join(dir, id, 'SKILL.md');
+    let content: string;
+    try {
+      content = readFileSync(path, 'utf-8');
+    } catch {
+      continue;
+    }
+    const frontmatter = extractFrontmatter(content);
+    if (frontmatter === undefined) {
+      continue;
+    }
+    const name = frontmatterField(frontmatter, 'name');
+    const description = frontmatterField(frontmatter, 'description');
+    if (name === '' || description === '') {
+      continue;
+    }
+    if (manifest === '') {
+      manifest =
+        'AVAILABLE SKILLS:\n' +
+        'Skills are reusable instructions for specific tasks. When a task matches a\n' +
+        "skill's description, read the SKILL.md file at the listed path using the Read\n" +
+        'tool, then follow its instructions.\n\n';
+    }
+    manifest += `- ${name}: ${description}\n  Path: ${path}\n`;
+  }
+  return manifest;
+}
+
+/**
+ * Return the text between the opening and closing `---` fences of a
+ * SKILL.md file (without the fences themselves), or undefined when no
+ * frontmatter block is present.
+ */
+function extractFrontmatter(content: string): string | undefined {
+  const buf = content.replace(/^﻿/, '').replace(/^[\s\r\n]+/, '');
+  if (!buf.startsWith('---')) {
+    return undefined;
+  }
+  const rest = buf.slice(3).replace(/^[\r\n]+/, '');
+  const idx = rest.indexOf('\n---');
+  if (idx < 0) {
+    return undefined;
+  }
+  return rest.slice(0, idx);
+}
+
+/**
+ * Pull a single top-level scalar field (`name`/`description`) out of a
+ * frontmatter block. Intentionally minimal - it only needs to handle the
+ * flat key/value shape the scaffolder emits, so no YAML dependency is
+ * pulled in.
+ */
+function frontmatterField(frontmatter: string, key: string): string {
+  const prefix = `${key}:`;
+  for (const line of frontmatter.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith(prefix)) {
+      continue;
+    }
+    let value = trimmed.slice(prefix.length).trim();
+    if (
+      value.length >= 2 &&
+      ((value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'")))
+    ) {
+      value = value.slice(1, -1);
+    }
+    return value;
+  }
+  return '';
+}
+
+function required(name: string): string {
+  const value = process.env[name];
+  if (value === undefined || value.length === 0) {
+    console.error(`missing required environment variable: ${name}`);
+    process.exit(1);
+  }
+  return value;
+}
+
+function isTruthy(value: string | undefined): boolean {
+  return value !== undefined && value !== '' && value !== 'false' && value !== '0';
+}
+
+/**
+ * Adapter from {@link OpenAICompatibleLLMClient} (wire-shaped, snake_case,
+ * `chatCompletion`) to the structural {@link LLMClient} interface consumed by
+ * {@link DefaultBackgroundTaskHandler} (camelCase, `createCompletion`).
+ *
+ * The TS ADK does not yet ship this bridge built-in (the Go ADK wires it
+ * internally); this carries the minimal one-shot variant until the upstream
+ * gap closes.
+ */
+function adaptLLMClient(client: OpenAICompatibleLLMClient): LLMClient {
+  return {
+    async createCompletion(
+      opts: CreateCompletionOptions
+    ): Promise<CompletionResult> {
+      const wireMessages = opts.messages.map(toWireMessage);
+      const wireTools = opts.tools?.map(toWireTool);
+      const response = await client.chatCompletion(wireMessages, {
+        ...(wireTools !== undefined && wireTools.length > 0
+          ? { tools: wireTools }
+          : {}),
+        ...(opts.signal !== undefined ? { signal: opts.signal } : {}),
+      });
+      const choice = response.choices[0];
+      const msg = choice?.message;
+      const content =
+        msg !== undefined && typeof msg.content === 'string'
+          ? msg.content
+          : undefined;
+      const toolCalls = msg?.tool_calls?.map((tc) => ({
+        id: tc.id,
+        name: tc.function.name,
+        arguments: tc.function.arguments,
+      }));
+      const usage =
+        response.usage !== undefined
+          ? {
+              promptTokens: response.usage.prompt_tokens,
+              completionTokens: response.usage.completion_tokens,
+              totalTokens: response.usage.total_tokens,
+            }
+          : undefined;
+      return {
+        message: {
+          ...(content !== undefined ? { content } : {}),
+          ...(toolCalls !== undefined && toolCalls.length > 0
+            ? { toolCalls }
+            : {}),
+        },
+        ...(usage !== undefined ? { usage } : {}),
+      };
+    },
+  };
+}
+
+function toWireMessage(message: ChatMessage): LLMMessage {
+  switch (message.role) {
+    case 'system':
+      return { role: MessageRole.system, content: message.content };
+    case 'user':
+      return { role: MessageRole.user, content: message.content };
+    case 'assistant': {
+      const toolCalls = message.toolCalls?.map((tc) => ({
+        id: tc.id,
+        type: ChatCompletionToolType.function,
+        function: { name: tc.name, arguments: tc.arguments },
+      }));
+      return {
+        role: MessageRole.assistant,
+        content: message.content ?? '',
+        ...(toolCalls !== undefined && toolCalls.length > 0
+          ? { tool_calls: toolCalls }
+          : {}),
+      };
+    }
+    case 'tool':
+      return {
+        role: MessageRole.tool,
+        content: message.content,
+        tool_call_id: message.toolCallId,
+      };
+  }
+}
+
+function toWireTool(tool: ToolDefinition): LLMTool {
+  return {
+    type: ChatCompletionToolType.function,
+    function: {
+      name: tool.name,
+      description: tool.description,
+      parameters: tool.parameters as Record<string, unknown>,
+      strict: false,
+    },
+  };
+}

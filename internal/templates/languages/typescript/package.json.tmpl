@@ -1,0 +1,28 @@
+{
+  "name": {{ .ADL.Spec.Language.TypeScript.PackageName | toJson }},
+  "version": {{ .ADL.Metadata.Version | toJson }},
+  "description": {{ .ADL.Metadata.Description | toJson }},
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">={{ .ADL.Spec.Language.TypeScript.NodeVersion }}"
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@inference-gateway/adk": "0.11.0"{{- range .Vendor.NpmDeps }},
+    {{ .Name | toJson }}: {{ .Version | toJson }}{{- end }}
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^6.0.3"{{- range .Vendor.NpmDevDeps }},
+    {{ .Name | toJson }}: {{ .Version | toJson }}{{- end }}
+  }
+}
