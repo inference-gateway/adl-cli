@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.40.0](https://github.com/inference-gateway/adl-cli/compare/v0.39.3...v0.40.0) (2026-05-31)
+
+### ⚠ BREAKING CHANGES
+
+* per-agent AI toggles must nest under
+spec.development.ai.orchestrators; flat spec.development.ai.<agent>
+manifests are now rejected with a migration hint.
+
+* chore: use schema version v0.12.0
+
+Co-authored-by: Eden Reich <eden.reich@gmail.com>
+
+### ✨ Features
+
+* **adl-cli:** task-based branch prefix in generated claude workflow ([59f5c48](https://github.com/inference-gateway/adl-cli/commit/59f5c481177ba122d9f1b726502e5409189e8f86))
+
+### ♻️ Improvements
+
+* adopt spec.development.ai.orchestrators schema ([#163](https://github.com/inference-gateway/adl-cli/issues/163)) ([6e03851](https://github.com/inference-gateway/adl-cli/commit/6e038516adfa18c78b4d26d3f88cc2ff9b1869e9)), closes [adl#27](https://github.com/inference-gateway/adl/issues/27) [adl#27](https://github.com/inference-gateway/adl/issues/27)
+
+### 🐛 Bug Fixes
+
+* **ci:** only trigger infer when actually needed ([c9c115d](https://github.com/inference-gateway/adl-cli/commit/c9c115d9a75538e238f73d114432c7c30ce62be4))
+
+### 👷 CI
+
+* centralize claude.yml via reusable workflow ([#162](https://github.com/inference-gateway/adl-cli/issues/162)) ([7bffc3b](https://github.com/inference-gateway/adl-cli/commit/7bffc3b48a1f834d084d09da79274585a2e0a270))
+* centralize claude.yml via reusable workflow ([#164](https://github.com/inference-gateway/adl-cli/issues/164)) ([4ba0794](https://github.com/inference-gateway/adl-cli/commit/4ba07944d5575016c803c3792c338d5100edeec9))
+* **claude:** change effort to max ([3656279](https://github.com/inference-gateway/adl-cli/commit/36562790bf606503d33efd247e5602f041463465))
+* **claude:** change effort to max ([26d67ef](https://github.com/inference-gateway/adl-cli/commit/26d67ef940f249b555b24350fabf138ba050f765))
+* **claude:** download all maintainer skill assets ([70f2100](https://github.com/inference-gateway/adl-cli/commit/70f2100a2e605a9773d55d7b24098bce4dc525e1))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump docker/setup-qemu-action version v4.0.0 -> v4.1.0 ([befc836](https://github.com/inference-gateway/adl-cli/commit/befc83684ea640781b85df4fcc9294c7f3207e91))
+
 ## [0.39.3](https://github.com/inference-gateway/adl-cli/compare/v0.39.2...v0.39.3) (2026-05-26)
 
 ### 🐛 Bug Fixes
