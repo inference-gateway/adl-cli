@@ -170,9 +170,14 @@ spec:
     typescript:
       packageName: "typescript-agent-tools"
       nodeVersion: "24"
+  scm:
+    provider: github
+    dependabot: true
   development:
     sandbox:
       flox:
         enabled: true
       devcontainer:
-        enabled: false
+        enabled: true
+      dockerCompose:
+        enabled: true

@@ -55,7 +55,7 @@ tasks:
     desc: Run linter
     cmd: {{- if eq .Language "go" }} golangci-lint run
     {{- else if eq .Language "rust" }} cargo clippy
-    {{- else if eq .Language "typescript" }} npm run lint
+    {{- else if eq .Language "typescript" }} npm run typecheck
     {{- end }}
 
   clean:

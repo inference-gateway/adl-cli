@@ -93,7 +93,7 @@ func TestGenerator_TypeScriptPackageJSON(t *testing.T) {
 			t.Fatalf("expected pinned ADK dependency, got %q\n%s", deps["@inference-gateway/adk"], got)
 		}
 		scripts, _ := pkg["scripts"].(map[string]any)
-		for _, s := range []string{"build", "start", "typecheck", "test"} {
+		for _, s := range []string{"build", "start", "typecheck", "format", "test", "test:coverage"} {
 			if _, ok := scripts[s]; !ok {
 				t.Fatalf("expected %q script, got %v", s, scripts)
 			}
