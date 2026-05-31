@@ -206,9 +206,6 @@ func TestGenerator_TypeScriptIndex(t *testing.T) {
 		}
 	}
 
-	// Configuration is now sourced from the dedicated loader rather than inline
-	// process.env reads (the defaults themselves are asserted in the config.ts
-	// tests below).
 	for _, want := range []string{
 		"import { loadConfig, type Config } from './config.js'",
 		"const config = loadConfig();",
@@ -288,9 +285,6 @@ func TestGenerator_TypeScriptConfig(t *testing.T) {
 				t.Fatalf("config.ts missing %q\n%s", want, got)
 			}
 		}
-		// With no custom sections the only loader is loadConfig itself, and
-		// because provider/model carry manifest defaults the required() helper
-		// is omitted.
 		if c := strings.Count(got, "function load"); c != 1 {
 			t.Fatalf("expected only loadConfig (1 loader), got %d\n%s", c, got)
 		}
