@@ -68,4 +68,4 @@ shortcuts:
             ```
 
             Output ONLY the commit message in the format "type: Description"
-          template: '!git commit -m "{llm}"'
+          template: "!git commit -m \"{llm}\""
