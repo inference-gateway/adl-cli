@@ -57,7 +57,7 @@ bindings:
     enabled: true
   help_toggle_help:
     keys:
-      - "?"
+      - '?'
     description: toggle help when input is empty
     category: help
     enabled: true

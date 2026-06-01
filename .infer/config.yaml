@@ -64,7 +64,7 @@ tools:
       - .infer/heartbeat.yaml
       - .infer/computer_use.yaml
       - .git/
-      - "*.env"
+      - '*.env'
   bash:
     enabled: true
     timeout: 120
@@ -136,7 +136,7 @@ tools:
     timeout: 10
   github:
     enabled: true
-    token: "%GITHUB_TOKEN%"
+    token: '%GITHUB_TOKEN%'
     base_url: https://api.github.com
     owner: inference-gateway
     safety:

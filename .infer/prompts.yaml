@@ -114,16 +114,16 @@ git:
       Generate a concise git commit message following conventional commit format.
 
       REQUIREMENTS:
-      - MUST use format: "type: Brief description"
+      - MUST use format: "type(scope): brief description"
       - MUST be under 50 characters total
-      - MUST use imperative mood (e.g., "Add", "Fix", "Update")
+      - MUST use imperative mood (e.g., "add", "fix", "update", "refactor")
       - Types: feat, fix, docs, style, refactor, test, chore
 
       EXAMPLES:
-      - "feat: Add git shortcut with AI commits"
-      - "fix: Resolve build error in container"
-      - "docs: Update README installation guide"
-      - "refactor: Simplify error handling"
+      - "feat: add git shortcut with AI commits"
+      - "fix: resolve build error in container"
+      - "docs: update README installation guide"
+      - "refactor(examples): simplify error handling"
 
       Respond with ONLY the commit message, no quotes or explanation.
 conversation:
@@ -369,9 +369,9 @@ tools:
   A2A_QueryAgent:
     description: Retrieve an A2A agent's metadata card showing its capabilities and configuration. Use ONLY for discovering what an agent can do. For asking questions or requesting work from an agent, use the Task tool instead.
   A2A_QueryTask:
-    description: "Query the status and result of a specific A2A task. Returns the complete task object including status, artifacts, and message data. IMPORTANT: When you submit a task via A2A_SubmitTask, it automatically monitors the task in the background and emits an event when complete - you will be notified automatically. DO NOT manually query recently submitted tasks during background monitoring. Only use this tool to: 1) Check tasks from previous conversations, 2) Check tasks submitted outside this session, or 3) Get detailed results AFTER you receive a completion notification."
+    description: 'Query the status and result of a specific A2A task. Returns the complete task object including status, artifacts, and message data. IMPORTANT: When you submit a task via A2A_SubmitTask, it automatically monitors the task in the background and emits an event when complete - you will be notified automatically. DO NOT manually query recently submitted tasks during background monitoring. Only use this tool to: 1) Check tasks from previous conversations, 2) Check tasks submitted outside this session, or 3) Get detailed results AFTER you receive a completion notification.'
   A2A_SubmitTask:
-    description: "Submit work to an A2A agent server and delegate it to run in the background. IMPORTANT: This tool returns IMMEDIATELY after submission. DO NOT poll, query, or download artifacts right after submission. The system automatically monitors the task in the background and you will be AUTOMATICALLY NOTIFIED when it completes - the result will appear in the conversation. After submission, you MUST wait for the automatic notification before taking any follow-up actions. You can tell the user the task is running and you're waiting for it to complete. Use this for ANY interaction where you need an agent to respond with answers or complete work. The A2A_QueryTask tool is ONLY for retrieving metadata/capabilities or checking status of previously submitted tasks, NOT for polling just-submitted tasks."
+    description: 'Submit work to an A2A agent server and delegate it to run in the background. IMPORTANT: This tool returns IMMEDIATELY after submission. DO NOT poll, query, or download artifacts right after submission. The system automatically monitors the task in the background and you will be AUTOMATICALLY NOTIFIED when it completes - the result will appear in the conversation. After submission, you MUST wait for the automatic notification before taking any follow-up actions. You can tell the user the task is running and you''re waiting for it to complete. Use this for ANY interaction where you need an agent to respond with answers or complete work. The A2A_QueryTask tool is ONLY for retrieving metadata/capabilities or checking status of previously submitted tasks, NOT for polling just-submitted tasks.'
   MouseMove:
     description: Moves the mouse cursor to absolute screen coordinates. Requires user approval unless in auto-accept mode.
   MouseClick:
@@ -379,7 +379,7 @@ tools:
   MouseScroll:
     description: Scrolls the mouse wheel up or down. Useful for navigating web pages, documents, and long content. Positive values scroll down, negative values scroll up.
   KeyboardType:
-    description: "Types text or sends key combinations INTO GUI APPLICATIONS at the current cursor position (e.g., typing in a text editor, browser search box, or form field). DO NOT use this to run shell commands - use the Bash tool instead. To open applications on macOS, use Bash with 'open -a AppName'. Requires user approval unless in auto-accept mode. Note: Exactly one of 'text' or 'key_combo' must be provided."
+    description: 'Types text or sends key combinations INTO GUI APPLICATIONS at the current cursor position (e.g., typing in a text editor, browser search box, or form field). DO NOT use this to run shell commands - use the Bash tool instead. To open applications on macOS, use Bash with ''open -a AppName''. Requires user approval unless in auto-accept mode. Note: Exactly one of ''text'' or ''key_combo'' must be provided.'
   GetFocusedApp:
     description: Gets the currently focused (frontmost) application. Returns the application name and bundle identifier. Use this before performing computer use actions to verify the correct application is in focus.
   ActivateApp:
