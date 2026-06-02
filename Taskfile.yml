@@ -136,6 +136,7 @@ tasks:
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent-ai.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/typescript-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/typescript-agent-tools.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/typescript-agent-ai.yaml
 
   examples:generate:
     desc: Generate all example projects
@@ -157,6 +158,7 @@ tasks:
           - rust-agent-ai
           - typescript-agent
           - typescript-agent-tools
+          - typescript-agent-ai
         cmd: |
           ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/{{.ITEM}}.yaml --output test-output/{{.ITEM}} --overwrite
           cp examples/{{.ITEM}}.yaml test-output/{{.ITEM}}/agent.yaml
