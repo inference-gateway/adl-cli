@@ -1,0 +1,89 @@
+---
+apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: typescript-agent-ai
+  description: "AI-powered TypeScript agent with LLM-driven tools"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: true
+  card:
+    protocolVersion: "0.3.0"
+    preferredTransport: JSONRPC
+    defaultInputModes:
+      - text
+    defaultOutputModes:
+      - text
+  agent:
+    provider: deepseek
+    model: deepseek-v4-flash
+    systemPrompt: |
+      You are a concise, helpful assistant with access to tools.
+      Use the appropriate tool when the user asks about weather or math.
+    maxTokens: 4096
+    temperature: 0.3
+  tools:
+    - id: get_weather
+      name: get_weather
+      description: "Get the current weather for a specific location"
+      tags:
+        - weather
+      schema:
+        type: object
+        properties:
+          location:
+            type: string
+            description: "City name"
+          unit:
+            type: string
+            description: "Temperature unit"
+            enum:
+              - celsius
+              - fahrenheit
+            default: celsius
+        required:
+          - location
+    - id: calculate
+      name: calculate
+      description: "Perform a basic math calculation"
+      tags:
+        - math
+      schema:
+        type: object
+        properties:
+          expression:
+            type: string
+            description: "A simple arithmetic expression, e.g. '2 + 2'"
+        required:
+          - expression
+  server:
+    port: 8080
+    scheme: http
+    debug: false
+    auth:
+      enabled: false
+  language:
+    typescript:
+      packageName: "typescript-agent-ai"
+      nodeVersion: "24"
+  development:
+    sandbox:
+      flox:
+        enabled: true
+      devcontainer:
+        enabled: false
+    ai:
+      orchestrators:
+        claudecode:
+          enabled: true
+        gemini:
+          enabled: false
+        codex:
+          enabled: false
+        opencode:
+          enabled: false
+        infer:
+          enabled: false

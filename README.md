@@ -247,7 +247,7 @@ The init command supports extensive configuration options:
 
 **Language-Specific Options:**
 
-- `--language` - Programming language (`go`/`rust`, TypeScript support planned)
+- `--language` - Programming language (`go`/`rust`/`typescript`)
 
 **Go Options:**
 
@@ -635,7 +635,7 @@ downgrades of the core runtime SDK.
 | ---------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Go         | `go.mod` `require` block      | `go.mod` [`tool` directive](https://go.dev/doc/modules/managing-dependencies#tools) (executable dev tools: code generators, linters, etc.) plus an `// indirect` entry in `require` so the module is downloadable. Test libraries that you `import` (testify, go-cmp, …) belong in `deps`, not `devdeps`. |
 | Rust       | `Cargo.toml` `[dependencies]` | `Cargo.toml` `[dev-dependencies]`                                                                                                                                                                                                                                                                         |
-| TypeScript | `package.json` `dependencies` | `package.json` `devDependencies` _(plumbed end-to-end once the TypeScript generator templates land - the schema and validator already accept the field)_                                                                                                                                                  |
+| TypeScript | `package.json` `dependencies` | `package.json` `devDependencies`                                                                                                                                                                                                                                                                          |
 
 For Go, supply the **full tool package path** (the binary's `main` package,
 e.g. `golang.org/x/tools/cmd/stringer`) with a version. After generation,
@@ -1216,7 +1216,7 @@ func NewCreateEventSkill(logger *zap.Logger, calendar googleCalendar.CalendarSer
 - **Environment Variables**: Automatic mapping with proper naming conventions
 - **Interface-Based Design**: Testable services with clear contracts
 - **Separation of Concerns**: Configuration separate from service definitions
-- **Language Agnostic**: Works across Go, Rust, and planned TypeScript support
+- **Language Agnostic**: Works across Go, Rust, and TypeScript
 - **Hot Reload**: Configuration changes via environment variables
 - **Security**: No secrets in code, environment-based configuration
 - **Scalability**: Easy to add new services and configuration sections
@@ -1313,6 +1313,42 @@ my-rust-agent/
 │   └── deployment.yaml        # Kubernetes deployment
 ├── cloudrun/
 │   └── deploy.sh              # CloudRun deployment script (with --deployment cloudrun)
+├── CLAUDE.md                  # AI assistant instructions (spec.development.ai.orchestrators.claudecode.enabled: true)
+└── README.md                  # Documentation
+```
+
+### TypeScript Project Structure
+
+```text
+my-typescript-agent/
+├── src/
+│   ├── index.ts               # Main server setup + background task worker
+│   ├── config.ts              # Typed configuration loader (env-mapped)
+│   ├── logger.ts              # Built-in logger factory
+│   ├── services/              # Injectable service implementations
+│   │   └── database.ts
+│   └── tools/                 # Function-call tool implementations
+│       ├── index.ts           # Toolbox wiring
+│       ├── query_database.ts  # Individual tool implementations (TODO placeholders)
+│       └── send_notification.ts
+├── skills/                    # Skill directories (SKILL.md + optional bundled assets)
+│   ├── incident-response/
+│   │   └── SKILL.md
+│   └── support-handoff/
+│       └── SKILL.md
+├── package.json               # Node package definition + scripts
+├── tsconfig.json              # TypeScript compiler configuration
+├── Taskfile.yml               # Development tasks
+├── Dockerfile                 # Node-optimized container
+├── .adl-ignore                # Protection configuration
+├── .well-known/
+│   └── agent-card.json        # Agent capabilities
+├── .github/workflows/         # CI configuration (with --ci)
+│   ├── ci.yml                 # TypeScript-specific CI workflow
+│   └── cd.yml                 # GitHub Actions CD workflow (with --cd flag)
+├── .releaserc.yaml            # Semantic-release configuration (with --cd flag)
+├── k8s/
+│   └── deployment.yaml        # Kubernetes deployment (with --deployment kubernetes)
 ├── CLAUDE.md                  # AI assistant instructions (spec.development.ai.orchestrators.claudecode.enabled: true)
 └── README.md                  # Documentation
 ```
@@ -1740,13 +1776,14 @@ The CLI includes example ADL files in the `examples/` directory:
 # Validate examples
 adl validate examples/go-agent.yaml
 adl validate examples/rust-agent.yaml
-adl validate examples/github-app-agent.yaml
+adl validate examples/typescript-agent.yaml
 adl validate examples/cloudrun-agent.yaml
 adl validate examples/cloudrun-ghcr-agent.yaml
 
 # Generate from examples
 adl generate --file examples/go-agent.yaml --output ./test-go-agent
 adl generate --file examples/rust-agent.yaml --output ./test-rust-agent
+adl generate --file examples/typescript-agent.yaml --output ./test-typescript-agent
 adl generate --file examples/github-app-agent.yaml --output ./test-github-app-agent --cd
 adl generate --file examples/cloudrun-agent.yaml --output ./test-cloudrun-agent --deployment cloudrun
 adl generate --file examples/cloudrun-ghcr-agent.yaml --output ./test-ghcr-agent --deployment cloudrun
@@ -1760,6 +1797,9 @@ adl generate --file examples/cloudrun-agent.yaml --output ./cloudrun-enterprise 
 
 - `go-agent.yaml` - Basic Go agent with multiple skills and capabilities
 - `rust-agent.yaml` - Rust agent with enterprise features
+- `typescript-agent.yaml` - Minimal TypeScript agent built with the TypeScript ADK
+- `typescript-agent-tools.yaml` - TypeScript agent with tools, services, and dependency injection
+- `typescript-agent-ai.yaml` - AI-powered TypeScript agent with LLM-driven tools
 - `github-app-agent.yaml` - Enterprise agent with GitHub App CD integration
 - `cloudrun-agent.yaml` - CloudRun deployment with Google Container Registry
 - `cloudrun-ghcr-agent.yaml` - CloudRun deployment with GitHub Container Registry
@@ -2057,20 +2097,15 @@ hooks:
 
 ### Language Support
 
-The ADL CLI currently supports Go and Rust, with plans to expand to additional programming languages:
+The ADL CLI currently supports Go, Rust, and TypeScript, with plans to expand to additional programming languages:
 
 #### ✅ Currently Supported
 
 - **Go** - Full support with templates for main.go, go.mod, and tools
 - **Rust** - Full support with templates for main.rs, Cargo.toml, and tools
+- **TypeScript/Node.js** - Full support with templates for src/index.ts, package.json, and tools
 
 #### 🚧 Planned Support
-
-- **TypeScript/Node.js** - Template structure exists but templates not yet implemented
-  - Complete A2A agent generation with Express.js framework planned
-  - AI-powered agents with OpenAI/Anthropic integration
-  - Enterprise features (auth, metrics, logging)
-  - Docker and Kubernetes deployment configs
 
 - **Python** - Rapid prototyping and AI-first development
   - FastAPI-based server generation
