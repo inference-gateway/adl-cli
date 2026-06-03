@@ -218,8 +218,6 @@ func TestBuildADLToolsAndSkills(t *testing.T) {
 		t.Errorf("expected logger injected, got %v", tool.Inject)
 	}
 
-	// spec.services must be an object keyed by service name, each value a
-	// Service with type/interface/factory/description (schema #190).
 	logger, ok := adl.Spec.Services["logger"]
 	if !ok {
 		t.Fatalf("expected logger service in map, got %v", adl.Spec.Services)
