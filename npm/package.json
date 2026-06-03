@@ -1,0 +1,52 @@
+{
+  "name": "@inference-gateway/adl-cli",
+  "version": "0.40.0",
+  "description": "Scaffold complete A2A (Agent-to-Agent) projects from YAML Agent Definition Language (ADL) manifests. Thin npm wrapper around the native adl binary.",
+  "bin": {
+    "adl": "bin/run.js"
+  },
+  "scripts": {
+    "postinstall": "node bin/install.js"
+  },
+  "files": [
+    "bin/run.js",
+    "bin/install.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "a2a",
+    "agent",
+    "agent-to-agent",
+    "adl",
+    "scaffold",
+    "scaffolding",
+    "generator",
+    "cli",
+    "inference-gateway"
+  ],
+  "homepage": "https://github.com/inference-gateway/adl-cli#readme",
+  "bugs": {
+    "url": "https://github.com/inference-gateway/adl-cli/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inference-gateway/adl-cli.git"
+  },
+  "license": "Apache-2.0",
+  "author": "Inference Gateway",
+  "engines": {
+    "node": ">=18"
+  },
+  "os": [
+    "linux",
+    "darwin"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
