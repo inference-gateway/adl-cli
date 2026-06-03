@@ -136,13 +136,13 @@ nix run github:inference-gateway/adl-cli
 Or pin a specific version:
 
 ```bash
-nix run github:inference-gateway/adl-cli/v0.27.13
+nix run github:inference-gateway/adl-cli/v0.41.3
 ```
 
 Build and add it to your profile:
 
 ```bash
-nix profile install github:inference-gateway/adl-cli/v0.27.13
+nix profile install github:inference-gateway/adl-cli/v0.41.3
 ```
 
 Enter a development shell with `go`, `go-task`, `golangci-lint`, `gopls`, and
@@ -159,7 +159,7 @@ adding it to your `.flox/env/manifest.toml`:
 
 ```toml
 [install]
-adl.flake = "github:inference-gateway/adl-cli/v0.31.0"
+adl.flake = "github:inference-gateway/adl-cli/v0.41.3"
 ```
 
 Then activate the environment:
