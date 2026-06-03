@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.42.0](https://github.com/inference-gateway/adl-cli/compare/v0.41.4...v0.42.0) (2026-06-03)
+
+### ✨ Features
+
+* **init:** redesign the adl init wizard with a branded huh/lipgloss TUI ([#188](https://github.com/inference-gateway/adl-cli/issues/188)) ([5fdc32c](https://github.com/inference-gateway/adl-cli/commit/5fdc32c00c9134a17be0108e3e5797b9fb3cdbb7))
+
 ## [0.41.4](https://github.com/inference-gateway/adl-cli/compare/v0.41.3...v0.41.4) (2026-06-03)
 
 ### 🐛 Bug Fixes
