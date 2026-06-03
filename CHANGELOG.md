@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.41.0](https://github.com/inference-gateway/adl-cli/compare/v0.40.0...v0.41.0) (2026-06-03)
+
+### ✨ Features
+
+* generate typescript config module from adl manifest ([#171](https://github.com/inference-gateway/adl-cli/issues/171)) ([0996261](https://github.com/inference-gateway/adl-cli/commit/0996261fd897b67ee62392f6271c9fcaa2e009e1))
+* generate typescript tools, toolbox, and services ([#172](https://github.com/inference-gateway/adl-cli/issues/172)) ([05cdae6](https://github.com/inference-gateway/adl-cli/commit/05cdae6f948aac8ee2b761b71d67ab0b925902e8))
+* publish adl-cli to npm via thin npx wrapper ([#186](https://github.com/inference-gateway/adl-cli/issues/186)) ([c0582c2](https://github.com/inference-gateway/adl-cli/commit/c0582c223ae422ffe2c280af0d84ade6e3d9c07a))
+* scaffold core typescript project templates ([#170](https://github.com/inference-gateway/adl-cli/issues/170)) ([70f6588](https://github.com/inference-gateway/adl-cli/commit/70f65881c822bed7f793145d56ecc610139abc4f))
+* typescript dockerfile, taskfile, and sandbox toolchain parity ([#173](https://github.com/inference-gateway/adl-cli/issues/173)) ([14fdd9f](https://github.com/inference-gateway/adl-cli/commit/14fdd9f740a04ad23e847d1e430c9be86779c5c0))
+
+### 👷 CI
+
+* centralize claude.yml via reusable workflow ([#175](https://github.com/inference-gateway/adl-cli/issues/175)) ([00de9f7](https://github.com/inference-gateway/adl-cli/commit/00de9f7dd2dd5d677b9e1ec34f87f9dfc7ea968b))
+* centralize claude.yml via reusable workflow ([#185](https://github.com/inference-gateway/adl-cli/issues/185)) ([0c5f4bd](https://github.com/inference-gateway/adl-cli/commit/0c5f4bd2024fd0924e918c8190d2cc7e60b10b6b))
+* centralize infer.yml + bump infer CLI and sync .infer config ([#178](https://github.com/inference-gateway/adl-cli/issues/178)) ([d2c5d3b](https://github.com/inference-gateway/adl-cli/commit/d2c5d3b119155a32eb53c48ffe9ecdfee1b5e762))
+* centralize infer.yml + sync .infer config ([#177](https://github.com/inference-gateway/adl-cli/issues/177)) ([33fff01](https://github.com/inference-gateway/adl-cli/commit/33fff01c4fb8e7d3e58329096c054019ffab85eb))
+* centralize infer.yml via reusable workflow ([#176](https://github.com/inference-gateway/adl-cli/issues/176)) ([cc56b21](https://github.com/inference-gateway/adl-cli/commit/cc56b21d91f0796a16bead3925e08b68bb984e6e))
+* **infer:** centralize infer.yml + bump infer CLI and sync .infer config ([#180](https://github.com/inference-gateway/adl-cli/issues/180)) ([725c0bc](https://github.com/inference-gateway/adl-cli/commit/725c0bca10deaff196b46b2202abef0a0b014d8d))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump claude-code 2.1.148 -> 2.1.158 ([#183](https://github.com/inference-gateway/adl-cli/issues/183)) ([f3f1cb6](https://github.com/inference-gateway/adl-cli/commit/f3f1cb65ca00f2fa175b06e000fd98fe70bb1d0a))
+* **deps:** bump infer CLI v0.117.0 -> v0.117.1, infer-action v0.9.1 -> v0.11.1 ([#181](https://github.com/inference-gateway/adl-cli/issues/181)) ([029a3e5](https://github.com/inference-gateway/adl-cli/commit/029a3e54139202584b9953e04d24c24dc87c98f4))
+
+### ✅ Miscellaneous
+
+* add typescript-agent-ai example and document TS support ([#179](https://github.com/inference-gateway/adl-cli/issues/179)) ([8532df6](https://github.com/inference-gateway/adl-cli/commit/8532df672df9cb54af513f6943099d9c4b3241fe))
+
 ## [0.40.0](https://github.com/inference-gateway/adl-cli/compare/v0.39.3...v0.40.0) (2026-05-31)
 
 ### ⚠ BREAKING CHANGES
