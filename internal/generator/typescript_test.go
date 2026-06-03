@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/inference-gateway/adl-cli/internal/schema"
 	"github.com/inference-gateway/adl-cli/internal/templates"
 	"github.com/inference-gateway/adl-cli/internal/vendor"
+	"gopkg.in/yaml.v3"
 )
 
 // makeTypeScriptADL builds a minimal but representative TypeScript ADL for
@@ -110,6 +112,9 @@ func TestGenerator_TypeScriptPackageJSON(t *testing.T) {
 		if devDeps["@inference-gateway/adl-cli"] != "9.9.9" {
 			t.Fatalf("expected adl-cli devDependency pinned to the generating CLI version, got %q\n%s", devDeps["@inference-gateway/adl-cli"], got)
 		}
+		if _, ok := pkg["pnpm"]; ok {
+			t.Fatalf("package.json must not carry a pnpm field; pnpm 11 ignores it and the build-script allowlist lives in pnpm-workspace.yaml\n%s", got)
+		}
 	})
 
 	t.Run("adl-cli devDependency floats to latest for dev builds", func(t *testing.T) {
@@ -164,6 +169,72 @@ func TestGenerator_TypeScriptPackageJSON(t *testing.T) {
 		}
 		if devDeps["typescript"] == nil || devDeps["tsx"] == nil || devDeps["@types/node"] == nil {
 			t.Fatalf("expected built-in devDeps preserved alongside vendor, got %v", devDeps)
+		}
+	})
+}
+
+// TestGenerator_TypeScriptPnpmWorkspace locks issue #199: pnpm 11 no longer
+// reads the `pnpm` field from package.json, so the build-script approval list
+// must live in pnpm-workspace.yaml. Without it pnpm skips the install scripts
+// for adl-cli/esbuild/protobufjs, the native `adl` binary never downloads, and
+// `task generate` fails with ERR_PNPM_IGNORED_BUILDS.
+func TestGenerator_TypeScriptPnpmWorkspace(t *testing.T) {
+	want := []string{"@inference-gateway/adl-cli", "esbuild", "protobufjs"}
+
+	t.Run("template emits the onlyBuiltDependencies allowlist as valid YAML", func(t *testing.T) {
+		got := renderTS(t, "pnpm-workspace.yaml", makeTypeScriptADL(nil, ""))
+
+		var ws struct {
+			OnlyBuiltDependencies []string `yaml:"onlyBuiltDependencies"`
+		}
+		if err := yaml.Unmarshal([]byte(got), &ws); err != nil {
+			t.Fatalf("pnpm-workspace.yaml is not valid YAML: %v\n%s", err, got)
+		}
+		if !reflect.DeepEqual(ws.OnlyBuiltDependencies, want) {
+			t.Fatalf("expected onlyBuiltDependencies %v, got %v\n%s", want, ws.OnlyBuiltDependencies, got)
+		}
+	})
+
+	t.Run("full pipeline writes pnpm-workspace.yaml so pnpm 11 reads the allowlist", func(t *testing.T) {
+		tmpDir, err := os.MkdirTemp("", "adl-ts-pnpm-*")
+		if err != nil {
+			t.Fatalf("MkdirTemp: %v", err)
+		}
+		defer func() { _ = os.RemoveAll(tmpDir) }()
+
+		adlPath := filepath.Join(tmpDir, "agent.yaml")
+		writeYAML(t, adlPath, makeTypeScriptADL(nil, "You are a test bot."))
+
+		outDir := filepath.Join(tmpDir, "out")
+		gen := New(Config{Template: "minimal", Overwrite: true, Version: "1.2.3"})
+		if err := gen.Generate(adlPath, outDir); err != nil {
+			t.Fatalf("Generate: %v", err)
+		}
+
+		wsBytes, err := os.ReadFile(filepath.Join(outDir, "pnpm-workspace.yaml"))
+		if err != nil {
+			t.Fatalf("pnpm-workspace.yaml must be generated for TS projects: %v", err)
+		}
+		var ws struct {
+			OnlyBuiltDependencies []string `yaml:"onlyBuiltDependencies"`
+		}
+		if err := yaml.Unmarshal(wsBytes, &ws); err != nil {
+			t.Fatalf("generated pnpm-workspace.yaml invalid: %v\n%s", err, wsBytes)
+		}
+		if !reflect.DeepEqual(ws.OnlyBuiltDependencies, want) {
+			t.Fatalf("expected onlyBuiltDependencies %v, got %v\n%s", want, ws.OnlyBuiltDependencies, wsBytes)
+		}
+
+		pkgBytes, err := os.ReadFile(filepath.Join(outDir, "package.json"))
+		if err != nil {
+			t.Fatalf("read package.json: %v", err)
+		}
+		var pkg map[string]any
+		if err := json.Unmarshal(pkgBytes, &pkg); err != nil {
+			t.Fatalf("package.json invalid: %v\n%s", err, pkgBytes)
+		}
+		if _, ok := pkg["pnpm"]; ok {
+			t.Fatalf("package.json must not carry a pnpm field; pnpm 11 ignores it\n%s", pkgBytes)
 		}
 	})
 }

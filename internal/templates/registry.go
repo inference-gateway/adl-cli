@@ -272,6 +272,7 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		"src/config.ts":               "config.ts",
 		"src/logger.ts":               "logger.ts",
 		"package.json":                "package.json",
+		"pnpm-workspace.yaml":         "pnpm-workspace.yaml",
 		"tsconfig.json":               "tsconfig.json",
 		".well-known/agent-card.json": "config/agent.json",
 		"Taskfile.yml":                "taskfile/taskfile.yml",
