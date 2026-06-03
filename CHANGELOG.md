@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.41.1](https://github.com/inference-gateway/adl-cli/compare/v0.41.0...v0.41.1) (2026-06-03)
+
+### 🔧 Miscellaneous
+
+* **npm:** add npm token temporarily ([db963a2](https://github.com/inference-gateway/adl-cli/commit/db963a279568c33b0f9f30d1eba6d1c81bfaf27a))
+
 ## [0.41.0](https://github.com/inference-gateway/adl-cli/compare/v0.40.0...v0.41.0) (2026-06-03)
 
 ### ✨ Features
