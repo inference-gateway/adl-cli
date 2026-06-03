@@ -12,7 +12,6 @@ const binName = process.platform === "win32" ? "adl.exe" : "adl";
 const binPath = path.join(__dirname, binName);
 
 if (!fs.existsSync(binPath)) {
-  // The postinstall hook may have been skipped (e.g. --ignore-scripts); try once.
   const install = spawnSync(process.execPath, [path.join(__dirname, "install.js")], {
     stdio: "inherit",
   });
