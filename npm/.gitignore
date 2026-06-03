@@ -1,0 +1,10 @@
+# Native binary fetched at install time
+adl
+adl.exe
+
+# Copied from repo root at publish time
+LICENSE
+
+# Auth + deps
+.npmrc
+node_modules/

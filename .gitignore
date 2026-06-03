@@ -4,8 +4,8 @@
 *.dll
 *.so
 *.dylib
-bin/
-dist/
+/bin/
+/dist/
 
 # Test binary, built with `go test -c`
 *.test
@@ -25,6 +25,9 @@ go.work.sum
 # Environment variables
 .env
 .env.local
+
+# npm publish auth (written transiently during release)
+.npmrc
 
 # IDE files
 .vscode/
