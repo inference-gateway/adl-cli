@@ -1,3 +1,4 @@
+{{- if eq .Language "go" -}}
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -16,6 +17,23 @@
 
 # Go workspace file
 go.work
+{{- else if eq .Language "rust" -}}
+# Rust-specific artifacts (target/ is covered under build output)
+**/*.rs.bk
+*.pdb
+{{- else if eq .Language "typescript" -}}
+# Node.js dependencies
+node_modules/
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Package manager debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log
+.pnpm-debug.log*
+{{- end }}
 
 # Build output
 bin/
