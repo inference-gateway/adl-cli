@@ -10,11 +10,32 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/inference-gateway/adl-cli/internal/prompt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
+
+	"github.com/inference-gateway/adl-cli/internal/prompt"
+	"github.com/inference-gateway/adl-cli/internal/tui"
 )
+
+// aiProviders are the LLM providers the inference-gateway supports, in the order
+// shown to users. This mirrors the gateway's Provider enum
+// (inference-gateway/inference-gateway openapi.yaml). Note the ADL schema's
+// spec.agent.provider enum may lag the gateway; providers not yet in that enum
+// will fail `adl validate` until the schema is updated upstream.
+var aiProviders = []string{
+	"openai",
+	"anthropic",
+	"google",
+	"groq",
+	"mistral",
+	"deepseek",
+	"cohere",
+	"cloudflare",
+	"moonshot",
+	"ollama",
+	"ollama_cloud",
+}
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
@@ -37,7 +58,7 @@ func init() {
 	initCmd.Flags().String("description", "", "Agent description")
 	initCmd.Flags().String("version", "", "Agent version")
 	initCmd.Flags().String("type", "", "Agent type (ai-powered/minimal)")
-	initCmd.Flags().String("provider", "", "AI provider (openai/anthropic/groq/mistral/ollama/deepseek/cloudflare)")
+	initCmd.Flags().String("provider", "", "AI provider (openai/anthropic/google/groq/mistral/deepseek/cohere/cloudflare/moonshot/ollama/ollama_cloud)")
 	initCmd.Flags().String("model", "", "AI model")
 	initCmd.Flags().String("system-prompt", "", "System prompt")
 	initCmd.Flags().Int("max-tokens", 0, "Maximum tokens")
@@ -71,12 +92,21 @@ func init() {
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 }
 
+// runInit dispatches to the interactive huh wizard when stdout/stdin are a
+// terminal and the user did not pass --defaults; otherwise it runs the plain,
+// non-interactive flow. The non-interactive flow is what the test suite exercises
+// (it always passes --defaults) and what CI / piped invocations hit, so its
+// output is kept byte-for-byte stable.
 func runInit(cmd *cobra.Command, args []string) error {
 	useDefaults, _ := cmd.Flags().GetBool("defaults")
+	if !useDefaults && tui.IsTTY() {
+		return runInitInteractive(args)
+	}
+	return runInitNonInteractive(args, useDefaults)
+}
 
-	fmt.Println("\n🚀 A2A Agent Project Initialization")
-	fmt.Println("=====================================")
-	fmt.Println()
+func runInitNonInteractive(args []string, useDefaults bool) error {
+	tui.PrintBanner()
 
 	projectDir := promptWithConfig("path", useDefaults, "Project directory (relative or absolute path)", ".")
 
@@ -100,8 +130,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	fmt.Println("\n📋 ADL Schema Setup")
-	fmt.Println("-------------------")
+	tui.Println(tui.Header("ADL Schema Setup"))
 
 	var adl *adlData
 	var adlFile string
@@ -112,7 +141,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 		for {
 			existingFile := promptString("Path to existing ADL schema file (relative or absolute)", "")
 			if existingFile == "" {
-				fmt.Println("⚠️  ADL file path is required. Please provide a path to the existing schema file.")
+				tui.Println(tui.Note("An ADL file path is required. Please provide a path to the existing schema file."))
 				continue
 			}
 
@@ -122,15 +151,13 @@ func runInit(cmd *cobra.Command, args []string) error {
 			}
 
 			if _, err := os.Stat(existingFile); os.IsNotExist(err) {
-				fmt.Printf("⚠️  ADL file does not exist: %s\n", existingFile)
-				fmt.Println("Please provide a valid path to an existing ADL schema file.")
+				tui.Println(tui.Note(fmt.Sprintf("ADL file does not exist: %s", existingFile)))
 				continue
 			}
 
 			existingADL, err := readADLFile(existingFile)
 			if err != nil {
-				fmt.Printf("⚠️  Failed to read ADL file: %v\n", err)
-				fmt.Println("Please provide a valid ADL schema file.")
+				tui.Println(tui.Note(fmt.Sprintf("Failed to read ADL file: %v", err)))
 				continue
 			}
 
@@ -141,12 +168,11 @@ func runInit(cmd *cobra.Command, args []string) error {
 				return fmt.Errorf("failed to write ADL file: %w", err)
 			}
 
-			fmt.Printf("✅ Using existing ADL schema from: %s\n", existingFile)
+			tui.Println(tui.Bullet(fmt.Sprintf("Using existing ADL schema from: %s", existingFile)))
 			break
 		}
 	} else {
-		fmt.Printf("\n")
-		adl = collectADLInfo(cmd, projectName, useDefaults)
+		adl = buildADL(collectAnswersNonInteractive(projectName, useDefaults))
 		adlFile = filepath.Join(projectDir, "agent.yaml")
 
 		if err := writeADLFile(adl, adlFile); err != nil {
@@ -154,25 +180,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	fmt.Printf("\n✅ ADL file created: %s\n", adlFile)
-
-	fmt.Println()
-	fmt.Printf("🎉 Project '%s' initialized successfully!\n", projectName)
-	fmt.Printf("📁 ADL manifest location: %s\n", adlFile)
-	fmt.Println()
-	fmt.Println("📝 Next steps:")
-	if projectDir == "." {
-		fmt.Println("   1. Run 'adl generate' to generate the project code")
-		fmt.Println("   2. Implement the TODO placeholders in the generated files")
-		fmt.Println("   3. Run 'task build' to build your agent")
-		fmt.Println("   4. Run 'task run' to start your agent server")
-	} else {
-		fmt.Printf("   1. cd %s\n", projectDir)
-		fmt.Println("   2. Run 'adl generate' to generate the project code")
-		fmt.Println("   3. Implement the TODO placeholders in the generated files")
-		fmt.Println("   4. Run 'task build' to build your agent")
-		fmt.Println("   5. Run 'task run' to start your agent server")
-	}
+	printInitSummary(adl, adlFile, projectDir)
 
 	return nil
 }
@@ -320,90 +328,419 @@ type adlData struct {
 	} `yaml:"spec"`
 }
 
-func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *adlData {
+// toolAnswer captures one tool collected during init, before it is expanded into
+// the generated JSON schema by buildADL.
+type toolAnswer struct {
+	ID          string
+	Name        string
+	Description string
+	Tags        []string
+	Inject      []string
+}
+
+// skillAnswer captures one skill collected during init.
+type skillAnswer struct {
+	ID          string
+	Version     string
+	Source      string
+	Bare        bool
+	Name        string
+	Description string
+	Tags        []string
+}
+
+// answers is the language-agnostic bag of resolved choices produced by either
+// collector (interactive wizard or non-interactive prompts/flags). buildADL is
+// the single place that turns these answers into the on-disk adlData/agent.yaml,
+// so both input paths emit byte-identical manifests for identical answers.
+type answers struct {
+	Name        string
+	Description string
+	Version     string
+
+	AgentType    string
+	Provider     string
+	Model        string
+	SystemPrompt string
+	MaxTokens    int
+	Temperature  float64
+
+	Streaming              bool
+	PushNotifications      bool
+	StateTransitionHistory bool
+
+	ArtifactsEnabled bool
+
+	Services []string
+	Tools    []toolAnswer
+	Skills   []skillAnswer
+
+	Port        int
+	Scheme      string
+	Debug       bool
+	AuthEnabled bool
+
+	CardEnabled        bool
+	ProtocolVersion    string
+	PreferredTransport string
+	InputModes         []string
+	OutputModes        []string
+	CardURL            string
+
+	Language        string
+	GoModule        string
+	GoVersion       string
+	RustPackageName string
+	RustVersion     string
+	RustEdition     string
+	TSPackageName   string
+
+	FloxEnabled          bool
+	DevcontainerEnabled  bool
+	DockerComposeEnabled bool
+
+	DeploymentType string
+
+	ScmProvider    string
+	ScmURL         string
+	GithubApp      bool
+	IssueTemplates bool
+	Dependabot     bool
+	CI             bool
+	CD             bool
+
+	// Coding-agent orchestrators (spec.development.ai.orchestrators). Only
+	// claudecode has a CLI flag (--ai); the rest are wizard/manifest-only.
+	Claudecode bool
+	Codex      bool
+	Gemini     bool
+	Opencode   bool
+	Infer      bool
+}
+
+// defaultToolSchema returns the placeholder JSON schema generated for a freshly
+// scaffolded tool. The user fills in the real parameters afterwards.
+func defaultToolSchema(name string) map[string]any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"input": map[string]any{
+				"type":        "string",
+				"description": "Input parameter for " + name,
+			},
+		},
+		"required": []string{"input"},
+	}
+}
+
+// splitAndTrim splits a comma-separated list and trims whitespace from each
+// element, preserving the original (non-filtering) behaviour of the wizard.
+func splitAndTrim(s string) []string {
+	parts := strings.Split(s, ",")
+	for i, p := range parts {
+		parts[i] = strings.TrimSpace(p)
+	}
+	return parts
+}
+
+// buildADL turns resolved answers into the agent.yaml document. It is pure (no
+// prompts, no I/O) so it can be golden-tested in isolation and so the
+// interactive and non-interactive paths can never drift in manifest shape.
+func buildADL(ans answers) *adlData {
 	adl := &adlData{
 		APIVersion: "adl.inference-gateway.com/v1",
 		Kind:       "Agent",
 	}
 
-	fmt.Println("📋 Agent Metadata")
-	fmt.Println("-----------------")
-	adl.Metadata.Name = promptWithConfig("name", useDefaults, "Agent name", projectName)
-	adl.Metadata.Description = promptWithConfig("description", useDefaults, "Agent description", "A helpful AI agent")
-	adl.Metadata.Version = promptWithConfig("version", useDefaults, "Version", "0.1.0")
+	adl.Metadata.Name = ans.Name
+	adl.Metadata.Description = ans.Description
+	adl.Metadata.Version = ans.Version
 
-	fmt.Println("\n🤖 Agent Type")
-	fmt.Println("--------------")
-	agentType := conditionalPromptChoice(useDefaults, "Agent type", []string{"ai-powered", "minimal"}, "ai-powered")
-
-	if agentType == "ai-powered" {
-		fmt.Println("\n🧠 AI Configuration")
-		fmt.Println("-------------------")
-
+	if ans.AgentType == "ai-powered" {
 		adl.Spec.Agent = &struct {
 			Provider     string  `yaml:"provider"`
 			Model        string  `yaml:"model"`
 			SystemPrompt string  `yaml:"systemPrompt,omitempty"`
 			MaxTokens    int     `yaml:"maxTokens,omitempty"`
 			Temperature  float64 `yaml:"temperature,omitempty"`
-		}{}
-
-		provider := conditionalPromptChoice(useDefaults, "AI Provider", []string{"openai", "anthropic", "ollama", "deepseek", "mistral", "cloudflare", "cohere", "groq"}, "")
-		adl.Spec.Agent.Provider = provider
-
-		adl.Spec.Agent.Model = conditionalPrompt(useDefaults, "Model", "")
-
-		systemPrompt := conditionalPrompt(useDefaults, "System prompt", "You are a helpful AI assistant.")
-		adl.Spec.Agent.SystemPrompt = systemPrompt
-
-		if maxTokensStr := conditionalPrompt(useDefaults, "Max tokens (optional, press enter to skip)", ""); maxTokensStr != "" {
-			if maxTokens, err := strconv.Atoi(maxTokensStr); err == nil {
-				adl.Spec.Agent.MaxTokens = maxTokens
-			}
-		}
-
-		if tempStr := conditionalPrompt(useDefaults, "Temperature (0.0-2.0, optional)", ""); tempStr != "" {
-			if temp, err := strconv.ParseFloat(tempStr, 64); err == nil {
-				adl.Spec.Agent.Temperature = temp
-			}
+		}{
+			Provider:     ans.Provider,
+			Model:        ans.Model,
+			SystemPrompt: ans.SystemPrompt,
+			MaxTokens:    ans.MaxTokens,
+			Temperature:  ans.Temperature,
 		}
 	}
 
-	fmt.Println("\n⚡ Capabilities")
-	fmt.Println("---------------")
 	adl.Spec.Capabilities = &struct {
 		Streaming              bool `yaml:"streaming"`
 		PushNotifications      bool `yaml:"pushNotifications"`
 		StateTransitionHistory bool `yaml:"stateTransitionHistory"`
-	}{}
+	}{
+		Streaming:              ans.Streaming,
+		PushNotifications:      ans.PushNotifications,
+		StateTransitionHistory: ans.StateTransitionHistory,
+	}
 
-	adl.Spec.Capabilities.Streaming = conditionalPromptBool(useDefaults, "Enable streaming", true)
-	adl.Spec.Capabilities.PushNotifications = conditionalPromptBool(useDefaults, "Enable push notifications", false)
-	adl.Spec.Capabilities.StateTransitionHistory = conditionalPromptBool(useDefaults, "Enable state transition history", false)
-
-	fmt.Println("\n📂 Artifacts Configuration")
-	fmt.Println("--------------------------")
-	enableArtifacts := conditionalPromptBool(useDefaults, "Enable artifacts support (filesystem/MinIO storage)", false)
-
-	if enableArtifacts {
+	if ans.ArtifactsEnabled {
 		adl.Spec.Artifacts = &struct {
 			Enabled bool `yaml:"enabled"`
 		}{
 			Enabled: true,
 		}
-		fmt.Println("ℹ️  Artifacts storage can be configured via A2A_ARTIFACT_* environment variables")
 	}
 
-	fmt.Println("\n🔌 Dependencies")
-	fmt.Println("---------------")
+	adl.Spec.Services = ans.Services
+
+	for _, t := range ans.Tools {
+		adl.Spec.Tools = append(adl.Spec.Tools, struct {
+			ID          string         `yaml:"id"`
+			Name        string         `yaml:"name"`
+			Description string         `yaml:"description"`
+			Tags        []string       `yaml:"tags"`
+			Schema      map[string]any `yaml:"schema"`
+			Inject      []string       `yaml:"inject,omitempty"`
+		}{
+			ID:          t.ID,
+			Name:        t.Name,
+			Description: t.Description,
+			Tags:        t.Tags,
+			Schema:      defaultToolSchema(t.Name),
+			Inject:      t.Inject,
+		})
+	}
+
+	for _, s := range ans.Skills {
+		adl.Spec.Skills = append(adl.Spec.Skills, struct {
+			ID          string   `yaml:"id"`
+			Version     string   `yaml:"version,omitempty"`
+			Source      string   `yaml:"source,omitempty"`
+			Bare        bool     `yaml:"bare,omitempty"`
+			Name        string   `yaml:"name,omitempty"`
+			Description string   `yaml:"description,omitempty"`
+			Tags        []string `yaml:"tags,omitempty"`
+		}{
+			ID:          s.ID,
+			Version:     s.Version,
+			Source:      s.Source,
+			Bare:        s.Bare,
+			Name:        s.Name,
+			Description: s.Description,
+			Tags:        s.Tags,
+		})
+	}
+
+	adl.Spec.Server.Port = ans.Port
+	adl.Spec.Server.Scheme = ans.Scheme
+	adl.Spec.Server.Debug = ans.Debug
+	if ans.AuthEnabled {
+		adl.Spec.Server.Auth = &struct {
+			Enabled bool `yaml:"enabled"`
+		}{
+			Enabled: true,
+		}
+	}
+
+	if ans.CardEnabled {
+		adl.Spec.Card = &struct {
+			ProtocolVersion    string   `yaml:"protocolVersion,omitempty"`
+			URL                string   `yaml:"url,omitempty"`
+			PreferredTransport string   `yaml:"preferredTransport,omitempty"`
+			DefaultInputModes  []string `yaml:"defaultInputModes,omitempty"`
+			DefaultOutputModes []string `yaml:"defaultOutputModes,omitempty"`
+			DocumentationURL   string   `yaml:"documentationUrl,omitempty"`
+			IconURL            string   `yaml:"iconUrl,omitempty"`
+		}{
+			ProtocolVersion:    ans.ProtocolVersion,
+			PreferredTransport: ans.PreferredTransport,
+			DefaultInputModes:  ans.InputModes,
+			DefaultOutputModes: ans.OutputModes,
+			URL:                ans.CardURL,
+		}
+	}
+
+	adl.Spec.Language = &struct {
+		Go *struct {
+			Module  string       `yaml:"module"`
+			Version string       `yaml:"version"`
+			Vendor  *vendorBlock `yaml:"vendor,omitempty"`
+		} `yaml:"go,omitempty"`
+		TypeScript *struct {
+			PackageName string       `yaml:"packageName"`
+			NodeVersion string       `yaml:"nodeVersion"`
+			Vendor      *vendorBlock `yaml:"vendor,omitempty"`
+		} `yaml:"typescript,omitempty"`
+		Rust *struct {
+			PackageName string       `yaml:"packageName"`
+			Version     string       `yaml:"version"`
+			Edition     string       `yaml:"edition"`
+			Vendor      *vendorBlock `yaml:"vendor,omitempty"`
+		} `yaml:"rust,omitempty"`
+	}{}
+
+	switch ans.Language {
+	case "rust":
+		adl.Spec.Language.Rust = &struct {
+			PackageName string       `yaml:"packageName"`
+			Version     string       `yaml:"version"`
+			Edition     string       `yaml:"edition"`
+			Vendor      *vendorBlock `yaml:"vendor,omitempty"`
+		}{
+			PackageName: ans.RustPackageName,
+			Version:     ans.RustVersion,
+			Edition:     ans.RustEdition,
+			Vendor:      &vendorBlock{Deps: []string{}, Devdeps: []string{}},
+		}
+	case "typescript":
+		adl.Spec.Language.TypeScript = &struct {
+			PackageName string       `yaml:"packageName"`
+			NodeVersion string       `yaml:"nodeVersion"`
+			Vendor      *vendorBlock `yaml:"vendor,omitempty"`
+		}{
+			PackageName: ans.TSPackageName,
+			NodeVersion: "24",
+			Vendor:      &vendorBlock{Deps: []string{}, Devdeps: []string{}},
+		}
+	default:
+		adl.Spec.Language.Go = &struct {
+			Module  string       `yaml:"module"`
+			Version string       `yaml:"version"`
+			Vendor  *vendorBlock `yaml:"vendor,omitempty"`
+		}{
+			Module:  ans.GoModule,
+			Version: ans.GoVersion,
+			Vendor:  &vendorBlock{Deps: []string{}, Devdeps: []string{}},
+		}
+	}
+
+	ensureDevelopment(adl)
+	adl.Spec.Development.Sandbox = &struct {
+		Flox *struct {
+			Enabled bool `yaml:"enabled"`
+		} `yaml:"flox,omitempty"`
+		DevContainer *struct {
+			Enabled bool `yaml:"enabled"`
+		} `yaml:"devcontainer,omitempty"`
+		DockerCompose *struct {
+			Enabled bool `yaml:"enabled"`
+		} `yaml:"dockerCompose,omitempty"`
+	}{
+		Flox: &struct {
+			Enabled bool `yaml:"enabled"`
+		}{
+			Enabled: ans.FloxEnabled,
+		},
+		DevContainer: &struct {
+			Enabled bool `yaml:"enabled"`
+		}{
+			Enabled: ans.DevcontainerEnabled,
+		},
+		DockerCompose: &struct {
+			Enabled bool `yaml:"enabled"`
+		}{
+			Enabled: ans.DockerComposeEnabled,
+		},
+	}
+
+	if ans.DeploymentType != "" {
+		adl.Spec.Deployment = &struct {
+			Type string `yaml:"type,omitempty"`
+		}{
+			Type: ans.DeploymentType,
+		}
+	}
+
+	if ans.ScmProvider != "" {
+		adl.Spec.SCM = &struct {
+			Provider       string `yaml:"provider"`
+			URL            string `yaml:"url,omitempty"`
+			GithubApp      bool   `yaml:"github_app,omitempty"`
+			IssueTemplates bool   `yaml:"issue_templates"`
+			Dependabot     bool   `yaml:"dependabot"`
+			CI             bool   `yaml:"ci"`
+			CD             bool   `yaml:"cd"`
+		}{
+			Provider: ans.ScmProvider,
+		}
+
+		if ans.ScmProvider == "github" {
+			adl.Spec.SCM.URL = ans.ScmURL
+			adl.Spec.SCM.GithubApp = ans.GithubApp
+			adl.Spec.SCM.IssueTemplates = ans.IssueTemplates
+			adl.Spec.SCM.Dependabot = ans.Dependabot
+		}
+
+		adl.Spec.SCM.CI = ans.CI
+		adl.Spec.SCM.CD = ans.CD
+	}
+
+	ensureDevelopment(adl)
+	adl.Spec.Development.AI = &aiBlock{
+		Orchestrators: &orchestratorsBlock{
+			Claudecode: &orchestratorToggle{Enabled: ans.Claudecode},
+			Codex:      &orchestratorToggle{Enabled: ans.Codex},
+			Gemini:     &orchestratorToggle{Enabled: ans.Gemini},
+			Opencode:   &orchestratorToggle{Enabled: ans.Opencode},
+			Infer:      &orchestratorToggle{Enabled: ans.Infer},
+		},
+	}
+
+	return adl
+}
+
+// collectAnswersNonInteractive reproduces the original linear prompt flow,
+// writing into an answers value instead of directly into adlData. With
+// --defaults every helper echoes its default and returns without reading stdin,
+// so the output is identical to the pre-refactor behaviour the tests pin.
+func collectAnswersNonInteractive(projectName string, useDefaults bool) answers {
+	var ans answers
+
+	tui.Println(tui.Header("Agent Metadata"))
+	ans.Name = promptWithConfig("name", useDefaults, "Agent name", projectName)
+	ans.Description = promptWithConfig("description", useDefaults, "Agent description", "A helpful AI agent")
+	ans.Version = promptWithConfig("version", useDefaults, "Version", "0.1.0")
+
+	tui.Println(tui.Header("Agent Type"))
+	ans.AgentType = conditionalPromptChoice(useDefaults, "Agent type", []string{"ai-powered", "minimal"}, "ai-powered")
+
+	if ans.AgentType == "ai-powered" {
+		tui.Println(tui.Header("AI Configuration"))
+		ans.Provider = conditionalPromptChoice(useDefaults, "AI Provider", aiProviders, "")
+		ans.Model = conditionalPrompt(useDefaults, "Model", "")
+		ans.SystemPrompt = conditionalPrompt(useDefaults, "System prompt", "You are a helpful AI assistant.")
+
+		if maxTokensStr := conditionalPrompt(useDefaults, "Max tokens (optional, press enter to skip)", ""); maxTokensStr != "" {
+			if maxTokens, err := strconv.Atoi(maxTokensStr); err == nil {
+				ans.MaxTokens = maxTokens
+			}
+		}
+
+		if tempStr := conditionalPrompt(useDefaults, "Temperature (0.0-2.0, optional)", ""); tempStr != "" {
+			if temp, err := strconv.ParseFloat(tempStr, 64); err == nil {
+				ans.Temperature = temp
+			}
+		}
+	}
+
+	tui.Println(tui.Header("Capabilities"))
+	ans.Streaming = conditionalPromptBool(useDefaults, "Enable streaming", true)
+	ans.PushNotifications = conditionalPromptBool(useDefaults, "Enable push notifications", false)
+	ans.StateTransitionHistory = conditionalPromptBool(useDefaults, "Enable state transition history", false)
+
+	tui.Println(tui.Header("Artifacts Configuration"))
+	ans.ArtifactsEnabled = conditionalPromptBool(useDefaults, "Enable artifacts support (filesystem/MinIO storage)", false)
+	if ans.ArtifactsEnabled {
+		tui.Println(tui.Note("Artifacts storage can be configured via A2A_ARTIFACT_* environment variables"))
+	}
+
+	tui.Println(tui.Header("Dependencies"))
 	addDependencies := conditionalPromptBool(useDefaults, "Add dependencies for dependency injection", useDefaults)
 
 	if addDependencies {
 		if useDefaults {
-			adl.Spec.Services = append(adl.Spec.Services, "logger")
-			fmt.Printf("Add dependencies for dependency injection [y/n] [n]: y\n")
-			fmt.Printf("Dependency name (e.g., 'logger', 'database') []: logger\n")
-			fmt.Printf("✅ Added default logger dependency\n")
+			ans.Services = append(ans.Services, "logger")
+			echoRow("Dependency name", "logger")
+			tui.Println(tui.Bullet("Added default logger dependency"))
 		}
 
 		if !useDefaults {
@@ -419,7 +756,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 				}
 
 				duplicate := false
-				for _, existing := range adl.Spec.Services {
+				for _, existing := range ans.Services {
 					if existing == service {
 						fmt.Printf("⚠️  Service '%s' already exists\n", service)
 						duplicate = true
@@ -428,7 +765,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 				}
 
 				if !duplicate {
-					adl.Spec.Services = append(adl.Spec.Services, service)
+					ans.Services = append(ans.Services, service)
 					fmt.Printf("✅ Added service: %s\n", service)
 					fmt.Printf("💡 You will need to implement this in internal/%s package with a New%s function\n", service, titleCase(service))
 				}
@@ -440,59 +777,33 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 		}
 	}
 
-	fmt.Println("\n🔧 Tools")
-	fmt.Println("---------")
-	fmt.Println("Tools are function-call entrypoints the agent can invoke (each becomes a generated handler).")
+	tui.Println(tui.Header("Tools"))
+	tui.Println(tui.Note("Tools are function-call entrypoints the agent can invoke (each becomes a generated handler)."))
 	addTools := conditionalPromptBool(useDefaults, "Add tools to your agent", false)
 
 	if addTools {
 		for {
-			tool := struct {
-				ID          string         `yaml:"id"`
-				Name        string         `yaml:"name"`
-				Description string         `yaml:"description"`
-				Tags        []string       `yaml:"tags"`
-				Schema      map[string]any `yaml:"schema"`
-				Inject      []string       `yaml:"inject,omitempty"`
-			}{}
-
+			var tool toolAnswer
 			tool.Name = promptString("Tool name (e.g., 'get_weather')", "")
 			if tool.Name == "" {
 				break
 			}
 			tool.ID = tool.Name
-
 			tool.Description = promptString("Tool description", "")
 
-			tagsStr := promptString("Tool tags (comma-separated, e.g., 'weather,api,data')", "")
-			if tagsStr != "" {
-				tool.Tags = strings.Split(tagsStr, ",")
-				for i, tag := range tool.Tags {
-					tool.Tags[i] = strings.TrimSpace(tag)
-				}
+			if tagsStr := promptString("Tool tags (comma-separated, e.g., 'weather,api,data')", ""); tagsStr != "" {
+				tool.Tags = splitAndTrim(tagsStr)
 			} else {
 				tool.Tags = []string{"general"}
 			}
 
-			tool.Schema = map[string]any{
-				"type": "object",
-				"properties": map[string]any{
-					"input": map[string]any{
-						"type":        "string",
-						"description": "Input parameter for " + tool.Name,
-					},
-				},
-				"required": []string{"input"},
-			}
-
-			if len(adl.Spec.Services) > 0 {
+			if len(ans.Services) > 0 {
 				fmt.Printf("\nAvailable services for tool '%s':\n", tool.Name)
-				for i, svc := range adl.Spec.Services {
+				for i, svc := range ans.Services {
 					fmt.Printf("  %d. %s\n", i+1, svc)
 				}
 
-				addToolServices := promptBool("Inject services into this tool", false)
-				if addToolServices {
+				if promptBool("Inject services into this tool", false) {
 					for {
 						svcChoice := promptString("Enter service name (or empty to finish)", "")
 						if svcChoice == "" {
@@ -500,7 +811,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 						}
 
 						found := false
-						for _, svc := range adl.Spec.Services {
+						for _, svc := range ans.Services {
 							if svc == svcChoice {
 								found = true
 								break
@@ -529,7 +840,7 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 				}
 			}
 
-			adl.Spec.Tools = append(adl.Spec.Tools, tool)
+			ans.Tools = append(ans.Tools, tool)
 
 			if !promptBool("Add another tool", false) {
 				break
@@ -537,24 +848,14 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 		}
 	}
 
-	fmt.Println("\n📚 Skills")
-	fmt.Println("---------")
-	fmt.Println("Skills are markdown playbooks (with YAML frontmatter) loaded into the system prompt at startup.")
-	fmt.Println("You can pull skills from the registry, or scaffold a blank one to author yourself ('bare').")
+	tui.Println(tui.Header("Skills"))
+	tui.Println(tui.Note("Skills are markdown playbooks (with YAML frontmatter) loaded into the system prompt at startup."))
+	tui.Println(tui.Note("You can pull skills from the registry, or scaffold a blank one to author yourself ('bare')."))
 	addSkills := conditionalPromptBool(useDefaults, "Add markdown skills to your agent", false)
 
 	if addSkills {
 		for {
-			skill := struct {
-				ID          string   `yaml:"id"`
-				Version     string   `yaml:"version,omitempty"`
-				Source      string   `yaml:"source,omitempty"`
-				Bare        bool     `yaml:"bare,omitempty"`
-				Name        string   `yaml:"name,omitempty"`
-				Description string   `yaml:"description,omitempty"`
-				Tags        []string `yaml:"tags,omitempty"`
-			}{}
-
+			var skill skillAnswer
 			skill.ID = promptString("Skill id (kebab-case, e.g. 'data-analysis')", "")
 			if skill.ID == "" {
 				break
@@ -570,18 +871,14 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 					skill.Name = defaultName
 				}
 				skill.Description = promptString("Skill description", "")
-				tagsStr := promptString("Skill tags (comma-separated, optional)", "")
-				if tagsStr != "" {
-					skill.Tags = strings.Split(tagsStr, ",")
-					for i, tag := range skill.Tags {
-						skill.Tags[i] = strings.TrimSpace(tag)
-					}
+				if tagsStr := promptString("Skill tags (comma-separated, optional)", ""); tagsStr != "" {
+					skill.Tags = splitAndTrim(tagsStr)
 				}
 			default:
 				skill.Version = promptString("Pin to version (optional, e.g. '0.1.0')", "")
 			}
 
-			adl.Spec.Skills = append(adl.Spec.Skills, skill)
+			ans.Skills = append(ans.Skills, skill)
 
 			if !promptBool("Add another skill", false) {
 				break
@@ -589,252 +886,99 @@ func collectADLInfo(cmd *cobra.Command, projectName string, useDefaults bool) *a
 		}
 	}
 
-	fmt.Println("\n🌐 Server Configuration")
-	fmt.Println("-----------------------")
+	tui.Println(tui.Header("Server Configuration"))
 	portStr := conditionalPrompt(useDefaults, "Server port", "8080")
 	if port, err := strconv.Atoi(portStr); err == nil {
-		adl.Spec.Server.Port = port
+		ans.Port = port
 	} else {
-		adl.Spec.Server.Port = 8080
+		ans.Port = 8080
 	}
-	adl.Spec.Server.Scheme = conditionalPrompt(useDefaults, "Server scheme (http/https)", "http")
-	adl.Spec.Server.Debug = conditionalPromptBool(useDefaults, "Enable debug mode", false)
+	ans.Scheme = conditionalPrompt(useDefaults, "Server scheme (http/https)", "http")
+	ans.Debug = conditionalPromptBool(useDefaults, "Enable debug mode", false)
+	ans.AuthEnabled = conditionalPromptBool(useDefaults, "Enable server authentication", false)
 
-	authEnabled := conditionalPromptBool(useDefaults, "Enable server authentication", false)
-	if authEnabled {
-		adl.Spec.Server.Auth = &struct {
-			Enabled bool `yaml:"enabled"`
-		}{
-			Enabled: true,
-		}
-	}
+	tui.Println(tui.Header("Agent Card Configuration"))
+	ans.CardEnabled = conditionalPromptBool(useDefaults, "Configure agent card (protocol, transport, modes)", false)
+	if ans.CardEnabled {
+		ans.ProtocolVersion = conditionalPrompt(useDefaults, "Protocol version", "0.3.0")
+		ans.PreferredTransport = conditionalPrompt(useDefaults, "Preferred transport", "JSONRPC")
 
-	fmt.Println("\n🎴 Agent Card Configuration")
-	fmt.Println("---------------------------")
-
-	addCard := conditionalPromptBool(useDefaults, "Configure agent card (protocol, transport, modes)", false)
-	if addCard {
-		adl.Spec.Card = &struct {
-			ProtocolVersion    string   `yaml:"protocolVersion,omitempty"`
-			URL                string   `yaml:"url,omitempty"`
-			PreferredTransport string   `yaml:"preferredTransport,omitempty"`
-			DefaultInputModes  []string `yaml:"defaultInputModes,omitempty"`
-			DefaultOutputModes []string `yaml:"defaultOutputModes,omitempty"`
-			DocumentationURL   string   `yaml:"documentationUrl,omitempty"`
-			IconURL            string   `yaml:"iconUrl,omitempty"`
-		}{}
-
-		adl.Spec.Card.ProtocolVersion = conditionalPrompt(useDefaults, "Protocol version", "0.3.0")
-		adl.Spec.Card.PreferredTransport = conditionalPrompt(useDefaults, "Preferred transport", "JSONRPC")
-
-		defaultInputModes := conditionalPrompt(useDefaults, "Default input modes (comma-separated)", "text,voice")
-		if defaultInputModes != "" {
-			modes := strings.Split(defaultInputModes, ",")
-			for i, mode := range modes {
-				modes[i] = strings.TrimSpace(mode)
-			}
-			adl.Spec.Card.DefaultInputModes = modes
+		if modes := conditionalPrompt(useDefaults, "Default input modes (comma-separated)", "text,voice"); modes != "" {
+			ans.InputModes = splitAndTrim(modes)
 		}
 
-		defaultOutputModes := conditionalPrompt(useDefaults, "Default output modes (comma-separated)", "text,audio")
-		if defaultOutputModes != "" {
-			modes := strings.Split(defaultOutputModes, ",")
-			for i, mode := range modes {
-				modes[i] = strings.TrimSpace(mode)
-			}
-			adl.Spec.Card.DefaultOutputModes = modes
+		if modes := conditionalPrompt(useDefaults, "Default output modes (comma-separated)", "text,audio"); modes != "" {
+			ans.OutputModes = splitAndTrim(modes)
 		}
 
-		scheme := adl.Spec.Server.Scheme
+		scheme := ans.Scheme
 		if scheme == "" {
 			scheme = "http"
 		}
-		cardURL := conditionalPrompt(useDefaults, "Agent service URL", fmt.Sprintf("%s://%s.example.com:%d", scheme, adl.Metadata.Name, adl.Spec.Server.Port))
-		adl.Spec.Card.URL = cardURL
+		ans.CardURL = conditionalPrompt(useDefaults, "Agent service URL", fmt.Sprintf("%s://%s.example.com:%d", scheme, ans.Name, ans.Port))
 	}
 
-	fmt.Println("\n💻 Language Configuration")
-	fmt.Println("-------------------------")
+	tui.Println(tui.Header("Language Configuration"))
+	ans.Language = promptWithConfig("language", useDefaults, "Programming language", "typescript")
 
-	language := promptWithConfig("language", useDefaults, "Programming language", "go")
-
-	adl.Spec.Language = &struct {
-		Go *struct {
-			Module  string       `yaml:"module"`
-			Version string       `yaml:"version"`
-			Vendor  *vendorBlock `yaml:"vendor,omitempty"`
-		} `yaml:"go,omitempty"`
-		TypeScript *struct {
-			PackageName string       `yaml:"packageName"`
-			NodeVersion string       `yaml:"nodeVersion"`
-			Vendor      *vendorBlock `yaml:"vendor,omitempty"`
-		} `yaml:"typescript,omitempty"`
-		Rust *struct {
-			PackageName string       `yaml:"packageName"`
-			Version     string       `yaml:"version"`
-			Edition     string       `yaml:"edition"`
-			Vendor      *vendorBlock `yaml:"vendor,omitempty"`
-		} `yaml:"rust,omitempty"`
-	}{}
-
-	switch language {
-	case "go":
-		adl.Spec.Language.Go = &struct {
-			Module  string       `yaml:"module"`
-			Version string       `yaml:"version"`
-			Vendor  *vendorBlock `yaml:"vendor,omitempty"`
-		}{}
-		defaultModule := getDefaultGoModule(adl.Metadata.Name)
-		adl.Spec.Language.Go.Module = promptWithConfig("go-module", useDefaults, "Go module", defaultModule)
-		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.26.2")
-		adl.Spec.Language.Go.Vendor = &vendorBlock{Deps: []string{}, Devdeps: []string{}}
-
+	switch ans.Language {
 	case "rust":
-		adl.Spec.Language.Rust = &struct {
-			PackageName string       `yaml:"packageName"`
-			Version     string       `yaml:"version"`
-			Edition     string       `yaml:"edition"`
-			Vendor      *vendorBlock `yaml:"vendor,omitempty"`
-		}{}
-		adl.Spec.Language.Rust.PackageName = promptWithConfig("rust-package-name", useDefaults, "Rust package name", adl.Metadata.Name)
-		adl.Spec.Language.Rust.Version = promptWithConfig("rust-version", useDefaults, "Rust version", "1.89.0")
-		adl.Spec.Language.Rust.Edition = promptWithConfig("rust-edition", useDefaults, "Rust edition", "2024")
-		adl.Spec.Language.Rust.Vendor = &vendorBlock{Deps: []string{}, Devdeps: []string{}}
-
+		ans.RustPackageName = promptWithConfig("rust-package-name", useDefaults, "Rust package name", ans.Name)
+		ans.RustVersion = promptWithConfig("rust-version", useDefaults, "Rust version", "1.89.0")
+		ans.RustEdition = promptWithConfig("rust-edition", useDefaults, "Rust edition", "2024")
 	case "typescript":
-		adl.Spec.Language.TypeScript = &struct {
-			PackageName string       `yaml:"packageName"`
-			NodeVersion string       `yaml:"nodeVersion"`
-			Vendor      *vendorBlock `yaml:"vendor,omitempty"`
-		}{}
-		adl.Spec.Language.TypeScript.PackageName = promptWithConfig("typescript-name", useDefaults, "TypeScript package name", adl.Metadata.Name)
-		adl.Spec.Language.TypeScript.NodeVersion = "24"
-		adl.Spec.Language.TypeScript.Vendor = &vendorBlock{Deps: []string{}, Devdeps: []string{}}
-
+		ans.TSPackageName = promptWithConfig("typescript-name", useDefaults, "TypeScript package name", ans.Name)
 	default:
-		adl.Spec.Language.Go = &struct {
-			Module  string       `yaml:"module"`
-			Version string       `yaml:"version"`
-			Vendor  *vendorBlock `yaml:"vendor,omitempty"`
-		}{}
-		defaultModule := getDefaultGoModule(adl.Metadata.Name)
-		adl.Spec.Language.Go.Module = promptWithConfig("go-module", useDefaults, "Go module", defaultModule)
-		adl.Spec.Language.Go.Version = promptWithConfig("go-version", useDefaults, "Go version", "1.26.2")
-		adl.Spec.Language.Go.Vendor = &vendorBlock{Deps: []string{}, Devdeps: []string{}}
+		ans.GoModule = promptWithConfig("go-module", useDefaults, "Go module", getDefaultGoModule(ans.Name))
+		ans.GoVersion = promptWithConfig("go-version", useDefaults, "Go version", "1.26.2")
 	}
 
-	fmt.Println("\n🏗️ Sandbox Configuration")
-	fmt.Println("------------------------")
+	tui.Println(tui.Header("Sandbox Configuration"))
+	ans.FloxEnabled = promptBoolWithConfig("flox", useDefaults, "Enable Flox environment", false)
+	ans.DevcontainerEnabled = promptBoolWithConfig("devcontainer", useDefaults, "Enable DevContainer environment", false)
+	ans.DockerComposeEnabled = promptBoolWithConfig("docker-compose", useDefaults, "Enable Docker Compose environment", false)
 
-	floxEnabled := promptBoolWithConfig("flox", useDefaults, "Enable Flox environment", false)
-	devcontainerEnabled := promptBoolWithConfig("devcontainer", useDefaults, "Enable DevContainer environment", false)
-	dockerComposeEnabled := promptBoolWithConfig("docker-compose", useDefaults, "Enable Docker Compose environment", false)
+	tui.Println(tui.Header("Deployment Configuration"))
+	ans.DeploymentType = promptWithConfig("deployment", useDefaults, "Deployment type (kubernetes, leave empty for no deployment)", "")
 
-	ensureDevelopment(adl)
-	adl.Spec.Development.Sandbox = &struct {
-		Flox *struct {
-			Enabled bool `yaml:"enabled"`
-		} `yaml:"flox,omitempty"`
-		DevContainer *struct {
-			Enabled bool `yaml:"enabled"`
-		} `yaml:"devcontainer,omitempty"`
-		DockerCompose *struct {
-			Enabled bool `yaml:"enabled"`
-		} `yaml:"dockerCompose,omitempty"`
-	}{
-		Flox: &struct {
-			Enabled bool `yaml:"enabled"`
-		}{
-			Enabled: floxEnabled,
-		},
-		DevContainer: &struct {
-			Enabled bool `yaml:"enabled"`
-		}{
-			Enabled: devcontainerEnabled,
-		},
-		DockerCompose: &struct {
-			Enabled bool `yaml:"enabled"`
-		}{
-			Enabled: dockerComposeEnabled,
-		},
-	}
-
-	fmt.Println("\n🚀 Deployment Configuration")
-	fmt.Println("---------------------------")
-
-	deploymentType := promptWithConfig("deployment", useDefaults, "Deployment type (kubernetes, leave empty for no deployment)", "")
-	if deploymentType != "" {
-		adl.Spec.Deployment = &struct {
-			Type string `yaml:"type,omitempty"`
-		}{
-			Type: deploymentType,
-		}
-	}
-
-	fmt.Println("\n📋 Source Control Management")
-	fmt.Println("-----------------------------")
-
-	scmProvider := conditionalPrompt(useDefaults, "SCM provider", "github")
-	if scmProvider != "" {
-		adl.Spec.SCM = &struct {
-			Provider       string `yaml:"provider"`
-			URL            string `yaml:"url,omitempty"`
-			GithubApp      bool   `yaml:"github_app,omitempty"`
-			IssueTemplates bool   `yaml:"issue_templates"`
-			Dependabot     bool   `yaml:"dependabot"`
-			CI             bool   `yaml:"ci"`
-			CD             bool   `yaml:"cd"`
-		}{
-			Provider: scmProvider,
-		}
-
-		if scmProvider == "github" {
+	tui.Println(tui.Header("Source Control Management"))
+	ans.ScmProvider = conditionalPrompt(useDefaults, "SCM provider", "github")
+	if ans.ScmProvider != "" {
+		if ans.ScmProvider == "github" {
 			owner, repo := parseGitRemote()
 			var defaultURL string
 			if owner != "" && repo != "" {
 				defaultURL = fmt.Sprintf("https://github.com/%s/%s", owner, repo)
 			} else {
-				defaultURL = fmt.Sprintf("https://github.com/example/%s", adl.Metadata.Name)
+				defaultURL = fmt.Sprintf("https://github.com/example/%s", ans.Name)
 			}
 
-			scmURL := conditionalPrompt(useDefaults, "Repository URL", defaultURL)
-			adl.Spec.SCM.URL = scmURL
-			adl.Spec.SCM.GithubApp = conditionalPromptBool(useDefaults, "Enable GitHub App integration", true)
+			ans.ScmURL = conditionalPrompt(useDefaults, "Repository URL", defaultURL)
+			ans.GithubApp = conditionalPromptBool(useDefaults, "Enable GitHub App integration", true)
 
 			if useDefaults {
-				adl.Spec.SCM.IssueTemplates = false
-				fmt.Printf("Enable issue templates [y/n] [n]: n\n")
+				ans.IssueTemplates = false
+				echoRow("Enable issue templates", "no")
 			} else {
-				adl.Spec.SCM.IssueTemplates = promptBool("Enable issue templates", false)
+				ans.IssueTemplates = promptBool("Enable issue templates", false)
 			}
 
 			if useDefaults {
-				adl.Spec.SCM.Dependabot = false
-				fmt.Printf("Enable Dependabot configuration [y/n] [n]: n\n")
+				ans.Dependabot = false
+				echoRow("Enable Dependabot configuration", "no")
 			} else {
-				adl.Spec.SCM.Dependabot = promptBool("Enable Dependabot configuration", false)
+				ans.Dependabot = promptBool("Enable Dependabot configuration", false)
 			}
 		}
 
-		adl.Spec.SCM.CI = promptBoolWithConfig("ci", useDefaults, "Enable CI workflow generation", false)
-		adl.Spec.SCM.CD = promptBoolWithConfig("cd", useDefaults, "Enable CD pipeline generation", false)
+		ans.CI = promptBoolWithConfig("ci", useDefaults, "Enable CI workflow generation", false)
+		ans.CD = promptBoolWithConfig("cd", useDefaults, "Enable CD pipeline generation", false)
 	}
 
-	fmt.Println("\n🤖 AI Assistant Documentation")
-	fmt.Println("-----------------------------")
-	aiEnabled := promptBoolWithConfig("ai", useDefaults, "Enable Claude Code (CLAUDE.md + claude-code in sandboxes)", false)
-	ensureDevelopment(adl)
-	adl.Spec.Development.AI = &aiBlock{
-		Orchestrators: &orchestratorsBlock{
-			Claudecode: &orchestratorToggle{Enabled: aiEnabled},
-			Codex:      &orchestratorToggle{Enabled: false},
-			Gemini:     &orchestratorToggle{Enabled: false},
-			Opencode:   &orchestratorToggle{Enabled: false},
-			Infer:      &orchestratorToggle{Enabled: false},
-		},
-	}
+	tui.Println(tui.Header("AI Assistant Documentation"))
+	ans.Claudecode = promptBoolWithConfig("ai", useDefaults, "Enable Claude Code (CLAUDE.md + claude-code in sandboxes)", false)
 
-	return adl
+	return ans
 }
 
 // ensureDevelopment lazily initialises adl.Spec.Development so that callers
@@ -910,9 +1054,23 @@ func getDefaultGoModule(projectName string) string {
 	return fmt.Sprintf("github.com/%s/%s", owner, projectName)
 }
 
+// echoRow prints a resolved field as a styled "label › value" row. It is used
+// only on the non-interactive (--defaults / flag-driven) path; the interactive
+// readline branches below never call it.
+func echoRow(label, value string) {
+	tui.Println(tui.Row(label, value))
+}
+
+func yesNo(v bool) string {
+	if v {
+		return "yes"
+	}
+	return "no"
+}
+
 func conditionalPrompt(useDefaults bool, promptText, defaultValue string) string {
 	if useDefaults {
-		fmt.Printf("%s [%s]: %s\n", promptText, defaultValue, defaultValue)
+		echoRow(promptText, defaultValue)
 		return defaultValue
 	}
 	return promptString(promptText, defaultValue)
@@ -921,7 +1079,7 @@ func conditionalPrompt(useDefaults bool, promptText, defaultValue string) string
 func promptWithConfig(key string, useDefaults bool, promptText, defaultValue string) string {
 	if viper.IsSet(key) && viper.GetString(key) != "" {
 		value := viper.GetString(key)
-		fmt.Printf("%s [%s]: %s\n", promptText, defaultValue, value)
+		echoRow(promptText, value)
 		return value
 	}
 	return conditionalPrompt(useDefaults, promptText, defaultValue)
@@ -930,15 +1088,7 @@ func promptWithConfig(key string, useDefaults bool, promptText, defaultValue str
 func promptBoolWithConfig(key string, useDefaults bool, promptText string, defaultValue bool) bool {
 	if viper.IsSet(key) {
 		value := viper.GetBool(key)
-		valueStr := "n"
-		if value {
-			valueStr = "y"
-		}
-		defaultStr := "n"
-		if defaultValue {
-			defaultStr = "y"
-		}
-		fmt.Printf("%s [y/n] [%s]: %s\n", promptText, defaultStr, valueStr)
+		echoRow(promptText, yesNo(value))
 		return value
 	}
 	return conditionalPromptBool(useDefaults, promptText, defaultValue)
@@ -946,11 +1096,7 @@ func promptBoolWithConfig(key string, useDefaults bool, promptText string, defau
 
 func conditionalPromptBool(useDefaults bool, promptText string, defaultValue bool) bool {
 	if useDefaults {
-		defaultStr := "n"
-		if defaultValue {
-			defaultStr = "y"
-		}
-		fmt.Printf("%s [y/n] [%s]: %s\n", promptText, defaultStr, defaultStr)
+		echoRow(promptText, yesNo(defaultValue))
 		return defaultValue
 	}
 	return promptBool(promptText, defaultValue)
@@ -958,7 +1104,7 @@ func conditionalPromptBool(useDefaults bool, promptText string, defaultValue boo
 
 func conditionalPromptChoice(useDefaults bool, promptText string, choices []string, defaultValue string) string {
 	if useDefaults {
-		fmt.Printf("%s (%s) [%s]: %s\n", promptText, strings.Join(choices, "/"), defaultValue, defaultValue)
+		echoRow(promptText, defaultValue)
 		return defaultValue
 	}
 	return promptChoice(promptText, choices, defaultValue)
