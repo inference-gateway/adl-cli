@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.41.4](https://github.com/inference-gateway/adl-cli/compare/v0.41.3...v0.41.4) (2026-06-03)
+
+### 🐛 Bug Fixes
+
+* **docs:** bump versions mentioned to latest ([78410b5](https://github.com/inference-gateway/adl-cli/commit/78410b5a467d455579dee09ea79f3f8ecd075919))
+
+### 👷 CI
+
+* **npm:** use truster publishers for publishing npm package ([4364b1e](https://github.com/inference-gateway/adl-cli/commit/4364b1e0eda01674cf4c0671b1b5f99213266007))
+
 ## [0.41.3](https://github.com/inference-gateway/adl-cli/compare/v0.41.2...v0.41.3) (2026-06-03)
 
 ### 📚 Documentation
