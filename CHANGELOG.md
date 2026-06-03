@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.41.3](https://github.com/inference-gateway/adl-cli/compare/v0.41.2...v0.41.3) (2026-06-03)
+
+### 📚 Documentation
+
+* **npm:** use the repos README.md for the published package ([27ae0e9](https://github.com/inference-gateway/adl-cli/commit/27ae0e9283dd8ab44c03b35f6d35b2274ede39a4))
+* reorder installation sections ([a61132f](https://github.com/inference-gateway/adl-cli/commit/a61132f7befd0414fb7e98c1b94548872c13849b))
+
 ## [0.41.2](https://github.com/inference-gateway/adl-cli/compare/v0.41.1...v0.41.2) (2026-06-03)
 
 ### 🐛 Bug Fixes

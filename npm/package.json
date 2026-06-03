@@ -1,6 +1,6 @@
 {
   "name": "@inference-gateway/adl-cli",
-  "version": "0.41.2",
+  "version": "0.41.3",
   "description": "Scaffold complete A2A (Agent-to-Agent) projects from YAML Agent Definition Language (ADL) manifests. Thin npm wrapper around the native adl binary.",
   "bin": {
     "adl": "bin/run.js"
