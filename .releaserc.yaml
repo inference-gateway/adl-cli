@@ -52,13 +52,16 @@ plugins:
   - - "@semantic-release/exec"
     - prepareCmd: |
         sed -i "s/VERSION: [0-9]\\+\\.[0-9]\\+\\.[0-9]\\+.*/VERSION: ${nextRelease.version}/" Taskfile.yml
-        npm --prefix npm version "${nextRelease.version}" --no-git-tag-version --allow-same-version
+        cp LICENSE npm/LICENSE
         sed -i.bak 's|version = "[^"]*";|version = "${nextRelease.version}";|' flake.nix && rm flake.nix.bak
         sed -i.bak 's|vendorHash = "[^"]*";|vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";|' flake.nix && rm flake.nix.bak
         NEW_HASH=$(nix build .#adl 2>&1 | awk '/got:/ {print $2; exit}')
         if [ -z "$NEW_HASH" ]; then echo "ERROR: could not extract vendorHash from nix build output"; exit 1; fi
         sed -i.bak "s|vendorHash = \"sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\";|vendorHash = \"$NEW_HASH\";|" flake.nix && rm flake.nix.bak
         echo "Updated vendorHash to $NEW_HASH"
+
+  - - "@semantic-release/npm"
+    - pkgRoot: npm
 
   - - "@semantic-release/git"
     - assets:
@@ -71,14 +74,6 @@ plugins:
   - - "@semantic-release/exec"
     - publishCmd: |
         GORELEASER_CURRENT_TAG=v${nextRelease.version} goreleaser release --clean --skip=publish
-        if [ -n "$NPM_TOKEN" ]; then
-          cp LICENSE npm/LICENSE
-          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
-          npm publish npm/ --access public
-          rm -f .npmrc
-        else
-          echo "NPM_TOKEN not set; skipping npm publish for @inference-gateway/adl-cli"
-        fi
 
   - - "@semantic-release/github"
     - assets:
