@@ -9,6 +9,8 @@
   },
   "main": "dist/index.js",
   "scripts": {
+    "validate": "adl validate agent.yaml",
+    "generate": {{ .GenerateCommand | toJson }},
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
@@ -22,6 +24,11 @@
     {{ .Name | toJson }}: {{ .Version | toJson }}{{- end }}
   },
   "devDependencies": {
+    {{- if and .Metadata.CLIVersion (ne .Metadata.CLIVersion "dev") }}
+    "@inference-gateway/adl-cli": {{ .Metadata.CLIVersion | toJson }},
+    {{- else }}
+    "@inference-gateway/adl-cli": "latest",
+    {{- end }}
     "@types/node": "^24.1.0",
     "prettier": "^3.8.3",
     "tsx": "^4.19.2",

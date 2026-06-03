@@ -1,10 +1,12 @@
 schema-version = "1.12.0"
 
 [install]
+{{- if ne .Language "typescript" }}
 {{- if and .Metadata.CLIVersion (ne .Metadata.CLIVersion "dev") }}
 adl.flake = "github:inference-gateway/adl-cli/v{{ .Metadata.CLIVersion }}"
 {{- else }}
 adl.flake = "github:inference-gateway/adl-cli"
+{{- end }}
 {{- end }}
 {{- if eq .Language "go" }}
 go.pkg-path = "go"
@@ -37,6 +39,9 @@ rust-analyzer.pkg-group = "rust-analyzer"
 {{- else if eq .Language "typescript" }}
 nodejs_24.pkg-path = "nodejs_24"
 nodejs_24.version = "^24.15.0"
+
+pnpm.pkg-path = "pnpm"
+pnpm.version = "^11.4.0"
 {{- end }}
 
 go-task.pkg-path = "go-task"

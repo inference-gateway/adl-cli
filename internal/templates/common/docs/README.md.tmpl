@@ -51,8 +51,8 @@ task build
 ./target/release/{{ .ADL.Spec.Language.Rust.PackageName }} --version
 ./target/release/{{ .ADL.Spec.Language.Rust.PackageName }} start
 {{- else if eq .Language "typescript" }}
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 {{- end }}
 
 # Or with Docker

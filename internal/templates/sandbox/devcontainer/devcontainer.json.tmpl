@@ -48,7 +48,7 @@
   {{- else if eq .Language "rust" }}
   "postCreateCommand": "cargo build",
   {{- else if eq .Language "typescript" }}
-  "postCreateCommand": "npm install",
+  "postCreateCommand": "corepack enable && pnpm install",
   {{- end }}
   "remoteUser": "vscode"
 }
