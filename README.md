@@ -18,8 +18,8 @@ _A command-line interface for generating enterprise-ready A2A (Agent-to-Agent) s
 
 - [Overview](#overview)
 - [Installation](#installation)
-  - [Quick Install (Recommended)](#quick-install-recommended)
-  - [npm / npx](#npm--npx)
+  - [npm / npx (Recommended)](#npm--npx-recommended)
+  - [Install Script](#install-script)
   - [From Source](#from-source)
   - [Using Go Install](#using-go-install)
   - [Pre-built Binaries](#pre-built-binaries)
@@ -67,7 +67,29 @@ The ADL CLI helps you build enterprise-ready A2A agents quickly by generating co
 
 ## Installation
 
-### Quick Install (Recommended)
+### npm / npx (Recommended)
+
+Most developers already have Node.js - run `adl` without a prior install via
+[`@inference-gateway/adl-cli`](https://www.npmjs.com/package/@inference-gateway/adl-cli),
+a thin wrapper that downloads the matching native binary on first use:
+
+```bash
+npx @inference-gateway/adl-cli init my-agent
+npx @inference-gateway/adl-cli generate --file agent.yaml --output ./agent
+npx @inference-gateway/adl-cli validate agent.yaml
+```
+
+Or install it globally:
+
+```bash
+npm install -g @inference-gateway/adl-cli
+adl --help
+```
+
+Prebuilt binaries are available for Linux and macOS on x64/arm64. The npm
+package version tracks the native binary version one-to-one.
+
+### Install Script
 
 Use our install script to automatically download and install the latest binary:
 
@@ -88,28 +110,6 @@ chmod +x install.sh
 - Install specific version: `./install.sh --version v1.0.0`
 - Custom install directory: `INSTALL_DIR=~/bin ./install.sh`
 - Show help: `./install.sh --help`
-
-### npm / npx
-
-If you already have Node.js, you can run `adl` without a prior install via
-[`@inference-gateway/adl-cli`](https://www.npmjs.com/package/@inference-gateway/adl-cli),
-a thin wrapper that downloads the matching native binary on first use:
-
-```bash
-npx @inference-gateway/adl-cli init my-agent
-npx @inference-gateway/adl-cli generate --file agent.yaml --output ./agent
-npx @inference-gateway/adl-cli validate agent.yaml
-```
-
-Or install it globally:
-
-```bash
-npm install -g @inference-gateway/adl-cli
-adl --help
-```
-
-Prebuilt binaries are available for Linux and macOS on x64/arm64. The npm
-package version tracks the native binary version one-to-one.
 
 ### From Source
 

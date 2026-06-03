@@ -98,7 +98,24 @@ plugins:
 
         ## 📦 Installation
 
-        ### Quick Install (Recommended)
+        ### npm / npx (Recommended)
+
+        Most developers already have Node.js - run `adl` without installing anything. npx downloads the matching native binary on first use:
+
+        ```bash
+        npx @inference-gateway/adl-cli@<%= nextRelease.version %> init my-agent
+        npx @inference-gateway/adl-cli@<%= nextRelease.version %> generate --file agent.yaml --output ./agent
+        npx @inference-gateway/adl-cli@<%= nextRelease.version %> validate agent.yaml
+        ```
+
+        Or install it globally:
+
+        ```bash
+        npm install -g @inference-gateway/adl-cli@<%= nextRelease.version %>
+        adl --help
+        ```
+
+        ### Install Script
 
         ```bash
         curl -fsSL https://raw.githubusercontent.com/inference-gateway/adl-cli/main/install.sh | bash
