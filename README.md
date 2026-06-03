@@ -62,7 +62,7 @@ The ADL CLI helps you build enterprise-ready A2A agents quickly by generating co
 - 🔧 **CI/CD Generation** - Automatic GitHub Actions workflows with semantic-release CD pipelines
 - 🏗️ **Sandbox Environments** - Flox and DevContainer support for isolated development
 - 🎣 **Post-Generation Hooks** - Customize build, format, and test commands after generation
-- 🤖 **Multi-Provider AI** - OpenAI, Anthropic, DeepSeek, Ollama, Google, Mistral, and Groq support
+- 🤖 **Multi-Provider AI** - OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama, and Ollama Cloud support
 - 📁 **Artifacts Support** - Integrated filesystem and MinIO object storage for artifact management
 
 ## Installation
@@ -251,7 +251,7 @@ The init command supports extensive configuration options:
 **Agent Configuration:**
 
 - `--type` - Agent type (`ai-powered`/`minimal`)
-- `--provider` - AI provider (`openai`/`anthropic`/`deepseek`/`ollama`/`google`/`mistral`/`groq`)
+- `--provider` - AI provider (`openai`/`anthropic`/`google`/`groq`/`mistral`/`deepseek`/`cohere`/`cloudflare`/`moonshot`/`ollama`/`ollama_cloud`)
 - `--model` - AI model name
 - `--system-prompt` - System prompt for the agent
 - `--max-tokens` - Maximum tokens (integer)
@@ -447,7 +447,7 @@ spec:
     pushNotifications: false
     stateTransitionHistory: false
   agent:
-    provider: "" # Choose: openai, anthropic, deepseek, ollama, google, mistral, groq
+    provider: "" # Choose: openai, anthropic, google, groq, mistral, deepseek, cohere, cloudflare, moonshot, ollama, ollama_cloud
     model: "" # Specify default model name for chosen provider
     systemPrompt: "You are a helpful weather assistant."
     maxTokens: 4096
@@ -487,7 +487,7 @@ The complete ADL schema includes:
 - **capabilities**: Streaming, notifications, state history
 - **config**: Structured configuration sections with environment variable mapping
 - **services**: Service services with interfaces, factories, and type definitions
-- **agent**: AI provider configuration (OpenAI, Anthropic, DeepSeek, Ollama, Google, Mistral, Groq)
+- **agent**: AI provider configuration (OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama, Ollama Cloud)
 - **tools**: Function-call definitions with JSON schemas, validation, and service injection support
 - **skills**: Markdown playbooks (id + optional `bare`, version, source) pulled from the skills registry, fetched as a full directory from a GitHub repo (shorthand or URL), or scaffolded locally; advertised on the agent card and prepended to the system prompt at runtime
 - **server**: HTTP server configuration with authentication support
@@ -1720,7 +1720,7 @@ When `github_app: true` is set, the generated CD pipeline will use GitHub App au
 
 ### AI Provider Support
 
-The ADL CLI supports multiple AI providers including OpenAI, Anthropic, DeepSeek, Ollama (for local LLMs), Google AI, Mistral, and Groq. Each provider requires appropriate API keys to be configured as environment variables. See the ADL examples above for configuration details.
+The ADL CLI supports multiple AI providers including OpenAI, Anthropic, Google AI, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama (for local LLMs), and Ollama Cloud. Each provider requires appropriate API keys to be configured as environment variables. See the ADL examples above for configuration details.
 
 ## Artifacts Support
 

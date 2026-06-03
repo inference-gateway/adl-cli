@@ -30,6 +30,13 @@ type Agent struct {
 	// MaxTokens corresponds to the JSON schema field "maxTokens".
 	MaxTokens int `json:"maxTokens,omitempty,omitzero" yaml:"maxTokens,omitempty" mapstructure:"maxTokens,omitempty"`
 
+	// MCP (Model Context Protocol) servers the agent connects to at runtime to
+	// discover and call external tools and capabilities, in addition to the locally
+	// generated 'spec.tools'. Only meaningful for an LLM-backed agent: A2A itself
+	// does not require an LLM, so this lives under 'spec.agent'. Each entry declares
+	// a transport plus the connection details for that transport.
+	Mcps []MCP `json:"mcps,omitempty,omitzero" yaml:"mcps,omitempty" mapstructure:"mcps,omitempty"`
+
 	// Model corresponds to the JSON schema field "model".
 	Model string `json:"model,omitempty,omitzero" yaml:"model,omitempty" mapstructure:"model,omitempty"`
 
@@ -47,11 +54,15 @@ type AgentProvider string
 
 const AgentProviderAnthropic AgentProvider = "anthropic"
 const AgentProviderBlank AgentProvider = ""
+const AgentProviderCloudflare AgentProvider = "cloudflare"
+const AgentProviderCohere AgentProvider = "cohere"
 const AgentProviderDeepseek AgentProvider = "deepseek"
 const AgentProviderGoogle AgentProvider = "google"
 const AgentProviderGroq AgentProvider = "groq"
 const AgentProviderMistral AgentProvider = "mistral"
+const AgentProviderMoonshot AgentProvider = "moonshot"
 const AgentProviderOllama AgentProvider = "ollama"
+const AgentProviderOllamaCloud AgentProvider = "ollama_cloud"
 const AgentProviderOpenai AgentProvider = "openai"
 
 type ArtifactsConfig struct {
@@ -139,12 +150,16 @@ type DeploymentConfig struct {
 
 	// Type corresponds to the JSON schema field "type".
 	Type DeploymentConfigType `json:"type,omitempty,omitzero" yaml:"type,omitempty" mapstructure:"type,omitempty"`
+
+	// Vercel corresponds to the JSON schema field "vercel".
+	Vercel *VercelConfig `json:"vercel,omitempty,omitzero" yaml:"vercel,omitempty" mapstructure:"vercel,omitempty"`
 }
 
 type DeploymentConfigType string
 
 const DeploymentConfigTypeCloudRun DeploymentConfigType = "cloudrun"
 const DeploymentConfigTypeKubernetes DeploymentConfigType = "kubernetes"
+const DeploymentConfigTypeVercel DeploymentConfigType = "vercel"
 
 type DevContainerConfig struct {
 	// Enabled corresponds to the JSON schema field "enabled".
@@ -240,6 +255,54 @@ type Language struct {
 	// TypeScript corresponds to the JSON schema field "typescript".
 	TypeScript *TypeScriptConfig `json:"typescript,omitempty,omitzero" yaml:"typescript,omitempty" mapstructure:"typescript,omitempty"`
 }
+
+// A single MCP (Model Context Protocol) server the agent can connect to. 'stdio'
+// launches a local subprocess and talks over stdin/stdout (use 'command', 'args',
+// and 'env'); 'http' and 'sse' connect to a remote endpoint (use 'url' and
+// 'headers'). Connection details that do not apply to the chosen transport are
+// simply omitted; the schema does not constrain which combination is present so
+// consumers can stay lenient.
+type MCP struct {
+	// Arguments passed to 'command' when launching a 'stdio' server.
+	Args []string `json:"args,omitempty,omitzero" yaml:"args,omitempty" mapstructure:"args,omitempty"`
+
+	// Executable to launch for a 'stdio' server (e.g. 'npx', 'uvx', 'docker').
+	// Ignored by remote transports.
+	Command string `json:"command,omitempty,omitzero" yaml:"command,omitempty" mapstructure:"command,omitempty"`
+
+	// Environment variables set when launching a 'stdio' server (e.g. API keys or
+	// tokens the server needs).
+	Env MCPEnv `json:"env,omitempty,omitzero" yaml:"env,omitempty" mapstructure:"env,omitempty"`
+
+	// Extra HTTP headers sent when connecting to an 'http' or 'sse' server (e.g.
+	// 'Authorization').
+	Headers MCPHeaders `json:"headers,omitempty,omitzero" yaml:"headers,omitempty" mapstructure:"headers,omitempty"`
+
+	// Identifier for the MCP server, unique within the agent. Consumers typically use
+	// it to namespace the tools the server exposes.
+	Name string `json:"name" yaml:"name" mapstructure:"name"`
+
+	// How the agent connects to the MCP server. New transports may be added in future
+	// minor versions; consumers should be lenient about unknown values.
+	Transport MCPTransport `json:"transport" yaml:"transport" mapstructure:"transport"`
+
+	// Endpoint URL for an 'http' or 'sse' server. Ignored by the 'stdio' transport.
+	URL string `json:"url,omitempty,omitzero" yaml:"url,omitempty" mapstructure:"url,omitempty"`
+}
+
+// Environment variables set when launching a 'stdio' server (e.g. API keys or
+// tokens the server needs).
+type MCPEnv map[string]string
+
+// Extra HTTP headers sent when connecting to an 'http' or 'sse' server (e.g.
+// 'Authorization').
+type MCPHeaders map[string]string
+
+type MCPTransport string
+
+const MCPTransportHttp MCPTransport = "http"
+const MCPTransportSse MCPTransport = "sse"
+const MCPTransportStdio MCPTransport = "stdio"
 
 type Metadata struct {
 	// Author of the agent. Optional; when provided, 'name' is required. 'email' and
@@ -548,6 +611,9 @@ type Spec struct {
 	// Skills corresponds to the JSON schema field "skills".
 	Skills []Skill `json:"skills,omitempty,omitzero" yaml:"skills,omitempty" mapstructure:"skills,omitempty"`
 
+	// Telemetry corresponds to the JSON schema field "telemetry".
+	Telemetry *TelemetryConfig `json:"telemetry,omitempty,omitzero" yaml:"telemetry,omitempty" mapstructure:"telemetry,omitempty"`
+
 	// Tools corresponds to the JSON schema field "tools".
 	Tools []Tool `json:"tools,omitempty,omitzero" yaml:"tools,omitempty" mapstructure:"tools,omitempty"`
 }
@@ -555,6 +621,20 @@ type Spec struct {
 type SpecConfig map[string]map[string]any
 
 type SpecServices map[string]Service
+
+// Toggles OpenTelemetry instrumentation for the generated agent. When enabled, the
+// consumer (e.g. adl-cli) pulls OpenTelemetry dependencies into the project,
+// instruments the built-in tool calls with spans, and turns on the ADK's
+// telemetry/metrics server (the A2A_TELEMETRY_ENABLE switch) so traces, metrics,
+// and logs can be exported. As with spec.artifacts the schema deliberately exposes
+// only the on/off switch; the exporter endpoint, metrics port, and sampling are
+// resolved by the consumer and the runtime environment rather than pinned in the
+// manifest. Telemetry is disabled by default - omit the block or set 'enabled:
+// false' to keep it off.
+type TelemetryConfig struct {
+	// Enabled corresponds to the JSON schema field "enabled".
+	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
+}
 
 // Function-call entrypoint the agent can invoke. Generated as code in the target
 // language. User-defined tools require name, description, tags, and schema;
@@ -613,3 +693,54 @@ type VendorConfig struct {
 	// form.
 	Devdeps []string `json:"devdeps,omitempty,omitzero" yaml:"devdeps,omitempty" mapstructure:"devdeps,omitempty"`
 }
+
+// Configuration for deploying to Vercel. Unlike kubernetes/cloudrun which deploy
+// prebuilt container images, Vercel deploys from source via its own build
+// pipeline.
+type VercelConfig struct {
+	// Environment variables injected into the Vercel deployment. Values can use the
+	// ${VAR} placeholder convention for secrets; never inline a real secret here. See
+	// docs/reference/secrets.md.
+	Environment VercelConfigEnvironment `json:"environment,omitempty,omitzero" yaml:"environment,omitempty" mapstructure:"environment,omitempty"`
+
+	// Vercel framework identifier (e.g. "nextjs", "nuxtjs"). When omitted Vercel
+	// auto-detects.
+	Framework string `json:"framework,omitempty,omitzero" yaml:"framework,omitempty" mapstructure:"framework,omitempty"`
+
+	// Configuration for Vercel serverless functions.
+	Functions *VercelConfigFunctions `json:"functions,omitempty,omitzero" yaml:"functions,omitempty" mapstructure:"functions,omitempty"`
+
+	// Vercel project name.
+	Project string `json:"project,omitempty,omitzero" yaml:"project,omitempty" mapstructure:"project,omitempty"`
+
+	// Vercel region identifiers where the function is deployed (e.g. "iad1", "gru1",
+	// "hkg1"). Omitting lets Vercel decide.
+	Regions []string `json:"regions,omitempty,omitzero" yaml:"regions,omitempty" mapstructure:"regions,omitempty"`
+
+	// Vercel function runtime. "nodejs" for the serverless Node.js runtime (supports
+	// full Node API); "edge" for the Edge runtime (limited API, runs in V8 isolates
+	// at the edge).
+	Runtime VercelConfigRuntime `json:"runtime,omitempty,omitzero" yaml:"runtime,omitempty" mapstructure:"runtime,omitempty"`
+
+	// Vercel team ID or slug the project belongs to.
+	Team string `json:"team,omitempty,omitzero" yaml:"team,omitempty" mapstructure:"team,omitempty"`
+}
+
+// Environment variables injected into the Vercel deployment. Values can use the
+// ${VAR} placeholder convention for secrets; never inline a real secret here. See
+// docs/reference/secrets.md.
+type VercelConfigEnvironment map[string]string
+
+// Configuration for Vercel serverless functions.
+type VercelConfigFunctions struct {
+	// Maximum function execution time in seconds.
+	MaxDuration int `json:"maxDuration,omitempty,omitzero" yaml:"maxDuration,omitempty" mapstructure:"maxDuration,omitempty"`
+
+	// Memory limit in MB (e.g. 1024).
+	Memory int `json:"memory,omitempty,omitzero" yaml:"memory,omitempty" mapstructure:"memory,omitempty"`
+}
+
+type VercelConfigRuntime string
+
+const VercelConfigRuntimeEdge VercelConfigRuntime = "edge"
+const VercelConfigRuntimeNodejs VercelConfigRuntime = "nodejs"
