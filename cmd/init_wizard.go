@@ -196,16 +196,20 @@ func collectAnswersWizard(projectName string) answers {
 
 		var aiFields []huh.Field
 		if !providerLocked {
+			providerOptions := append(
+				[]huh.Option[string]{huh.NewOption("None — choose provider & model at runtime", "")},
+				huh.NewOptions(aiProviders...)...,
+			)
 			aiFields = append(aiFields, huh.NewSelect[string]().
 				Title("LLM provider").
-				Description("You can leave the model blank to stay vendor-neutral.").
-				Options(huh.NewOptions(aiProviders...)...).
+				Description("Pick \"None\" to stay vendor-neutral and select the provider at runtime via environment variables.").
+				Options(providerOptions...).
 				Value(&provider))
 		}
 		if !modelLocked {
 			aiFields = append(aiFields, huh.NewInput().
 				Title("Model").
-				Description("e.g. gpt-5.5, claude-opus-4-8 - optional.").
+				Description("Optional - e.g. gpt-5.5, claude-opus-4-8. Leave blank to choose the model at runtime.").
 				Value(&model))
 		}
 		if !promptLocked {

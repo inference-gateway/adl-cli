@@ -605,3 +605,64 @@ func TestInitDefaultsVendorNeutral(t *testing.T) {
 		t.Errorf("expected model to be empty string for vendor neutrality, got: %s", adl.Spec.Agent.Model)
 	}
 }
+
+// TestInitProviderModelFlags guards issue #191: `--provider` and `--model` must
+// be honored in `--defaults` mode and written into the manifest, instead of
+// being silently dropped in favor of the empty default.
+func TestInitProviderModelFlags(t *testing.T) {
+	tempDir := t.TempDir()
+	outputPath := filepath.Join(tempDir, "test-output")
+
+	cmd := initCmd
+	if err := cmd.Flags().Set("defaults", "true"); err != nil {
+		t.Fatal(err)
+	}
+	if err := cmd.Flags().Set("path", outputPath); err != nil {
+		t.Fatal(err)
+	}
+	if err := cmd.Flags().Set("type", "ai-powered"); err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = cmd.Flags().Set("type", "") }()
+	if err := cmd.Flags().Set("provider", "anthropic"); err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = cmd.Flags().Set("provider", "") }()
+	if err := cmd.Flags().Set("model", "claude-sonnet-4-5"); err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = cmd.Flags().Set("model", "") }()
+
+	if err := runInit(cmd, []string{"test-agent"}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	adlPath := filepath.Join(outputPath, "agent.yaml")
+	content, err := os.ReadFile(adlPath)
+	if err != nil {
+		t.Fatalf("failed to read ADL file: %v", err)
+	}
+
+	var adl adlData
+	if err := yaml.Unmarshal(content, &adl); err != nil {
+		t.Fatalf("failed to parse ADL YAML: %v", err)
+	}
+
+	if adl.Spec.Agent == nil {
+		t.Fatalf("expected agent spec to be present for ai-powered agent")
+	}
+	if adl.Spec.Agent.Provider != "anthropic" {
+		t.Errorf("expected provider 'anthropic' from --provider flag, got: %q", adl.Spec.Agent.Provider)
+	}
+	if adl.Spec.Agent.Model != "claude-sonnet-4-5" {
+		t.Errorf("expected model 'claude-sonnet-4-5' from --model flag, got: %q", adl.Spec.Agent.Model)
+	}
+
+	contentStr := string(content)
+	if !strings.Contains(contentStr, "provider: anthropic") {
+		t.Errorf("ADL file should contain 'provider: anthropic', got:\n%s", contentStr)
+	}
+	if !strings.Contains(contentStr, "model: claude-sonnet-4-5") {
+		t.Errorf("ADL file should contain 'model: claude-sonnet-4-5', got:\n%s", contentStr)
+	}
+}

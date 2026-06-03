@@ -58,8 +58,8 @@ func init() {
 	initCmd.Flags().String("description", "", "Agent description")
 	initCmd.Flags().String("version", "", "Agent version")
 	initCmd.Flags().String("type", "", "Agent type (ai-powered/minimal)")
-	initCmd.Flags().String("provider", "", "AI provider (openai/anthropic/google/groq/mistral/deepseek/cohere/cloudflare/moonshot/ollama/ollama_cloud)")
-	initCmd.Flags().String("model", "", "AI model")
+	initCmd.Flags().String("provider", "", "AI provider (openai/anthropic/google/groq/mistral/deepseek/cohere/cloudflare/moonshot/ollama/ollama_cloud; empty = choose at runtime)")
+	initCmd.Flags().String("model", "", "AI model (empty = choose at runtime)")
 	initCmd.Flags().String("system-prompt", "", "System prompt")
 	initCmd.Flags().Int("max-tokens", 0, "Maximum tokens")
 	initCmd.Flags().Float64("temperature", 0.0, "Temperature (0.0-2.0)")
@@ -739,8 +739,9 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 
 	if ans.AgentType == "ai-powered" {
 		tui.Println(tui.Header("AI Configuration"))
-		ans.Provider = conditionalPromptChoice(useDefaults, "AI Provider", aiProviders, "")
-		ans.Model = conditionalPrompt(useDefaults, "Model", "")
+		tui.Println(tui.Note("Leave the provider and model empty to stay vendor-neutral and select them at runtime via environment variables."))
+		ans.Provider = promptChoiceWithConfig("provider", useDefaults, "AI Provider (optional, empty to choose at runtime)", aiProviders, "")
+		ans.Model = promptWithConfig("model", useDefaults, "Model (optional, empty to choose at runtime)", "")
 		ans.SystemPrompt = conditionalPrompt(useDefaults, "System prompt", "You are a helpful AI assistant.")
 
 		if maxTokensStr := conditionalPrompt(useDefaults, "Max tokens (optional, press enter to skip)", ""); maxTokensStr != "" {
@@ -1117,6 +1118,21 @@ func promptWithConfig(key string, useDefaults bool, promptText, defaultValue str
 		return value
 	}
 	return conditionalPrompt(useDefaults, promptText, defaultValue)
+}
+
+// promptChoiceWithConfig is the choice-list analogue of promptWithConfig: a
+// flag/env value (via viper) wins and is echoed without prompting; otherwise it
+// falls back to the interactive choice prompt, or the default in --defaults
+// mode. This is what lets `adl init --defaults --provider <p>` honor the flag
+// instead of silently returning the empty default (issue #191), while keeping
+// the empty default so an unset provider stays vendor-neutral.
+func promptChoiceWithConfig(key string, useDefaults bool, promptText string, choices []string, defaultValue string) string {
+	if viper.IsSet(key) && viper.GetString(key) != "" {
+		value := viper.GetString(key)
+		echoRow(promptText, value)
+		return value
+	}
+	return conditionalPromptChoice(useDefaults, promptText, choices, defaultValue)
 }
 
 func promptBoolWithConfig(key string, useDefaults bool, promptText string, defaultValue bool) bool {
