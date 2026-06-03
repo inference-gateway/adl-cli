@@ -57,9 +57,11 @@ func renderTS(t *testing.T, tmplKey string, adl *schema.ADL) string {
 		t.Fatalf("vendor.ResolveADL: %v", err)
 	}
 	out, err := engine.ExecuteTemplate(tmplKey, templates.Context{
-		ADL:      adl,
-		Language: "typescript",
-		Vendor:   view,
+		ADL:             adl,
+		Language:        "typescript",
+		Vendor:          view,
+		Metadata:        schema.GeneratedMetadata{CLIVersion: "9.9.9"},
+		GenerateCommand: "adl generate --file agent.yaml --output .",
 	})
 	if err != nil {
 		t.Fatalf("ExecuteTemplate %s: %v", tmplKey, err)
@@ -93,10 +95,49 @@ func TestGenerator_TypeScriptPackageJSON(t *testing.T) {
 			t.Fatalf("expected pinned ADK dependency, got %q\n%s", deps["@inference-gateway/adk"], got)
 		}
 		scripts, _ := pkg["scripts"].(map[string]any)
-		for _, s := range []string{"build", "start", "typecheck", "format", "test", "test:coverage"} {
+		for _, s := range []string{"validate", "generate", "build", "start", "typecheck", "format", "test", "test:coverage"} {
 			if _, ok := scripts[s]; !ok {
 				t.Fatalf("expected %q script, got %v", s, scripts)
 			}
+		}
+		if scripts["generate"] != "adl generate --file agent.yaml --output ." {
+			t.Fatalf("expected generate script to invoke the local adl bin, got %q", scripts["generate"])
+		}
+		if scripts["validate"] != "adl validate agent.yaml" {
+			t.Fatalf("expected validate script to invoke the local adl bin, got %q", scripts["validate"])
+		}
+		devDeps, _ := pkg["devDependencies"].(map[string]any)
+		if devDeps["@inference-gateway/adl-cli"] != "9.9.9" {
+			t.Fatalf("expected adl-cli devDependency pinned to the generating CLI version, got %q\n%s", devDeps["@inference-gateway/adl-cli"], got)
+		}
+	})
+
+	t.Run("adl-cli devDependency floats to latest for dev builds", func(t *testing.T) {
+		registry, err := templates.NewRegistry("typescript")
+		if err != nil {
+			t.Fatalf("NewRegistry: %v", err)
+		}
+		view, err := vendor.ResolveADL(makeTypeScriptADL(nil, ""))
+		if err != nil {
+			t.Fatalf("vendor.ResolveADL: %v", err)
+		}
+		got, err := templates.NewWithRegistry("", registry).ExecuteTemplate("package.json", templates.Context{
+			ADL:             makeTypeScriptADL(nil, ""),
+			Language:        "typescript",
+			Vendor:          view,
+			Metadata:        schema.GeneratedMetadata{CLIVersion: "dev"},
+			GenerateCommand: "adl generate --file agent.yaml --output .",
+		})
+		if err != nil {
+			t.Fatalf("ExecuteTemplate package.json: %v", err)
+		}
+		var pkg map[string]any
+		if err := json.Unmarshal([]byte(got), &pkg); err != nil {
+			t.Fatalf("package.json is not valid JSON: %v\n%s", err, got)
+		}
+		devDeps, _ := pkg["devDependencies"].(map[string]any)
+		if devDeps["@inference-gateway/adl-cli"] != "latest" {
+			t.Fatalf("expected adl-cli devDependency to float to latest on dev builds, got %q\n%s", devDeps["@inference-gateway/adl-cli"], got)
 		}
 	})
 
@@ -595,5 +636,105 @@ func TestGenerator_TypeScriptTools(t *testing.T) {
 	}
 	if strings.Contains(ignore, "src/tools/index.ts") {
 		t.Errorf(".adl-ignore must NOT list the regenerated aggregator src/tools/index.ts\n---\n%s", ignore)
+	}
+}
+
+// TestGenerator_TypeScriptShipsAdlCliAsDevDependency locks issue #192: the adl
+// CLI is shipped to TypeScript projects as an npm devDependency (resolved from
+// node_modules/.bin) rather than a global Flox install, so regeneration works
+// with a plain `pnpm install` outside any sandbox. The Taskfile delegates to the
+// pnpm scripts, and the Flox manifest no longer installs adl globally.
+func TestGenerator_TypeScriptShipsAdlCliAsDevDependency(t *testing.T) {
+	adl := makeTypeScriptADL(nil, "You are a test bot.")
+
+	tmpDir, err := os.MkdirTemp("", "adl-ts-toolchain-*")
+	if err != nil {
+		t.Fatalf("MkdirTemp: %v", err)
+	}
+	defer func() { _ = os.RemoveAll(tmpDir) }()
+
+	adlPath := filepath.Join(tmpDir, "agent.yaml")
+	writeYAML(t, adlPath, adl)
+
+	outDir := filepath.Join(tmpDir, "out")
+	gen := New(Config{Template: "minimal", Overwrite: true, Version: "1.2.3", EnableFlox: true})
+	if err := gen.Generate(adlPath, outDir); err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+
+	read := func(rel string) string {
+		t.Helper()
+		b, err := os.ReadFile(filepath.Join(outDir, rel))
+		if err != nil {
+			t.Fatalf("read %s: %v", rel, err)
+		}
+		return string(b)
+	}
+
+	var pkg map[string]any
+	if err := json.Unmarshal([]byte(read("package.json")), &pkg); err != nil {
+		t.Fatalf("package.json invalid: %v", err)
+	}
+	devDeps, _ := pkg["devDependencies"].(map[string]any)
+	if devDeps["@inference-gateway/adl-cli"] != "1.2.3" {
+		t.Fatalf("expected adl-cli devDependency pinned to 1.2.3, got %q", devDeps["@inference-gateway/adl-cli"])
+	}
+	scripts, _ := pkg["scripts"].(map[string]any)
+	if scripts["generate"] != "adl generate --file agent.yaml --output . --overwrite" {
+		t.Fatalf("expected generate script to carry the resolved generate command, got %q", scripts["generate"])
+	}
+
+	taskfile := read("Taskfile.yml")
+	for _, want := range []string{
+		"cmd: pnpm run generate",
+		"cmd: pnpm run validate",
+		"pnpm run build",
+		"pnpm run dev",
+		"pnpm test",
+	} {
+		if !strings.Contains(taskfile, want) {
+			t.Fatalf("Taskfile missing %q\n%s", want, taskfile)
+		}
+	}
+	if strings.Contains(taskfile, "adl generate") || strings.Contains(taskfile, "adl validate") {
+		t.Fatalf("TypeScript Taskfile must not call a global adl bin directly\n%s", taskfile)
+	}
+
+	flox := read(".flox/env/manifest.toml")
+	if strings.Contains(flox, "adl.flake") {
+		t.Fatalf("TypeScript Flox manifest must not install adl globally\n%s", flox)
+	}
+	if !strings.Contains(flox, `pnpm.pkg-path = "pnpm"`) {
+		t.Fatalf("TypeScript Flox manifest should provide pnpm for the toolchain\n%s", flox)
+	}
+}
+
+// TestFloxManifest_KeepsGlobalAdlForGo guards the other half of issue #192: Go
+// (and Rust) have no package-manager equivalent for the CLI, so their Flox
+// manifest must keep the global adl flake install.
+func TestFloxManifest_KeepsGlobalAdlForGo(t *testing.T) {
+	registry, err := templates.NewRegistry("go")
+	if err != nil {
+		t.Fatalf("NewRegistry: %v", err)
+	}
+	adl := &schema.ADL{
+		Metadata: schema.Metadata{Name: "go-agent"},
+		Spec: schema.Spec{
+			Language: schema.Language{Go: &schema.GoConfig{Version: "1.26.2"}},
+		},
+	}
+	got, err := templates.NewWithRegistry("", registry).ExecuteTemplate("flox/manifest.toml", templates.Context{
+		ADL:      adl,
+		Language: "go",
+		Metadata: schema.GeneratedMetadata{CLIVersion: "1.2.3"},
+	})
+	if err != nil {
+		t.Fatalf("ExecuteTemplate flox/manifest.toml: %v", err)
+	}
+	if !strings.Contains(got, `adl.flake = "github:inference-gateway/adl-cli/v1.2.3"`) {
+		t.Fatalf("Go Flox manifest must still install adl globally\n%s", got)
+	}
+	if strings.Contains(got, `pnpm.pkg-path`) {
+		t.Fatalf("Go Flox manifest must not pull in the pnpm toolchain\n%s", got)
 	}
 }

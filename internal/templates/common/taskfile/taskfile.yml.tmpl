@@ -7,24 +7,28 @@ vars:
 tasks:
   validate:
     desc: Validate ADL
-    cmd: adl validate agent.yaml
+    cmd: {{- if eq .Language "typescript" }} pnpm run validate
+    {{- else }} adl validate agent.yaml
+    {{- end }}
 
   generate:
     desc: Generate code from ADL
-    cmd: {{ .GenerateCommand }}
+    cmd: {{- if eq .Language "typescript" }} pnpm run generate
+    {{- else }} {{ .GenerateCommand }}
+    {{- end }}
 
   build:
     desc: Build the application
     cmd: {{- if eq .Language "go" }} go build -o bin/{{`{{.APP_NAME}}`}} .
     {{- else if eq .Language "rust" }} cargo build --release
-    {{- else if eq .Language "typescript" }} npm run build
+    {{- else if eq .Language "typescript" }} pnpm run build
     {{- end }}
 
   run:
     desc: Run the application in development mode
     cmd: {{- if eq .Language "go" }} go run . start
     {{- else if eq .Language "rust" }} cargo run -- start
-    {{- else if eq .Language "typescript" }} npm run dev
+    {{- else if eq .Language "typescript" }} pnpm run dev
     {{- end }}
     env:
       A2A_DEBUG: true
@@ -34,28 +38,28 @@ tasks:
     desc: Run tests
     cmd: {{- if eq .Language "go" }} go test -v ./...
     {{- else if eq .Language "rust" }} cargo test
-    {{- else if eq .Language "typescript" }} npm test
+    {{- else if eq .Language "typescript" }} pnpm test
     {{- end }}
 
   test:cover:
     desc: Run tests with coverage
     cmd: {{- if eq .Language "go" }} go test -v -cover ./...
     {{- else if eq .Language "rust" }} cargo tarpaulin
-    {{- else if eq .Language "typescript" }} npm run test:coverage
+    {{- else if eq .Language "typescript" }} pnpm run test:coverage
     {{- end }}
 
   fmt:
     desc: Format code
     cmd: {{- if eq .Language "go" }} go fmt ./...
     {{- else if eq .Language "rust" }} cargo fmt
-    {{- else if eq .Language "typescript" }} npm run format
+    {{- else if eq .Language "typescript" }} pnpm run format
     {{- end }}
 
   lint:
     desc: Run linter
     cmd: {{- if eq .Language "go" }} golangci-lint run
     {{- else if eq .Language "rust" }} cargo clippy
-    {{- else if eq .Language "typescript" }} npm run typecheck
+    {{- else if eq .Language "typescript" }} pnpm run typecheck
     {{- end }}
 
   clean:
