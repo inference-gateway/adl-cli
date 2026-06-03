@@ -247,7 +247,7 @@ func makeTSConfigADL(sections schema.SpecConfig) *schema.ADL {
 			Server:       schema.Server{Port: 9090},
 			Agent: &schema.Agent{
 				Provider:     "openai",
-				Model:        "gpt-4o",
+				Model:        "gpt-5.5",
 				SystemPrompt: "You are a test bot.",
 			},
 			Config: sections,
@@ -279,7 +279,7 @@ func TestGenerator_TypeScriptConfig(t *testing.T) {
 			`envString('A2A_AGENT_CARD_PATH', '.well-known/agent-card.json')`,
 			`envString('A2A_SKILLS_DIR', 'skills')`,
 			`envString('A2A_AGENT_CLIENT_PROVIDER', "openai")`,
-			`envString('A2A_AGENT_CLIENT_MODEL', "gpt-4o")`,
+			`envString('A2A_AGENT_CLIENT_MODEL', "gpt-5.5")`,
 			"process.env['A2A_AGENT_CLIENT_BASE_URL']",
 			"${provider.toUpperCase()}_API_KEY",
 		} {
@@ -424,7 +424,7 @@ func TestGenerator_TypeScriptTools(t *testing.T) {
 			Server:       schema.Server{Port: 8080},
 			Agent: &schema.Agent{
 				Provider:     "openai",
-				Model:        "gpt-4o",
+				Model:        "gpt-5.5",
 				SystemPrompt: "You are a test bot.",
 			},
 			Config: schema.SpecConfig{

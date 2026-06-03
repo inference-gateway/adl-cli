@@ -172,7 +172,7 @@ them at runtime.
 | **Server** | `A2A_SERVER_DISABLE_HEALTHCHECK_LOG` | Disable logging for health check requests | `true` |
 | **Agent Metadata** | `A2A_AGENT_CARD_FILE_PATH` | Path to agent card JSON file | `.well-known/agent-card.json` |
 | **LLM Client** | `A2A_AGENT_CLIENT_PROVIDER` | LLM provider (`openai`, `anthropic`, `azure`, `ollama`, `deepseek`) | {{- if .ADL.Spec.Agent }}`{{ .ADL.Spec.Agent.Provider }}`{{- else }}`openai`{{- end }} |
-| **LLM Client** | `A2A_AGENT_CLIENT_MODEL` | Model to use | {{- if .ADL.Spec.Agent }}`{{ .ADL.Spec.Agent.Model }}`{{- else }}`gpt-4o-mini`{{- end }} |
+| **LLM Client** | `A2A_AGENT_CLIENT_MODEL` | Model to use | {{- if .ADL.Spec.Agent }}`{{ .ADL.Spec.Agent.Model }}`{{- else }}`gpt-5.5`{{- end }} |
 | **LLM Client** | `A2A_AGENT_CLIENT_API_KEY` | API key for LLM provider | - |
 | **LLM Client** | `A2A_AGENT_CLIENT_BASE_URL` | Custom LLM API endpoint | - |
 | **LLM Client** | `A2A_AGENT_CLIENT_TIMEOUT` | Timeout for LLM requests | `30s` |
