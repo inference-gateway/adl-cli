@@ -4,6 +4,7 @@ adl.exe
 
 # Copied from repo root at publish time
 LICENSE
+README.md
 
 # Auth + deps
 .npmrc

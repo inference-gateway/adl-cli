@@ -53,6 +53,7 @@ plugins:
     - prepareCmd: |
         sed -i "s/VERSION: [0-9]\\+\\.[0-9]\\+\\.[0-9]\\+.*/VERSION: ${nextRelease.version}/" Taskfile.yml
         cp LICENSE npm/LICENSE
+        cp README.md npm/README.md
         sed -i.bak 's|version = "[^"]*";|version = "${nextRelease.version}";|' flake.nix && rm flake.nix.bak
         sed -i.bak 's|vendorHash = "[^"]*";|vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";|' flake.nix && rm flake.nix.bak
         NEW_HASH=$(nix build .#adl 2>&1 | awk '/got:/ {print $2; exit}')
