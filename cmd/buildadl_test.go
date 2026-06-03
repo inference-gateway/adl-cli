@@ -92,6 +92,37 @@ func TestBuildADLGolden(t *testing.T) {
 	}
 }
 
+// TestBuildADLAIPoweredEmptyProviderModel verifies that an ai-powered agent
+// with no provider and no model still emits the agent block with explicit empty
+// strings. The agent block's presence is what marks the agent LLM-backed, while
+// the empty provider/model let users swap both at runtime via environment
+// variables.
+func TestBuildADLAIPoweredEmptyProviderModel(t *testing.T) {
+	ans := answers{
+		Name:      "neutral-agent",
+		Language:  "go",
+		AgentType: "ai-powered",
+	}
+
+	adl := buildADL(ans)
+	if adl.Spec.Agent == nil {
+		t.Fatalf("expected agent block for ai-powered agent even without provider/model")
+	}
+	if adl.Spec.Agent.Provider != "" {
+		t.Errorf("expected empty provider, got %q", adl.Spec.Agent.Provider)
+	}
+	if adl.Spec.Agent.Model != "" {
+		t.Errorf("expected empty model, got %q", adl.Spec.Agent.Model)
+	}
+
+	got := renderADL(t, ans)
+	for _, want := range []string{"agent:", "provider: \"\"", "model: \"\""} {
+		if !strings.Contains(got, want) {
+			t.Errorf("manifest missing %q, got:\n%s", want, got)
+		}
+	}
+}
+
 // TestBuildADLLanguages asserts that exactly the chosen language block is
 // emitted, with its vendor extension points rendered as empty lists.
 func TestBuildADLLanguages(t *testing.T) {
