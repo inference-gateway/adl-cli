@@ -34,12 +34,5 @@
     "tsx": "^4.19.2",
     "typescript": "^6.0.3"{{- range .Vendor.NpmDevDeps }},
     {{ .Name | toJson }}: {{ .Version | toJson }}{{- end }}
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@inference-gateway/adl-cli",
-      "esbuild",
-      "protobufjs"
-    ]
   }
 }

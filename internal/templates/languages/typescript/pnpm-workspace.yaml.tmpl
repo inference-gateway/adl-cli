@@ -1,0 +1,7 @@
+# pnpm 11 reads settings from this file, not the `pnpm` field in package.json.
+# Pre-approve dependencies that run install/build scripts; without this pnpm
+# skips them and the native `adl` binary (adl-cli postinstall) is never fetched.
+onlyBuiltDependencies:
+  - "@inference-gateway/adl-cli"
+  - esbuild
+  - protobufjs
