@@ -196,6 +196,17 @@ type vendorBlock struct {
 	Devdeps []string `yaml:"devdeps"`
 }
 
+// serviceBlock mirrors a single entry under spec.services in the ADL schema.
+// Services are keyed by name (the map key) and the schema requires every entry
+// to be an object with type/interface/factory/description - rendering the bare
+// service name as a YAML array fails `adl validate`. See issue #190.
+type serviceBlock struct {
+	Type        string `yaml:"type"`
+	Interface   string `yaml:"interface"`
+	Factory     string `yaml:"factory"`
+	Description string `yaml:"description"`
+}
+
 // orchestratorToggle is a single coding-agent on/off switch under
 // spec.development.ai.orchestrators.<agent>.
 type orchestratorToggle struct {
@@ -251,7 +262,7 @@ type adlData struct {
 		Artifacts *struct {
 			Enabled bool `yaml:"enabled"`
 		} `yaml:"artifacts,omitempty"`
-		Services []string `yaml:"services,omitempty"`
+		Services map[string]serviceBlock `yaml:"services,omitempty"`
 		Tools    []struct {
 			ID          string         `yaml:"id"`
 			Name        string         `yaml:"name"`
@@ -443,6 +454,29 @@ func splitAndTrim(s string) []string {
 	return parts
 }
 
+// servicesFromNames expands the bare service names collected during init into
+// the object shape spec.services requires (see serviceBlock). Each name becomes
+// a map entry with conventional Go identifiers - <Name>Service for the interface
+// and New<Name>Service for the factory - matching what the generator emits in
+// internal/<name>/<name>.go. Returns nil when there are no services so the
+// `omitempty` tag drops the key entirely for service-less agents.
+func servicesFromNames(names []string) map[string]serviceBlock {
+	if len(names) == 0 {
+		return nil
+	}
+	services := make(map[string]serviceBlock, len(names))
+	for _, name := range names {
+		title := titleCase(name)
+		services[name] = serviceBlock{
+			Type:        "service",
+			Interface:   title + "Service",
+			Factory:     "New" + title + "Service",
+			Description: title + " service",
+		}
+	}
+	return services
+}
+
 // buildADL turns resolved answers into the agent.yaml document. It is pure (no
 // prompts, no I/O) so it can be golden-tested in isolation and so the
 // interactive and non-interactive paths can never drift in manifest shape.
@@ -490,7 +524,7 @@ func buildADL(ans answers) *adlData {
 		}
 	}
 
-	adl.Spec.Services = ans.Services
+	adl.Spec.Services = servicesFromNames(ans.Services)
 
 	for _, t := range ans.Tools {
 		adl.Spec.Tools = append(adl.Spec.Tools, struct {
@@ -767,7 +801,7 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 				if !duplicate {
 					ans.Services = append(ans.Services, service)
 					fmt.Printf("✅ Added service: %s\n", service)
-					fmt.Printf("💡 You will need to implement this in internal/%s package with a New%s function\n", service, titleCase(service))
+					fmt.Printf("💡 You will need to implement this in internal/%s package with a New%sService function\n", service, titleCase(service))
 				}
 
 				if !promptBool("Add another service", false) {

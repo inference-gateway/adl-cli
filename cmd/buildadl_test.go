@@ -218,8 +218,30 @@ func TestBuildADLToolsAndSkills(t *testing.T) {
 		t.Errorf("expected logger injected, got %v", tool.Inject)
 	}
 
+	logger, ok := adl.Spec.Services["logger"]
+	if !ok {
+		t.Fatalf("expected logger service in map, got %v", adl.Spec.Services)
+	}
+	if logger.Type != "service" || logger.Interface != "LoggerService" ||
+		logger.Factory != "NewLoggerService" || logger.Description == "" {
+		t.Errorf("unexpected logger service shape: %+v", logger)
+	}
+
 	got := renderADL(t, ans)
-	for _, want := range []string{"services:", "- logger", "- database", "id: get_weather", "bare: true", "id: summarize", "version: 0.1.0"} {
+	for _, want := range []string{
+		"services:",
+		"logger:",
+		"database:",
+		"type: service",
+		"interface: LoggerService",
+		"factory: NewLoggerService",
+		"interface: DatabaseService",
+		"factory: NewDatabaseService",
+		"id: get_weather",
+		"bare: true",
+		"id: summarize",
+		"version: 0.1.0",
+	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("manifest missing %q, got:\n%s", want, got)
 		}

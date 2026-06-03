@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/inference-gateway/adl-cli/internal/schema"
 )
 
 func TestInitCommand(t *testing.T) {
@@ -42,6 +44,48 @@ func TestInitCommand(t *testing.T) {
 	}
 	if !strings.Contains(contentStr, "kind: Agent") {
 		t.Errorf("ADL file missing kind")
+	}
+}
+
+// TestInitDefaultsManifestValidates guards issue #190: `adl init --defaults`
+// adds a default `logger` service, which must be rendered as a schema-valid
+// object (keyed by name) so the generated manifest passes `adl validate`.
+func TestInitDefaultsManifestValidates(t *testing.T) {
+	tempDir := t.TempDir()
+	outputPath := filepath.Join(tempDir, "test-output")
+
+	cmd := initCmd
+	if err := cmd.Flags().Set("defaults", "true"); err != nil {
+		t.Fatal(err)
+	}
+	if err := cmd.Flags().Set("path", outputPath); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := runInit(cmd, []string{"test-agent"}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	adlPath := filepath.Join(outputPath, "agent.yaml")
+
+	var adl adlData
+	content, err := os.ReadFile(adlPath)
+	if err != nil {
+		t.Fatalf("failed to read ADL file: %v", err)
+	}
+	if err := yaml.Unmarshal(content, &adl); err != nil {
+		t.Fatalf("failed to parse ADL YAML: %v", err)
+	}
+	logger, ok := adl.Spec.Services["logger"]
+	if !ok {
+		t.Fatalf("expected default logger service, got services=%v", adl.Spec.Services)
+	}
+	if logger.Type == "" || logger.Interface == "" || logger.Factory == "" {
+		t.Errorf("default logger service missing required fields: %+v", logger)
+	}
+
+	if _, err := schema.NewValidator().ValidateFile(adlPath); err != nil {
+		t.Fatalf("default manifest failed schema validation: %v", err)
 	}
 }
 
