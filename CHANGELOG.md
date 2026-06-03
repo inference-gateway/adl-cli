@@ -8,6 +8,16 @@ All notable changes to this project will be documented in this file.
 
 * **npm-release:** use pkg-root  to tell semantic-release what to bump and publish ([3530776](https://github.com/inference-gateway/adl-cli/commit/353077612c4538060ceae218aaf73f63a42a4553))
 
+### 🔧 Miscellaneous
+
+* **release:** 🔖 0.41.2 [skip ci] ([1fa6f85](https://github.com/inference-gateway/adl-cli/commit/1fa6f857d0cb4f348799003ec098698c358332d2))
+
+## [0.41.2](https://github.com/inference-gateway/adl-cli/compare/v0.41.1...v0.41.2) (2026-06-03)
+
+### 🐛 Bug Fixes
+
+* **npm-release:** use pkg-root  to tell semantic-release what to bump and publish ([3530776](https://github.com/inference-gateway/adl-cli/commit/353077612c4538060ceae218aaf73f63a42a4553))
+
 ## [0.41.1](https://github.com/inference-gateway/adl-cli/compare/v0.41.0...v0.41.1) (2026-06-03)
 
 ### 🔧 Miscellaneous
