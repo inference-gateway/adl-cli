@@ -1,0 +1,17 @@
+{{- $cfg := .ADL.Spec.Deployment.Vercel -}}
+{{- $ext := "ts" -}}
+{{- if eq .Language "go" -}}{{- $ext = "go" -}}{{- else if eq .Language "rust" -}}{{- $ext = "rs" -}}{{- end -}}
+{{- $vercel := dict "$schema" "https://openapi.vercel.sh/vercel.json" -}}
+{{- if $cfg -}}
+{{- if $cfg.Framework -}}{{- $_ := set $vercel "framework" $cfg.Framework -}}{{- end -}}
+{{- if $cfg.Regions -}}{{- $_ := set $vercel "regions" $cfg.Regions -}}{{- end -}}
+{{- $fn := dict -}}
+{{- if $cfg.Functions -}}
+{{- if $cfg.Functions.Memory -}}{{- $_ := set $fn "memory" $cfg.Functions.Memory -}}{{- end -}}
+{{- if $cfg.Functions.MaxDuration -}}{{- $_ := set $fn "maxDuration" $cfg.Functions.MaxDuration -}}{{- end -}}
+{{- end -}}
+{{- if eq $cfg.Runtime "edge" -}}{{- $_ := set $fn "runtime" "@vercel/edge" -}}{{- end -}}
+{{- if $fn -}}{{- $_ := set $vercel "functions" (dict (printf "api/**/*.%s" $ext) $fn) -}}{{- end -}}
+{{- if $cfg.Environment -}}{{- $_ := set $vercel "env" $cfg.Environment -}}{{- end -}}
+{{- end -}}
+{{ toPrettyJson $vercel }}

@@ -161,6 +161,9 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"
 		case schema.DeploymentConfigTypeCloudRun:
 			// CloudRun deployment is handled via Taskfile
+		case schema.DeploymentConfigTypeVercel:
+			files["vercel.json"] = "vercel/vercel.json"
+			files[".vercel/project.json"] = "vercel/project.json"
 		}
 	}
 
@@ -225,6 +228,9 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"
 		case schema.DeploymentConfigTypeCloudRun:
 			// CloudRun deployment is handled via Taskfile
+		case schema.DeploymentConfigTypeVercel:
+			files["vercel.json"] = "vercel/vercel.json"
+			files[".vercel/project.json"] = "vercel/project.json"
 		}
 	}
 
@@ -291,6 +297,9 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 			files["k8s/deployment.yaml"] = "kubernetes/deployment.yaml"
 		case schema.DeploymentConfigTypeCloudRun:
 			// CloudRun deployment is handled via Taskfile
+		case schema.DeploymentConfigTypeVercel:
+			files["vercel.json"] = "vercel/vercel.json"
+			files[".vercel/project.json"] = "vercel/project.json"
 		}
 	}
 

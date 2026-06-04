@@ -559,6 +559,88 @@ func TestGenerator_generateCD(t *testing.T) {
 	}
 }
 
+func TestGenerator_generateCD_Vercel(t *testing.T) {
+	vercelADL := &schema.ADL{
+		APIVersion: "adl.inference-gateway.com/v1",
+		Kind:       "Agent",
+		Metadata: schema.Metadata{
+			Name:        "test-vercel-agent",
+			Description: "Test Vercel CD agent",
+			Version:     "1.0.0",
+		},
+		Spec: schema.Spec{
+			Capabilities: schema.Capabilities{Streaming: true},
+			Server:       schema.Server{Port: 8080},
+			Language: schema.Language{
+				TypeScript: &schema.TypeScriptConfig{
+					PackageName: "test-vercel-agent",
+					NodeVersion: "24",
+				},
+			},
+			SCM: &schema.SCM{
+				Provider: schema.SCMProviderGithub,
+				URL:      "https://github.com/example/test-vercel-agent",
+			},
+			Deployment: &schema.DeploymentConfig{
+				Type: schema.DeploymentConfigTypeVercel,
+				Vercel: &schema.VercelConfig{
+					Project: "test-vercel-agent",
+					Team:    "my-team",
+				},
+			},
+		},
+	}
+
+	tmpDir, err := os.MkdirTemp("", "adl-cd-vercel-test-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer func() {
+		if err := os.RemoveAll(tmpDir); err != nil {
+			t.Logf("Failed to remove temp dir: %v", err)
+		}
+	}()
+
+	gen := New(Config{
+		Template:   "minimal",
+		Overwrite:  true,
+		Version:    "test-version",
+		GenerateCD: true,
+	})
+
+	ignoreChecker, err := NewIgnoreChecker(tmpDir)
+	if err != nil {
+		t.Fatalf("Failed to create ignore checker: %v", err)
+	}
+
+	if err := gen.generateCD(vercelADL, tmpDir, ignoreChecker); err != nil {
+		t.Fatalf("generateCD() error = %v", err)
+	}
+
+	cdContent, err := os.ReadFile(filepath.Join(tmpDir, ".github/workflows/cd.yml"))
+	if err != nil {
+		t.Fatalf("failed to read CD workflow: %v", err)
+	}
+	content := string(cdContent)
+
+	for _, want := range []string{
+		"Deploy to Vercel",
+		"Install Vercel CLI",
+		"npm install --global vercel",
+		"VERCEL_TOKEN",
+		"run: task deploy",
+		"node-version: 24",
+	} {
+		if !containsSubstring(content, want) {
+			t.Errorf("expected Vercel CD workflow to contain %q", want)
+		}
+	}
+
+	if containsSubstring(content, "Deploy to Cloud Run") || containsSubstring(content, "Deploy to Kubernetes") {
+		t.Errorf("Vercel CD workflow should not contain Cloud Run or Kubernetes deploy steps")
+	}
+}
+
 func TestGenerator_Dependabot(t *testing.T) {
 	makeADL := func(name string, dependabot bool, lang schema.Language, sandbox *schema.SandboxConfig) *schema.ADL {
 		spec := schema.Spec{

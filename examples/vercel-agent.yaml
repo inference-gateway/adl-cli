@@ -1,0 +1,68 @@
+---
+apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: vercel-example
+  description: Example A2A agent configured for Vercel deployment from source
+  version: "1.0.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: true
+  agent:
+    provider: deepseek
+    model: deepseek-v4-flash
+    systemPrompt: |
+      You are a helpful A2A agent deployed on Vercel.
+      You can process requests and provide responses efficiently.
+    maxTokens: 4000
+    temperature: 0.7
+  tools:
+    - id: greet
+      name: greet
+      description: Greets the user with a personalized message
+      tags:
+        - greeting
+        - interaction
+      schema:
+        type: object
+        properties:
+          name:
+            type: string
+            description: The name of the person to greet
+        required:
+          - name
+  server:
+    port: 8080
+    scheme: http
+    debug: false
+  language:
+    typescript:
+      packageName: "vercel-example"
+      nodeVersion: "24"
+  scm:
+    provider: github
+    url: "https://github.com/example/vercel-example"
+    issue_templates: false
+    ci: true
+    cd: false
+  deployment:
+    type: vercel
+    vercel:
+      project: vercel-example
+      team: my-team
+      framework: nextjs
+      runtime: edge
+      regions:
+        - iad1
+      functions:
+        memory: 1024
+        maxDuration: 60
+      environment:
+        LOG_LEVEL: info
+        ENVIRONMENT: production
+  development:
+    sandbox:
+      devcontainer:
+        enabled: true

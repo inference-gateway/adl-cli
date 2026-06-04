@@ -131,6 +131,7 @@ tasks:
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/cloudrun-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/cloudrun-ghcr-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/kubernetes-agent.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/vercel-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent-redis.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent-ai.yaml
@@ -153,6 +154,7 @@ tasks:
           - cloudrun-agent
           - cloudrun-ghcr-agent
           - kubernetes-agent
+          - vercel-agent
           - rust-agent
           - rust-agent-redis
           - rust-agent-ai
