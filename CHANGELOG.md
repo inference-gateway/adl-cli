@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.43.1](https://github.com/inference-gateway/adl-cli/compare/v0.43.0...v0.43.1) (2026-06-04)
+
+### 🐛 Bug Fixes
+
+* **typescript:** replace onlyBuiltDependencies with allowBuilds map for pnpm 11.5+ ([#202](https://github.com/inference-gateway/adl-cli/issues/202)) ([f17fb2e](https://github.com/inference-gateway/adl-cli/commit/f17fb2e6c3ab7f8965a2fea94cc8d0c3d9cae2d0)), closes [#201](https://github.com/inference-gateway/adl-cli/issues/201)
+
 ## [0.43.0](https://github.com/inference-gateway/adl-cli/compare/v0.42.0...v0.43.0) (2026-06-04)
 
 ### ✨ Features
