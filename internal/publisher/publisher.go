@@ -151,12 +151,8 @@ func (p *Publisher) Publish(ctx context.Context, meta Metadata, opts Options) (s
 	if _, err := p.Runner.Run(ctx, nil, "gh", "repo", "fork", owner+"/"+repo, "--clone=false"); err != nil {
 		return "", fmt.Errorf("failed to fork %s/%s: %w", owner, repo, err)
 	}
-	// Best-effort: bring an existing fork up to date so the upstream base SHA
-	// is guaranteed to exist in the fork before we branch from it.
 	_, _ = p.Runner.Run(ctx, nil, "gh", "repo", "sync", login+"/"+repo)
 
-	// The catalog repo's own default branch is the PR base, distinct from the
-	// agent's ref (which is only recorded in the catalog entry).
 	baseBranch, err := p.ghAPIString(ctx, fmt.Sprintf("repos/%s/%s", owner, repo), ".default_branch")
 	if err != nil || baseBranch == "" {
 		baseBranch = "main"

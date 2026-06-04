@@ -229,8 +229,6 @@ func TestPublishFullFlow(t *testing.T) {
 	var out strings.Builder
 	p := &Publisher{Runner: runner, Out: &out, Sleep: func(_ time.Duration) {}}
 
-	// Agent ref differs from the catalog repo's base branch (main) to ensure
-	// the two are not conflated.
 	url, err := p.Publish(context.Background(), Metadata{
 		Name:        "cool-agent",
 		Description: "Does cool things",
@@ -243,7 +241,6 @@ func TestPublishFullFlow(t *testing.T) {
 		t.Fatalf("unexpected PR URL: %q", url)
 	}
 
-	// The fork must target upstream and the branch/commit the user's fork.
 	if _, ok := runner.find("gh repo fork inference-gateway/agents"); !ok {
 		t.Fatal("expected fork of inference-gateway/agents")
 	}
@@ -287,7 +284,6 @@ func TestPublishFullFlow(t *testing.T) {
 	if !strings.Contains(prArgs, "--base main") {
 		t.Fatalf("PR base must be the catalog repo's default branch: %s", prArgs)
 	}
-	// The PR body must echo the agent ref, not the catalog base branch.
 	if !strings.Contains(string(pr.stdin), "(`v1.0.0`)") {
 		t.Fatalf("PR body missing agent ref: %s", pr.stdin)
 	}
