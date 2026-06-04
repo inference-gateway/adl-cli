@@ -10,6 +10,7 @@ This directory contains example Agent Definition Language (ADL) files that demon
 - `typescript-agent.yaml` - Minimal TypeScript agent built with the TypeScript ADK
 - `typescript-agent-tools.yaml` - TypeScript agent with tools, services, and dependency injection
 - `typescript-agent-ai.yaml` - AI-powered TypeScript agent with LLM-driven tools
+- `vercel-agent.yaml` - TypeScript agent configured for Vercel deployment from source (`spec.deployment.type: vercel`), exercising the edge runtime, regions, function limits, and env vars
 
 ## Usage
 

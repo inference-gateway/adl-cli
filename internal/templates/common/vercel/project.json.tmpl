@@ -1,0 +1,5 @@
+{{- $cfg := .ADL.Spec.Deployment.Vercel -}}
+{{- $project := "" -}}
+{{- $team := "" -}}
+{{- if $cfg -}}{{- $project = $cfg.Project -}}{{- $team = $cfg.Team -}}{{- end -}}
+{{ toPrettyJson (dict "projectId" $project "orgId" $team) }}

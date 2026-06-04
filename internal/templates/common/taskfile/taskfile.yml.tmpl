@@ -161,5 +161,27 @@ tasks:
       - |
         echo "Deployment completed successfully!"
         echo "Service URL: $(gcloud run services describe ${SERVICE_NAME} --region=${REGION} --format='value(status.url)')"
+{{- else if eq .ADL.Spec.Deployment.Type "vercel" }}
+
+  deploy:
+    desc: Deploy to Vercel
+    env:
+      VERCEL_PROJECT: "{{ if .ADL.Spec.Deployment.Vercel }}{{ .ADL.Spec.Deployment.Vercel.Project }}{{ end }}"
+      VERCEL_ORG: "{{ if .ADL.Spec.Deployment.Vercel }}{{ .ADL.Spec.Deployment.Vercel.Team }}{{ end }}"
+    cmds:
+      - |
+        if ! command -v vercel >/dev/null 2>&1; then
+          echo "Error: the vercel CLI is required. Install it with: npm i -g vercel"
+          exit 1
+        fi
+      - |
+        echo "Linking Vercel project ${VERCEL_PROJECT} (team ${VERCEL_ORG})..."
+        vercel link --yes --project "${VERCEL_PROJECT}"{{ if and .ADL.Spec.Deployment.Vercel .ADL.Spec.Deployment.Vercel.Team }} --scope "${VERCEL_ORG}"{{ end }}
+      - |
+        echo "Pulling Vercel project settings..."
+        vercel pull --yes{{ if and .ADL.Spec.Deployment.Vercel .ADL.Spec.Deployment.Vercel.Team }} --scope "${VERCEL_ORG}"{{ end }}
+      - |
+        echo "Deploying to Vercel..."
+        vercel deploy --prod{{ if and .ADL.Spec.Deployment.Vercel .ADL.Spec.Deployment.Vercel.Team }} --scope "${VERCEL_ORG}"{{ end }}
 {{- end }}
 {{- end }}
