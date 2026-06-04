@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.43.2](https://github.com/inference-gateway/adl-cli/compare/v0.43.1...v0.43.2) (2026-06-04)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump actions/checkout version v6.0.2 -> v6.0.3 ([c584813](https://github.com/inference-gateway/adl-cli/commit/c5848132cec30a1d571f604f88d72160e72ca221))
+* **deps:** bump anthropics/claude-code-action version 1.0.33 -> 1.0.35 ([da34ce7](https://github.com/inference-gateway/adl-cli/commit/da34ce7bee587fa4a0ec5a5f0c0e675e92cd3d24))
+* **deps:** bump the github-actions group with 2 updates ([#203](https://github.com/inference-gateway/adl-cli/issues/203)) ([0ff75d2](https://github.com/inference-gateway/adl-cli/commit/0ff75d2d8ab9766428ccc4f6076ddba2b6397b34))
+
 ## [0.43.1](https://github.com/inference-gateway/adl-cli/compare/v0.43.0...v0.43.1) (2026-06-04)
 
 ### 🐛 Bug Fixes
