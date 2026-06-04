@@ -173,29 +173,37 @@ func TestGenerator_TypeScriptPackageJSON(t *testing.T) {
 	})
 }
 
-// TestGenerator_TypeScriptPnpmWorkspace locks issue #199: pnpm 11 no longer
-// reads the `pnpm` field from package.json, so the build-script approval list
-// must live in pnpm-workspace.yaml. Without it pnpm skips the install scripts
-// for adl-cli/esbuild/protobufjs, the native `adl` binary never downloads, and
-// `task generate` fails with ERR_PNPM_IGNORED_BUILDS.
+// TestGenerator_TypeScriptPnpmWorkspace locks issue #199 and issue #201: pnpm 11.5+
+// no longer reads onlyBuiltDependencies — it requires the allowBuilds map instead.
+// Without it pnpm skips the install scripts for adl-cli/esbuild/protobufjs, the
+// native `adl` binary never downloads, and `task generate` fails with
+// ERR_PNPM_IGNORED_BUILDS.
 func TestGenerator_TypeScriptPnpmWorkspace(t *testing.T) {
-	want := []string{"@inference-gateway/adl-cli", "esbuild", "protobufjs"}
+	wantAllowBuilds := map[string]bool{
+		"@inference-gateway/adl-cli": false,
+		"esbuild":                   false,
+		"protobufjs":                false,
+	}
 
-	t.Run("template emits the onlyBuiltDependencies allowlist as valid YAML", func(t *testing.T) {
+	t.Run("template emits the allowBuilds map as valid YAML", func(t *testing.T) {
 		got := renderTS(t, "pnpm-workspace.yaml", makeTypeScriptADL(nil, ""))
 
 		var ws struct {
-			OnlyBuiltDependencies []string `yaml:"onlyBuiltDependencies"`
+			AllowBuilds              map[string]bool `yaml:"allowBuilds"`
+			MinimumReleaseAgeExclude []string        `yaml:"minimumReleaseAgeExclude"`
 		}
 		if err := yaml.Unmarshal([]byte(got), &ws); err != nil {
 			t.Fatalf("pnpm-workspace.yaml is not valid YAML: %v\n%s", err, got)
 		}
-		if !reflect.DeepEqual(ws.OnlyBuiltDependencies, want) {
-			t.Fatalf("expected onlyBuiltDependencies %v, got %v\n%s", want, ws.OnlyBuiltDependencies, got)
+		if !reflect.DeepEqual(ws.AllowBuilds, wantAllowBuilds) {
+			t.Fatalf("expected allowBuilds %v, got %v\n%s", wantAllowBuilds, ws.AllowBuilds, got)
+		}
+		if len(ws.MinimumReleaseAgeExclude) != 1 || ws.MinimumReleaseAgeExclude[0] != "@inference-gateway/adl-cli@9.9.9" {
+			t.Fatalf("expected minimumReleaseAgeExclude [@inference-gateway/adl-cli@9.9.9], got %v\n%s", ws.MinimumReleaseAgeExclude, got)
 		}
 	})
 
-	t.Run("full pipeline writes pnpm-workspace.yaml so pnpm 11 reads the allowlist", func(t *testing.T) {
+	t.Run("full pipeline writes pnpm-workspace.yaml so pnpm 11.5+ reads the allowlist", func(t *testing.T) {
 		tmpDir, err := os.MkdirTemp("", "adl-ts-pnpm-*")
 		if err != nil {
 			t.Fatalf("MkdirTemp: %v", err)
@@ -216,13 +224,17 @@ func TestGenerator_TypeScriptPnpmWorkspace(t *testing.T) {
 			t.Fatalf("pnpm-workspace.yaml must be generated for TS projects: %v", err)
 		}
 		var ws struct {
-			OnlyBuiltDependencies []string `yaml:"onlyBuiltDependencies"`
+			AllowBuilds              map[string]bool `yaml:"allowBuilds"`
+			MinimumReleaseAgeExclude []string        `yaml:"minimumReleaseAgeExclude"`
 		}
 		if err := yaml.Unmarshal(wsBytes, &ws); err != nil {
 			t.Fatalf("generated pnpm-workspace.yaml invalid: %v\n%s", err, wsBytes)
 		}
-		if !reflect.DeepEqual(ws.OnlyBuiltDependencies, want) {
-			t.Fatalf("expected onlyBuiltDependencies %v, got %v\n%s", want, ws.OnlyBuiltDependencies, wsBytes)
+		if !reflect.DeepEqual(ws.AllowBuilds, wantAllowBuilds) {
+			t.Fatalf("expected allowBuilds %v, got %v\n%s", wantAllowBuilds, ws.AllowBuilds, wsBytes)
+		}
+		if len(ws.MinimumReleaseAgeExclude) != 1 || ws.MinimumReleaseAgeExclude[0] != "@inference-gateway/adl-cli@1.2.3" {
+			t.Fatalf("expected minimumReleaseAgeExclude [@inference-gateway/adl-cli@1.2.3], got %v\n%s", ws.MinimumReleaseAgeExclude, wsBytes)
 		}
 
 		pkgBytes, err := os.ReadFile(filepath.Join(outDir, "package.json"))
