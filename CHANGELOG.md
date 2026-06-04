@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.43.0](https://github.com/inference-gateway/adl-cli/compare/v0.42.0...v0.43.0) (2026-06-04)
+
+### ✨ Features
+
+* **init:** allow empty provider/model for runtime selection ([#195](https://github.com/inference-gateway/adl-cli/issues/195)) ([5bb1fe4](https://github.com/inference-gateway/adl-cli/commit/5bb1fe498433c441355b006ab1b0724786c9813b))
+* re-vendor adl schema v0.15.0 for new providers ([#194](https://github.com/inference-gateway/adl-cli/issues/194)) ([b1e7366](https://github.com/inference-gateway/adl-cli/commit/b1e73668c43703b1b966390023e4b017910cd48b))
+
+### ♻️ Improvements
+
+* ship adl-cli as a typescript devDependency ([#196](https://github.com/inference-gateway/adl-cli/issues/196)) ([4f2bec6](https://github.com/inference-gateway/adl-cli/commit/4f2bec63551249cc19bf0b91550f8ae180bfa45b))
+
+### 🐛 Bug Fixes
+
+* add node_modules to generated typescript .gitignore ([#198](https://github.com/inference-gateway/adl-cli/issues/198)) ([9c789ad](https://github.com/inference-gateway/adl-cli/commit/9c789adfb927d8cc2492a13b3e27012d0c9ab744))
+* pre-approve pnpm build scripts in generated TypeScript projects (fixes [#199](https://github.com/inference-gateway/adl-cli/issues/199)) ([#200](https://github.com/inference-gateway/adl-cli/issues/200)) ([f2acedf](https://github.com/inference-gateway/adl-cli/commit/f2acedf5cfebd60d76f088c3a16ffe4d6b76a14f))
+* render spec.services as object in adl init ([#193](https://github.com/inference-gateway/adl-cli/issues/193)) ([b84f768](https://github.com/inference-gateway/adl-cli/commit/b84f7681bb74d71ef3f590d424509c5afc1266a2))
+
 ## [0.42.0](https://github.com/inference-gateway/adl-cli/compare/v0.41.4...v0.42.0) (2026-06-03)
 
 ### ✨ Features
