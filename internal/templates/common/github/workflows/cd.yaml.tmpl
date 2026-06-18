@@ -84,7 +84,6 @@ jobs:
         run: task build
 {{ else if eq .Language "rust" }}
       - name: Set up Rust
-        # @master is required so the `toolchain` input is honored (see dtolnay/rust-toolchain docs)
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: {{ if and .ADL.Spec.Language.Rust .ADL.Spec.Language.Rust.Version }}{{ .ADL.Spec.Language.Rust.Version }}{{ else }}stable{{ end }}
