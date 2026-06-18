@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.44.0](https://github.com/inference-gateway/adl-cli/compare/v0.43.2...v0.44.0) (2026-06-18)
+
+### ✨ Features
+
+* generate cloudflare workers artifacts from deployment block ([#224](https://github.com/inference-gateway/adl-cli/issues/224)) ([a50dd2e](https://github.com/inference-gateway/adl-cli/commit/a50dd2ee3c38e6668e7dfd87ada59b7ea815ca55))
+* generate Vercel deployment artifacts from spec.deployment.vercel ([#205](https://github.com/inference-gateway/adl-cli/issues/205)) ([0658e85](https://github.com/inference-gateway/adl-cli/commit/0658e85d993fd5d0663a81ebe8ad8fa6e74f3230))
+
+### ♻️ Improvements
+
+* bump CI/CD dependencies to latest in templates ([#223](https://github.com/inference-gateway/adl-cli/issues/223)) ([ca93db3](https://github.com/inference-gateway/adl-cli/commit/ca93db311eb36fac72d79f295dcd2d90ecd32385))
+
+### 👷 CI
+
+* add permissions section to CI workflow ([16537a7](https://github.com/inference-gateway/adl-cli/commit/16537a76f65785d2bd5d2e66a717656aebdb3689))
+* centralize claude.yml via reusable workflow ([#214](https://github.com/inference-gateway/adl-cli/issues/214)) ([98c96a6](https://github.com/inference-gateway/adl-cli/commit/98c96a6961c8ab8e7fd878f0196288f0371296fa))
+* update nix.yml to include permissions for contents ([61af48c](https://github.com/inference-gateway/adl-cli/commit/61af48c418f7c05df1074467add8e352bbaf3854))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump charm.land/lipgloss/v2 in the gomod group ([#220](https://github.com/inference-gateway/adl-cli/issues/220)) ([33e1769](https://github.com/inference-gateway/adl-cli/commit/33e17690d1c4576365a9d7aed330e7479f0a53bf))
+* **deps:** bump claude-code 2.1.158 -> 2.1.161, claude-code-action v1.0.133 -> v1.0.135 ([#211](https://github.com/inference-gateway/adl-cli/issues/211)) ([0995d85](https://github.com/inference-gateway/adl-cli/commit/0995d856cb81a380a28021a688ac990f987454ac))
+* **deps:** bump claude-code 2.1.161 -> 2.1.170, claude-code-action v1.0.135 -> v1.0.142 ([#216](https://github.com/inference-gateway/adl-cli/issues/216)) ([8297544](https://github.com/inference-gateway/adl-cli/commit/8297544462ca85664845d964cbbc586d54810bee))
+* **deps:** bump claude-code 2.1.170 -> 2.1.177, claude-code-action v1.0.142 -> v1.0.150 ([#218](https://github.com/inference-gateway/adl-cli/issues/218)) ([8741ca0](https://github.com/inference-gateway/adl-cli/commit/8741ca0e6c94c15468ca24a4de34e23f84b585e6))
+* **deps:** bump codex 0.133.0 -> 0.135.0 ([#207](https://github.com/inference-gateway/adl-cli/issues/207)) ([c9e9d4b](https://github.com/inference-gateway/adl-cli/commit/c9e9d4bdb75b69286bcfdb7b2185554bddb98dbf))
+* **deps:** bump golang.org/x/term in the gomod group ([#215](https://github.com/inference-gateway/adl-cli/issues/215)) ([b2ab82c](https://github.com/inference-gateway/adl-cli/commit/b2ab82cdf9d174dacba316d674ca2ccaab2835d6))
+* **deps:** bump infer CLI v0.117.1 -> v0.119.0, infer-action v0.11.2 -> v0.11.4 ([#208](https://github.com/inference-gateway/adl-cli/issues/208)) ([46417d5](https://github.com/inference-gateway/adl-cli/commit/46417d5f138ad2f00cb4b063d9ed2902d1695a5b))
+* **deps:** bump infer CLI v0.119.0 -> v0.120.0, infer-action v0.11.4 -> v0.11.6 ([#209](https://github.com/inference-gateway/adl-cli/issues/209)) ([707a03d](https://github.com/inference-gateway/adl-cli/commit/707a03dad7e43035cf8bf6351e179aa7c1a65dcb))
+* **deps:** bump infer CLI v0.120.0 -> v0.120.1, infer-action v0.11.6 -> v0.11.7 ([#210](https://github.com/inference-gateway/adl-cli/issues/210)) ([1c3bf86](https://github.com/inference-gateway/adl-cli/commit/1c3bf866d8a8c6ab662fcd6cd33dc5878dc81ea8))
+* **deps:** bump infer CLI v0.120.1 -> v0.121.0 ([#212](https://github.com/inference-gateway/adl-cli/issues/212)) ([d3d95ec](https://github.com/inference-gateway/adl-cli/commit/d3d95ec24676ccdfa77a9dd99526ba3013621757))
+* **deps:** bump infer CLI v0.121.0 -> v0.121.1, infer-action v0.12.1 -> v0.13.1 ([#217](https://github.com/inference-gateway/adl-cli/issues/217)) ([5ee4f98](https://github.com/inference-gateway/adl-cli/commit/5ee4f98de8909c00542ec0014561b89de6ebb3f4))
+* **deps:** bump infer-action v0.11.1 -> v0.11.2 ([#204](https://github.com/inference-gateway/adl-cli/issues/204)) ([59a75c6](https://github.com/inference-gateway/adl-cli/commit/59a75c6735b9fbe37b771880f0df298834d831c1))
+* **deps:** bump infer-action v0.11.7 -> v0.12.1 ([#213](https://github.com/inference-gateway/adl-cli/issues/213)) ([27dcc3e](https://github.com/inference-gateway/adl-cli/commit/27dcc3e6829e9b2b1d047c7efbe6741b74f23056))
+* **deps:** bump infer-action v0.13.1 -> v0.15.1 ([#219](https://github.com/inference-gateway/adl-cli/issues/219)) ([1ce05dd](https://github.com/inference-gateway/adl-cli/commit/1ce05dd2435b68d2386d5abb01badf4196d52e2e))
+
 ## [0.43.2](https://github.com/inference-gateway/adl-cli/compare/v0.43.1...v0.43.2) (2026-06-04)
 
 ### 🔧 Miscellaneous
