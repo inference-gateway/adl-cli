@@ -135,6 +135,53 @@ type CloudRunConfig struct {
 
 type CloudRunConfigEnvironment map[string]string
 
+// Configuration for deploying to Cloudflare Workers. Like vercel and unlike
+// kubernetes/cloudrun, Workers deploy from source via wrangler rather than a
+// prebuilt container image, so there is no image sub-block. This models Workers
+// (the server/serverless product, the right target for an A2A agent server), not
+// Pages. Consumers (e.g. adl-cli) translate this block into wrangler configuration
+// (wrangler.toml / wrangler.jsonc).
+type CloudflareConfig struct {
+	// Cloudflare account ID that owns the Worker. Prefer a ${VAR} placeholder over
+	// inlining the value.
+	AccountID string `json:"accountId,omitempty,omitzero" yaml:"accountId,omitempty" mapstructure:"accountId,omitempty"`
+
+	// Workers runtime compatibility date in YYYY-MM-DD form (e.g. "2025-01-01").
+	// Effectively required by wrangler; when omitted the generator supplies a
+	// default. See
+	// https://developers.cloudflare.com/workers/configuration/compatibility-dates/.
+	CompatibilityDate string `json:"compatibilityDate,omitempty,omitzero" yaml:"compatibilityDate,omitempty" mapstructure:"compatibilityDate,omitempty"`
+
+	// Workers runtime compatibility flags (e.g. "nodejs_compat" to enable Node.js API
+	// compatibility). Workers always run on the V8-isolate edge runtime, so Node API
+	// needs are met via flags rather than a runtime enum.
+	CompatibilityFlags []string `json:"compatibilityFlags,omitempty,omitzero" yaml:"compatibilityFlags,omitempty" mapstructure:"compatibilityFlags,omitempty"`
+
+	// Plain-text environment variables (wrangler "vars") injected into the Worker.
+	// Values can use the ${VAR} placeholder convention; never inline a real secret
+	// here - Cloudflare secrets are set out-of-band with "wrangler secret put". See
+	// docs/reference/secrets.md.
+	Environment CloudflareConfigEnvironment `json:"environment,omitempty,omitzero" yaml:"environment,omitempty" mapstructure:"environment,omitempty"`
+
+	// Worker name - the script name registered with Cloudflare (e.g.
+	// "customer-support-agent"). Surfaces as the wrangler "name" field.
+	Name string `json:"name,omitempty,omitzero" yaml:"name,omitempty" mapstructure:"name,omitempty"`
+
+	// Custom routes / domains the Worker is served on (e.g. "agent.example.com/*").
+	// Omit to rely on the workers.dev subdomain.
+	Routes []string `json:"routes,omitempty,omitzero" yaml:"routes,omitempty" mapstructure:"routes,omitempty"`
+
+	// Whether the Worker is exposed on its *.workers.dev subdomain. Set false when
+	// serving exclusively via custom routes.
+	WorkersDev bool `json:"workersDev,omitempty,omitzero" yaml:"workersDev,omitempty" mapstructure:"workersDev,omitempty"`
+}
+
+// Plain-text environment variables (wrangler "vars") injected into the Worker.
+// Values can use the ${VAR} placeholder convention; never inline a real secret
+// here - Cloudflare secrets are set out-of-band with "wrangler secret put". See
+// docs/reference/secrets.md.
+type CloudflareConfigEnvironment map[string]string
+
 // Provision OpenAI's Codex coding agent inside the sandbox.
 type CodexConfig struct {
 	// Enabled corresponds to the JSON schema field "enabled".
@@ -142,6 +189,9 @@ type CodexConfig struct {
 }
 
 type DeploymentConfig struct {
+	// Cloudflare corresponds to the JSON schema field "cloudflare".
+	Cloudflare *CloudflareConfig `json:"cloudflare,omitempty,omitzero" yaml:"cloudflare,omitempty" mapstructure:"cloudflare,omitempty"`
+
 	// CloudRun corresponds to the JSON schema field "cloudrun".
 	CloudRun *CloudRunConfig `json:"cloudrun,omitempty,omitzero" yaml:"cloudrun,omitempty" mapstructure:"cloudrun,omitempty"`
 
@@ -158,6 +208,7 @@ type DeploymentConfig struct {
 type DeploymentConfigType string
 
 const DeploymentConfigTypeCloudRun DeploymentConfigType = "cloudrun"
+const DeploymentConfigTypeCloudflare DeploymentConfigType = "cloudflare"
 const DeploymentConfigTypeKubernetes DeploymentConfigType = "kubernetes"
 const DeploymentConfigTypeVercel DeploymentConfigType = "vercel"
 

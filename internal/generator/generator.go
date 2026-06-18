@@ -830,6 +830,12 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 				snakeCaseName := strings.ReplaceAll(serviceName, "-", "_")
 				filesToIgnore = append(filesToIgnore, fmt.Sprintf("src/services/%s.ts", snakeCaseName))
 			}
+
+			// The Cloudflare Worker entrypoint ships as a scaffold with a TODO;
+			// preserve the user's completed handler across regenerations.
+			if adl.Spec.Deployment != nil && adl.Spec.Deployment.Type == schema.DeploymentConfigTypeCloudflare {
+				filesToIgnore = append(filesToIgnore, "src/worker.ts")
+			}
 		}
 
 		for _, skill := range adl.Spec.Skills {
