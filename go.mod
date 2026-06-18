@@ -4,7 +4,7 @@ go 1.26.2
 
 require (
 	charm.land/huh/v2 v2.0.3
-	charm.land/lipgloss/v2 v2.0.3
+	charm.land/lipgloss/v2 v2.0.4
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/chzyer/readline v1.5.1
 	github.com/go-viper/mapstructure/v2 v2.5.0
