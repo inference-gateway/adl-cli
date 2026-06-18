@@ -291,7 +291,7 @@ func TestGenerator_AI_ClaudeWorkflowGoContent(t *testing.T) {
 	assertContains(t, body, "Install ADL skill", "Claude Code workflow body")
 	assertContains(t, body, "raw.githubusercontent.com/inference-gateway/skills/main/skills/adl/SKILL.md", "Claude Code workflow body")
 
-	assertContains(t, body, "anthropics/claude-code-action@v1.0.135", "Claude Code workflow body")
+	assertContains(t, body, "anthropics/claude-code-action@v1.0.151", "Claude Code workflow body")
 	assertContains(t, body, "claude_code_oauth_token:", "Claude Code workflow body")
 	assertContains(t, body, "use_commit_signing: true", "Claude Code workflow body")
 	assertContains(t, body, "branch_prefix: ${{ steps.prefix.outputs.value }}", "Claude Code workflow body")
@@ -340,7 +340,8 @@ spec:
 	wf := readGenerated(t, out, ".github/workflows/claude.yml")
 
 	assertContains(t, wf, "Set up Rust", "Claude Code workflow body (rust)")
-	assertContains(t, wf, "actions-rs/toolchain@v1", "Claude Code workflow body (rust)")
+	assertContains(t, wf, "dtolnay/rust-toolchain@master", "Claude Code workflow body (rust)")
+	assertNotContains(t, wf, "actions-rs/toolchain", "Claude Code workflow body (rust)")
 	assertContains(t, wf, "1.94.1", "Claude Code workflow body (rust)")
 	assertNotContains(t, wf, "Set up Go", "Claude Code workflow body (rust)")
 	assertNotContains(t, wf, "actions/setup-go", "Claude Code workflow body (rust)")

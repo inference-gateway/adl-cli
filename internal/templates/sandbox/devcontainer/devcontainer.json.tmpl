@@ -1,11 +1,11 @@
 {
   "name": "{{ .ADL.Metadata.Name }}",
   {{- if eq .Language "go" }}
-  "image": "mcr.microsoft.com/devcontainers/go:1-{{ .ADL.Spec.Language.Go.Version }}-bullseye",
+  "image": "mcr.microsoft.com/devcontainers/go:1-{{ .ADL.Spec.Language.Go.Version }}-bookworm",
   {{- else if eq .Language "rust" }}
-  "image": "mcr.microsoft.com/devcontainers/rust:1-bullseye",
+  "image": "mcr.microsoft.com/devcontainers/rust:1-bookworm",
   {{- else if eq .Language "typescript" }}
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-{{ .ADL.Spec.Language.TypeScript.NodeVersion }}-bullseye",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-{{ .ADL.Spec.Language.TypeScript.NodeVersion }}-bookworm",
   {{- end }}
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {},

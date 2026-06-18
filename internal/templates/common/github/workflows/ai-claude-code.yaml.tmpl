@@ -51,24 +51,24 @@ jobs:
 {{- else if eq .Language "rust" }}
 
       - name: Set up Rust
-        uses: actions-rs/toolchain@v1
+        # @master is required so the `toolchain` input is honored (see dtolnay/rust-toolchain docs)
+        uses: dtolnay/rust-toolchain@master
         with:
           toolchain: {{ if and .ADL.Spec.Language.Rust .ADL.Spec.Language.Rust.Version }}{{ .ADL.Spec.Language.Rust.Version }}{{ else }}stable{{ end }}
-          override: true
           components: rustfmt, clippy
 {{- else if eq .Language "typescript" }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v6.4.0
         with:
-          node-version: {{ if and .ADL.Spec.Language.TypeScript .ADL.Spec.Language.TypeScript.NodeVersion }}{{ .ADL.Spec.Language.TypeScript.NodeVersion }}{{ else }}18{{ end }}
+          node-version: {{ if and .ADL.Spec.Language.TypeScript .ADL.Spec.Language.TypeScript.NodeVersion }}{{ .ADL.Spec.Language.TypeScript.NodeVersion }}{{ else }}24{{ end }}
           cache: 'npm'
 {{- end }}
 
       - name: Install task
         uses: arduino/setup-task@v2.0.0
         with:
-          version: 3.48.0
+          version: 3.51.1
           repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
       - name: Install ADL skill
@@ -97,7 +97,7 @@ jobs:
 
       - name: Run Claude Code
         id: claude
-        uses: anthropics/claude-code-action@v1.0.135
+        uses: anthropics/claude-code-action@v1.0.151
         with:
           claude_code_oauth_token: ${{`{{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}`}}
           display_report: true
