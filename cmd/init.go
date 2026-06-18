@@ -959,7 +959,7 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 	switch ans.Language {
 	case "rust":
 		ans.RustPackageName = promptWithConfig("rust-package-name", useDefaults, "Rust package name", ans.Name)
-		ans.RustVersion = promptWithConfig("rust-version", useDefaults, "Rust version", "1.89.0")
+		ans.RustVersion = promptWithConfig("rust-version", useDefaults, "Rust version", "1.94.1")
 		ans.RustEdition = promptWithConfig("rust-edition", useDefaults, "Rust edition", "2024")
 	case "typescript":
 		ans.TSPackageName = promptWithConfig("typescript-name", useDefaults, "TypeScript package name", ans.Name)

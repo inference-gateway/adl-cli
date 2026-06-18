@@ -446,7 +446,7 @@ func collectLanguage(ans *answers) {
 	switch language {
 	case "rust":
 		pkg, pkgLocked := wzString("rust-package-name", ans.Name)
-		ver, verLocked := wzString("rust-version", "1.89.0")
+		ver, verLocked := wzString("rust-version", "1.94.1")
 		edition, editionLocked := wzString("rust-edition", "2024")
 		var fields []huh.Field
 		if !pkgLocked {

@@ -64,7 +64,7 @@ jobs:
       - name: Install task
         uses: arduino/setup-task@v2.0.0
         with:
-          version: 3.48.0
+          version: 3.51.1
           repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
       - name: Install ADL CLI
@@ -84,16 +84,16 @@ jobs:
         run: task build
 {{ else if eq .Language "rust" }}
       - name: Set up Rust
-        uses: actions-rs/toolchain@v1
+        # @master is required so the `toolchain` input is honored (see dtolnay/rust-toolchain docs)
+        uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: {{ if and .ADL.Spec.Language.Rust .ADL.Spec.Language.Rust.Version }}{{ .ADL.Spec.Language.Rust.Version }}{{ else }}1.70{{ end }}
-          override: true
+          toolchain: {{ if and .ADL.Spec.Language.Rust .ADL.Spec.Language.Rust.Version }}{{ .ADL.Spec.Language.Rust.Version }}{{ else }}stable{{ end }}
           components: rustfmt, clippy
 
       - name: Install task
         uses: arduino/setup-task@v2.0.0
         with:
-          version: 3.48.0
+          version: 3.51.1
           repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
       - name: Cache cargo dependencies
@@ -116,13 +116,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6.4.0
         with:
-          node-version: {{ if and .ADL.Spec.Language.TypeScript .ADL.Spec.Language.TypeScript.NodeVersion }}{{ .ADL.Spec.Language.TypeScript.NodeVersion }}{{ else }}18{{ end }}
+          node-version: {{ if and .ADL.Spec.Language.TypeScript .ADL.Spec.Language.TypeScript.NodeVersion }}{{ .ADL.Spec.Language.TypeScript.NodeVersion }}{{ else }}24{{ end }}
           cache: 'npm'
 
       - name: Install task
         uses: arduino/setup-task@v2.0.0
         with:
-          version: 3.48.0
+          version: 3.51.1
           repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
       - name: Install dependencies
@@ -137,7 +137,7 @@ jobs:
       - name: Install task
         uses: arduino/setup-task@v2.0.0
         with:
-          version: 3.48.0
+          version: 3.51.1
           repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
       - name: Build
@@ -167,7 +167,7 @@ jobs:
 
       - name: Install semantic-release and plugins
         run: |
-          npm install -g semantic-release@v25.0.2 \
+          npm install -g semantic-release@v25.0.5 \
             conventional-changelog-conventionalcommits \
             @semantic-release/changelog \
             @semantic-release/git \
@@ -231,7 +231,7 @@ jobs:
 {{- if eq .ADL.Spec.Deployment.Type "kubernetes" }}
 
       - name: Set up kubectl
-        uses: azure/setup-kubectl@v4
+        uses: azure/setup-kubectl@v4.0.1
         
       - name: Deploy to Kubernetes
         run: |
@@ -244,7 +244,7 @@ jobs:
 {{- else if eq .ADL.Spec.Deployment.Type "cloudrun" }}
 
       - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v2.1.13
         with:
           credentials_json: ${{`{{ secrets.GCP_CREDENTIALS }}`}}
 
@@ -256,7 +256,7 @@ jobs:
       - name: Install task
         uses: arduino/setup-task@v2.0.0
         with:
-          version: 3.48.0
+          version: 3.51.1
           repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
       - name: Deploy to Cloud Run
@@ -271,7 +271,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6.4.0
         with:
-          node-version: {{ if and .ADL.Spec.Language.TypeScript .ADL.Spec.Language.TypeScript.NodeVersion }}{{ .ADL.Spec.Language.TypeScript.NodeVersion }}{{ else }}18{{ end }}
+          node-version: {{ if and .ADL.Spec.Language.TypeScript .ADL.Spec.Language.TypeScript.NodeVersion }}{{ .ADL.Spec.Language.TypeScript.NodeVersion }}{{ else }}24{{ end }}
 
       - name: Install Vercel CLI
         run: npm install --global vercel
@@ -279,7 +279,7 @@ jobs:
       - name: Install task
         uses: arduino/setup-task@v2.0.0
         with:
-          version: 3.48.0
+          version: 3.51.1
           repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
       - name: Deploy to Vercel
