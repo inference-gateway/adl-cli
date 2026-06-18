@@ -21,6 +21,9 @@ on:
       - go.sum
       - .github/workflows/nix.yml
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build
