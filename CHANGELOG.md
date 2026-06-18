@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.44.1](https://github.com/inference-gateway/adl-cli/compare/v0.44.0...v0.44.1) (2026-06-18)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump GitHub actions/checkout version 6.0.3 -> 7.0.0 ([9586bb5](https://github.com/inference-gateway/adl-cli/commit/9586bb5c249ba36726f6ee89c695618d72f7bb4d))
+* **deps:** bump schema version to 1.13.0 and update goreleaser to version 2.16.0 in manifest.toml ([d5e0335](https://github.com/inference-gateway/adl-cli/commit/d5e0335efa44fc7ba74a4be607e1f93dc9621eff))
+* **flox:** bump schema version to 1.13.0 in manifest.toml ([c616077](https://github.com/inference-gateway/adl-cli/commit/c616077a9e9767396aad525bf6dfaaf8749fc549))
+
 ## [0.44.0](https://github.com/inference-gateway/adl-cli/compare/v0.43.2...v0.44.0) (2026-06-18)
 
 ### ✨ Features
