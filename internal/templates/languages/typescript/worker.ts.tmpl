@@ -1,0 +1,64 @@
+/**
+ * Cloudflare Workers entrypoint (module worker format).
+ *
+ * This is a scaffold - finish wiring the A2A handler below, then deploy.
+ *
+ * How this differs from `src/index.ts`: the Node entrypoint opens a
+ * long-running listener with `server.listen()` and drains a background task
+ * queue. A Worker is request/response only - the V8-isolate edge runtime
+ * invokes `fetch` once per request and there is no always-on process, so the
+ * background task loop and POSIX signal handling in `index.ts` do not apply.
+ *
+ * Configuration on Workers:
+ *   - Plain vars declared under `[vars]` in wrangler.toml arrive on `env`.
+ *   - Secrets are NOT in wrangler.toml - set them with
+ *     `wrangler secret put <NAME>` and read them from `env` at runtime.
+ *
+ * Stateful / long-running work (the background task queue the Node scaffold
+ * runs) needs Cloudflare Queues or Durable Objects. Those bindings were
+ * intentionally left out of the initial cloudflare deployment block - add the
+ * binding to wrangler.toml and wire it here when you need it.
+ *
+ * One-time setup (not installed by the scaffold):
+ *   pnpm add -D wrangler @cloudflare/workers-types
+ * then add "@cloudflare/workers-types" to compilerOptions.types in
+ * tsconfig.json so the Workers globals below type-check.
+ *
+ * Local dev:   pnpm wrangler dev
+ * Deploy:      pnpm wrangler deploy
+ */
+
+/**
+ * Bindings available on the Worker: the `[vars]` declared in wrangler.toml
+ * plus any secrets set with `wrangler secret put`. Replace the index signature
+ * with typed fields as you introduce them, e.g. `LLM_API_KEY: string`.
+ */
+export interface Env {
+  [key: string]: string | undefined;
+}
+
+export default {
+  async fetch(
+    request: Request,
+    env: Env,
+    _ctx: ExecutionContext
+  ): Promise<Response> {
+    const url = new URL(request.url);
+
+    if (request.method === 'GET' && url.pathname === '/health') {
+      return Response.json({ status: 'ok' });
+    }
+
+    // TODO: serve the A2A agent. `src/index.ts` builds the agent, toolbox and
+    // task handlers with @inference-gateway/adk and exposes them via
+    // `createA2AServer(...).listen()`. On Workers, construct the same handlers
+    // once at module scope (reading config from `env`) and dispatch this
+    // request to them, returning their Response - covering at least:
+    //   GET  /.well-known/agent-card.json
+    //   POST /                              (A2A JSON-RPC)
+    return new Response(
+      'Not Implemented: wire the A2A handler in src/worker.ts',
+      { status: 501 }
+    );
+  },
+};

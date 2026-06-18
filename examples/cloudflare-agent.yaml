@@ -1,0 +1,67 @@
+---
+apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: cloudflare-example
+  description: Example A2A agent configured for Cloudflare Workers deployment
+  version: "1.0.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: true
+  agent:
+    provider: deepseek
+    model: deepseek-v4-flash
+    systemPrompt: |
+      You are a helpful A2A agent deployed on Cloudflare Workers.
+      You run on the V8-isolate edge runtime and respond efficiently.
+    maxTokens: 4000
+    temperature: 0.7
+  tools:
+    - id: greet
+      name: greet
+      description: Greets the user with a personalized message
+      tags:
+        - greeting
+        - interaction
+      schema:
+        type: object
+        properties:
+          name:
+            type: string
+            description: The name of the person to greet
+        required:
+          - name
+  server:
+    port: 8080
+    scheme: http
+    debug: false
+  language:
+    typescript:
+      packageName: "cloudflare-example"
+      nodeVersion: "24"
+  scm:
+    provider: github
+    url: "https://github.com/example/cloudflare-example"
+    issue_templates: false
+    ci: true
+    cd: false
+  deployment:
+    type: cloudflare
+    cloudflare:
+      name: cloudflare-example
+      accountId: "${CLOUDFLARE_ACCOUNT_ID}"
+      compatibilityDate: "2025-01-01"
+      compatibilityFlags:
+        - nodejs_compat
+      routes:
+        - agent.example.com/*
+      workersDev: false
+      environment:
+        LOG_LEVEL: info
+        ENVIRONMENT: production
+  development:
+    sandbox:
+      devcontainer:
+        enabled: true

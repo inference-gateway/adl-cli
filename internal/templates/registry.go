@@ -300,6 +300,13 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 		case schema.DeploymentConfigTypeVercel:
 			files["vercel.json"] = "vercel/vercel.json"
 			files[".vercel/project.json"] = "vercel/project.json"
+		case schema.DeploymentConfigTypeCloudflare:
+			// Cloudflare Workers run on the V8-isolate edge runtime and are
+			// deployed from source via wrangler. The Worker entrypoint is
+			// TypeScript-specific; see the Go/Rust maps, which intentionally
+			// omit it.
+			files["wrangler.toml"] = "cloudflare/wrangler.toml"
+			files["src/worker.ts"] = "worker.ts"
 		}
 	}
 

@@ -312,6 +312,28 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 		},
 	}
 
+	tsCloudflareADL := &schema.ADL{
+		APIVersion: "adl.inference-gateway.com/v1",
+		Kind:       "Agent",
+		Metadata: schema.Metadata{
+			Name:        "cloudflare-agent",
+			Description: "Cloudflare test agent",
+			Version:     "1.0.0",
+		},
+		Spec: schema.Spec{
+			Language: schema.Language{
+				TypeScript: &schema.TypeScriptConfig{
+					PackageName: "cloudflare-agent",
+					NodeVersion: "24",
+				},
+			},
+			Deployment: &schema.DeploymentConfig{
+				Type:       schema.DeploymentConfigTypeCloudflare,
+				Cloudflare: &schema.CloudflareConfig{Name: "cloudflare-agent"},
+			},
+		},
+	}
+
 	tests := []struct {
 		name         string
 		templateName string
@@ -329,6 +351,12 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 			templateName: "minimal",
 			adl:          rustADL,
 			wantContent:  "src/tools/process_data.rs",
+		},
+		{
+			name:         "minimal template ignores the Worker entrypoint for Cloudflare",
+			templateName: "minimal",
+			adl:          tsCloudflareADL,
+			wantContent:  "src/worker.ts",
 		},
 	}
 

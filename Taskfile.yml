@@ -6,7 +6,7 @@ vars:
   VERSION: 0.43.2
   BUILD_DIR: bin
   DIST_DIR: dist
-  ADL_SCHEMA_VERSION: v0.15.0
+  ADL_SCHEMA_VERSION: v0.16.0
   ADL_SCHEMA_URL: https://raw.githubusercontent.com/inference-gateway/adl/{{.ADL_SCHEMA_VERSION}}/schema/v1/schema.json
   ADL_SCHEMA_PATH: internal/schema/schema.json
 
@@ -132,6 +132,7 @@ tasks:
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/cloudrun-ghcr-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/kubernetes-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/vercel-agent.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/cloudflare-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent-redis.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/rust-agent-ai.yaml
@@ -155,6 +156,7 @@ tasks:
           - cloudrun-ghcr-agent
           - kubernetes-agent
           - vercel-agent
+          - cloudflare-agent
           - rust-agent
           - rust-agent-redis
           - rust-agent-ai

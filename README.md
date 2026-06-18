@@ -1590,6 +1590,77 @@ adl generate --file examples/cloudrun-agent.yaml --output ./cloudrun-test
 adl generate --file examples/cloudrun-ghcr-agent.yaml --output ./ghcr-test
 ```
 
+## Cloudflare Workers Deployment
+
+Cloudflare Workers run on the V8-isolate edge runtime and, like Vercel and
+unlike Kubernetes/CloudRun, deploy **from source** via `wrangler` rather than a
+prebuilt container image. This target is **TypeScript-only** - Workers execute
+JS/TS on the edge, so a Go or Rust agent does not produce Worker artifacts.
+
+### Cloudflare Configuration
+
+```yaml
+spec:
+  language:
+    typescript:
+      packageName: "my-agent"
+      nodeVersion: "24"
+  deployment:
+    type: cloudflare
+    cloudflare:
+      name: my-agent # Worker (script) name
+      accountId: "${CLOUDFLARE_ACCOUNT_ID}" # prefer a ${VAR} placeholder
+      compatibilityDate: "2025-01-01" # defaults when omitted
+      compatibilityFlags:
+        - nodejs_compat # defaults to [nodejs_compat] when omitted
+      routes:
+        - agent.example.com/* # custom routes/domains
+      workersDev: false # expose on *.workers.dev (omit to keep wrangler's default)
+      environment: # plain-text wrangler [vars]
+        LOG_LEVEL: info
+```
+
+### Generated Artifacts
+
+- `wrangler.toml` - rendered from the block (`name`, `main`, `compatibility_date`,
+  `compatibility_flags`, `account_id`, `workers_dev`, `routes`, `[vars]`).
+- `src/worker.ts` - a module-format Worker entrypoint scaffold exporting a
+  `fetch` handler. It is added to `.adl-ignore`, so your completed handler
+  survives subsequent `adl generate` runs.
+
+`compatibilityDate` defaults to a stable value when omitted, and
+`compatibilityFlags` defaults to `nodejs_compat` (the scaffold relies on Node.js
+API compatibility).
+
+### Secrets
+
+Secrets are never written to `wrangler.toml`. Use `${VAR}` placeholders only in
+the `environment` block (plain-text `[vars]`), and set real secrets out-of-band:
+
+```bash
+wrangler secret put LLM_API_KEY
+```
+
+### Deploy
+
+```bash
+# One-time setup (not installed by the scaffold)
+pnpm add -D wrangler @cloudflare/workers-types
+# then add "@cloudflare/workers-types" to compilerOptions.types in tsconfig.json
+
+# Validate and generate
+adl validate examples/cloudflare-agent.yaml
+adl generate --file examples/cloudflare-agent.yaml --output ./cloudflare-test
+
+# Finish wiring the A2A handler in src/worker.ts, then
+wrangler deploy
+```
+
+> **Note:** Long-running/stateful work (the background task queue the Node
+> entrypoint runs) needs Cloudflare Queues or Durable Objects. Those resource
+> bindings were intentionally left out of the initial schema and may arrive in a
+> later minor version.
+
 ## Sandbox Environments
 
 The ADL CLI supports multiple development environments for isolated, reproducible development:

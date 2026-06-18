@@ -1,0 +1,49 @@
+{{- /*
+  wrangler.toml - Cloudflare Workers configuration rendered from
+  spec.deployment.cloudflare. Workers deploy from source via wrangler (there
+  is no container image), so `main` points at the TypeScript Worker entrypoint
+  and wrangler bundles it for the V8-isolate edge runtime.
+
+  Secrets are NEVER written here - set them out-of-band with
+  `wrangler secret put <NAME>`. Only plain-text vars (the `[vars]` table)
+  belong in this file, and only ${VAR} placeholders should reference secrets.
+*/ -}}
+{{- $cfg := .ADL.Spec.Deployment.Cloudflare -}}
+{{- $name := .ADL.Metadata.Name -}}
+{{- $date := "2025-01-01" -}}
+{{- $flags := list "nodejs_compat" -}}
+{{- $accountId := "" -}}
+{{- $routes := list -}}
+{{- $workersDev := false -}}
+{{- $env := dict -}}
+{{- if $cfg -}}
+{{- if $cfg.Name }}{{ $name = $cfg.Name }}{{ end -}}
+{{- if $cfg.CompatibilityDate }}{{ $date = $cfg.CompatibilityDate }}{{ end -}}
+{{- if $cfg.CompatibilityFlags }}{{ $flags = $cfg.CompatibilityFlags }}{{ end -}}
+{{- $accountId = $cfg.AccountID -}}
+{{- $routes = $cfg.Routes -}}
+{{- $workersDev = $cfg.WorkersDev -}}
+{{- if $cfg.Environment }}{{ $env = $cfg.Environment }}{{ end -}}
+{{- end -}}
+name = "{{ $name }}"
+main = "src/worker.ts"
+compatibility_date = "{{ $date }}"
+compatibility_flags = [{{ range $i, $f := $flags }}{{ if $i }}, {{ end }}"{{ $f }}"{{ end }}]
+{{- if $accountId }}
+account_id = "{{ $accountId }}"
+{{- end }}
+{{- if $workersDev }}
+workers_dev = true
+{{- else if $routes }}
+workers_dev = false
+{{- end }}
+{{- if $routes }}
+routes = [{{ range $i, $r := $routes }}{{ if $i }}, {{ end }}"{{ $r }}"{{ end }}]
+{{- end }}
+{{- if $env }}
+
+[vars]
+{{- range $k, $v := $env }}
+{{ $k }} = "{{ $v }}"
+{{- end }}
+{{- end }}
