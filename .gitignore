@@ -32,6 +32,7 @@ go.work.sum
 # IDE files
 .vscode/
 .idea/
+.infer/
 *.swp
 *.swo
 
