@@ -214,6 +214,7 @@ task run
 | `adl init [name]`     | Create ADL manifest file interactively with options                |
 | `adl generate`        | Generate project code from ADL file with CI/CD and sandbox support |
 | `adl validate [file]` | Validate an ADL file against the complete schema                   |
+| `adl publish [file]`  | Open a PR adding your agent to the public catalog                   |
 
 ### Init Command
 
@@ -425,6 +426,49 @@ The `--deployment` flag generates platform-specific deployment configurations:
   - Enterprise-ready configurations with resource limits and health checks
   - ConfigMap and Secret integration for environment variables
   - Service and Ingress configurations for load balancing
+
+### Publish your agent
+
+Once your agent lives in a public GitHub repository (with an `agent.yaml` at its
+root), `adl publish` submits it to the public catalog at
+[registry.inference-gateway.com](https://registry.inference-gateway.com).
+
+The catalog is sourced from the `agents.yaml` list in
+[inference-gateway/agents](https://github.com/inference-gateway/agents), where
+each entry is just a pointer to a repository (`{ url, ref }`). `adl publish`
+validates your manifest, resolves your repository, and opens a pull request
+against that repo appending your agent as a new entry.
+
+```bash
+# Preview the catalog entry, PR title, and PR body without opening a PR
+adl publish --dry-run
+
+# Open the PR (repo URL is read from the 'origin' git remote, ref defaults to main)
+adl publish
+
+# Override the repository URL and/or the ref recorded in the catalog
+adl publish --url https://github.com/my-org/my-agent --ref v1.0.0
+```
+
+#### Publish Flags
+
+| Flag        | Description                                                          |
+| ----------- | ------------------------------------------------------------------- |
+| `--url`     | Agent repository URL (defaults to the `origin` git remote)          |
+| `--ref`     | Git ref (branch, tag, or SHA) to record in the catalog (default: `main`) |
+| `--dry-run` | Print the catalog entry, PR title, and PR body without opening a PR |
+
+> **How it works:** the live catalog pulls each agent's name, description, and
+> version from its own repository's `agent.yaml` (`metadata.*`) at build time -
+> the catalog entry itself is only `{ url, ref }`. The PR title and body are
+> seeded from your local `agent.yaml` so you can refine the summary before
+> submitting; to change how your agent is described in the catalog, edit
+> `metadata.description` in your repository.
+>
+> **Requirements:** publishing uses the [GitHub CLI](https://cli.github.com)
+> (`gh`), which must be installed and authenticated (`gh auth login`). The
+> command forks `inference-gateway/agents` to your account, commits the new
+> entry on a branch, and opens the pull request from your fork.
 
 ## Agent Definition Language (ADL)
 
