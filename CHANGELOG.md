@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.44.2](https://github.com/inference-gateway/adl-cli/compare/v0.44.1...v0.44.2) (2026-06-23)
+
+### 👷 CI
+
+* **infer:** centralize infer.yml + sync .infer config ([#226](https://github.com/inference-gateway/adl-cli/issues/226)) ([5280057](https://github.com/inference-gateway/adl-cli/commit/52800579667f3f2dc7d879d51dbe7a21954e5136))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump claude-code-action v1.0.150 -> v1.0.152 ([#225](https://github.com/inference-gateway/adl-cli/issues/225)) ([c4eb261](https://github.com/inference-gateway/adl-cli/commit/c4eb26181016fae7421e88c2fee66971e831018b))
+* **deps:** bump infer CLI v0.121.1 -> v0.122.2, infer-action v0.15.1 -> v0.15.4 ([#227](https://github.com/inference-gateway/adl-cli/issues/227)) ([488b793](https://github.com/inference-gateway/adl-cli/commit/488b793e85cd388a7b8a284dfa49bf63ffd915f8))
+* **github:** update GitHub Actions bot author information in release workflows ([39ec84e](https://github.com/inference-gateway/adl-cli/commit/39ec84e29f5ac0a21375bdee49739504c68779be))
+* **infer:** remove default configuration ([c7e7a93](https://github.com/inference-gateway/adl-cli/commit/c7e7a9391e592bfd0a852cc60db26e412afbc32c))
+
 ## [0.44.1](https://github.com/inference-gateway/adl-cli/compare/v0.44.0...v0.44.1) (2026-06-18)
 
 ### 🔧 Miscellaneous
