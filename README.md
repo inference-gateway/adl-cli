@@ -251,7 +251,7 @@ The init command supports extensive configuration options:
 **Agent Configuration:**
 
 - `--type` - Agent type (`ai-powered`/`minimal`)
-- `--provider` - AI provider (`openai`/`anthropic`/`google`/`groq`/`mistral`/`deepseek`/`cohere`/`cloudflare`/`moonshot`/`ollama`/`ollama_cloud`/`nvidia`)
+- `--provider` - AI provider (`openai`/`anthropic`/`google`/`groq`/`mistral`/`deepseek`/`cohere`/`cloudflare`/`moonshot`/`ollama`/`ollama_cloud`/`nvidia`/`minimax`)
 - `--model` - AI model name
 - `--system-prompt` - System prompt for the agent
 - `--max-tokens` - Maximum tokens (integer)
@@ -447,7 +447,7 @@ spec:
     pushNotifications: false
     stateTransitionHistory: false
   agent:
-    provider: "" # Choose: openai, anthropic, google, groq, mistral, deepseek, cohere, cloudflare, moonshot, ollama, ollama_cloud, nvidia
+    provider: "" # Choose: openai, anthropic, google, groq, mistral, deepseek, cohere, cloudflare, moonshot, ollama, ollama_cloud, nvidia, minimax
     model: "" # Specify default model name for chosen provider
     systemPrompt: "You are a helpful weather assistant."
     maxTokens: 4096
