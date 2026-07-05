@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.45.1](https://github.com/inference-gateway/adl-cli/compare/v0.45.0...v0.45.1) (2026-07-05)
+
 ## [0.45.0](https://github.com/inference-gateway/adl-cli/compare/v0.44.2...v0.45.0) (2026-07-05)
 
 ## [0.44.2](https://github.com/inference-gateway/adl-cli/compare/v0.44.1...v0.44.2) (2026-06-23)
