@@ -35,6 +35,7 @@ var aiProviders = []string{
 	"moonshot",
 	"ollama",
 	"ollama_cloud",
+	"nvidia",
 }
 
 // initCmd represents the init command
@@ -58,7 +59,7 @@ func init() {
 	initCmd.Flags().String("description", "", "Agent description")
 	initCmd.Flags().String("version", "", "Agent version")
 	initCmd.Flags().String("type", "", "Agent type (ai-powered/minimal)")
-	initCmd.Flags().String("provider", "", "AI provider (openai/anthropic/google/groq/mistral/deepseek/cohere/cloudflare/moonshot/ollama/ollama_cloud; empty = choose at runtime)")
+	initCmd.Flags().String("provider", "", "AI provider (openai/anthropic/google/groq/mistral/deepseek/cohere/cloudflare/moonshot/ollama/ollama_cloud/nvidia; empty = choose at runtime)")
 	initCmd.Flags().String("model", "", "AI model (empty = choose at runtime)")
 	initCmd.Flags().String("system-prompt", "", "System prompt")
 	initCmd.Flags().Int("max-tokens", 0, "Maximum tokens")
