@@ -62,7 +62,7 @@ The ADL CLI helps you build enterprise-ready A2A agents quickly by generating co
 - 🔧 **CI/CD Generation** - Automatic GitHub Actions workflows with semantic-release CD pipelines
 - 🏗️ **Sandbox Environments** - Flox and DevContainer support for isolated development
 - 🎣 **Post-Generation Hooks** - Customize build, format, and test commands after generation
-- 🤖 **Multi-Provider AI** - OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama, Ollama Cloud, and NVIDIA support
+- 🤖 **Multi-Provider AI** - OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama, Ollama Cloud, and Nvidia support
 - 📁 **Artifacts Support** - Integrated filesystem and MinIO object storage for artifact management
 
 ## Installation
@@ -487,7 +487,7 @@ The complete ADL schema includes:
 - **capabilities**: Streaming, notifications, state history
 - **config**: Structured configuration sections with environment variable mapping
 - **services**: Service services with interfaces, factories, and type definitions
-- **agent**: AI provider configuration (OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama, Ollama Cloud, NVIDIA)
+- **agent**: AI provider configuration (OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama, Ollama Cloud, Nvidia)
 - **tools**: Function-call definitions with JSON schemas, validation, and service injection support
 - **skills**: Markdown playbooks (id + optional `bare`, version, source) pulled from the skills registry, fetched as a full directory from a GitHub repo (shorthand or URL), or scaffolded locally; advertised on the agent card and prepended to the system prompt at runtime
 - **server**: HTTP server configuration with authentication support
@@ -1791,7 +1791,7 @@ When `github_app: true` is set, the generated CD pipeline will use GitHub App au
 
 ### AI Provider Support
 
-The ADL CLI supports multiple AI providers including OpenAI, Anthropic, Google AI, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama (for local LLMs), Ollama Cloud, and NVIDIA. Each provider requires appropriate API keys to be configured as environment variables. See the ADL examples above for configuration details.
+The ADL CLI supports multiple AI providers including OpenAI, Anthropic, Google AI, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama (for local LLMs), Ollama Cloud, and Nvidia. Each provider requires appropriate API keys to be configured as environment variables. See the ADL examples above for configuration details.
 
 ## Artifacts Support
 
