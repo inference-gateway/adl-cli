@@ -174,14 +174,9 @@ func runStart(ctx context.Context) error {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
 {{- if and .ADL.Spec.Telemetry .ADL.Spec.Telemetry.Enabled }}
-
-	// The standard OpenTelemetry SDK variables (OTEL_*) are read without the
-	// A2A_ prefix so they match the names every OTel collector and tool expects.
-	// The Process above populates the A2A_-prefixed config; this overlay fills
-	// the ADK's OTel config from the bare OTEL_* names emitted in .env.example.
-	if err := envconfig.Process(ctx, &cfg.A2A.OTelConfig); err != nil {
-		return fmt.Errorf("failed to load OpenTelemetry config: %w", err)
-	}
+	// The OpenTelemetry SDK settings are read as A2A_OTEL_* through the ADK's
+	// A2A_-prefixed config (cfg.A2A.OTelConfig), so the single Process call above
+	// already loaded them - no separate OTel pass is required.
 {{- end }}
 
 	// Initialize logger

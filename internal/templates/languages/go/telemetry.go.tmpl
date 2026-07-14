@@ -52,7 +52,7 @@ func resolveAttrKeys() (string, string) {
 // stay in sync with the ADK via A2A_TELEMETRY_ATTR_* overrides.
 //
 // Telemetry is a no-op unless A2A_TELEMETRY_ENABLE=true and a traces exporter is
-// configured (OTEL_TRACES_EXPORTER=otlp); the ADK installs the global tracer
+// configured (A2A_OTEL_TRACES_EXPORTER=otlp); the ADK installs the global tracer
 // provider only then. When export is off the tracer is a no-op, so this is always
 // safe to call. Pair it with `defer span.End()` at the top of a tool Handler.
 func startToolSpan(ctx context.Context, toolName string) trace.Span {

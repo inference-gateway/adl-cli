@@ -30,11 +30,12 @@ spec:
   # spec.telemetry configures OpenTelemetry instrumentation. 'enabled' is the
   # master switch: the generator pulls the OpenTelemetry runtime dependencies
   # into go.mod, instruments the built-in tool calls with spans
-  # (tools/telemetry.go), and surfaces A2A_TELEMETRY_ENABLE plus the standard
-  # OTEL_* exporter variables in .env.example. Each per-signal exporter maps 1:1
-  # to the OTEL_* names the OpenTelemetry SDK reads. Here traces push over OTLP
-  # while metrics are exposed for Prometheus scraping (a pull endpoint). Auth
-  # headers, credentials, and sampling stay runtime concerns.
+  # (tools/telemetry.go), and surfaces A2A_TELEMETRY_ENABLE plus the OpenTelemetry
+  # SDK exporter variables in .env.example. The Go ADK reads them through its
+  # A2A_-prefixed config, so each standard OTEL_* name is emitted as A2A_OTEL_*
+  # and maps 1:1 to a spec.telemetry field. Here traces push over OTLP while
+  # metrics are exposed for Prometheus scraping (a pull endpoint). Auth headers,
+  # credentials, and sampling stay runtime concerns.
   telemetry:
     enabled: true
     traces:

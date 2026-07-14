@@ -14,18 +14,30 @@ type TelemetryEnvVar struct {
 }
 
 // telemetryEnvVars maps a manifest's spec.telemetry exporter blocks to the
-// standard OpenTelemetry SDK environment variables, following the schema's 1:1
-// field -> OTEL_* contract. It returns only the OTEL_* variables; the master
-// switch (A2A_TELEMETRY_ENABLE / TELEMETRY_ENABLE) is emitted by the template
-// since its name is language-specific.
+// OpenTelemetry SDK environment variables. It returns only the exporter
+// variables; the master switch (A2A_TELEMETRY_ENABLE / TELEMETRY_ENABLE) is
+// emitted by the template since its name is language-specific.
+//
+// The key prefix is language-specific:
+//   - Go reads the OTel settings through the ADK config, which nests the whole
+//     server config under the A2A_ prefix (config.Config.A2A is
+//     `env:",prefix=A2A_"`) while its OTelConfig carries no prefix of its own -
+//     so every standard OTEL_* name is emitted as A2A_OTEL_*. The Go ADK only
+//     exposes the shared OTEL_EXPORTER_OTLP_{ENDPOINT,PROTOCOL} fields (it has no
+//     per-signal variants), so it always emits that shared pair from whichever
+//     signal pushes over OTLP.
+//   - TypeScript hands the OTLP settings straight to the OpenTelemetry Node SDK,
+//     which reads the bare OTEL_* names from process.env, so they stay
+//     unprefixed. The Node SDK honors the per-signal
+//     OTEL_EXPORTER_OTLP_{TRACES,METRICS}_* names, so when traces and metrics
+//     push to different collectors it emits those and otherwise collapses to the
+//     shared pair.
 //
 // Signal selection follows the schema's declarative-config model: a present
 // traces/metrics exporter sets OTEL_{TRACES,METRICS}_EXPORTER to the chosen key
 // (otlp or, for metrics, prometheus); omitting the signal disables it (=none).
-// When both traces and metrics push over OTLP with identical endpoint/protocol
-// the shared OTEL_EXPORTER_OTLP_* pair is emitted; otherwise the per-signal
-// OTEL_EXPORTER_OTLP_{TRACES,METRICS}_* variants are. An exporter field that is
-// omitted in the manifest is left out so the OTLP/Prometheus SDK default applies.
+// An exporter field that is omitted in the manifest is left out so the
+// OTLP/Prometheus SDK default applies.
 //
 // Prometheus pull is Go-only: the TypeScript ADK does not support it yet, so its
 // OTEL_EXPORTER_PROMETHEUS_* defaults are skipped for TypeScript (the validator
@@ -37,6 +49,11 @@ func telemetryEnvVars(adl *schema.ADL) []TelemetryEnvVar {
 	lang := DetectLanguageFromADL(adl)
 	if lang == "rust" {
 		return nil
+	}
+
+	prefix := ""
+	if lang == "go" {
+		prefix = "A2A_"
 	}
 
 	tel := adl.Spec.Telemetry
@@ -54,34 +71,46 @@ func telemetryEnvVars(adl *schema.ADL) []TelemetryEnvVar {
 	}
 
 	out := []TelemetryEnvVar{
-		{Key: "OTEL_TRACES_EXPORTER", Value: exporterValue(tracesOtlp != nil, "otlp")},
+		{Key: prefix + "OTEL_TRACES_EXPORTER", Value: exporterValue(tracesOtlp != nil, "otlp")},
 	}
 
 	switch {
 	case metricsOtlp != nil:
-		out = append(out, TelemetryEnvVar{Key: "OTEL_METRICS_EXPORTER", Value: "otlp"})
+		out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_METRICS_EXPORTER", Value: "otlp"})
 	case metricsProm != nil:
-		out = append(out, TelemetryEnvVar{Key: "OTEL_METRICS_EXPORTER", Value: "prometheus"})
+		out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_METRICS_EXPORTER", Value: "prometheus"})
 	default:
-		out = append(out, TelemetryEnvVar{Key: "OTEL_METRICS_EXPORTER", Value: "none"})
+		out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_METRICS_EXPORTER", Value: "none"})
 	}
 
-	shared := tracesOtlp != nil && metricsOtlp != nil &&
-		tracesOtlp.Endpoint == metricsOtlp.Endpoint &&
-		tracesOtlp.Protocol == metricsOtlp.Protocol
-	if shared {
-		out = appendOTLPEnv(out, "", tracesOtlp)
+	if lang == "go" {
+		// The Go ADK has a single shared OTLP endpoint/protocol; emit it from
+		// whichever signal pushes over OTLP (traces preferred, else metrics).
+		otlp := tracesOtlp
+		if otlp == nil {
+			otlp = metricsOtlp
+		}
+		out = appendOTLPEnv(out, prefix, "", otlp)
 	} else {
-		out = appendOTLPEnv(out, "TRACES_", tracesOtlp)
-		out = appendOTLPEnv(out, "METRICS_", metricsOtlp)
+		// The TypeScript Node SDK supports per-signal OTLP endpoints; collapse to
+		// the shared pair only when both signals target the same collector.
+		shared := tracesOtlp != nil && metricsOtlp != nil &&
+			tracesOtlp.Endpoint == metricsOtlp.Endpoint &&
+			tracesOtlp.Protocol == metricsOtlp.Protocol
+		if shared {
+			out = appendOTLPEnv(out, prefix, "", tracesOtlp)
+		} else {
+			out = appendOTLPEnv(out, prefix, "TRACES_", tracesOtlp)
+			out = appendOTLPEnv(out, prefix, "METRICS_", metricsOtlp)
+		}
 	}
 
 	if metricsProm != nil && lang == "go" {
 		if metricsProm.Host != "" {
-			out = append(out, TelemetryEnvVar{Key: "OTEL_EXPORTER_PROMETHEUS_HOST", Value: metricsProm.Host})
+			out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_EXPORTER_PROMETHEUS_HOST", Value: metricsProm.Host})
 		}
 		if metricsProm.Port != 0 {
-			out = append(out, TelemetryEnvVar{Key: "OTEL_EXPORTER_PROMETHEUS_PORT", Value: strconv.Itoa(metricsProm.Port)})
+			out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_EXPORTER_PROMETHEUS_PORT", Value: strconv.Itoa(metricsProm.Port)})
 		}
 	}
 
@@ -98,17 +127,18 @@ func exporterValue(configured bool, key string) string {
 }
 
 // appendOTLPEnv appends the endpoint/protocol vars for one OTLP exporter using
-// the given infix ("" shared, or "TRACES_"/"METRICS_" per-signal). A nil
-// exporter or an omitted field contributes nothing so the SDK default applies.
-func appendOTLPEnv(out []TelemetryEnvVar, infix string, otlp *schema.TelemetryOTLPExporter) []TelemetryEnvVar {
+// the given prefix ("" for TypeScript, "A2A_" for Go) and infix ("" shared, or
+// "TRACES_"/"METRICS_" per-signal). A nil exporter or an omitted field
+// contributes nothing so the SDK default applies.
+func appendOTLPEnv(out []TelemetryEnvVar, prefix, infix string, otlp *schema.TelemetryOTLPExporter) []TelemetryEnvVar {
 	if otlp == nil {
 		return out
 	}
 	if otlp.Endpoint != "" {
-		out = append(out, TelemetryEnvVar{Key: "OTEL_EXPORTER_OTLP_" + infix + "ENDPOINT", Value: otlp.Endpoint})
+		out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_EXPORTER_OTLP_" + infix + "ENDPOINT", Value: otlp.Endpoint})
 	}
 	if otlp.Protocol != "" {
-		out = append(out, TelemetryEnvVar{Key: "OTEL_EXPORTER_OTLP_" + infix + "PROTOCOL", Value: string(otlp.Protocol)})
+		out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_EXPORTER_OTLP_" + infix + "PROTOCOL", Value: string(otlp.Protocol)})
 	}
 	return out
 }
