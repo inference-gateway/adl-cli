@@ -369,7 +369,6 @@ func TestGenerator_AI_InferWorkflowContent(t *testing.T) {
 
 	mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
 
-	// infer reads AGENTS.md, so it must be emitted alongside the workflow.
 	assertFile(t, out, "AGENTS.md", true)
 
 	body := readGenerated(t, out, ".github/workflows/infer.yml")
@@ -380,7 +379,6 @@ func TestGenerator_AI_InferWorkflowContent(t *testing.T) {
 	assertContains(t, body, "model:", "Infer workflow body")
 	assertContains(t, body, "deepseek-api-key: ${{ secrets.DEEPSEEK_API_KEY }}", "Infer workflow body")
 
-	// Gated on @infer mentions, matching the sibling AI workflows.
 	assertContains(t, body, "contains(github.event.comment.body, '@infer')", "Infer workflow body")
 	assertContains(t, body, "issue_comment:\n    types: [created]", "Infer workflow body")
 
@@ -388,10 +386,8 @@ func TestGenerator_AI_InferWorkflowContent(t *testing.T) {
 	assertContains(t, body, "pull-requests: write", "Infer workflow body")
 	assertContains(t, body, "issues: write", "Infer workflow body")
 
-	// It must use the standalone action, not the org-wide reusable workflow.
 	assertNotContains(t, body, "inference-gateway/.github/.github/workflows/infer.yml", "Infer workflow body")
 
-	// The workflow is generated output, so it collapses in diffs.
 	attrs := readGenerated(t, out, ".gitattributes")
 	assertContains(t, attrs, ".github/workflows/infer.yml linguist-generated=true", ".gitattributes")
 }
