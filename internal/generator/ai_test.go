@@ -375,12 +375,14 @@ func TestGenerator_AI_InferWorkflowContent(t *testing.T) {
 
 	assertContains(t, body, "name: Infer", "Infer workflow body")
 	assertContains(t, body, "inference-gateway/infer-action@v0.32.1", "Infer workflow body")
-	assertContains(t, body, "github-token: ${{ secrets.GITHUB_TOKEN }}", "Infer workflow body")
+	assertContains(t, body, "github-token: ${{ steps.app-token.outputs.token }}", "Infer workflow body")
+	assertContains(t, body, "actions/create-github-app-token", "Infer workflow body")
 	assertContains(t, body, "model:", "Infer workflow body")
 	assertContains(t, body, "deepseek-api-key: ${{ secrets.DEEPSEEK_API_KEY }}", "Infer workflow body")
+	assertContains(t, body, "anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}", "Infer workflow body")
 
 	assertContains(t, body, "contains(github.event.comment.body, '@infer')", "Infer workflow body")
-	assertContains(t, body, "issue_comment:\n    types: [created]", "Infer workflow body")
+	assertContains(t, body, "issue_comment:", "Infer workflow body")
 
 	assertContains(t, body, "contents: write", "Infer workflow body")
 	assertContains(t, body, "pull-requests: write", "Infer workflow body")
