@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.46.4](https://github.com/inference-gateway/adl-cli/compare/v0.46.3...v0.46.4) (2026-07-14)
+
+### 🔧 Miscellaneous
+
+* **deps:** update claude-code version to ^2.1.201 in manifest template ([25b3a01](https://github.com/inference-gateway/adl-cli/commit/25b3a01958843d7126f19cb2517521d8d38204e0))
+
 ## [0.46.3](https://github.com/inference-gateway/adl-cli/compare/v0.46.2...v0.46.3) (2026-07-14)
 
 ### 🔧 Miscellaneous
