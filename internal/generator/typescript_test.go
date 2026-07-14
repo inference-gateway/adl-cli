@@ -181,8 +181,8 @@ func TestGenerator_TypeScriptPackageJSON(t *testing.T) {
 func TestGenerator_TypeScriptPnpmWorkspace(t *testing.T) {
 	wantAllowBuilds := map[string]bool{
 		"@inference-gateway/adl-cli": false,
-		"esbuild":                   false,
-		"protobufjs":                false,
+		"esbuild":                    false,
+		"protobufjs":                 false,
 	}
 
 	t.Run("template emits the allowBuilds map as valid YAML", func(t *testing.T) {
