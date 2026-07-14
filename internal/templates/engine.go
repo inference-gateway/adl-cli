@@ -370,6 +370,7 @@ func customFuncMap() template.FuncMap {
 	funcMap["findDependencyByID"] = findDependencyByID
 	funcMap["isBuiltinToolID"] = schema.IsReservedToolID
 	funcMap["builtinToolMeta"] = schema.BuiltinToolMetaFor
+	funcMap["telemetryEnvVars"] = telemetryEnvVars
 	return funcMap
 }
 
@@ -401,6 +402,7 @@ func customFuncMapWithAcronyms(acronyms map[string]string) template.FuncMap {
 	funcMap["findDependencyByID"] = findDependencyByID
 	funcMap["isBuiltinToolID"] = schema.IsReservedToolID
 	funcMap["builtinToolMeta"] = schema.BuiltinToolMetaFor
+	funcMap["telemetryEnvVars"] = telemetryEnvVars
 	return funcMap
 }
 

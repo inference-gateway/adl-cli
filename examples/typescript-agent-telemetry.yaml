@@ -26,12 +26,23 @@ spec:
     temperature: 0.3
   # spec.telemetry enables OpenTelemetry. The TypeScript ADK bundles the
   # OpenTelemetry Node SDK, so no extra npm dependencies are added; the
-  # generator wires a TelemetryProvider into src/index.ts and surfaces the
-  # TELEMETRY_ENABLE / OTEL_EXPORTER_OTLP_* environment variables in
-  # .env.example. Traces, metrics, and logs are pushed over OTLP HTTP at runtime
-  # when TELEMETRY_ENABLE is truthy.
+  # generator wires a TelemetryProvider into src/index.ts and surfaces
+  # TELEMETRY_ENABLE plus the standard OTEL_* variables in .env.example. Both
+  # signals push over OTLP with identical settings, so the generator emits the
+  # shared OTEL_EXPORTER_OTLP_ENDPOINT / OTEL_EXPORTER_OTLP_PROTOCOL pair. The TS
+  # ADK does not support the Prometheus pull exporter yet - use OTLP for metrics.
   telemetry:
     enabled: true
+    traces:
+      exporter:
+        otlp:
+          endpoint: http://localhost:4318
+          protocol: http/protobuf
+    metrics:
+      exporter:
+        otlp:
+          endpoint: http://localhost:4318
+          protocol: http/protobuf
   server:
     port: 8080
     scheme: http

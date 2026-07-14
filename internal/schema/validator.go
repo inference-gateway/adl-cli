@@ -93,7 +93,38 @@ func (v *Validator) ValidateFile(filePath string) ([]string, error) {
 		return nil, fmt.Errorf("skill validation failed: %w", err)
 	}
 
+	warnings = append(warnings, v.validateTelemetry(&adl)...)
+
 	return warnings, nil
+}
+
+// validateTelemetry surfaces non-fatal warnings for telemetry configurations the
+// generator cannot fully honor. Rust ignores spec.telemetry entirely, and the
+// TypeScript ADK does not support the Prometheus pull exporter yet - the OTLP
+// push exporter is the supported path there.
+func (v *Validator) validateTelemetry(adl *ADL) []string {
+	tel := adl.Spec.Telemetry
+	if tel == nil {
+		return nil
+	}
+
+	if adl.Spec.Language.Rust != nil {
+		return []string{
+			"spec.telemetry is set but telemetry generation supports Go and TypeScript only; the block is ignored for Rust agents.",
+		}
+	}
+
+	if !tel.Enabled {
+		return nil
+	}
+
+	var warnings []string
+	if adl.Spec.Language.TypeScript != nil &&
+		tel.Metrics != nil && tel.Metrics.Exporter != nil && tel.Metrics.Exporter.Prometheus != nil {
+		warnings = append(warnings,
+			"spec.telemetry.metrics.exporter.prometheus is set but the TypeScript ADK does not support the Prometheus pull exporter yet; use spec.telemetry.metrics.exporter.otlp to push to a collector instead.")
+	}
+	return warnings
 }
 
 // checkLegacySpecFields rejects manifests that still use a superseded AI

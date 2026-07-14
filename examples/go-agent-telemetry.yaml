@@ -27,15 +27,26 @@ spec:
       the tracing backend.
     maxTokens: 4096
     temperature: 0.3
-  # spec.telemetry is the on/off switch for OpenTelemetry instrumentation. When
-  # enabled, the generator pulls the OpenTelemetry runtime dependencies into
-  # go.mod, instruments the built-in tool calls with spans (tools/telemetry.go),
-  # and surfaces the A2A_TELEMETRY_* environment variables in .env.example. The
-  # ADK turns on the metrics server and tracing at runtime when
-  # A2A_TELEMETRY_ENABLE=true; the exporter endpoint, metrics port, and sampling
-  # stay runtime/deployment concerns rather than manifest fields.
+  # spec.telemetry configures OpenTelemetry instrumentation. 'enabled' is the
+  # master switch: the generator pulls the OpenTelemetry runtime dependencies
+  # into go.mod, instruments the built-in tool calls with spans
+  # (tools/telemetry.go), and surfaces A2A_TELEMETRY_ENABLE plus the OpenTelemetry
+  # SDK exporter variables in .env.example. The Go ADK reads them through its
+  # A2A_-prefixed config, so each standard OTEL_* name is emitted as A2A_OTEL_*
+  # and maps 1:1 to a spec.telemetry field. Here traces push over OTLP while
+  # metrics are exposed for Prometheus scraping (a pull endpoint). Auth headers,
+  # credentials, and sampling stay runtime concerns.
   telemetry:
     enabled: true
+    traces:
+      exporter:
+        otlp:
+          endpoint: http://localhost:4318
+          protocol: http/protobuf
+    metrics:
+      exporter:
+        prometheus:
+          port: 9464
   config:
     tools:
       read:

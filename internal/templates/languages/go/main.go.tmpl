@@ -173,6 +173,11 @@ func runStart(ctx context.Context) error {
 	if err := envconfig.Process(ctx, &cfg); err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
+{{- if and .ADL.Spec.Telemetry .ADL.Spec.Telemetry.Enabled }}
+	// The OpenTelemetry SDK settings are read as A2A_OTEL_* through the ADK's
+	// A2A_-prefixed config (cfg.A2A.OTelConfig), so the single Process call above
+	// already loaded them - no separate OTel pass is required.
+{{- end }}
 
 	// Initialize logger
 	l, err := logger.NewLogger(ctx, &cfg)
