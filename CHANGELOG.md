@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.46.3](https://github.com/inference-gateway/adl-cli/compare/v0.46.2...v0.46.3) (2026-07-14)
+
+### 🔧 Miscellaneous
+
+* **deps:** update anthropics/claude-code-action to v1.0.173 in workflow templates ([b69dc7d](https://github.com/inference-gateway/adl-cli/commit/b69dc7df57521c9cd241ce3d7a3c7270c355ccd2))
+* **deps:** upgrade actions/setup-go to v6.5.0 in workflow templates ([3d11b64](https://github.com/inference-gateway/adl-cli/commit/3d11b64c11d13adc94d2cb3a372d9afcc1a6779e))
+* **deps:** upgrade golangci-lint-action to v9.3.0 in CI workflows ([6e32726](https://github.com/inference-gateway/adl-cli/commit/6e32726e816a2e7a1dc1f1e6772d41681e4cc715))
+
 ## [0.46.2](https://github.com/inference-gateway/adl-cli/compare/v0.46.1...v0.46.2) (2026-07-14)
 
 ### 🔧 Miscellaneous
