@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	schema "github.com/inference-gateway/adl-cli/internal/schema"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // TestRegistry_DockerCompose_AllLanguages verifies that
@@ -172,7 +173,7 @@ func TestDockerComposeTemplate_ArtifactsWiring(t *testing.T) {
 			name:             "artifacts disabled",
 			artifactsEnabled: false,
 			wantPresent: []string{
-				"INFER_TOOLS_WEB_FETCH_ENABLED: false",
+				"INFER_TOOLS_WEB_FETCH_ENABLED: \"false\"",
 			},
 			wantAbsent: []string{
 				"A2A_ARTIFACTS_ENABLE",
@@ -186,15 +187,15 @@ func TestDockerComposeTemplate_ArtifactsWiring(t *testing.T) {
 			name:             "artifacts enabled",
 			artifactsEnabled: true,
 			wantPresent: []string{
-				"A2A_ARTIFACTS_ENABLE: true",
+				"A2A_ARTIFACTS_ENABLE: \"true\"",
 				"A2A_ARTIFACTS_SERVER_HOST: browser-agent",
-				"A2A_ARTIFACTS_SERVER_PORT: 8081",
-				"INFER_TOOLS_WEB_FETCH_ENABLED: true",
+				"A2A_ARTIFACTS_SERVER_PORT: \"8081\"",
+				"INFER_TOOLS_WEB_FETCH_ENABLED: \"true\"",
 				"INFER_TOOLS_WEB_FETCH_WHITELISTED_DOMAINS: |\n        - browser-agent",
 				"./tmp:/home/infer/.infer/tmp",
 			},
 			wantAbsent: []string{
-				"INFER_TOOLS_WEB_FETCH_ENABLED: false",
+				"INFER_TOOLS_WEB_FETCH_ENABLED: \"false\"",
 			},
 		},
 	}
@@ -283,6 +284,93 @@ func TestDockerComposeTemplate_RedisOnlyWithRustFeature(t *testing.T) {
 			hasQueueEnv := strings.Contains(out, "A2A_QUEUE_PROVIDER: redis")
 			if hasQueueEnv != tc.wantRedis {
 				t.Fatalf("A2A_QUEUE_PROVIDER env present=%v, want=%v", hasQueueEnv, tc.wantRedis)
+			}
+		})
+	}
+}
+
+// TestDockerComposeTemplate_EnvironmentValuesAreStrings guards every value in
+// a service `environment` map against being emitted as a bare YAML boolean or
+// number. Docker's own docs require these to be quoted: unquoted booleans
+// (true/false/yes/no) and numbers are coerced by the YAML parser (e.g. true ->
+// "True"), so `docker compose config` silently rewrites them and the agent /
+// infer CLI receive the wrong value. This is exactly the class of defect a
+// local `docker compose config` smoke-test surfaces, so a regression here
+// should fail the build rather than ship a broken stack. The two cases below
+// between them exercise every environment branch: the agent client block,
+// the artifacts block, the Redis queue block, and the full infer CLI flag set.
+func TestDockerComposeTemplate_EnvironmentValuesAreStrings(t *testing.T) {
+	cases := []struct {
+		name     string
+		language string
+		makeADL  func() *schema.ADL
+	}{
+		{
+			name:     "go agent with artifacts",
+			language: "go",
+			makeADL: func() *schema.ADL {
+				return &schema.ADL{
+					APIVersion: "adl.inference-gateway.com/v1",
+					Kind:       "Agent",
+					Metadata:   schema.Metadata{Name: "browser-agent", Description: "x", Version: "1.0.0"},
+					Spec: schema.Spec{
+						Capabilities: schema.Capabilities{Streaming: true},
+						Server:       schema.Server{Port: 8080},
+						Agent: &schema.Agent{
+							Provider:     "openai",
+							Model:        "gpt-5-mini",
+							SystemPrompt: "hello",
+						},
+						Artifacts: &schema.ArtifactsConfig{Enabled: true},
+						Language: schema.Language{
+							Go: &schema.GoConfig{Module: "example.com/agent", Version: "1.26.2"},
+						},
+					},
+				}
+			},
+		},
+		{
+			name:     "rust agent with redis",
+			language: "rust",
+			makeADL: func() *schema.ADL {
+				adl := minimalRustADL()
+				adl.Spec.Language.Rust.Features = []string{"redis"}
+				return adl
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			registry, err := NewRegistry(tc.language)
+			if err != nil {
+				t.Fatalf("NewRegistry: %v", err)
+			}
+			engine := NewWithRegistry("minimal", registry)
+			out, err := engine.ExecuteTemplate("docker/docker-compose.yaml", Context{ADL: tc.makeADL()})
+			if err != nil {
+				t.Fatalf("ExecuteTemplate: %v", err)
+			}
+
+			var doc struct {
+				Services map[string]struct {
+					Environment map[string]yaml.Node `yaml:"environment"`
+				} `yaml:"services"`
+			}
+			if err := yaml.Unmarshal([]byte(out), &doc); err != nil {
+				t.Fatalf("rendered compose is not valid YAML: %v\n---\n%s", err, out)
+			}
+
+			for svc, s := range doc.Services {
+				for key, node := range s.Environment {
+					if node.Kind != yaml.ScalarNode {
+						continue
+					}
+					if node.Tag != "!!str" && node.Tag != "!!null" {
+						t.Errorf("services.%s.environment.%s renders as %s (%s); quote it so docker compose does not coerce the value",
+							svc, key, node.Value, node.Tag)
+					}
+				}
 			}
 		})
 	}
