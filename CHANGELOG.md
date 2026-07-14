@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.48.0](https://github.com/inference-gateway/adl-cli/compare/v0.47.1...v0.48.0) (2026-07-14)
+
+### ✨ Features
+
+* bump Go version to 1.26.4 ([#279](https://github.com/inference-gateway/adl-cli/issues/279)) ([4945a28](https://github.com/inference-gateway/adl-cli/commit/4945a28740f2ee41c9d56738796a5a335c68ab1e))
+* generate OTel-aligned telemetry configuration from extended spec.telemetry ([#281](https://github.com/inference-gateway/adl-cli/issues/281)) ([47c5b3d](https://github.com/inference-gateway/adl-cli/commit/47c5b3d50192239b71f80be09e255a5fc5952ab2))
+
+### 🐛 Bug Fixes
+
+* quote boolean and numeric env values in compose template ([#267](https://github.com/inference-gateway/adl-cli/issues/267)) ([6198824](https://github.com/inference-gateway/adl-cli/commit/61988240ccd44060628d6a0851a51962a76e7a23))
+
+### 📚 Documentation
+
+* add missing CLI flags to README generate/init flag tables ([#275](https://github.com/inference-gateway/adl-cli/issues/275)) ([db0a842](https://github.com/inference-gateway/adl-cli/commit/db0a84252056c16fc02b127180ee79a2975b421c))
+* document spec.telemetry OpenTelemetry generation ([#277](https://github.com/inference-gateway/adl-cli/issues/277)) ([bd75c08](https://github.com/inference-gateway/adl-cli/commit/bd75c08ebd38531d71164c849d9d86b7a4bc50d3)), references [#259](https://github.com/inference-gateway/adl-cli/issues/259)
+* fix project structure diagrams and universal files section ([#274](https://github.com/inference-gateway/adl-cli/issues/274)) ([17bad1b](https://github.com/inference-gateway/adl-cli/commit/17bad1b446626b6e8b803e163e0f039695446615)), closes [#272](https://github.com/inference-gateway/adl-cli/issues/272)
+* mark Service Injection code examples as illustrative with template references ([#278](https://github.com/inference-gateway/adl-cli/issues/278)) ([69b9806](https://github.com/inference-gateway/adl-cli/commit/69b9806b4baac283e626e56b6b367021735c83c0))
+* remove missing example ref, document all examples ([#273](https://github.com/inference-gateway/adl-cli/issues/273)) ([4e30aff](https://github.com/inference-gateway/adl-cli/commit/4e30affbbb0b25e8b092cff3885e6e7764a6f9e8)), closes [#268](https://github.com/inference-gateway/adl-cli/issues/268)
+* update Template System and Architecture section with accurate Context struct and file mapping ([#276](https://github.com/inference-gateway/adl-cli/issues/276)) ([352d084](https://github.com/inference-gateway/adl-cli/commit/352d084627e2b42f77184e828d797fd13ff0362b))
+
 ## [0.47.1](https://github.com/inference-gateway/adl-cli/compare/v0.47.0...v0.47.1) (2026-07-14)
 
 ### ♻️ Improvements
