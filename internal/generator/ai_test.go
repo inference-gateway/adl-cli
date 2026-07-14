@@ -287,7 +287,7 @@ func TestGenerator_AI_ClaudeWorkflowGoContent(t *testing.T) {
 	assertNotContains(t, body, "Set up Rust", "Claude Code workflow body (go)")
 	assertNotContains(t, body, "actions-rs/toolchain", "Claude Code workflow body (go)")
 
-	assertContains(t, body, "arduino/setup-task@v2.0.0", "Claude Code workflow body")
+	assertContains(t, body, "arduino/setup-task@v3.0.0", "Claude Code workflow body")
 	assertContains(t, body, "Install ADL skill", "Claude Code workflow body")
 	assertContains(t, body, "raw.githubusercontent.com/inference-gateway/skills/main/skills/adl/SKILL.md", "Claude Code workflow body")
 
