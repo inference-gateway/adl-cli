@@ -177,6 +177,12 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		files[fmt.Sprintf("tools/%s.go", snakeCaseName)] = "tool.go"
 	}
 
+	// The shared span helper is only used by the built-in tool handlers, so
+	// emit it only when telemetry is on and at least one built-in tool exists.
+	if telemetryEnabled(adl) && hasBuiltinTool(adl) {
+		files["tools/telemetry.go"] = "telemetry.go"
+	}
+
 	for _, skill := range adl.Spec.Skills {
 		if skill.Bare {
 			files[fmt.Sprintf("skills/%s/SKILL.md", skill.ID)] = "skills/skill.md"
@@ -426,6 +432,24 @@ func (r *Registry) addDependabotFiles(adl *schema.ADL, files map[string]string) 
 	if adl.Spec.SCM.Provider == schema.SCMProviderGithub || adl.Spec.SCM.Provider == "" {
 		files[".github/dependabot.yml"] = "github/dependabot.yaml"
 	}
+}
+
+// telemetryEnabled reports whether spec.telemetry.enabled is set. Telemetry
+// is off by default - the block is optional and defaults to disabled.
+func telemetryEnabled(adl *schema.ADL) bool {
+	return adl.Spec.Telemetry != nil && adl.Spec.Telemetry.Enabled
+}
+
+// hasBuiltinTool reports whether the manifest declares any reserved built-in
+// tool (read/bash/write/edit/fetch). Used to decide whether the generated
+// project needs the shared tool-span helper.
+func hasBuiltinTool(adl *schema.ADL) bool {
+	for _, tool := range adl.Spec.Tools {
+		if schema.IsReservedToolID(tool.ID) {
+			return true
+		}
+	}
+	return false
 }
 
 // DetectLanguageFromADL detects the programming language from ADL

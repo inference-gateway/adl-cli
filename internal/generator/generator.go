@@ -466,6 +466,11 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 						"Tags":        foundTool.Tags,
 						"Schema":      foundTool.Schema,
 						"Inject":      foundTool.Inject,
+						// TelemetryEnabled gates the OpenTelemetry span emitted
+						// by generated built-in tool handlers. When on, the
+						// handler calls the shared startToolSpan helper
+						// (tools/telemetry.go) to capture per-tool-call latency.
+						"TelemetryEnabled": adl.Spec.Telemetry != nil && adl.Spec.Telemetry.Enabled,
 					}
 
 					if adl.Spec.Language.Go != nil {

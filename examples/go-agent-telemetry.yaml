@@ -1,0 +1,72 @@
+---
+apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: go-agent-telemetry
+  description: "Go A2A agent wired for OpenTelemetry - metrics server, OTLP traces, and per-tool-call spans"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  card:
+    protocolVersion: "0.3.0"
+    preferredTransport: JSONRPC
+    defaultInputModes:
+      - text
+    defaultOutputModes:
+      - text
+  agent:
+    provider: deepseek
+    model: deepseek-v4-flash
+    systemPrompt: |
+      You are an observability-friendly assistant. Investigate files with the
+      Read tool and run whitelisted shell commands with Bash. Every built-in
+      tool call is traced as its own span so per-tool-call latency shows up in
+      the tracing backend.
+    maxTokens: 4096
+    temperature: 0.3
+  # spec.telemetry is the on/off switch for OpenTelemetry instrumentation. When
+  # enabled, the generator pulls the OpenTelemetry runtime dependencies into
+  # go.mod, instruments the built-in tool calls with spans (tools/telemetry.go),
+  # and surfaces the A2A_TELEMETRY_* environment variables in .env.example. The
+  # ADK turns on the metrics server and tracing at runtime when
+  # A2A_TELEMETRY_ENABLE=true; the exporter endpoint, metrics port, and sampling
+  # stay runtime/deployment concerns rather than manifest fields.
+  telemetry:
+    enabled: true
+  config:
+    tools:
+      read:
+        enabled: true
+        max_lines: 2000
+      bash:
+        enabled: true
+        whitelist:
+          - ls
+          - cat
+          - grep
+          - find
+        timeout_seconds: 30
+  tools:
+    - id: read
+    - id: bash
+  server:
+    port: 8080
+    scheme: http
+    debug: false
+    auth:
+      enabled: false
+  language:
+    go:
+      module: "github.com/inference-gateway/adl-cli/test-output"
+      version: "1.26.2"
+  development:
+    sandbox:
+      flox:
+        enabled: true
+      devcontainer:
+        enabled: false
+      dockerCompose:
+        enabled: true

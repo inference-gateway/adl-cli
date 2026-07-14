@@ -62,6 +62,10 @@ func NewWriteTool(ctx context.Context, logger *zap.Logger) (server.Tool, error) 
 
 // Handler executes the Write tool.
 func (t *WriteTool) Handler(ctx context.Context, args map[string]any) (string, error) {
+{{- if .TelemetryEnabled }}
+	span := startToolSpan(ctx, "{{ .ID }}")
+	defer span.End()
+{{- end }}
 	if !t.cfg.Enabled {
 		return "", errors.New("write tool is disabled; set spec.config.tools.write.enabled: true in the ADL and regenerate")
 	}
