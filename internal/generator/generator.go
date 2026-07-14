@@ -561,9 +561,14 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 			(strings.HasPrefix(fileName, "skills/") && filepath.Base(fileName) == "SKILL.md")
 
 		isBuiltinToolFile := strings.HasPrefix(templateKey, "builtin/")
-		isToolFile := !isBuiltinToolFile && ((templateKey == "tool.go" || templateKey == "tool.rs" || templateKey == "tool.mod.rs" || templateKey == "tool.ts") ||
-			(strings.HasPrefix(fileName, "tools/") && ext == ".go") ||
-			(strings.HasPrefix(fileName, "src/tools/") && (ext == ".rs" || ext == ".ts")))
+		// tools/telemetry.go is a shared, fully-generated helper (not a
+		// user-owned per-tool implementation), so it must carry the DO NOT
+		// EDIT header like every other generated file rather than be treated
+		// as editable tool code.
+		isToolFile := !isBuiltinToolFile && templateKey != "telemetry.go" &&
+			((templateKey == "tool.go" || templateKey == "tool.rs" || templateKey == "tool.mod.rs" || templateKey == "tool.ts") ||
+				(strings.HasPrefix(fileName, "tools/") && ext == ".go") ||
+				(strings.HasPrefix(fileName, "src/tools/") && (ext == ".rs" || ext == ".ts")))
 
 		isServiceFile := templateKey == "service.go" ||
 			(strings.Contains(fileName, "/internal/") && strings.HasSuffix(fileName, ".go") && !strings.Contains(fileName, "/logger/"))
