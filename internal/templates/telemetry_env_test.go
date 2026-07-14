@@ -61,9 +61,6 @@ func TestTelemetryEnvVars_GoUsesA2APrefix(t *testing.T) {
 		if !strings.HasPrefix(k, "A2A_OTEL_") {
 			t.Errorf("Go telemetry var %q must carry the A2A_ prefix", k)
 		}
-		// The Go ADK has no per-signal OTLP endpoint fields, so the shared pair
-		// must be used - never OTEL_EXPORTER_OTLP_{TRACES,METRICS}_* (which the
-		// exporter-selection vars OTEL_{TRACES,METRICS}_EXPORTER don't match).
 		if strings.Contains(k, "OTEL_EXPORTER_OTLP_TRACES_") || strings.Contains(k, "OTEL_EXPORTER_OTLP_METRICS_") {
 			t.Errorf("Go must emit the shared OTLP pair, not per-signal var %q", k)
 		}

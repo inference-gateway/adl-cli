@@ -84,16 +84,12 @@ func telemetryEnvVars(adl *schema.ADL) []TelemetryEnvVar {
 	}
 
 	if lang == "go" {
-		// The Go ADK has a single shared OTLP endpoint/protocol; emit it from
-		// whichever signal pushes over OTLP (traces preferred, else metrics).
 		otlp := tracesOtlp
 		if otlp == nil {
 			otlp = metricsOtlp
 		}
 		out = appendOTLPEnv(out, prefix, "", otlp)
 	} else {
-		// The TypeScript Node SDK supports per-signal OTLP endpoints; collapse to
-		// the shared pair only when both signals target the same collector.
 		shared := tracesOtlp != nil && metricsOtlp != nil &&
 			tracesOtlp.Endpoint == metricsOtlp.Endpoint &&
 			tracesOtlp.Protocol == metricsOtlp.Protocol
