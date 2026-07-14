@@ -104,8 +104,8 @@ func TestAIHasOfficialAction(t *testing.T) {
 		"claudecode": true,
 		"codex":      true,
 		"gemini":     true,
+		"infer":      true,
 		"opencode":   false,
-		"infer":      false,
 		"unknown":    false,
 	}
 	for agent, want := range cases {

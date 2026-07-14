@@ -606,7 +606,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 // generateAIWorkflows emits per-agent GitHub Actions workflows under
 // .github/workflows/ for every enabled AI assistant that has an
 // upstream action (see schema.AIHasOfficialAction). Currently that
-// covers claudecode, codex, and gemini; opencode and infer ship docs
+// covers claudecode, codex, gemini, and infer; opencode ships docs
 // only because no first-party action exists yet.
 //
 // The workflows are generated regardless of GenerateCI/GenerateCD -
@@ -644,6 +644,12 @@ func (g *Generator) generateAIWorkflows(adl *schema.ADL, ctx templates.Context, 
 			key:     "github/workflows/ai-gemini.yaml",
 			path:    ".github/workflows/gemini.yml",
 			label:   "Gemini",
+		},
+		{
+			enabled: g.config.AIToggles.Infer && schema.AIHasOfficialAction("infer"),
+			key:     "github/workflows/ai-infer.yaml",
+			path:    ".github/workflows/infer.yml",
+			label:   "Infer",
 		},
 	}
 

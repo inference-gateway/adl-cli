@@ -1,0 +1,46 @@
+---
+name: Infer
+
+# Runs the Inference Gateway "infer" coding agent on issues and pull
+# requests that mention @infer. The agent picks up AGENTS.md from the repo
+# root for project-specific instructions and opens a pull request with its
+# changes. See https://github.com/inference-gateway/infer-action.
+#
+# The model / provider below is a starting point - swap it (and the matching
+# provider API key secret) for whichever model you prefer. A `/model
+# provider/name` override in the triggering issue or comment wins per-run.
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened, assigned]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  infer:
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@infer')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@infer')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@infer')) ||
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '@infer') || contains(github.event.issue.title, '@infer')))
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.0
+        with:
+          fetch-depth: 1
+
+      - name: Run Infer
+        uses: inference-gateway/infer-action@v0.32.1
+        with:
+          github-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
+          model: deepseek/deepseek-v4-flash
+          deepseek-api-key: ${{`{{ secrets.DEEPSEEK_API_KEY }}`}}

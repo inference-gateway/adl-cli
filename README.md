@@ -344,6 +344,7 @@ adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun --
 >   (`CLAUDE.md`, `GEMINI.md`, `AGENTS.md`, `.github/workflows/ci.yml`,
 >   `.github/workflows/cd.yml`, `.github/workflows/claude.yml`,
 >   `.github/workflows/codex.yml`, `.github/workflows/gemini.yml`,
+>   `.github/workflows/infer.yml`,
 >   `.releaserc.yaml`) are tagged `linguist-generated=true` in `.gitattributes`
 >   so they collapse in pull request diffs.
 
@@ -386,7 +387,7 @@ spec:
         opencode:
           enabled: false # would generate AGENTS.md (no upstream action yet)
         infer:
-          enabled: false # would generate AGENTS.md (no upstream action yet)
+          enabled: false # would generate AGENTS.md + .github/workflows/infer.yml
 ```
 
 #### Per-agent AI assistants
@@ -397,7 +398,7 @@ spec:
 | `codex`      | `AGENTS.md` (shared)      | yes (`.github/workflows/codex.yml`, uses `openai/codex-action`)                   |
 | `gemini`     | `GEMINI.md`               | yes (`.github/workflows/gemini.yml`, uses `google-github-actions/run-gemini-cli`) |
 | `opencode`   | `AGENTS.md` (shared)      | no upstream action yet - docs only                                                |
-| `infer`      | `AGENTS.md` (shared)      | no workflow scaffolded yet - docs only                                            |
+| `infer`      | `AGENTS.md` (shared)      | yes (`.github/workflows/infer.yml`, uses `inference-gateway/infer-action`)         |
 
 - `AGENTS.md` is generated **once** and is shared by every enabled agent that
   reads from it (`codex`, `opencode`, `infer`); the file's contents are
