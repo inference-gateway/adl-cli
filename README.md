@@ -1879,25 +1879,25 @@ adl validate examples/cloudrun-ghcr-agent.yaml
 adl generate --file examples/go-agent.yaml --output ./test-go-agent
 adl generate --file examples/rust-agent.yaml --output ./test-rust-agent
 adl generate --file examples/typescript-agent.yaml --output ./test-typescript-agent
-adl generate --file examples/github-app-agent.yaml --output ./test-github-app-agent --cd
 adl generate --file examples/cloudrun-agent.yaml --output ./test-cloudrun-agent --deployment cloudrun
 adl generate --file examples/cloudrun-ghcr-agent.yaml --output ./test-ghcr-agent --deployment cloudrun
 
 # Generate with CI/CD pipeline
-adl generate --file examples/github-app-agent.yaml --output ./enterprise-agent --ci --cd
+adl generate --file examples/go-agent.yaml --output ./enterprise-agent --ci --cd
 adl generate --file examples/cloudrun-agent.yaml --output ./cloudrun-enterprise --deployment cloudrun --cd
 ```
 
 **Example ADL Files:**
 
-- `go-agent.yaml` - Basic Go agent with multiple skills and capabilities
-- `rust-agent.yaml` - Rust agent with enterprise features
+- `go-agent.yaml` - Go agent with services, tools, and an orchestration skill
+- `rust-agent.yaml` - Minimal Rust agent built with the Rust ADK
 - `typescript-agent.yaml` - Minimal TypeScript agent built with the TypeScript ADK
 - `typescript-agent-tools.yaml` - TypeScript agent with tools, services, and dependency injection
 - `typescript-agent-ai.yaml` - AI-powered TypeScript agent with LLM-driven tools
-- `github-app-agent.yaml` - Enterprise agent with GitHub App CD integration
-- `cloudrun-agent.yaml` - CloudRun deployment with Google Container Registry
-- `cloudrun-ghcr-agent.yaml` - CloudRun deployment with GitHub Container Registry
+- `cloudrun-agent.yaml` - Cloud Run deployment with Google Container Registry
+- `cloudrun-ghcr-agent.yaml` - Cloud Run deployment with GitHub Container Registry
+
+See [`examples/README.md`](examples/README.md) for the full catalog of all 18 example manifests.
 
 ## Template System & Architecture
 
