@@ -61,7 +61,7 @@ spec:
   language:
     go:
       module: "github.com/inference-gateway/adl-cli/test-output"
-      version: "1.26.2"
+      version: "1.26.4"
   development:
     sandbox:
       flox:

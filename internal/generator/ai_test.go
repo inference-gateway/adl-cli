@@ -21,7 +21,7 @@ spec:
   language:
     go:
       module: github.com/example/ai-toggle-agent
-      version: "1.26.2"
+      version: "1.26.4"
 `
 
 // writeManifest writes the canonical manifest plus an optional

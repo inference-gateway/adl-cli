@@ -108,7 +108,7 @@ Skills are resolved in three modes:
 
 ## Project conventions
 
-- Go version is **1.26.2**; the Flox sandbox at `.flox/env/manifest.toml` pins `go`, `golangci-lint`, `goreleaser`, `go-task`, `prettier`, `markdownlint-cli`. Run `flox activate` to enter it.
+- Go version is **1.26.4**; the Flox sandbox at `.flox/env/manifest.toml` pins `go`, `golangci-lint`, `goreleaser`, `go-task`, `prettier`, `markdownlint-cli`. Run `flox activate` to enter it.
 - Indentation: tabs in Go, 2-space in YAML/JSON/Markdown (see `.editorconfig`).
 - Commit messages follow conventional commits (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`, `ci:`, `build:`) — semantic-release in `.releaserc.yaml` derives version bumps from them.
 - Examples in `examples/` are **the regression suite**: `task examples:test` + `task examples:generate` is what catches template breakage. When adding a new ADL feature, add or update an example and wire it into both lists in `Taskfile.yml`.
