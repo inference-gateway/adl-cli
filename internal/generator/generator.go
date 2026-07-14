@@ -460,16 +460,12 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 
 				if foundTool != nil {
 					toolContext := map[string]interface{}{
-						"ID":          foundTool.ID,
-						"Name":        foundTool.Name,
-						"Description": foundTool.Description,
-						"Tags":        foundTool.Tags,
-						"Schema":      foundTool.Schema,
-						"Inject":      foundTool.Inject,
-						// TelemetryEnabled gates the OpenTelemetry span emitted
-						// by generated built-in tool handlers. When on, the
-						// handler calls the shared startToolSpan helper
-						// (tools/telemetry.go) to capture per-tool-call latency.
+						"ID":               foundTool.ID,
+						"Name":             foundTool.Name,
+						"Description":      foundTool.Description,
+						"Tags":             foundTool.Tags,
+						"Schema":           foundTool.Schema,
+						"Inject":           foundTool.Inject,
 						"TelemetryEnabled": adl.Spec.Telemetry != nil && adl.Spec.Telemetry.Enabled,
 					}
 
@@ -561,10 +557,6 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 			(strings.HasPrefix(fileName, "skills/") && filepath.Base(fileName) == "SKILL.md")
 
 		isBuiltinToolFile := strings.HasPrefix(templateKey, "builtin/")
-		// tools/telemetry.go is a shared, fully-generated helper (not a
-		// user-owned per-tool implementation), so it must carry the DO NOT
-		// EDIT header like every other generated file rather than be treated
-		// as editable tool code.
 		isToolFile := !isBuiltinToolFile && templateKey != "telemetry.go" &&
 			((templateKey == "tool.go" || templateKey == "tool.rs" || templateKey == "tool.mod.rs" || templateKey == "tool.ts") ||
 				(strings.HasPrefix(fileName, "tools/") && ext == ".go") ||

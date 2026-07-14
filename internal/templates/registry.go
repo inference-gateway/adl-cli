@@ -177,8 +177,6 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 		files[fmt.Sprintf("tools/%s.go", snakeCaseName)] = "tool.go"
 	}
 
-	// The shared span helper is only used by the built-in tool handlers, so
-	// emit it only when telemetry is on and at least one built-in tool exists.
 	if telemetryEnabled(adl) && hasBuiltinTool(adl) {
 		files["tools/telemetry.go"] = "telemetry.go"
 	}
