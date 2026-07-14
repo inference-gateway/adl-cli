@@ -1293,9 +1293,7 @@ my-go-agent/
 │       └── refactor_request.md # Refactoring request template
 ├── .releaserc.yaml            # Semantic-release configuration (with --cd flag)
 ├── k8s/
-│   └── deployment.yaml        # Kubernetes deployment manifest
-├── cloudrun/
-│   └── deploy.sh              # CloudRun deployment script (with --deployment cloudrun)
+│   └── deployment.yaml        # Kubernetes deployment manifest (with --deployment kubernetes)
 ├── .flox/                     # Generated when sandbox: flox
 │   ├── env/manifest.toml
 │   ├── env.json
@@ -1334,9 +1332,7 @@ my-rust-agent/
 │   └── cd.yml                 # GitHub Actions CD workflow (with --cd flag)
 ├── .releaserc.yaml            # Semantic-release configuration (with --cd flag)
 ├── k8s/
-│   └── deployment.yaml        # Kubernetes deployment
-├── cloudrun/
-│   └── deploy.sh              # CloudRun deployment script (with --deployment cloudrun)
+│   └── deployment.yaml        # Kubernetes deployment (with --deployment kubernetes)
 ├── CLAUDE.md                  # AI assistant instructions (spec.development.ai.orchestrators.claudecode.enabled: true)
 └── README.md                  # Documentation
 ```
@@ -1384,7 +1380,7 @@ All projects include these essential files regardless of language:
 - **`.well-known/agent-card.json`** - A2A agent discovery and capabilities manifest
 - **`Taskfile.yml`** - Unified task runner configuration for build, test, lint, run
 - **`Dockerfile`** - Language-optimized container configuration
-- **`k8s/deployment.yaml`** - Kubernetes deployment manifest
+- **`k8s/deployment.yaml`** - Kubernetes deployment manifest (only when `spec.deployment.type: kubernetes`)
 - **`deploy` task in `Taskfile.yml`** - CloudRun deployment task (when using `--deployment cloudrun`)
 - **`.adl-ignore`** - Protects user implementations from overwrite
 - **CI Workflows** - When using `--ci` flag, generates GitHub Actions workflows:
@@ -1941,7 +1937,7 @@ Each language has its own file mapping that determines what gets generated:
 
 - `Taskfile.yml` → Development task runner
 - `.well-known/agent-card.json` → A2A capabilities manifest (skills are listed here, not tools)
-- `k8s/deployment.yaml` → Kubernetes deployment
+- `k8s/deployment.yaml` → Kubernetes deployment (only when `spec.deployment.type: kubernetes`)
 - CI workflows and sandbox configurations
 
 ### Template Context
