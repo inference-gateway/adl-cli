@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.46.1](https://github.com/inference-gateway/adl-cli/compare/v0.46.0...v0.46.1) (2026-07-14)
+
+### 🔧 Miscellaneous
+
+* **deps:** update arduino/setup-task version to v3.0.0 and adjust related task versions ([adf45d9](https://github.com/inference-gateway/adl-cli/commit/adf45d9a689b2388080103e13b0fc59c7757f514))
+
 ## [0.46.0](https://github.com/inference-gateway/adl-cli/compare/v0.45.1...v0.46.0) (2026-07-14)
 
 ### ✨ Features
