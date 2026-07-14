@@ -289,8 +289,9 @@ The init command supports extensive configuration options:
 
 **Environment Options:**
 
-- `--flox` - Enable Flox environment
 - `--devcontainer` - Enable DevContainer environment
+- `--docker-compose` - Enable Docker Compose environment
+- `--flox` - Enable Flox environment
 
 **Pipeline / AI Options (declarative, written into the manifest as `false` by default):**
 
@@ -301,6 +302,10 @@ The init command supports extensive configuration options:
   (see [Per-agent AI assistants](#per-agent-ai-assistants)).
 - `--ci` - Sets `spec.scm.ci: true` (generate CI workflow on `adl generate`)
 - `--cd` - Sets `spec.scm.cd: true` (generate CD pipeline + semantic-release on `adl generate`)
+
+**Deployment Options:**
+
+- `--deployment` - Deployment type (`kubernetes`, `cloudrun`, `vercel`, `cloudflare` (TypeScript-only); defaults to empty for no deployment)
 
 ### Generate Command
 
@@ -331,7 +336,10 @@ adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun --
 | `--overwrite`      | Overwrite existing files (respects .adl-ignore)                                    |
 | `--ci`             | Generate CI workflow configuration (GitHub Actions). Overrides `spec.scm.ci`.      |
 | `--cd`             | Generate CD pipeline configuration with semantic-release. Overrides `spec.scm.cd`. |
-| `--deployment`     | Generate deployment configuration (`kubernetes`, `cloudrun`)                       |
+| `--deployment`     | Generate deployment configuration (`kubernetes`, `cloudrun`, `vercel`, `cloudflare` (TypeScript-only)) |
+| `--devcontainer`  | Enable DevContainer environment                                                    |
+| `--flox`          | Enable Flox environment                                                            |
+| `--offline`       | Skip the skills registry; require every non-bare skill to already be in the local cache |
 
 > **Declarative equivalents:** `--ci` and `--cd` are mirrored by `spec.scm.ci`
 > and `spec.scm.cd`. The CLI flag is OR'd on top of the manifest value (passing
