@@ -124,8 +124,8 @@ jobs:
           base_branch: main
           branch_prefix: ${{`{{ steps.prefix.outputs.value }}`}}
           claude_args: |
-            --effort ultracode
+            --effort max
             --model claude-opus-4-8
             --allowedTools "Bash(task:*),Bash(gh:*),Bash(git:*){{- if eq .Language "go" }},Bash(go:*){{- else if eq .Language "rust" }},Bash(cargo:*){{- else if eq .Language "typescript" }},Bash(npm:*),Bash(node:*){{- end }}"
           prompt: ${{`{{ steps.set-prompt.outputs.value }}`}}
-          track_progress: true
+          track_progress: ${{ github.event_name != 'workflow_dispatch' }}
