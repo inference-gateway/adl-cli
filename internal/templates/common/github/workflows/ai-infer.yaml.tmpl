@@ -28,10 +28,21 @@ on:
   pull_request_review:
     types:
       - submitted
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: 'Task for the agent to run'
+        type: string
+        required: true
+      debug:
+        description: 'Enable debug logging'
+        type: boolean
+        default: false
 
 jobs:
   infer:
     if: |
+      github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@infer')) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@infer')) ||
       (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@infer')) ||
@@ -132,7 +143,10 @@ jobs:
         with:
           github-token: ${{`{{ steps.app-token.outputs.token }}`}}
           github-app-slug: ${{`{{ steps.app-token.outputs.app-slug }}`}}
-          model: deepseek/deepseek-v4-flash
+          model: ${{`{{ vars.INFER_MODEL || 'ollama_cloud/deepseek-v4-flash' }}`}}
+          direct-prompt: ${{`{{ inputs.prompt }}`}}
+          debug: ${{`{{ inputs.debug || vars.INFER_DEBUG == 'true' }}`}}
+          mirror-agent-logs: ${{`{{ inputs.debug || vars.INFER_DEBUG == 'true' }}`}}
           skills: |
             adl
           bash-allow-append: >-
