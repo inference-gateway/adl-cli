@@ -33,6 +33,7 @@ _A command-line interface for generating enterprise-ready A2A (Agent-to-Agent) s
 - [Sandbox Environments](#sandbox-environments)
 - [Enterprise Features](#enterprise-features)
 - [Artifacts Support](#artifacts-support)
+- [Telemetry](#telemetry)
 - [GitHub Issue Templates](#github-issue-templates)
 - [Examples](#examples)
 - [Template System & Architecture](#template-system--architecture)
@@ -64,6 +65,7 @@ The ADL CLI helps you build enterprise-ready A2A agents quickly by generating co
 - 🎣 **Post-Generation Hooks** - Customize build, format, and test commands after generation
 - 🤖 **Multi-Provider AI** - OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama, Ollama Cloud, and Nvidia support
 - 📁 **Artifacts Support** - Integrated filesystem and MinIO object storage for artifact management
+- 📡 **OpenTelemetry Instrumentation** - Opt-in tracing and metrics via `spec.telemetry.enabled` (Go and TypeScript)
 
 ## Installation
 
@@ -504,6 +506,7 @@ The complete ADL schema includes:
 - **scm**: Source control management configuration (GitHub, GitLab)
 - **sandbox**: Development environment configuration (Flox, DevContainer)
 - **deployment**: Platform-specific deployment configuration (Kubernetes, Cloud Run)
+- **telemetry**: OpenTelemetry instrumentation toggle (see [Telemetry](#telemetry))
 
 ### Complete ADL Example
 
@@ -1814,6 +1817,28 @@ Configure storage via environment variables (see generated README for A2A*ARTIFA
 
 - `examples/go-agent-artifacts-filesystem.yaml` - Filesystem storage example
 - `examples/go-agent-artifacts-minio.yaml` - MinIO storage example
+
+## Telemetry
+
+Enable OpenTelemetry instrumentation for the generated agent:
+
+```yaml
+spec:
+  telemetry:
+    enabled: true
+```
+
+The manifest field is a single on/off switch - exporter endpoints, ports, and sampling stay runtime concerns configured via environment variables in the generated `.env.example`:
+
+- **Go**: pulls the OpenTelemetry runtime dependencies into `go.mod`, generates `tools/telemetry.go` (each built-in tool call becomes its own span with `infer.tool.call.id`/`infer.session.id` attributes), and surfaces `A2A_TELEMETRY_ENABLE`, `A2A_TELEMETRY_METRICS_PORT`/`_HOST`, `A2A_TELEMETRY_TRACE_ENABLE`/`_ENDPOINT`/`_HEADERS` in `.env.example`.
+- **TypeScript**: wires the ADK's `createTelemetryProvider` into `src/index.ts` (no extra npm dependencies) and surfaces `TELEMETRY_ENABLE` plus the standard `OTEL_EXPORTER_OTLP_*` / `OTEL_SERVICE_*` variables in `.env.example`.
+
+> **Note:** Telemetry generation currently supports Go and TypeScript only; Rust agents ignore `spec.telemetry`.
+
+**Examples:**
+
+- `examples/go-agent-telemetry.yaml` - Go agent with metrics server, OTLP traces, and per-tool-call spans
+- `examples/typescript-agent-telemetry.yaml` - TypeScript agent with ADK-provided OTel wiring
 
 ## GitHub Issue Templates
 
