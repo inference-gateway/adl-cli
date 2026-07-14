@@ -277,7 +277,7 @@ The init command supports extensive configuration options:
 **Go Options:**
 
 - `--go-module` - Go module path (e.g., `github.com/user/project`)
-- `--go-version` - Go version (e.g., `1.26.2`)
+- `--go-version` - Go version (e.g., `1.26.4`)
 
 **Rust Options:**
 
@@ -483,7 +483,7 @@ spec:
   language:
     go:
       module: "github.com/example/weather-agent"
-      version: "1.26.2"
+      version: "1.26.4"
   acronyms: # Optional: Custom acronyms for better code generation
     - api
     - json
@@ -613,7 +613,7 @@ spec:
   language:
     go:
       module: "github.com/company/advanced-agent"
-      version: "1.26.2"
+      version: "1.26.4"
   scm:
     provider: github
     url: "https://github.com/company/advanced-agent"
@@ -685,7 +685,7 @@ spec:
   language:
     go:
       module: github.com/example/agent
-      version: "1.26.2"
+      version: "1.26.4"
       vendor:
         deps:
           - github.com/google/uuid@v1.6.0
@@ -781,7 +781,7 @@ Worked example per backend:
 # Flox: pin deno + kubectl + terraform alongside the Go toolchain
 spec:
   language:
-    go: { module: github.com/example/agent, version: "1.26.2" }
+    go: { module: github.com/example/agent, version: "1.26.4" }
   development:
     sandbox:
       flox:
@@ -796,7 +796,7 @@ spec:
 # Devcontainer: same deps, rendered as an apt-packages feature
 spec:
   language:
-    go: { module: github.com/example/agent, version: "1.26.2" }
+    go: { module: github.com/example/agent, version: "1.26.4" }
   development:
     sandbox:
       devcontainer:
@@ -2123,7 +2123,7 @@ Taskfile.yml
 
 ### Prerequisites
 
-- Go 1.26.2+
+- Go 1.26.4+
 - [Task](https://taskfile.dev/) (optional, for using Taskfile commands)
 
 ### Building from Source
@@ -2188,7 +2188,7 @@ spec:
   language:
     go:
       module: "github.com/company/my-agent"
-      version: "1.26.2"
+      version: "1.26.4"
   acronyms: ["n8n", "xml", "mqtt", "iot", "uuid"]
 ```
 

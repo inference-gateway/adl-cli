@@ -55,6 +55,7 @@
           proxyVendor = true;
 
           env.CGO_ENABLED = "0";
+          env.GOTOOLCHAIN = "local";
 
           ldflags = [
             "-s"

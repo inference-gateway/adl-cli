@@ -167,7 +167,7 @@ When implementing tests:
 {{- if not $sandbox }}
 No sandboxed environments are configured. Install the toolchain manually:
 {{- if .ADL.Spec.Language.Go }}
-- Go {{ .ADL.Spec.Language.Go.Version | default "1.26.2+" }}
+- Go {{ .ADL.Spec.Language.Go.Version | default "1.26.4+" }}
 {{- else if .ADL.Spec.Language.Rust }}
 - Rust {{ .ADL.Spec.Language.Rust.Version | default "1.94+" }}
 {{- else if .ADL.Spec.Language.TypeScript }}

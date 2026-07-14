@@ -2,6 +2,8 @@ module github.com/inference-gateway/adl-cli
 
 go 1.26.2
 
+toolchain go1.26.4
+
 require (
 	charm.land/huh/v2 v2.0.3
 	charm.land/lipgloss/v2 v2.0.5

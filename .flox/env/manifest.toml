@@ -2,7 +2,7 @@ schema-version = "1.13.0"
 
 [install]
 go.pkg-path = "go"
-go.version = "^1.26.2"
+go.version = "^1.26.4"
 golangci-lint.pkg-path = "golangci-lint"
 golangci-lint.version = "^2.12.2"
 goreleaser.pkg-path = "goreleaser"
