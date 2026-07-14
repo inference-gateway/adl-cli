@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.46.2](https://github.com/inference-gateway/adl-cli/compare/v0.46.1...v0.46.2) (2026-07-14)
+
+### 🔧 Miscellaneous
+
+* **deps:** upgrade actions/setup-node to v7.0.0 in CI workflows ([10b3c62](https://github.com/inference-gateway/adl-cli/commit/10b3c627138b6940caf4ba330b617cb0239ab1a3))
+
 ## [0.46.1](https://github.com/inference-gateway/adl-cli/compare/v0.46.0...v0.46.1) (2026-07-14)
 
 ### 🔧 Miscellaneous
