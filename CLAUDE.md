@@ -79,6 +79,10 @@ Template files live as `.tmpl` under three roots that map to embed globs in `reg
 
 There are also five **reserved tool IDs** (`read`/`bash`/`write`/`edit`/`fetch`) — see `internal/schema/builtin_config.go`. They render from `languages/<lang>/builtin/*.tmpl` and are configured under the reserved `spec.config.tools.<id>` namespace, which is intentionally skipped when generating the `Config` struct.
 
+### Telemetry (`spec.telemetry.enabled`)
+
+A manifest-only boolean (no CLI flag) that turns on OpenTelemetry instrumentation. Go gets a generated `tools/telemetry.go` (from `languages/go/telemetry.go.tmpl`, per-tool-call spans, OTel deps added to `go.mod`, `A2A_TELEMETRY_*` vars in `.env.example`); TypeScript gets `createTelemetryProvider` wiring in `index.ts.tmpl` (`TELEMETRY_ENABLE` + `OTEL_*` vars). Rust is not supported — the toggle is ignored there. Regression coverage: `examples/{go,typescript}-agent-telemetry.yaml`.
+
 ### `.adl-ignore` protects user code on re-generate
 
 The generator creates a `.adl-ignore` (gitignore-style globs) listing files containing TODO placeholders — tool implementations, custom services, bare skill directories. On subsequent `adl generate` runs (even with `--overwrite`), matched paths are skipped. `internal/generator/ignore.go` handles matching. When adding new "user-owned" files, decide whether they should be in `.adl-ignore` by default.
