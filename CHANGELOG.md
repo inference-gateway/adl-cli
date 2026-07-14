@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.47.1](https://github.com/inference-gateway/adl-cli/compare/v0.47.0...v0.47.1) (2026-07-14)
+
+### ♻️ Improvements
+
+* harden generated workflow permissions and gate infer ([#265](https://github.com/inference-gateway/adl-cli/issues/265)) ([69c2b5e](https://github.com/inference-gateway/adl-cli/commit/69c2b5e07878adbf31107671f1830b7c9a6cc961))
+
 ## [0.47.0](https://github.com/inference-gateway/adl-cli/compare/v0.46.5...v0.47.0) (2026-07-14)
 
 ### ✨ Features
