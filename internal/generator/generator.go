@@ -460,12 +460,13 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 
 				if foundTool != nil {
 					toolContext := map[string]interface{}{
-						"ID":          foundTool.ID,
-						"Name":        foundTool.Name,
-						"Description": foundTool.Description,
-						"Tags":        foundTool.Tags,
-						"Schema":      foundTool.Schema,
-						"Inject":      foundTool.Inject,
+						"ID":               foundTool.ID,
+						"Name":             foundTool.Name,
+						"Description":      foundTool.Description,
+						"Tags":             foundTool.Tags,
+						"Schema":           foundTool.Schema,
+						"Inject":           foundTool.Inject,
+						"TelemetryEnabled": adl.Spec.Telemetry != nil && adl.Spec.Telemetry.Enabled,
 					}
 
 					if adl.Spec.Language.Go != nil {
@@ -556,9 +557,10 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 			(strings.HasPrefix(fileName, "skills/") && filepath.Base(fileName) == "SKILL.md")
 
 		isBuiltinToolFile := strings.HasPrefix(templateKey, "builtin/")
-		isToolFile := !isBuiltinToolFile && ((templateKey == "tool.go" || templateKey == "tool.rs" || templateKey == "tool.mod.rs" || templateKey == "tool.ts") ||
-			(strings.HasPrefix(fileName, "tools/") && ext == ".go") ||
-			(strings.HasPrefix(fileName, "src/tools/") && (ext == ".rs" || ext == ".ts")))
+		isToolFile := !isBuiltinToolFile && templateKey != "telemetry.go" &&
+			((templateKey == "tool.go" || templateKey == "tool.rs" || templateKey == "tool.mod.rs" || templateKey == "tool.ts") ||
+				(strings.HasPrefix(fileName, "tools/") && ext == ".go") ||
+				(strings.HasPrefix(fileName, "src/tools/") && (ext == ".rs" || ext == ".ts")))
 
 		isServiceFile := templateKey == "service.go" ||
 			(strings.Contains(fileName, "/internal/") && strings.HasSuffix(fileName, ".go") && !strings.Contains(fileName, "/logger/"))

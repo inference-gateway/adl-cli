@@ -1,0 +1,59 @@
+package tools
+
+import (
+	"context"
+	"crypto/rand"
+	"encoding/hex"
+
+	otel "go.opentelemetry.io/otel"
+	attribute "go.opentelemetry.io/otel/attribute"
+	baggage "go.opentelemetry.io/otel/baggage"
+	trace "go.opentelemetry.io/otel/trace"
+)
+
+// tracerName is the instrumentation scope reported for the spans the
+// generated built-in tools emit. Matching the module path makes the spans
+// easy to filter by library in a tracing backend.
+const tracerName = "{{ .ADL.Spec.Language.Go.Module }}/tools"
+
+// startToolSpan opens a span around a built-in tool call so per-tool-call
+// latency is captured. It ensures an infer.tool.call.id is present (minting
+// one when the caller did not propagate it) and carries the infer.session.id
+// from the inbound baggage, exposing both as span attributes so the tool span
+// correlates with the ADK's a2a.request span in the tracing backend.
+//
+// Telemetry is a no-op unless A2A_TELEMETRY_ENABLE=true and, for trace export,
+// A2A_TELEMETRY_TRACE_ENABLE=true (the ADK installs the global tracer provider
+// only then). When export is off the tracer is a no-op, so this is always safe
+// to call. Pair it with `defer span.End()` at the top of a tool Handler.
+func startToolSpan(ctx context.Context, toolName string) trace.Span {
+	_, span := otel.Tracer(tracerName).Start(ctx, "tool."+toolName)
+	if !span.IsRecording() {
+		return span
+	}
+
+	bag := baggage.FromContext(ctx)
+
+	callID := bag.Member("infer.tool.call.id").Value()
+	if callID == "" {
+		callID = newToolCallID()
+	}
+
+	attrs := []attribute.KeyValue{attribute.String("infer.tool.call.id", callID)}
+	if sessionID := bag.Member("infer.session.id").Value(); sessionID != "" {
+		attrs = append(attrs, attribute.String("infer.session.id", sessionID))
+	}
+	span.SetAttributes(attrs...)
+
+	return span
+}
+
+// newToolCallID mints a random 128-bit identifier for a tool call when the
+// caller did not propagate one via the infer.tool.call.id baggage member.
+func newToolCallID() string {
+	var b [16]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(b[:])
+}

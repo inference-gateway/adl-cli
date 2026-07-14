@@ -17,6 +17,9 @@ import {
   TASK_LIST_METHOD,
   TASK_STATE,
   createA2AServer,
+{{- if and .ADL.Spec.Telemetry .ADL.Spec.Telemetry.Enabled }}
+  createTelemetryProvider,
+{{- end }}
   createMessageSendHandler,
   createTaskGetHandler,
   createTaskListHandler,
@@ -89,7 +92,25 @@ const handler = new DefaultBackgroundTaskHandler({
 handler.setEnableUsageMetadata(true);
 
 const storage = new InMemoryTaskStorage();
+{{- if and .ADL.Spec.Telemetry .ADL.Spec.Telemetry.Enabled }}
+
+// OpenTelemetry (spec.telemetry.enabled): start the Node SDK before the server
+// so inbound JSON-RPC requests get an `adk.jsonrpc.request` span and the OTLP
+// exporters are live. The provider is a no-op unless TELEMETRY_ENABLE is truthy
+// (see .env.example), so this is safe to run unconditionally; its lifecycle is
+// owned here - start() before listen(), shutdown() after close().
+const telemetry = createTelemetryProvider({
+  serviceName: card.name,
+  serviceVersion: card.version,
+});
+telemetry.start();
+if (telemetry.isEnabled()) {
+  logger.info('OpenTelemetry enabled', { serviceName: card.name });
+}
+const server = createA2AServer({ card, telemetry });
+{{- else }}
 const server = createA2AServer({ card });
+{{- end }}
 
 server.registerMethod(MESSAGE_SEND_METHOD, createMessageSendHandler({ storage }));
 server.registerMethod(TASK_GET_METHOD, createTaskGetHandler({ storage }));
@@ -117,6 +138,9 @@ const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
   abort.abort();
   await worker;
   await server.close();
+{{- if and .ADL.Spec.Telemetry .ADL.Spec.Telemetry.Enabled }}
+  await telemetry.shutdown();
+{{- end }}
   process.exit(0);
 };
 process.once('SIGINT', shutdown);

@@ -128,6 +128,7 @@ tasks:
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-builtin-tools.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-artifacts-filesystem.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-artifacts-minio.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-telemetry.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/cloudrun-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/cloudrun-ghcr-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/kubernetes-agent.yaml
@@ -139,6 +140,7 @@ tasks:
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/typescript-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/typescript-agent-tools.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/typescript-agent-ai.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/typescript-agent-telemetry.yaml
 
   examples:generate:
     desc: Generate all example projects
@@ -152,6 +154,7 @@ tasks:
           - go-agent-builtin-tools
           - go-agent-artifacts-filesystem
           - go-agent-artifacts-minio
+          - go-agent-telemetry
           - cloudrun-agent
           - cloudrun-ghcr-agent
           - kubernetes-agent
@@ -163,6 +166,7 @@ tasks:
           - typescript-agent
           - typescript-agent-tools
           - typescript-agent-ai
+          - typescript-agent-telemetry
         cmd: |
           ./{{.BUILD_DIR}}/{{.APP_NAME}} generate --file examples/{{.ITEM}}.yaml --output test-output/{{.ITEM}} --overwrite
           cp examples/{{.ITEM}}.yaml test-output/{{.ITEM}}/agent.yaml

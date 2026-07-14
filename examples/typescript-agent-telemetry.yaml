@@ -1,0 +1,52 @@
+---
+apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: typescript-agent-telemetry
+  description: "TypeScript A2A agent wired for OpenTelemetry via the ADK's Node SDK provider"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  card:
+    protocolVersion: "0.3.0"
+    preferredTransport: JSONRPC
+    defaultInputModes:
+      - text
+    defaultOutputModes:
+      - text
+  agent:
+    provider: deepseek
+    model: deepseek-v4-flash
+    systemPrompt: |
+      You are a helpful assistant.
+    maxTokens: 2048
+    temperature: 0.3
+  # spec.telemetry enables OpenTelemetry. The TypeScript ADK bundles the
+  # OpenTelemetry Node SDK, so no extra npm dependencies are added; the
+  # generator wires a TelemetryProvider into src/index.ts and surfaces the
+  # TELEMETRY_ENABLE / OTEL_EXPORTER_OTLP_* environment variables in
+  # .env.example. Traces, metrics, and logs are pushed over OTLP HTTP at runtime
+  # when TELEMETRY_ENABLE is truthy.
+  telemetry:
+    enabled: true
+  server:
+    port: 8080
+    scheme: http
+    debug: false
+    auth:
+      enabled: false
+  language:
+    typescript:
+      packageName: "typescript-agent-telemetry"
+      nodeVersion: "24"
+  development:
+    sandbox:
+      flox:
+        enabled: true
+      devcontainer:
+        enabled: false
+      dockerCompose:
+        enabled: true

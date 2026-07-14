@@ -66,6 +66,10 @@ func NewEditTool(ctx context.Context, logger *zap.Logger) (server.Tool, error) {
 
 // Handler executes the Edit tool.
 func (t *EditTool) Handler(ctx context.Context, args map[string]any) (string, error) {
+{{- if .TelemetryEnabled }}
+	span := startToolSpan(ctx, "{{ .ID }}")
+	defer span.End()
+{{- end }}
 	if !t.cfg.Enabled {
 		return "", errors.New("edit tool is disabled; set spec.config.tools.edit.enabled: true in the ADL and regenerate")
 	}
