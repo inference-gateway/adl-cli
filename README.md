@@ -1928,25 +1928,89 @@ Each language has its own file mapping that determines what gets generated:
 **Go Projects:**
 
 - `main.go` → Go main server setup
+- `config/config.go` → Application configuration
+- `internal/logger/logger.go` → Structured logging
+- `internal/{service}/{service}.go` → Service implementation per ADL service
 - `tools/{toolname}.go` → Individual function-call tool implementations
+- `tools/{builtin}.go` + `tools/{builtin}_test.go` → Reserved built-in tool implementations (read, bash, write, edit, fetch)
+- `tools/telemetry.go` → OpenTelemetry instrumentation (when telemetry enabled and built-in tools present)
 - `skills/{skillid}/SKILL.md` → Markdown skill playbooks (loaded into system prompt at runtime)
 - `go.mod` → Go module configuration
-- Language-specific Dockerfile and CI configurations
+- `Dockerfile` → Container image
+- `.dockerignore` → Docker build exclusions
+- `.gitignore`, `.gitattributes`, `.editorconfig` → Repository configuration
+- `README.md`, `LICENSE` → Project documentation
+- `Taskfile.yml` → Development task runner
+- `.well-known/agent-card.json` → A2A capabilities manifest
+- `k8s/deployment.yaml` → Kubernetes deployment (only when `spec.deployment.type: kubernetes`)
+- `vercel.json`, `.vercel/project.json` → Vercel deployment (only when `spec.deployment.type: vercel`)
+- `docker-compose.yaml`, `.env.example` → Docker Compose sandbox (conditional on sandbox config)
+- `.flox/` → Flox reproducible environment (conditional)
+- `.devcontainer/` → Devcontainer configuration (conditional)
+- `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` → AI assistant documentation (conditional on AI toggles)
+- `.github/ISSUE_TEMPLATE/*.md` → GitHub issue templates (conditional on SCM config)
+- `.github/dependabot.yml` → Dependabot configuration (conditional on SCM config)
+- CI workflow (`.github/workflows/ci.go.yaml`) → Conditional on SCM CI toggle
+- CD workflow (`.github/workflows/cd.yaml`) → Conditional on SCM CD toggle
+- AI agent workflows (`.github/workflows/ai-*.yaml`) → Conditional on AI orchestrator toggles
 
 **Rust Projects:**
 
 - `src/main.rs` → Rust main application
 - `src/tools/{toolname}.rs` → Tool descriptor + handler
+- `src/tools/{builtin}.rs` → Reserved built-in tool implementations (read, bash, write, edit, fetch)
 - `src/tools/mod.rs` → Module declarations
 - `skills/{skillid}/SKILL.md` → Markdown skill playbooks
 - `Cargo.toml` → Rust package configuration
-
-**Universal Files:**
-
+- `Dockerfile` → Container image
+- `.dockerignore` → Docker build exclusions
+- `.gitignore`, `.gitattributes`, `.editorconfig` → Repository configuration
+- `README.md`, `LICENSE` → Project documentation
 - `Taskfile.yml` → Development task runner
-- `.well-known/agent-card.json` → A2A capabilities manifest (skills are listed here, not tools)
+- `.well-known/agent-card.json` → A2A capabilities manifest
 - `k8s/deployment.yaml` → Kubernetes deployment (only when `spec.deployment.type: kubernetes`)
-- CI workflows and sandbox configurations
+- `vercel.json`, `.vercel/project.json` → Vercel deployment (only when `spec.deployment.type: vercel`)
+- `docker-compose.yaml`, `.env.example` → Docker Compose sandbox (conditional on sandbox config)
+- `.flox/` → Flox reproducible environment (conditional)
+- `.devcontainer/` → Devcontainer configuration (conditional)
+- `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` → AI assistant documentation (conditional on AI toggles)
+- `.github/ISSUE_TEMPLATE/*.md` → GitHub issue templates (conditional on SCM config)
+- `.github/dependabot.yml` → Dependabot configuration (conditional on SCM config)
+- CI workflow (`.github/workflows/ci.rust.yaml`) → Conditional on SCM CI toggle
+- CD workflow (`.github/workflows/cd.yaml`) → Conditional on SCM CD toggle
+- AI agent workflows (`.github/workflows/ai-*.yaml`) → Conditional on AI orchestrator toggles
+
+**TypeScript Projects:**
+
+- `src/index.ts` → TypeScript main application
+- `src/config.ts` → Application configuration
+- `src/logger.ts` → Structured logging
+- `src/services/{service}.ts` → Service implementation per ADL service
+- `src/tools/{toolname}.ts` → Individual function-call tool implementations
+- `src/tools/index.ts` → Tool module barrel export
+- `src/worker.ts` → Cloudflare Worker entrypoint (only when `spec.deployment.type: cloudflare`)
+- `skills/{skillid}/SKILL.md` → Markdown skill playbooks
+- `package.json` → Node.js package configuration
+- `pnpm-workspace.yaml` → pnpm workspace configuration
+- `tsconfig.json` → TypeScript compiler configuration
+- `Dockerfile` → Container image
+- `.dockerignore` → Docker build exclusions
+- `.gitignore`, `.gitattributes`, `.editorconfig` → Repository configuration
+- `README.md`, `LICENSE` → Project documentation
+- `Taskfile.yml` → Development task runner
+- `.well-known/agent-card.json` → A2A capabilities manifest
+- `wrangler.toml` → Cloudflare Workers configuration (only when `spec.deployment.type: cloudflare`)
+- `k8s/deployment.yaml` → Kubernetes deployment (only when `spec.deployment.type: kubernetes`)
+- `vercel.json`, `.vercel/project.json` → Vercel deployment (only when `spec.deployment.type: vercel`)
+- `docker-compose.yaml`, `.env.example` → Docker Compose sandbox (conditional on sandbox config)
+- `.flox/` → Flox reproducible environment (conditional)
+- `.devcontainer/` → Devcontainer configuration (conditional)
+- `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` → AI assistant documentation (conditional on AI toggles)
+- `.github/ISSUE_TEMPLATE/*.md` → GitHub issue templates (conditional on SCM config)
+- `.github/dependabot.yml` → Dependabot configuration (conditional on SCM config)
+- CI workflow (`.github/workflows/ci.typescript.yaml`) → Conditional on SCM CI toggle
+- CD workflow (`.github/workflows/cd.yaml`) → Conditional on SCM CD toggle
+- AI agent workflows (`.github/workflows/ai-*.yaml`) → Conditional on AI orchestrator toggles
 
 ### Template Context
 
@@ -1954,13 +2018,22 @@ All templates receive a rich context object:
 
 ```go
 type Context struct {
-    ADL      *schema.ADL           // Complete ADL configuration
-    Metadata GeneratedMetadata     // Generation metadata
-    Language string               // Detected language
+    ADL             *schema.ADL                // Complete ADL configuration
+    Metadata        schema.GeneratedMetadata  // Generation metadata (CLI version, timestamp, template, ADL file)
+    Language        string                    // Detected language (go, rust, typescript)
+    GenerateCI      bool                      // Whether to generate CI workflows
+    GenerateCD      bool                      // Whether to generate CD workflows
+    EnableAI        bool                      // Whether AI assistant features are enabled
+    AIToggles       schema.AIAgentToggles      // Per-agent AI toggles (Claude Code, Codex, Gemini, OpenCode, Infer)
+    GenerateCommand string                    // The CLI command used to generate the project
+    Skills          []SkillView               // Resolved skill metadata (frontmatter only)
+    BuiltinConfigs  schema.ResolvedBuiltinConfigs  // Decoded config for reserved built-in tools
+    Vendor          vendor.View               // Resolved user-declared extra dependencies
+    SandboxDeps     sandbox.View              // Resolved sandbox-level extra packages
 }
 ```
 
-This allows templates to access any ADL configuration and generate language-appropriate code.
+This allows templates to access any ADL configuration, toggle features based on SCM and AI settings, and generate language-appropriate code with the correct dependencies.
 
 ## Customizing Generation with .adl-ignore
 
