@@ -285,6 +285,12 @@ func TestGenerator_AI_ClaudeWorkflowGoContent(t *testing.T) {
 	assertContains(t, body, "issues:\n    types:\n      - opened\n      - assigned", "Claude Code workflow body")
 	assertNotContains(t, body, "types: [created]", "Claude Code workflow body")
 
+	assertContains(t, body, "workflow_dispatch:", "Claude Code workflow body")
+	assertContains(t, body, "description: 'Task for Claude Code to run'", "Claude Code workflow body")
+	assertContains(t, body, "type: string", "Claude Code workflow body")
+	assertContains(t, body, "required: false", "Claude Code workflow body")
+	assertContains(t, body, "github.event_name == 'workflow_dispatch'", "Claude Code workflow body")
+
 	assertContains(t, body, "actions: read", "Claude Code workflow body")
 
 	assertContains(t, body, "Set up Go", "Claude Code workflow body (go)")
@@ -301,11 +307,12 @@ func TestGenerator_AI_ClaudeWorkflowGoContent(t *testing.T) {
 	assertContains(t, body, "claude_code_oauth_token:", "Claude Code workflow body")
 	assertContains(t, body, "use_commit_signing: true", "Claude Code workflow body")
 	assertContains(t, body, "branch_prefix: ${{ steps.prefix.outputs.value }}", "Claude Code workflow body")
-	assertContains(t, body, "--effort ultracode", "Claude Code workflow body")
+	assertContains(t, body, "--effort max", "Claude Code workflow body")
 	assertContains(t, body, "--model claude-opus-4-8", "Claude Code workflow body")
 	assertContains(t, body, "name: Determine branch prefix", "Claude Code workflow body")
-	assertContains(t, body, "prompt: |", "Claude Code workflow body")
-	assertContains(t, body, "track_progress: true", "Claude Code workflow body")
+	assertContains(t, body, "name: Set prompt", "Claude Code workflow body")
+	assertContains(t, body, "steps.set-prompt.outputs.value", "Claude Code workflow body")
+	assertContains(t, body, "track_progress: ${{ github.event_name != 'workflow_dispatch' }}", "Claude Code workflow body")
 
 	assertContains(t, body, "Bash(go:*)", "Claude Code workflow body (go)")
 	assertNotContains(t, body, "Bash(cargo:*)", "Claude Code workflow body (go)")
