@@ -39,14 +39,21 @@ on:
         type: boolean
         default: false
 
+permissions:
+  contents: read
+
 jobs:
   infer:
     if: |
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@infer')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@infer')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@infer')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@infer') || contains(github.event.issue.title, '@infer')))
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@infer') &&
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@infer') &&
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@infer') &&
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.review.author_association)) ||
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '@infer') || contains(github.event.issue.title, '@infer')) &&
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.issue.author_association))
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     permissions:
