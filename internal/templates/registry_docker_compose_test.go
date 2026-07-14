@@ -366,9 +366,6 @@ func TestDockerComposeTemplate_EnvironmentValuesAreStrings(t *testing.T) {
 					if node.Kind != yaml.ScalarNode {
 						continue
 					}
-					// A resolved !!str (quoted or plain string) or an
-					// explicitly-unset !!null value is fine; anything else
-					// means the YAML parser typed it as bool/int/float.
 					if node.Tag != "!!str" && node.Tag != "!!null" {
 						t.Errorf("services.%s.environment.%s renders as %s (%s); quote it so docker compose does not coerce the value",
 							svc, key, node.Value, node.Tag)
