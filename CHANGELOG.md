@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.47.0](https://github.com/inference-gateway/adl-cli/compare/v0.46.5...v0.47.0) (2026-07-14)
+
+### ✨ Features
+
+* generate infer-action workflow for infer orchestrator ([#262](https://github.com/inference-gateway/adl-cli/issues/262)) ([66c526a](https://github.com/inference-gateway/adl-cli/commit/66c526adc1ea30e641bb6f2109c0c831bd979af1))
+* **workflows:** add workflow_dispatch with free-text prompt to claude-code template ([#263](https://github.com/inference-gateway/adl-cli/issues/263)) ([012a227](https://github.com/inference-gateway/adl-cli/commit/012a227fb40c2d3b3933a5d12675e8f426e7c330))
+
 ## [0.46.5](https://github.com/inference-gateway/adl-cli/compare/v0.46.4...v0.46.5) (2026-07-14)
 
 ### 🔧 Miscellaneous
