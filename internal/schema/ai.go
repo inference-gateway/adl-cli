@@ -56,13 +56,12 @@ func ResolveAIAgentToggles(ai *AIConfig) AIAgentToggles {
 
 // AIHasOfficialAction reports whether the generator should emit a
 // per-agent GitHub Actions workflow under .github/workflows/ for the
-// given agent. Only claudecode, codex, and gemini ship a workflow
-// today; opencode has no upstream action and the infer integration is
-// still being scoped (see inference-gateway/adl-cli#142 for the
-// acceptance matrix).
+// given agent. claudecode, codex, gemini, and infer each ship an
+// upstream action (infer via inference-gateway/infer-action); opencode
+// has no upstream action yet, so it is docs-only.
 func AIHasOfficialAction(agent string) bool {
 	switch agent {
-	case "claudecode", "codex", "gemini":
+	case "claudecode", "codex", "gemini", "infer":
 		return true
 	default:
 		return false

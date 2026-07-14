@@ -70,6 +70,7 @@ func TestGenerator_AI_NoTogglesNoFiles(t *testing.T) {
 	assertFile(t, out, ".github/workflows/claude.yml", false)
 	assertFile(t, out, ".github/workflows/codex.yml", false)
 	assertFile(t, out, ".github/workflows/gemini.yml", false)
+	assertFile(t, out, ".github/workflows/infer.yml", false)
 }
 
 func TestGenerator_AI_ClaudeCodeOnly(t *testing.T) {
@@ -119,6 +120,7 @@ func TestGenerator_AI_AgentsMDSharedAcrossCodexOpencodeInfer(t *testing.T) {
 		name              string
 		devAI             string
 		wantCodexWorkflow bool
+		wantInferWorkflow bool
 	}{
 		{
 			name: "codex only",
@@ -140,13 +142,14 @@ func TestGenerator_AI_AgentsMDSharedAcrossCodexOpencodeInfer(t *testing.T) {
 `,
 		},
 		{
-			name: "infer only (no workflow yet)",
+			name: "infer only (scaffolds infer workflow)",
 			devAI: `  development:
     ai:
       orchestrators:
         infer:
           enabled: true
 `,
+			wantInferWorkflow: true,
 		},
 		{
 			name: "codex + opencode + infer share a single AGENTS.md",
@@ -161,6 +164,7 @@ func TestGenerator_AI_AgentsMDSharedAcrossCodexOpencodeInfer(t *testing.T) {
           enabled: true
 `,
 			wantCodexWorkflow: true,
+			wantInferWorkflow: true,
 		},
 	}
 
@@ -176,6 +180,7 @@ func TestGenerator_AI_AgentsMDSharedAcrossCodexOpencodeInfer(t *testing.T) {
 			assertFile(t, out, "CLAUDE.md", false)
 			assertFile(t, out, "GEMINI.md", false)
 			assertFile(t, out, ".github/workflows/codex.yml", tt.wantCodexWorkflow)
+			assertFile(t, out, ".github/workflows/infer.yml", tt.wantInferWorkflow)
 			assertFile(t, out, ".github/workflows/claude.yml", false)
 			assertFile(t, out, ".github/workflows/gemini.yml", false)
 		})
@@ -209,6 +214,7 @@ func TestGenerator_AI_AllAgentsEnabled(t *testing.T) {
 	assertFile(t, out, ".github/workflows/claude.yml", true)
 	assertFile(t, out, ".github/workflows/codex.yml", true)
 	assertFile(t, out, ".github/workflows/gemini.yml", true)
+	assertFile(t, out, ".github/workflows/infer.yml", true)
 }
 
 func TestGenerator_AI_NoWorkflowsWhenSCMNotGithub(t *testing.T) {
@@ -349,4 +355,41 @@ spec:
 
 	assertContains(t, wf, "Bash(cargo:*)", "Claude Code workflow body (rust)")
 	assertNotContains(t, wf, "Bash(go:*)", "Claude Code workflow body (rust)")
+}
+
+func TestGenerator_AI_InferWorkflowContent(t *testing.T) {
+	tmp := t.TempDir()
+	manifest := writeManifest(t, tmp, `  development:
+    ai:
+      orchestrators:
+        infer:
+          enabled: true
+`)
+	out := filepath.Join(tmp, "out")
+
+	mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
+
+	assertFile(t, out, "AGENTS.md", true)
+
+	body := readGenerated(t, out, ".github/workflows/infer.yml")
+
+	assertContains(t, body, "name: Infer", "Infer workflow body")
+	assertContains(t, body, "inference-gateway/infer-action@v0.32.1", "Infer workflow body")
+	assertContains(t, body, "github-token: ${{ steps.app-token.outputs.token }}", "Infer workflow body")
+	assertContains(t, body, "actions/create-github-app-token", "Infer workflow body")
+	assertContains(t, body, "model:", "Infer workflow body")
+	assertContains(t, body, "deepseek-api-key: ${{ secrets.DEEPSEEK_API_KEY }}", "Infer workflow body")
+	assertContains(t, body, "anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}", "Infer workflow body")
+
+	assertContains(t, body, "contains(github.event.comment.body, '@infer')", "Infer workflow body")
+	assertContains(t, body, "issue_comment:", "Infer workflow body")
+
+	assertContains(t, body, "contents: write", "Infer workflow body")
+	assertContains(t, body, "pull-requests: write", "Infer workflow body")
+	assertContains(t, body, "issues: write", "Infer workflow body")
+
+	assertNotContains(t, body, "inference-gateway/.github/.github/workflows/infer.yml", "Infer workflow body")
+
+	attrs := readGenerated(t, out, ".gitattributes")
+	assertContains(t, attrs, ".github/workflows/infer.yml linguist-generated=true", ".gitattributes")
 }

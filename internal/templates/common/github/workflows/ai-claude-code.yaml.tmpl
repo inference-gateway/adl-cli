@@ -75,6 +75,7 @@ jobs:
         run: |
           mkdir -p ~/.claude/skills/adl
           curl -fsSL \
+            -H "Authorization: Bearer ${{`{{ secrets.GITHUB_TOKEN }}`}}" \
             https://raw.githubusercontent.com/inference-gateway/skills/main/skills/adl/SKILL.md \
             -o ~/.claude/skills/adl/SKILL.md
 

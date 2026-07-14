@@ -73,6 +73,9 @@ AGENTS.md linguist-generated=true
 {{- if .AIToggles.Gemini }}
 .github/workflows/gemini.yml linguist-generated=true
 {{- end }}
+{{- if .AIToggles.Infer }}
+.github/workflows/infer.yml linguist-generated=true
+{{- end }}
 
 # Kubernetes manifests
 k8s/*.yaml linguist-generated=true
