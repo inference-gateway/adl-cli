@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.46.5](https://github.com/inference-gateway/adl-cli/compare/v0.46.4...v0.46.5) (2026-07-14)
+
+### 🔧 Miscellaneous
+
+* **deps:** update go-envconfig version to v1.3.1 in go.mod and vendor ([7bcdf8e](https://github.com/inference-gateway/adl-cli/commit/7bcdf8e5590e2a02afc32c44dbbefce48db394f9))
+
 ## [0.46.4](https://github.com/inference-gateway/adl-cli/compare/v0.46.3...v0.46.4) (2026-07-14)
 
 ### 🔧 Miscellaneous
