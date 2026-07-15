@@ -190,6 +190,28 @@ type CodexConfig struct {
 	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
 }
 
+// DocumentationConfig configures hand-authored documentation pages that
+// survive regeneration. Each page is linked from the generated README's
+// ## Documentation section. Files are seeded once (never overwritten).
+type DocumentationConfig struct {
+	// Pages corresponds to the JSON schema field "pages".
+	Pages []DocumentationPage `json:"pages,omitempty,omitzero" yaml:"pages,omitempty" mapstructure:"pages,omitempty"`
+}
+
+// DocumentationPage is a single hand-authored documentation page linked from
+// the generated README. The file at 'path' is seeded as a stub if it does
+// not exist; it is never overwritten on subsequent generations.
+type DocumentationPage struct {
+	// Title corresponds to the JSON schema field "title".
+	Title string `json:"title" yaml:"title" mapstructure:"title"`
+
+	// Path corresponds to the JSON schema field "path".
+	Path string `json:"path" yaml:"path" mapstructure:"path"`
+
+	// Description corresponds to the JSON schema field "description".
+	Description string `json:"description,omitempty,omitzero" yaml:"description,omitempty" mapstructure:"description,omitempty"`
+}
+
 type DeploymentConfig struct {
 	// Cloudflare corresponds to the JSON schema field "cloudflare".
 	Cloudflare *CloudflareConfig `json:"cloudflare,omitempty,omitzero" yaml:"cloudflare,omitempty" mapstructure:"cloudflare,omitempty"`
@@ -653,6 +675,9 @@ type Spec struct {
 
 	// Config corresponds to the JSON schema field "config".
 	Config SpecConfig `json:"config,omitempty,omitzero" yaml:"config,omitempty" mapstructure:"config,omitempty"`
+
+	// Documentation corresponds to the JSON schema field "documentation".
+	Documentation *DocumentationConfig `json:"documentation,omitempty,omitzero" yaml:"documentation,omitempty" mapstructure:"documentation,omitempty"`
 
 	// Deployment corresponds to the JSON schema field "deployment".
 	Deployment *DeploymentConfig `json:"deployment,omitempty,omitzero" yaml:"deployment,omitempty" mapstructure:"deployment,omitempty"`

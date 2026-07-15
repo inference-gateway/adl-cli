@@ -980,3 +980,52 @@ spec:
 		})
 	}
 }
+
+func TestValidator_DocumentationPages(t *testing.T) {
+	validADL := `apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: doc-agent
+  description: "Agent with documentation pages"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  server:
+    port: 8080
+  language:
+    go:
+      module: "github.com/example/doc-agent"
+      version: "1.26.4"
+  documentation:
+    pages:
+      - title: Architecture
+        path: docs/architecture.md
+        description: How the mock LLM client is wired
+      - title: Deployment
+        path: docs/deployment.md
+`
+
+	tmpFile, err := os.CreateTemp("", "adl-doc-*.yaml")
+	if err != nil {
+		t.Fatalf("Failed to create temp file: %v", err)
+	}
+	defer func() {
+		if err := os.Remove(tmpFile.Name()); err != nil {
+			t.Logf("Failed to remove temp file: %v", err)
+		}
+	}()
+	if _, err := tmpFile.WriteString(validADL); err != nil {
+		t.Fatalf("Failed to write temp file: %v", err)
+	}
+	if err := tmpFile.Close(); err != nil {
+		t.Fatalf("Failed to close temp file: %v", err)
+	}
+
+	validator := NewValidator()
+	if _, err := validator.ValidateFile(tmpFile.Name()); err != nil {
+		t.Errorf("Validation failed for ADL with documentation pages: %v", err)
+	}
+}

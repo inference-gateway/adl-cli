@@ -111,6 +111,7 @@
           "description": "Hand-authored runnable examples linked from the generated README. The generator does not scaffold them, it only validates the link targets exist and warns if missing.",
           "items": { "$ref": "#/definitions/Example" }
         },
+        "documentation": { "$ref": "#/definitions/DocumentationConfig" },
         "deployment": { "$ref": "#/definitions/DeploymentConfig" },
         "telemetry": { "$ref": "#/definitions/TelemetryConfig" }
       }
@@ -740,6 +741,37 @@
           "type": "object",
           "description": "Environment variables injected into the Vercel deployment. Values can use the ${VAR} placeholder convention for secrets; never inline a real secret here. See docs/reference/secrets.md.",
           "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "DocumentationConfig": {
+      "type": "object",
+      "description": "Configures hand-authored documentation pages that survive regeneration. Each page is linked from the generated README's ## Documentation section. Files are seeded once (never overwritten).",
+      "properties": {
+        "pages": {
+          "type": "array",
+          "description": "Hand-authored documentation pages linked from the generated README.",
+          "items": { "$ref": "#/definitions/DocumentationPage" }
+        }
+      }
+    },
+    "DocumentationPage": {
+      "type": "object",
+      "description": "A single hand-authored documentation page linked from the generated README. The file at 'path' is seeded as a stub if it does not exist; it is never overwritten on subsequent generations.",
+      "required": ["title", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Display title for the documentation page."
+        },
+        "path": {
+          "type": "string",
+          "description": "File path relative to the project root (e.g. docs/architecture.md)."
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional one-line summary of the page content."
         }
       }
     },

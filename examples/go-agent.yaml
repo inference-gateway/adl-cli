@@ -231,6 +231,14 @@ spec:
     - title: OTel collector stack
       path: examples/otel/
       description: docker-compose stack with tracing enabled
+  documentation:
+    pages:
+      - title: Architecture
+        path: docs/architecture.md
+        description: How the mock LLM client is wired
+      - title: Deployment
+        path: docs/deployment.md
+        description: Deployment guide for production environments
   # hooks:
   #   post:
   #     - "go mod tidy"

@@ -144,6 +144,18 @@ infer agents add {{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Scheme | default "
 {{- end }}
 {{- end }}
 
+{{- if and .ADL.Spec.Documentation .ADL.Spec.Documentation.Pages }}
+
+## Documentation
+
+| Page | Description |
+|------|-------------|
+{{- range .ADL.Spec.Documentation.Pages }}
+| [{{ .Title }}]({{ .Path }}) | {{ .Description | default "N/A" }} |
+{{- end }}
+
+{{- end }}
+
 ## Configuration
 
 Configure the agent via environment variables:
