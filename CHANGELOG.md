@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.49.0](https://github.com/inference-gateway/adl-cli/compare/v0.48.5...v0.49.0) (2026-07-15)
+
+### ✨ Features
+
+* **init:** add documentation pages support to init wizard and non-interactive flow ([#293](https://github.com/inference-gateway/adl-cli/issues/293)) ([669038c](https://github.com/inference-gateway/adl-cli/commit/669038c09c1fa2a7bdd2d4dcb8fcd5abbcee90b9))
+* **init:** add spec.examples support to init wizard and non-interactive flow ([#295](https://github.com/inference-gateway/adl-cli/issues/295)) ([bda284e](https://github.com/inference-gateway/adl-cli/commit/bda284e9764f1b030470b03cc377b9f5b71cee5a))
+* **schema:** add spec.documentation.pages for hand-authored docs ([#288](https://github.com/inference-gateway/adl-cli/issues/288)) ([17ae38d](https://github.com/inference-gateway/adl-cli/commit/17ae38d0d10e69b55f77689ce92f922a13e56873))
+* **schema:** add spec.examples for README Examples section ([#290](https://github.com/inference-gateway/adl-cli/issues/290)) ([49e88e7](https://github.com/inference-gateway/adl-cli/commit/49e88e790959a69744120ad7aad3b90203b306e1))
+
+### 🐛 Bug Fixes
+
+* **schema:** align documentation.pages with ADL v1 schema definition ([#292](https://github.com/inference-gateway/adl-cli/issues/292)) ([ff2c3e1](https://github.com/inference-gateway/adl-cli/commit/ff2c3e1ccb1de3a8c95f5694edddede0cd9c23a4))
+
 ## [0.48.5](https://github.com/inference-gateway/adl-cli/compare/v0.48.4...v0.48.5) (2026-07-15)
 
 ### 🔧 Miscellaneous
