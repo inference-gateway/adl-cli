@@ -121,6 +121,18 @@ infer agents add {{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Scheme | default "
 {{- end }}
 {{- end }}
 
+{{- if .ADL.Spec.Examples }}
+
+## Examples
+
+| Example | Description |
+|---------|-------------|
+{{- range .ADL.Spec.Examples }}
+| {{ .Title }} | {{ .Description }} |
+{{- end }}
+
+{{- end }}
+
 {{- if .Skills }}
 
 ## Skills (loaded into the system prompt)

@@ -643,6 +643,17 @@ const SkillLicenseMPL20 SkillLicense = "MPL-2.0"
 const SkillLicenseProprietary SkillLicense = "Proprietary"
 const SkillLicenseUnlicense SkillLicense = "Unlicense"
 
+// A single example entry. 'title' is the human-readable heading shown in the
+// generated README's Examples section; 'description' explains what the example
+// demonstrates.
+type Example struct {
+	// Title corresponds to the JSON schema field "title".
+	Title string `json:"title" yaml:"title" mapstructure:"title"`
+
+	// Description corresponds to the JSON schema field "description".
+	Description string `json:"description" yaml:"description" mapstructure:"description"`
+}
+
 type Spec struct {
 	// Acronyms corresponds to the JSON schema field "acronyms".
 	Acronyms []string `json:"acronyms,omitempty,omitzero" yaml:"acronyms,omitempty" mapstructure:"acronyms,omitempty"`
@@ -670,6 +681,9 @@ type Spec struct {
 
 	// Development corresponds to the JSON schema field "development".
 	Development *DevelopmentConfig `json:"development,omitempty,omitzero" yaml:"development,omitempty" mapstructure:"development,omitempty"`
+
+	// Examples corresponds to the JSON schema field "examples".
+	Examples []Example `json:"examples,omitempty,omitzero" yaml:"examples,omitempty" mapstructure:"examples,omitempty"`
 
 	// Hooks corresponds to the JSON schema field "hooks".
 	Hooks *Hooks `json:"hooks,omitempty,omitzero" yaml:"hooks,omitempty" mapstructure:"hooks,omitempty"`

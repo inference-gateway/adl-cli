@@ -227,6 +227,9 @@ spec:
         enabled: true
       devcontainer:
         enabled: false
+  examples:
+    - title: OTel collector stack
+      description: docker-compose stack with tracing enabled
   documentation:
     pages:
       - title: Architecture
