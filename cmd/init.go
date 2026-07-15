@@ -1150,10 +1150,8 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 			ans.ScmURL = conditionalPrompt(useDefaults, "Repository URL", defaultURL)
 			ans.GithubApp = conditionalPromptBool(useDefaults, "Enable GitHub App integration", true)
 			if ans.GithubApp {
-				ans.ScmAppIDSecret = nonDefault(
-					conditionalPrompt(useDefaults, "GitHub App client ID secret name for releases", "RELEASER_APP_ID"), "RELEASER_APP_ID")
-				ans.ScmAppPrivateKeySecret = nonDefault(
-					conditionalPrompt(useDefaults, "GitHub App private key secret name for releases", "RELEASER_APP_PRIVATE_KEY"), "RELEASER_APP_PRIVATE_KEY")
+				ans.ScmAppIDSecret = conditionalPrompt(useDefaults, "GitHub App client ID secret name for releases", "RELEASER_APP_ID")
+				ans.ScmAppPrivateKeySecret = conditionalPrompt(useDefaults, "GitHub App private key secret name for releases", "RELEASER_APP_PRIVATE_KEY")
 			}
 
 			if useDefaults {
@@ -1178,23 +1176,11 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 	tui.Println(tui.Header("AI Assistant Documentation"))
 	ans.Claudecode = promptBoolWithConfig("ai", useDefaults, "Enable Claude Code (CLAUDE.md + claude-code in sandboxes)", false)
 	if ans.Claudecode {
-		ans.ClaudecodeAppIDSecret = nonDefault(
-			conditionalPrompt(useDefaults, "GitHub App client ID secret name for Claude Code", "CLAUDE_APP_ID"), "CLAUDE_APP_ID")
-		ans.ClaudecodeAppPrivateKeySecret = nonDefault(
-			conditionalPrompt(useDefaults, "GitHub App private key secret name for Claude Code", "CLAUDE_APP_PRIVATE_KEY"), "CLAUDE_APP_PRIVATE_KEY")
+		ans.ClaudecodeAppIDSecret = conditionalPrompt(useDefaults, "GitHub App client ID secret name for Claude Code", "CLAUDE_APP_ID")
+		ans.ClaudecodeAppPrivateKeySecret = conditionalPrompt(useDefaults, "GitHub App private key secret name for Claude Code", "CLAUDE_APP_PRIVATE_KEY")
 	}
 
 	return ans
-}
-
-// nonDefault returns v unless it equals the schema default, in which case it
-// returns "" so the field is omitted from the manifest and the default keeps
-// applying.
-func nonDefault(v, def string) string {
-	if v == def {
-		return ""
-	}
-	return v
 }
 
 // ensureDevelopment lazily initialises adl.Spec.Development so that callers
