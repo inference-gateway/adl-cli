@@ -600,6 +600,10 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		return fmt.Errorf("failed to generate AI assistant workflows: %w", err)
 	}
 
+	if err := g.seedDocumentationPages(adl, outputDir); err != nil {
+		return fmt.Errorf("failed to seed documentation pages: %w", err)
+	}
+
 	return nil
 }
 
@@ -686,6 +690,33 @@ func (g *Generator) generateAIWorkflows(adl *schema.ADL, ctx templates.Context, 
 		fmt.Printf("📁 %s workflow: %s\n", wf.label, wf.path)
 	}
 
+	return nil
+}
+
+// seedDocumentationPages seeds stub documentation files for each page
+// declared in spec.documentation.pages. Files are created only if they
+// do not already exist - never overwritten, mirroring the bare skill
+// scaffold pattern.
+func (g *Generator) seedDocumentationPages(adl *schema.ADL, outputDir string) error {
+	if adl.Spec.Documentation == nil {
+		return nil
+	}
+	for _, page := range adl.Spec.Documentation.Pages {
+		filePath := filepath.Join(outputDir, page.Path)
+		if _, err := os.Stat(filePath); err == nil {
+			fmt.Printf("📄 Documentation page already exists: %s\n", page.Path)
+			continue
+		}
+		dir := filepath.Dir(filePath)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return fmt.Errorf("failed to create directory for %s: %w", page.Path, err)
+		}
+		content := fmt.Sprintf("# %s\n\nTODO: Write documentation for this page.\n", page.Title)
+		if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+			return fmt.Errorf("failed to write documentation stub %s: %w", page.Path, err)
+		}
+		fmt.Printf("📄 Seeded documentation stub: %s\n", page.Path)
+	}
 	return nil
 }
 
