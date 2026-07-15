@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.50.1](https://github.com/inference-gateway/adl-cli/compare/v0.50.0...v0.50.1) (2026-07-15)
+
+### 🐛 Bug Fixes
+
+* **init:** write GitHub App secret names explicitly instead of omitting defaults ([#299](https://github.com/inference-gateway/adl-cli/issues/299)) ([95775f5](https://github.com/inference-gateway/adl-cli/commit/95775f5d590e43f7a16ad3bf8d65d1781424cb52))
+
 ## [0.50.0](https://github.com/inference-gateway/adl-cli/compare/v0.49.0...v0.50.0) (2026-07-15)
 
 ### ✨ Features
