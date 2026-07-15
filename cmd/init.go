@@ -335,6 +335,13 @@ type adlData struct {
 		Deployment *struct {
 			Type string `yaml:"type,omitempty"`
 		} `yaml:"deployment,omitempty"`
+		Documentation *struct {
+			Pages []struct {
+					Title       string `yaml:"title"`
+					Path        string `yaml:"path"`
+					Description string `yaml:"description,omitempty"`
+			} `yaml:"pages,omitempty"`
+		} `yaml:"documentation,omitempty"`
 		Hooks *struct {
 			Post []string `yaml:"post,omitempty"`
 		} `yaml:"hooks,omitempty"`
@@ -362,6 +369,13 @@ type skillAnswer struct {
 	Tags        []string
 }
 
+// docPageAnswer captures one documentation page collected during init.
+type docPageAnswer struct {
+	Title       string
+	Path        string
+	Description string
+}
+
 // answers is the language-agnostic bag of resolved choices produced by either
 // collector (interactive wizard or non-interactive prompts/flags). buildADL is
 // the single place that turns these answers into the on-disk adlData/agent.yaml,
@@ -387,6 +401,8 @@ type answers struct {
 	Services []string
 	Tools    []toolAnswer
 	Skills   []skillAnswer
+
+	DocumentationPages []docPageAnswer
 
 	Port        int
 	Scheme      string
@@ -686,6 +702,34 @@ func buildADL(ans answers) *adlData {
 		}
 	}
 
+	if len(ans.DocumentationPages) > 0 {
+		pages := make([]struct {
+			Title       string `yaml:"title"`
+			Path        string `yaml:"path"`
+			Description string `yaml:"description,omitempty"`
+		}, 0, len(ans.DocumentationPages))
+		for _, p := range ans.DocumentationPages {
+			pages = append(pages, struct {
+				Title       string `yaml:"title"`
+				Path        string `yaml:"path"`
+				Description string `yaml:"description,omitempty"`
+			}{
+				Title:       p.Title,
+				Path:        p.Path,
+				Description: p.Description,
+			})
+		}
+		adl.Spec.Documentation = &struct {
+			Pages []struct {
+				Title       string `yaml:"title"`
+				Path        string `yaml:"path"`
+				Description string `yaml:"description,omitempty"`
+			} `yaml:"pages,omitempty"`
+		}{
+			Pages: pages,
+		}
+	}
+
 	if ans.ScmProvider != "" {
 		adl.Spec.SCM = &struct {
 			Provider       string `yaml:"provider"`
@@ -918,6 +962,31 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 			ans.Skills = append(ans.Skills, skill)
 
 			if !promptBool("Add another skill", false) {
+				break
+			}
+		}
+	}
+
+	tui.Println(tui.Header("Documentation Pages"))
+	tui.Println(tui.Note("Documentation pages are hand-authored .md files linked from the generated README."))
+	addPages := conditionalPromptBool(useDefaults, "Add documentation pages", false)
+
+	if addPages {
+		for {
+			var page docPageAnswer
+			page.Title = promptString("Page title (e.g. 'Architecture')", "")
+			if page.Title == "" {
+				break
+			}
+			page.Path = promptString("Page path (e.g. 'docs/architecture.md')", "")
+			if page.Path == "" {
+				break
+			}
+			page.Description = promptString("Page description (optional)", "")
+
+			ans.DocumentationPages = append(ans.DocumentationPages, page)
+
+			if !promptBool("Add another documentation page", false) {
 				break
 			}
 		}
