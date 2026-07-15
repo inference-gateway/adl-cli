@@ -114,6 +114,14 @@ type Card struct {
 
 // Provision Anthropic's Claude Code coding agent inside the sandbox.
 type ClaudeCodeConfig struct {
+	// Name of the repository secret holding the GitHub App client ID used by the
+	// generated Claude Code workflow.
+	AppIDSecret string `json:"appIdSecret,omitempty,omitzero" yaml:"appIdSecret,omitempty" mapstructure:"appIdSecret,omitempty"`
+
+	// Name of the repository secret holding the GitHub App private key used by the
+	// generated Claude Code workflow.
+	AppPrivateKeySecret string `json:"appPrivateKeySecret,omitempty,omitzero" yaml:"appPrivateKeySecret,omitempty" mapstructure:"appPrivateKeySecret,omitempty"`
+
 	// Enabled corresponds to the JSON schema field "enabled".
 	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
 }
@@ -330,6 +338,14 @@ type ImageConfig struct {
 
 // Provision the Inference Gateway 'infer' coding agent inside the sandbox.
 type InferConfig struct {
+	// Name of the repository secret holding the GitHub App client ID used by the
+	// generated infer workflow.
+	AppIDSecret string `json:"appIdSecret,omitempty,omitzero" yaml:"appIdSecret,omitempty" mapstructure:"appIdSecret,omitempty"`
+
+	// Name of the repository secret holding the GitHub App private key used by the
+	// generated infer workflow.
+	AppPrivateKeySecret string `json:"appPrivateKeySecret,omitempty,omitzero" yaml:"appPrivateKeySecret,omitempty" mapstructure:"appPrivateKeySecret,omitempty"`
+
 	// Enabled corresponds to the JSON schema field "enabled".
 	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
 }
