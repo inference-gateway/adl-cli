@@ -110,7 +110,9 @@ jobs:
         env:
           VERSION: v{{ .Metadata.CLIVersion }}
         run: |
-          curl -fsSL https://raw.githubusercontent.com/inference-gateway/adl-cli/v{{ .Metadata.CLIVersion }}/install.sh | bash
+          curl -fsSL \
+            -H "Authorization: Bearer ${{`{{ steps.app-token.outputs.token }}`}}" \
+            https://raw.githubusercontent.com/inference-gateway/adl-cli/v{{ .Metadata.CLIVersion }}/install.sh | bash
           adl --version
 {{- if eq .Language "go" }}
 
