@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.48.4](https://github.com/inference-gateway/adl-cli/compare/v0.48.3...v0.48.4) (2026-07-15)
+
+### 🐛 Bug Fixes
+
+* propagate agent name/version to otel service.name ([#285](https://github.com/inference-gateway/adl-cli/issues/285)) ([108edd7](https://github.com/inference-gateway/adl-cli/commit/108edd7ec898f8fce641596220bc2c12f3ee7aa9))
+
 ## [0.48.3](https://github.com/inference-gateway/adl-cli/compare/v0.48.2...v0.48.3) (2026-07-15)
 
 ### 🐛 Bug Fixes
