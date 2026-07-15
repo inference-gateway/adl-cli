@@ -187,6 +187,65 @@ func TestBuildADLDocumentationPages(t *testing.T) {
 	})
 }
 
+// TestBuildADLExamples verifies that examples are rendered in the manifest
+// and omitted when empty.
+func TestBuildADLExamples(t *testing.T) {
+	t.Run("with examples", func(t *testing.T) {
+		ans := answers{
+			Name:     "example-agent",
+			Language: "go",
+			Examples: []exampleAnswer{
+				{Title: "Basic chat", Description: "How to start a conversation with the agent"},
+				{Title: "Tool use", Description: "How to invoke built-in tools"},
+			},
+		}
+
+		adl := buildADL(ans)
+		if len(adl.Spec.Examples) != 2 {
+			t.Fatalf("expected 2 examples, got %d", len(adl.Spec.Examples))
+		}
+		if adl.Spec.Examples[0].Title != "Basic chat" {
+			t.Errorf("expected title 'Basic chat', got %q", adl.Spec.Examples[0].Title)
+		}
+		if adl.Spec.Examples[0].Description != "How to start a conversation with the agent" {
+			t.Errorf("expected description, got %q", adl.Spec.Examples[0].Description)
+		}
+		if adl.Spec.Examples[1].Title != "Tool use" {
+			t.Errorf("expected title 'Tool use', got %q", adl.Spec.Examples[1].Title)
+		}
+
+		got := renderADL(t, ans)
+		for _, want := range []string{
+			"examples:",
+			"- title: Basic chat",
+			"description: How to start a conversation with the agent",
+			"- title: Tool use",
+			"description: How to invoke built-in tools",
+		} {
+			if !strings.Contains(got, want) {
+				t.Errorf("manifest missing %q, got:\n%s", want, got)
+			}
+		}
+	})
+
+	t.Run("empty", func(t *testing.T) {
+		ans := answers{
+			Name:     "no-example-agent",
+			Language: "go",
+		}
+
+		adl := buildADL(ans)
+		if len(adl.Spec.Examples) != 0 {
+			t.Errorf("expected no examples, got %d", len(adl.Spec.Examples))
+		}
+
+		got := renderADL(t, ans)
+		if strings.Contains(got, "examples:") {
+			t.Errorf("manifest should not contain examples block, got:\n%s", got)
+		}
+	})
+}
+
 // TestBuildADLLanguages asserts that exactly the chosen language block is
 // emitted, with its vendor extension points rendered as empty lists.
 func TestBuildADLLanguages(t *testing.T) {

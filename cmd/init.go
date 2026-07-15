@@ -342,6 +342,10 @@ type adlData struct {
 					Description string `yaml:"description,omitempty"`
 			} `yaml:"pages,omitempty"`
 		} `yaml:"documentation,omitempty"`
+		Examples []struct {
+			Title       string `yaml:"title"`
+			Description string `yaml:"description"`
+		} `yaml:"examples,omitempty"`
 		Hooks *struct {
 			Post []string `yaml:"post,omitempty"`
 		} `yaml:"hooks,omitempty"`
@@ -376,6 +380,12 @@ type docPageAnswer struct {
 	Description string
 }
 
+// exampleAnswer captures one spec.examples entry collected during init.
+type exampleAnswer struct {
+	Title       string
+	Description string
+}
+
 // answers is the language-agnostic bag of resolved choices produced by either
 // collector (interactive wizard or non-interactive prompts/flags). buildADL is
 // the single place that turns these answers into the on-disk adlData/agent.yaml,
@@ -403,6 +413,7 @@ type answers struct {
 	Skills   []skillAnswer
 
 	DocumentationPages []docPageAnswer
+	Examples           []exampleAnswer
 
 	Port        int
 	Scheme      string
@@ -730,6 +741,23 @@ func buildADL(ans answers) *adlData {
 		}
 	}
 
+	if len(ans.Examples) > 0 {
+		examples := make([]struct {
+			Title       string `yaml:"title"`
+			Description string `yaml:"description"`
+		}, 0, len(ans.Examples))
+		for _, e := range ans.Examples {
+			examples = append(examples, struct {
+				Title       string `yaml:"title"`
+				Description string `yaml:"description"`
+			}{
+				Title:       e.Title,
+				Description: e.Description,
+			})
+		}
+		adl.Spec.Examples = examples
+	}
+
 	if ans.ScmProvider != "" {
 		adl.Spec.SCM = &struct {
 			Provider       string `yaml:"provider"`
@@ -987,6 +1015,30 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 			ans.DocumentationPages = append(ans.DocumentationPages, page)
 
 			if !promptBool("Add another documentation page", false) {
+				break
+			}
+		}
+	}
+
+	tui.Println(tui.Header("Examples"))
+	tui.Println(tui.Note("Examples demonstrate your agent's capabilities in the generated README."))
+	addExamples := conditionalPromptBool(useDefaults, "Add examples", false)
+
+	if addExamples {
+		for {
+			var ex exampleAnswer
+			ex.Title = promptString("Example title (e.g. 'Basic chat')", "")
+			if ex.Title == "" {
+				break
+			}
+			ex.Description = promptString("Example description", "")
+			if ex.Description == "" {
+				break
+			}
+
+			ans.Examples = append(ans.Examples, ex)
+
+			if !promptBool("Add another example", false) {
 				break
 			}
 		}
