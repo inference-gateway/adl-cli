@@ -76,6 +76,8 @@
       "properties": {
         "capabilities": { "$ref": "#/definitions/Capabilities" },
         "card": { "$ref": "#/definitions/Card" },
+        "documentation": { "$ref": "#/definitions/Documentation" },
+        "examples": { "$ref": "#/definitions/Examples" },
         "agent": { "$ref": "#/definitions/Agent" },
         "config": {
           "type": "object",
@@ -106,12 +108,6 @@
         "hooks": { "$ref": "#/definitions/Hooks" },
         "scm": { "$ref": "#/definitions/SCM" },
         "development": { "$ref": "#/definitions/DevelopmentConfig" },
-        "examples": {
-          "type": "array",
-          "description": "Curated examples that demonstrate the agent's capabilities. Each entry has a 'title' and 'description'; consumers (e.g. adl-cli) use these to render an 'Examples' section in the generated README.md, linking each example to a scratchpad or playground for the agent.",
-          "items": { "$ref": "#/definitions/Example" }
-        },
-        "documentation": { "$ref": "#/definitions/DocumentationConfig" },
         "deployment": { "$ref": "#/definitions/DeploymentConfig" },
         "telemetry": { "$ref": "#/definitions/TelemetryConfig" }
       }
@@ -141,6 +137,55 @@
         },
         "documentationUrl": { "type": "string" },
         "iconUrl": { "type": "string" }
+      }
+    },
+    "Documentation": {
+      "type": "object",
+      "description": "Hand-authored documentation pages the generated project owns and ships itself. Each entry in 'pages' declares a page the consumer (e.g. adl-cli) scaffolds as a stub markdown file at 'path' with the given 'title', to be filled in by the maintainers. This is distinct from 'spec.card.documentationUrl', which is a single link to already-published external docs: 'documentation.pages' describes the docs the project generates and maintains in-tree.",
+      "required": ["pages"],
+      "properties": {
+        "pages": {
+          "type": "array",
+          "description": "Documentation pages to scaffold. At least one page is required when the 'documentation' block is present.",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/DocumentationPage" }
+        }
+      }
+    },
+    "Examples": {
+      "type": "array",
+      "description": "Curated examples that demonstrate the agent's capabilities. Each entry has a 'title' and 'description'; consumers (e.g. adl-cli) use these to render an 'Examples' section in the generated README.md, linking each example to a scratchpad or playground for the agent.",
+      "items": { "$ref": "#/definitions/Example" }
+    },
+    "Example": {
+      "type": "object",
+      "description": "A single example entry. 'title' is the human-readable heading shown in the generated README's Examples section; 'description' explains what the example demonstrates.",
+      "required": ["title", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Short, descriptive title for the example (e.g. 'Basic chat', 'Tool use')."
+        },
+        "description": {
+          "type": "string",
+          "description": "One- or two-sentence explanation of what the example demonstrates."
+        }
+      }
+    },
+    "DocumentationPage": {
+      "type": "object",
+      "description": "A single documentation page. 'title' is the human-readable heading; 'path' is where the consumer writes the stub file, relative to the generated project's docs root (e.g. 'docs/getting-started.md').",
+      "required": ["title", "path"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Human-readable page title, used as the heading and in navigation."
+        },
+        "path": {
+          "type": "string",
+          "description": "Destination path for the generated stub file, relative to the generated project's docs root (e.g. 'docs/getting-started.md')."
+        }
       }
     },
     "Agent": {
@@ -615,22 +660,6 @@
         "enabled": { "type": "boolean" }
       }
     },
-    "Example": {
-      "type": "object",
-      "description": "A single example entry. 'title' is the human-readable heading shown in the generated README's Examples section; 'description' explains what the example demonstrates.",
-      "required": ["title", "description"],
-      "additionalProperties": false,
-      "properties": {
-        "title": {
-          "type": "string",
-          "description": "Human-readable heading for the example."
-        },
-        "description": {
-          "type": "string",
-          "description": "Explanation of what the example demonstrates."
-        }
-      }
-    },
     "DeploymentConfig": {
       "type": "object",
       "properties": {
@@ -737,37 +766,6 @@
           "type": "object",
           "description": "Environment variables injected into the Vercel deployment. Values can use the ${VAR} placeholder convention for secrets; never inline a real secret here. See docs/reference/secrets.md.",
           "additionalProperties": { "type": "string" }
-        }
-      }
-    },
-    "DocumentationConfig": {
-      "type": "object",
-      "description": "Configures hand-authored documentation pages that survive regeneration. Each page is linked from the generated README's ## Documentation section. Files are seeded once (never overwritten).",
-      "properties": {
-        "pages": {
-          "type": "array",
-          "description": "Hand-authored documentation pages linked from the generated README.",
-          "items": { "$ref": "#/definitions/DocumentationPage" }
-        }
-      }
-    },
-    "DocumentationPage": {
-      "type": "object",
-      "description": "A single hand-authored documentation page linked from the generated README. The file at 'path' is seeded as a stub if it does not exist; it is never overwritten on subsequent generations.",
-      "required": ["title", "path"],
-      "additionalProperties": false,
-      "properties": {
-        "title": {
-          "type": "string",
-          "description": "Display title for the documentation page."
-        },
-        "path": {
-          "type": "string",
-          "description": "File path relative to the project root (e.g. docs/architecture.md)."
-        },
-        "description": {
-          "type": "string",
-          "description": "Optional one-line summary of the page content."
         }
       }
     },

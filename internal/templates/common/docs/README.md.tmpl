@@ -148,10 +148,8 @@ infer agents add {{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Scheme | default "
 
 ## Documentation
 
-| Page | Description |
-|------|-------------|
 {{- range .ADL.Spec.Documentation.Pages }}
-| [{{ .Title }}]({{ .Path }}) | {{ .Description | default "N/A" }} |
+- [{{ .Title }}]({{ .Path }})
 {{- end }}
 
 {{- end }}

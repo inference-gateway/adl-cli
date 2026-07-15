@@ -234,7 +234,6 @@ spec:
     pages:
       - title: Architecture
         path: docs/architecture.md
-        description: How the mock LLM client is wired
       - title: Deployment
         path: docs/deployment.md
         description: Deployment guide for production environments
