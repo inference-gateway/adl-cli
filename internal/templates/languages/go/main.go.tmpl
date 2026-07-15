@@ -173,6 +173,13 @@ func runStart(ctx context.Context) error {
 	if err := envconfig.Process(ctx, &cfg); err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
+
+	// AgentName and AgentVersion are build-time metadata (ldflags) that the ADK
+	// deliberately does not map from the environment. Propagate them so the
+	// OpenTelemetry resource carries service.name / service.version instead of
+	// empty strings, and so any other consumer of cfg.A2A sees the real values.
+	cfg.A2A.AgentName = AgentName
+	cfg.A2A.AgentVersion = Version
 {{- if and .ADL.Spec.Telemetry .ADL.Spec.Telemetry.Enabled }}
 	// The OpenTelemetry SDK settings are read as A2A_OTEL_* through the ADK's
 	// A2A_-prefixed config (cfg.A2A.OTelConfig), so the single Process call above
