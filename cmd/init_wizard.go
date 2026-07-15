@@ -542,8 +542,6 @@ func collectDeploymentSCM(ans *answers) {
 		ans.IssueTemplates = issueTemplates
 		ans.Dependabot = dependabot
 
-		// The release (CD) workflow authenticates with a GitHub App; let the
-		// user override the repository secret names.
 		if githubApp {
 			releaserAppID, releaserAppKey := "RELEASER_APP_ID", "RELEASER_APP_PRIVATE_KEY"
 			runFields([]huh.Field{
