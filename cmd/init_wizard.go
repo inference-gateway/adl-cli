@@ -548,8 +548,8 @@ func collectDeploymentSCM(ans *answers) {
 				huh.NewInput().Title("Release GitHub App client ID secret name").Value(&releaserAppID),
 				huh.NewInput().Title("Release GitHub App private key secret name").Value(&releaserAppKey),
 			})
-			ans.ScmAppIDSecret = nonDefault(releaserAppID, "RELEASER_APP_ID")
-			ans.ScmAppPrivateKeySecret = nonDefault(releaserAppKey, "RELEASER_APP_PRIVATE_KEY")
+			ans.ScmAppIDSecret = releaserAppID
+			ans.ScmAppPrivateKeySecret = releaserAppKey
 		}
 	}
 
@@ -614,10 +614,14 @@ func collectDeploymentSCM(ans *answers) {
 	if len(secretFields) > 0 {
 		runFields(secretFields)
 	}
-	ans.ClaudecodeAppIDSecret = nonDefault(claudeAppID, "CLAUDE_APP_ID")
-	ans.ClaudecodeAppPrivateKeySecret = nonDefault(claudeAppKey, "CLAUDE_APP_PRIVATE_KEY")
-	ans.InferAppIDSecret = nonDefault(inferAppID, "INFER_APP_ID")
-	ans.InferAppPrivateKeySecret = nonDefault(inferAppKey, "INFER_APP_PRIVATE_KEY")
+	if ans.Claudecode {
+		ans.ClaudecodeAppIDSecret = claudeAppID
+		ans.ClaudecodeAppPrivateKeySecret = claudeAppKey
+	}
+	if ans.Infer {
+		ans.InferAppIDSecret = inferAppID
+		ans.InferAppPrivateKeySecret = inferAppKey
+	}
 }
 
 // wizardServices runs the "add another service" loop.
