@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.51.0](https://github.com/inference-gateway/adl-cli/compare/v0.50.2...v0.51.0) (2026-07-15)
+
+### ✨ Features
+
+* **sandbox:** add infer installation to devcontainer and flox manifest ([733ee3a](https://github.com/inference-gateway/adl-cli/commit/733ee3a04d1baed67696f10006e1e806a8fafe8e))
+
+### 🔧 Miscellaneous
+
+* **deps:** update infer-action to version 0.32.2 ([4694b9e](https://github.com/inference-gateway/adl-cli/commit/4694b9eacdc92aee822d49a8265776814f67f315))
+
 ## [0.50.2](https://github.com/inference-gateway/adl-cli/compare/v0.50.1...v0.50.2) (2026-07-15)
 
 ### 🐛 Bug Fixes
