@@ -246,25 +246,27 @@ type DockerComposeConfig struct {
 	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
 }
 
-// Configures hand-authored documentation pages that survive regeneration. Each
-// page is linked from the generated README's ## Documentation section. Files are
-// seeded once (never overwritten).
-type DocumentationConfig struct {
-	// Hand-authored documentation pages linked from the generated README.
-	Pages []DocumentationPage `json:"pages,omitempty,omitzero" yaml:"pages,omitempty" mapstructure:"pages,omitempty"`
+// Hand-authored documentation pages the generated project owns and ships itself.
+// Each entry in 'pages' declares a page the consumer (e.g. adl-cli) scaffolds as a
+// stub markdown file at 'path' with the given 'title', to be filled in by the
+// maintainers. This is distinct from 'spec.card.documentationUrl', which is a
+// single link to already-published external docs: 'documentation.pages' describes
+// the docs the project generates and maintains in-tree.
+type Documentation struct {
+	// Documentation pages to scaffold. At least one page is required when the
+	// 'documentation' block is present.
+	Pages []DocumentationPage `json:"pages" yaml:"pages" mapstructure:"pages"`
 }
 
-// A single hand-authored documentation page linked from the generated README. The
-// file at 'path' is seeded as a stub if it does not exist; it is never overwritten
-// on subsequent generations.
+// A single documentation page. 'title' is the human-readable heading; 'path' is
+// where the consumer writes the stub file, relative to the generated project's
+// docs root (e.g. 'docs/getting-started.md').
 type DocumentationPage struct {
-	// Optional one-line summary of the page content.
-	Description string `json:"description,omitempty,omitzero" yaml:"description,omitempty" mapstructure:"description,omitempty"`
-
-	// File path relative to the project root (e.g. docs/architecture.md).
+	// Destination path for the generated stub file, relative to the generated
+	// project's docs root (e.g. 'docs/getting-started.md').
 	Path string `json:"path" yaml:"path" mapstructure:"path"`
 
-	// Display title for the documentation page.
+	// Human-readable page title, used as the heading and in navigation.
 	Title string `json:"title" yaml:"title" mapstructure:"title"`
 }
 
@@ -272,12 +274,18 @@ type DocumentationPage struct {
 // generated README's Examples section; 'description' explains what the example
 // demonstrates.
 type Example struct {
-	// Explanation of what the example demonstrates.
+	// One- or two-sentence explanation of what the example demonstrates.
 	Description string `json:"description" yaml:"description" mapstructure:"description"`
 
-	// Human-readable heading for the example.
+	// Short, descriptive title for the example (e.g. 'Basic chat', 'Tool use').
 	Title string `json:"title" yaml:"title" mapstructure:"title"`
 }
+
+// Curated examples that demonstrate the agent's capabilities. Each entry has a
+// 'title' and 'description'; consumers (e.g. adl-cli) use these to render an
+// 'Examples' section in the generated README.md, linking each example to a
+// scratchpad or playground for the agent.
+type Examples []Example
 
 type FloxConfig struct {
 	// Enabled corresponds to the JSON schema field "enabled".
@@ -680,13 +688,10 @@ type Spec struct {
 	Development *DevelopmentConfig `json:"development,omitempty,omitzero" yaml:"development,omitempty" mapstructure:"development,omitempty"`
 
 	// Documentation corresponds to the JSON schema field "documentation".
-	Documentation *DocumentationConfig `json:"documentation,omitempty,omitzero" yaml:"documentation,omitempty" mapstructure:"documentation,omitempty"`
+	Documentation *Documentation `json:"documentation,omitempty,omitzero" yaml:"documentation,omitempty" mapstructure:"documentation,omitempty"`
 
-	// Curated examples that demonstrate the agent's capabilities. Each entry has a
-	// 'title' and 'description'; consumers (e.g. adl-cli) use these to render an
-	// 'Examples' section in the generated README.md, linking each example to a
-	// scratchpad or playground for the agent.
-	Examples []Example `json:"examples,omitempty,omitzero" yaml:"examples,omitempty" mapstructure:"examples,omitempty"`
+	// Examples corresponds to the JSON schema field "examples".
+	Examples Examples `json:"examples,omitempty,omitzero" yaml:"examples,omitempty" mapstructure:"examples,omitempty"`
 
 	// Hooks corresponds to the JSON schema field "hooks".
 	Hooks *Hooks `json:"hooks,omitempty,omitzero" yaml:"hooks,omitempty" mapstructure:"hooks,omitempty"`
