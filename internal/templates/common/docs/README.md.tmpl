@@ -214,6 +214,16 @@ them at runtime.
 {{- else }}
 | **Authentication** | `A2A_AUTH_ENABLE` | Enable OIDC authentication | `false` |
 {{- end }}
+{{- if and .ADL.Spec.Telemetry .ADL.Spec.Telemetry.Enabled }}
+{{- if eq .Language "go" }}
+| **Telemetry** | `A2A_TELEMETRY_ENABLE` | Enable OpenTelemetry instrumentation | `true` |
+{{- else if eq .Language "typescript" }}
+| **Telemetry** | `TELEMETRY_ENABLE` | Enable OpenTelemetry instrumentation | `true` |
+{{- end }}
+{{- range telemetryEnvVars .ADL }}
+| **Telemetry** | `{{ .Key }}` | {{ .Description }} | `{{ .Value }}` |
+{{- end }}
+{{- end }}
 
 ## Development
 

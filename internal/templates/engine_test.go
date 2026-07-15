@@ -470,6 +470,109 @@ func TestREADMETemplate_TitleIsHumanized(t *testing.T) {
 	}
 }
 
+// TestREADMETemplate_TelemetryEnvVars guards the regression from
+// inference-gateway/mock-agent#64: once telemetry moved from spec.config.telemetry
+// (which the "Custom Configuration" loop documented) to top-level spec.telemetry,
+// the README stopped documenting any telemetry env vars even though .env.example
+// still emits them. The env-var table must carry the language-specific master
+// switch plus every telemetryEnvVars entry, and stay empty when telemetry is off.
+func TestREADMETemplate_TelemetryEnvVars(t *testing.T) {
+	enabledGo := &schema.TelemetryConfig{
+		Enabled: true,
+		Traces: &schema.TelemetryTracesConfig{
+			Exporter: &schema.TelemetryTracesExporter{
+				Otlp: otlpExporter("http://localhost:4318", schema.TelemetryOTLPExporterProtocolHttpProtobuf),
+			},
+		},
+		Metrics: &schema.TelemetryMetricsConfig{
+			Exporter: &schema.TelemetryMetricsExporter{
+				Prometheus: &schema.TelemetryPrometheusExporter{Port: 9464},
+			},
+		},
+	}
+
+	tests := []struct {
+		name       string
+		lang       string
+		adl        func() *schema.ADL
+		wantRows   []string
+		wantAbsent []string
+	}{
+		{
+			name: "go enabled documents A2A_-prefixed vars",
+			lang: "go",
+			adl: func() *schema.ADL {
+				adl := minimalGoADL()
+				adl.Spec.Telemetry = enabledGo
+				return adl
+			},
+			wantRows: []string{
+				"| **Telemetry** | `A2A_TELEMETRY_ENABLE` | Enable OpenTelemetry instrumentation | `true` |",
+				"| **Telemetry** | `A2A_OTEL_TRACES_EXPORTER` |",
+				"| **Telemetry** | `A2A_OTEL_EXPORTER_OTLP_ENDPOINT` |",
+				"| **Telemetry** | `A2A_OTEL_EXPORTER_PROMETHEUS_PORT` |",
+			},
+		},
+		{
+			name: "typescript enabled documents bare vars",
+			lang: "typescript",
+			adl: func() *schema.ADL {
+				adl := minimalTypeScriptADL()
+				adl.Spec.Telemetry = &schema.TelemetryConfig{
+					Enabled: true,
+					Traces: &schema.TelemetryTracesConfig{
+						Exporter: &schema.TelemetryTracesExporter{
+							Otlp: otlpExporter("http://localhost:4318", schema.TelemetryOTLPExporterProtocolHttpProtobuf),
+						},
+					},
+				}
+				return adl
+			},
+			wantRows: []string{
+				"| **Telemetry** | `TELEMETRY_ENABLE` | Enable OpenTelemetry instrumentation | `true` |",
+				"| **Telemetry** | `OTEL_TRACES_EXPORTER` |",
+			},
+			wantAbsent: []string{"A2A_TELEMETRY_ENABLE"},
+		},
+		{
+			name: "go disabled documents no telemetry rows",
+			lang: "go",
+			adl: func() *schema.ADL {
+				adl := minimalGoADL()
+				adl.Spec.Telemetry = &schema.TelemetryConfig{Enabled: false}
+				return adl
+			},
+			wantAbsent: []string{"**Telemetry**", "TELEMETRY_ENABLE"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			registry, err := NewRegistry(tt.lang)
+			if err != nil {
+				t.Fatalf("NewRegistry: %v", err)
+			}
+			engine := NewWithRegistry("minimal", registry)
+
+			out, err := engine.ExecuteTemplate("docs/README.md", Context{ADL: tt.adl(), Language: tt.lang})
+			if err != nil {
+				t.Fatalf("ExecuteTemplate(README.md): %v", err)
+			}
+
+			for _, row := range tt.wantRows {
+				if !strings.Contains(out, row) {
+					t.Errorf("README missing telemetry row %q", row)
+				}
+			}
+			for _, absent := range tt.wantAbsent {
+				if strings.Contains(out, absent) {
+					t.Errorf("README unexpectedly contains %q", absent)
+				}
+			}
+		})
+	}
+}
+
 func TestGetDefaultAcronyms(t *testing.T) {
 	acronyms := getDefaultAcronyms()
 
