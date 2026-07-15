@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.50.2](https://github.com/inference-gateway/adl-cli/compare/v0.50.1...v0.50.2) (2026-07-15)
+
+### 🐛 Bug Fixes
+
+* **init:** always emit orchestrator GitHub App secret defaults ([#300](https://github.com/inference-gateway/adl-cli/issues/300)) ([8ec189a](https://github.com/inference-gateway/adl-cli/commit/8ec189ae317a4c0747ef7e794b547e5526932a85))
+
 ## [0.50.1](https://github.com/inference-gateway/adl-cli/compare/v0.50.0...v0.50.1) (2026-07-15)
 
 ### 🐛 Bug Fixes
