@@ -229,7 +229,6 @@ spec:
         enabled: false
   examples:
     - title: OTel collector stack
-      path: examples/otel/
       description: docker-compose stack with tracing enabled
   documentation:
     pages:

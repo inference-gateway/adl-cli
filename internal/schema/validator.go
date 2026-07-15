@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/xeipuuv/gojsonschema"
 	"gopkg.in/yaml.v3"
@@ -96,8 +95,6 @@ func (v *Validator) ValidateFile(filePath string) ([]string, error) {
 
 	warnings = append(warnings, v.validateTelemetry(&adl)...)
 
-	warnings = append(warnings, v.validateExamples(&adl, filePath)...)
-
 	return warnings, nil
 }
 
@@ -126,26 +123,6 @@ func (v *Validator) validateTelemetry(adl *ADL) []string {
 		tel.Metrics != nil && tel.Metrics.Exporter != nil && tel.Metrics.Exporter.Prometheus != nil {
 		warnings = append(warnings,
 			"spec.telemetry.metrics.exporter.prometheus is set but the TypeScript ADK does not support the Prometheus pull exporter yet; use spec.telemetry.metrics.exporter.otlp to push to a collector instead.")
-	}
-	return warnings
-}
-
-// validateExamples surfaces non-fatal warnings when spec.examples references
-// paths that do not exist on disk. The generator does not scaffold examples
-// (they are hand-authored), so a missing path is a warning, not an error.
-func (v *Validator) validateExamples(adl *ADL, adlFilePath string) []string {
-	if len(adl.Spec.Examples) == 0 {
-		return nil
-	}
-
-	adlDir := filepath.Dir(adlFilePath)
-	var warnings []string
-	for _, ex := range adl.Spec.Examples {
-		resolvedPath := filepath.Join(adlDir, ex.Path)
-		if _, err := os.Stat(resolvedPath); os.IsNotExist(err) {
-			warnings = append(warnings,
-				fmt.Sprintf("spec.examples entry %q references path %q which does not exist; the generated README will link to a missing target", ex.Title, ex.Path))
-		}
 	}
 	return warnings
 }

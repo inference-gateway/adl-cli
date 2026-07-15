@@ -643,18 +643,15 @@ const SkillLicenseMPL20 SkillLicense = "MPL-2.0"
 const SkillLicenseProprietary SkillLicense = "Proprietary"
 const SkillLicenseUnlicense SkillLicense = "Unlicense"
 
-// A hand-authored example referenced by spec.examples. The generator does not
-// scaffold the example (it is hand-authored), it only validates the link target
-// exists and warns if missing.
+// A single example entry. 'title' is the human-readable heading shown in the
+// generated README's Examples section; 'description' explains what the example
+// demonstrates.
 type Example struct {
 	// Title corresponds to the JSON schema field "title".
 	Title string `json:"title" yaml:"title" mapstructure:"title"`
 
-	// Path corresponds to the JSON schema field "path".
-	Path string `json:"path" yaml:"path" mapstructure:"path"`
-
 	// Description corresponds to the JSON schema field "description".
-	Description string `json:"description,omitempty,omitzero" yaml:"description,omitempty" mapstructure:"description,omitempty"`
+	Description string `json:"description" yaml:"description" mapstructure:"description"`
 }
 
 type Spec struct {

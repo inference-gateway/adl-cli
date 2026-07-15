@@ -128,7 +128,7 @@ infer agents add {{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Scheme | default "
 | Example | Description |
 |---------|-------------|
 {{- range .ADL.Spec.Examples }}
-| [{{ .Title }}]({{ .Path }}) | {{ if .Description }}{{ .Description }}{{ else }}&mdash;{{ end }} |
+| {{ .Title }} | {{ .Description }} |
 {{- end }}
 
 {{- end }}

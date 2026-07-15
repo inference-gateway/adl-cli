@@ -108,7 +108,7 @@
         "development": { "$ref": "#/definitions/DevelopmentConfig" },
         "examples": {
           "type": "array",
-          "description": "Hand-authored runnable examples linked from the generated README. The generator does not scaffold them, it only validates the link targets exist and warns if missing.",
+          "description": "Curated examples that demonstrate the agent's capabilities. Each entry has a 'title' and 'description'; consumers (e.g. adl-cli) use these to render an 'Examples' section in the generated README.md, linking each example to a scratchpad or playground for the agent.",
           "items": { "$ref": "#/definitions/Example" }
         },
         "documentation": { "$ref": "#/definitions/DocumentationConfig" },
@@ -617,21 +617,17 @@
     },
     "Example": {
       "type": "object",
-      "description": "A hand-authored example referenced by spec.examples. The generator does not scaffold the example, it only validates the link target exists and warns if missing.",
-      "required": ["title", "path"],
+      "description": "A single example entry. 'title' is the human-readable heading shown in the generated README's Examples section; 'description' explains what the example demonstrates.",
+      "required": ["title", "description"],
       "additionalProperties": false,
       "properties": {
         "title": {
           "type": "string",
-          "description": "Display title for the example link in the generated README."
-        },
-        "path": {
-          "type": "string",
-          "description": "Relative path to the example directory or file."
+          "description": "Human-readable heading for the example."
         },
         "description": {
           "type": "string",
-          "description": "Optional description of the example."
+          "description": "Explanation of what the example demonstrates."
         }
       }
     },
