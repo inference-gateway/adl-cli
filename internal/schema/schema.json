@@ -747,6 +747,7 @@
         "pages": {
           "type": "array",
           "description": "Hand-authored documentation pages linked from the generated README.",
+          "minItems": 1,
           "items": { "$ref": "#/definitions/DocumentationPage" }
         }
       }
@@ -755,7 +756,6 @@
       "type": "object",
       "description": "A single hand-authored documentation page linked from the generated README. The file at 'path' is seeded as a stub if it does not exist; it is never overwritten on subsequent generations.",
       "required": ["title", "path"],
-      "additionalProperties": false,
       "properties": {
         "title": {
           "type": "string",
