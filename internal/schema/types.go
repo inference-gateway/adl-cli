@@ -190,28 +190,6 @@ type CodexConfig struct {
 	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
 }
 
-// DocumentationConfig configures hand-authored documentation pages that
-// survive regeneration. Each page is linked from the generated README's
-// ## Documentation section. Files are seeded once (never overwritten).
-type DocumentationConfig struct {
-	// Pages corresponds to the JSON schema field "pages".
-	Pages []DocumentationPage `json:"pages,omitempty,omitzero" yaml:"pages,omitempty" mapstructure:"pages,omitempty"`
-}
-
-// DocumentationPage is a single hand-authored documentation page linked from
-// the generated README. The file at 'path' is seeded as a stub if it does
-// not exist; it is never overwritten on subsequent generations.
-type DocumentationPage struct {
-	// Title corresponds to the JSON schema field "title".
-	Title string `json:"title" yaml:"title" mapstructure:"title"`
-
-	// Path corresponds to the JSON schema field "path".
-	Path string `json:"path" yaml:"path" mapstructure:"path"`
-
-	// Description corresponds to the JSON schema field "description".
-	Description string `json:"description,omitempty,omitzero" yaml:"description,omitempty" mapstructure:"description,omitempty"`
-}
-
 type DeploymentConfig struct {
 	// Cloudflare corresponds to the JSON schema field "cloudflare".
 	Cloudflare *CloudflareConfig `json:"cloudflare,omitempty,omitzero" yaml:"cloudflare,omitempty" mapstructure:"cloudflare,omitempty"`
@@ -267,6 +245,47 @@ type DockerComposeConfig struct {
 	// Enabled corresponds to the JSON schema field "enabled".
 	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
 }
+
+// Hand-authored documentation pages the generated project owns and ships itself.
+// Each entry in 'pages' declares a page the consumer (e.g. adl-cli) scaffolds as a
+// stub markdown file at 'path' with the given 'title', to be filled in by the
+// maintainers. This is distinct from 'spec.card.documentationUrl', which is a
+// single link to already-published external docs: 'documentation.pages' describes
+// the docs the project generates and maintains in-tree.
+type Documentation struct {
+	// Documentation pages to scaffold. At least one page is required when the
+	// 'documentation' block is present.
+	Pages []DocumentationPage `json:"pages" yaml:"pages" mapstructure:"pages"`
+}
+
+// A single documentation page. 'title' is the human-readable heading; 'path' is
+// where the consumer writes the stub file, relative to the generated project's
+// docs root (e.g. 'docs/getting-started.md').
+type DocumentationPage struct {
+	// Destination path for the generated stub file, relative to the generated
+	// project's docs root (e.g. 'docs/getting-started.md').
+	Path string `json:"path" yaml:"path" mapstructure:"path"`
+
+	// Human-readable page title, used as the heading and in navigation.
+	Title string `json:"title" yaml:"title" mapstructure:"title"`
+}
+
+// A single example entry. 'title' is the human-readable heading shown in the
+// generated README's Examples section; 'description' explains what the example
+// demonstrates.
+type Example struct {
+	// One- or two-sentence explanation of what the example demonstrates.
+	Description string `json:"description" yaml:"description" mapstructure:"description"`
+
+	// Short, descriptive title for the example (e.g. 'Basic chat', 'Tool use').
+	Title string `json:"title" yaml:"title" mapstructure:"title"`
+}
+
+// Curated examples that demonstrate the agent's capabilities. Each entry has a
+// 'title' and 'description'; consumers (e.g. adl-cli) use these to render an
+// 'Examples' section in the generated README.md, linking each example to a
+// scratchpad or playground for the agent.
+type Examples []Example
 
 type FloxConfig struct {
 	// Enabled corresponds to the JSON schema field "enabled".
@@ -643,17 +662,6 @@ const SkillLicenseMPL20 SkillLicense = "MPL-2.0"
 const SkillLicenseProprietary SkillLicense = "Proprietary"
 const SkillLicenseUnlicense SkillLicense = "Unlicense"
 
-// A single example entry. 'title' is the human-readable heading shown in the
-// generated README's Examples section; 'description' explains what the example
-// demonstrates.
-type Example struct {
-	// Title corresponds to the JSON schema field "title".
-	Title string `json:"title" yaml:"title" mapstructure:"title"`
-
-	// Description corresponds to the JSON schema field "description".
-	Description string `json:"description" yaml:"description" mapstructure:"description"`
-}
-
 type Spec struct {
 	// Acronyms corresponds to the JSON schema field "acronyms".
 	Acronyms []string `json:"acronyms,omitempty,omitzero" yaml:"acronyms,omitempty" mapstructure:"acronyms,omitempty"`
@@ -673,17 +681,17 @@ type Spec struct {
 	// Config corresponds to the JSON schema field "config".
 	Config SpecConfig `json:"config,omitempty,omitzero" yaml:"config,omitempty" mapstructure:"config,omitempty"`
 
-	// Documentation corresponds to the JSON schema field "documentation".
-	Documentation *DocumentationConfig `json:"documentation,omitempty,omitzero" yaml:"documentation,omitempty" mapstructure:"documentation,omitempty"`
-
 	// Deployment corresponds to the JSON schema field "deployment".
 	Deployment *DeploymentConfig `json:"deployment,omitempty,omitzero" yaml:"deployment,omitempty" mapstructure:"deployment,omitempty"`
 
 	// Development corresponds to the JSON schema field "development".
 	Development *DevelopmentConfig `json:"development,omitempty,omitzero" yaml:"development,omitempty" mapstructure:"development,omitempty"`
 
+	// Documentation corresponds to the JSON schema field "documentation".
+	Documentation *Documentation `json:"documentation,omitempty,omitzero" yaml:"documentation,omitempty" mapstructure:"documentation,omitempty"`
+
 	// Examples corresponds to the JSON schema field "examples".
-	Examples []Example `json:"examples,omitempty,omitzero" yaml:"examples,omitempty" mapstructure:"examples,omitempty"`
+	Examples Examples `json:"examples,omitempty,omitzero" yaml:"examples,omitempty" mapstructure:"examples,omitempty"`
 
 	// Hooks corresponds to the JSON schema field "hooks".
 	Hooks *Hooks `json:"hooks,omitempty,omitzero" yaml:"hooks,omitempty" mapstructure:"hooks,omitempty"`
