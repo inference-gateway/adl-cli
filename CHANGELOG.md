@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.50.0](https://github.com/inference-gateway/adl-cli/compare/v0.49.0...v0.50.0) (2026-07-15)
+
+### ✨ Features
+
+* **templates:** create PRs from the Claude Code workflow and make GitHub App secret names configurable ([#297](https://github.com/inference-gateway/adl-cli/issues/297)) ([33bf845](https://github.com/inference-gateway/adl-cli/commit/33bf845cddd8f25627e341b621019016dc235833)), closes [#296](https://github.com/inference-gateway/adl-cli/issues/296)
+* **templates:** make release workflow GitHub App secret names configurable ([#298](https://github.com/inference-gateway/adl-cli/issues/298)) ([2602ceb](https://github.com/inference-gateway/adl-cli/commit/2602ceb5b145f6a0ebf453382493dbd9c9323af6))
+
 ## [0.49.0](https://github.com/inference-gateway/adl-cli/compare/v0.48.5...v0.49.0) (2026-07-15)
 
 ### ✨ Features
