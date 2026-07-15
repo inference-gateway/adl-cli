@@ -541,6 +541,16 @@ func collectDeploymentSCM(ans *answers) {
 		ans.GithubApp = githubApp
 		ans.IssueTemplates = issueTemplates
 		ans.Dependabot = dependabot
+
+		if githubApp {
+			releaserAppID, releaserAppKey := "RELEASER_APP_ID", "RELEASER_APP_PRIVATE_KEY"
+			runFields([]huh.Field{
+				huh.NewInput().Title("Release GitHub App client ID secret name").Value(&releaserAppID),
+				huh.NewInput().Title("Release GitHub App private key secret name").Value(&releaserAppKey),
+			})
+			ans.ScmAppIDSecret = nonDefault(releaserAppID, "RELEASER_APP_ID")
+			ans.ScmAppPrivateKeySecret = nonDefault(releaserAppKey, "RELEASER_APP_PRIVATE_KEY")
+		}
 	}
 
 	if provider != "" {

@@ -1809,8 +1809,11 @@ spec:
 
 **Required GitHub Secrets:**
 
-- `BOT_GH_APP_ID` - Your GitHub App ID
-- `BOT_GH_APP_PRIVATE_KEY` - Your GitHub App private key
+- `RELEASER_APP_ID` - Your GitHub App ID
+- `RELEASER_APP_PRIVATE_KEY` - Your GitHub App private key
+
+The secret names are configurable via `spec.scm.app_id_secret` and
+`spec.scm.app_private_key_secret` if your organization uses different names.
 
 When `github_app: true` is set, the generated CD pipeline will use GitHub App authentication instead of the default `GITHUB_TOKEN`, providing better security isolation for release management.
 

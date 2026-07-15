@@ -318,13 +318,15 @@ type adlData struct {
 			} `yaml:"rust,omitempty"`
 		} `yaml:"language,omitempty"`
 		SCM *struct {
-			Provider       string `yaml:"provider"`
-			URL            string `yaml:"url,omitempty"`
-			GithubApp      bool   `yaml:"github_app,omitempty"`
-			IssueTemplates bool   `yaml:"issue_templates"`
-			Dependabot     bool   `yaml:"dependabot"`
-			CI             bool   `yaml:"ci"`
-			CD             bool   `yaml:"cd"`
+			Provider            string `yaml:"provider"`
+			URL                 string `yaml:"url,omitempty"`
+			GithubApp           bool   `yaml:"github_app,omitempty"`
+			AppIDSecret         string `yaml:"app_id_secret,omitempty"`
+			AppPrivateKeySecret string `yaml:"app_private_key_secret,omitempty"`
+			IssueTemplates      bool   `yaml:"issue_templates"`
+			Dependabot          bool   `yaml:"dependabot"`
+			CI                  bool   `yaml:"ci"`
+			CD                  bool   `yaml:"cd"`
 		} `yaml:"scm,omitempty"`
 		Development *struct {
 			Sandbox *struct {
@@ -450,13 +452,18 @@ type answers struct {
 
 	DeploymentType string
 
-	ScmProvider    string
-	ScmURL         string
-	GithubApp      bool
-	IssueTemplates bool
-	Dependabot     bool
-	CI             bool
-	CD             bool
+	ScmProvider string
+	ScmURL      string
+	GithubApp   bool
+	// GitHub App secret names for the release (CD) workflow. Empty means the
+	// schema defaults (RELEASER_APP_ID / RELEASER_APP_PRIVATE_KEY) and the
+	// fields are omitted from the manifest.
+	ScmAppIDSecret         string
+	ScmAppPrivateKeySecret string
+	IssueTemplates         bool
+	Dependabot             bool
+	CI                     bool
+	CD                     bool
 
 	// Coding-agent orchestrators (spec.development.ai.orchestrators). Only
 	// claudecode has a CLI flag (--ai); the rest are wizard/manifest-only.
@@ -777,13 +784,15 @@ func buildADL(ans answers) *adlData {
 
 	if ans.ScmProvider != "" {
 		adl.Spec.SCM = &struct {
-			Provider       string `yaml:"provider"`
-			URL            string `yaml:"url,omitempty"`
-			GithubApp      bool   `yaml:"github_app,omitempty"`
-			IssueTemplates bool   `yaml:"issue_templates"`
-			Dependabot     bool   `yaml:"dependabot"`
-			CI             bool   `yaml:"ci"`
-			CD             bool   `yaml:"cd"`
+			Provider            string `yaml:"provider"`
+			URL                 string `yaml:"url,omitempty"`
+			GithubApp           bool   `yaml:"github_app,omitempty"`
+			AppIDSecret         string `yaml:"app_id_secret,omitempty"`
+			AppPrivateKeySecret string `yaml:"app_private_key_secret,omitempty"`
+			IssueTemplates      bool   `yaml:"issue_templates"`
+			Dependabot          bool   `yaml:"dependabot"`
+			CI                  bool   `yaml:"ci"`
+			CD                  bool   `yaml:"cd"`
 		}{
 			Provider: ans.ScmProvider,
 		}
@@ -791,6 +800,8 @@ func buildADL(ans answers) *adlData {
 		if ans.ScmProvider == "github" {
 			adl.Spec.SCM.URL = ans.ScmURL
 			adl.Spec.SCM.GithubApp = ans.GithubApp
+			adl.Spec.SCM.AppIDSecret = ans.ScmAppIDSecret
+			adl.Spec.SCM.AppPrivateKeySecret = ans.ScmAppPrivateKeySecret
 			adl.Spec.SCM.IssueTemplates = ans.IssueTemplates
 			adl.Spec.SCM.Dependabot = ans.Dependabot
 		}
@@ -1138,6 +1149,12 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 
 			ans.ScmURL = conditionalPrompt(useDefaults, "Repository URL", defaultURL)
 			ans.GithubApp = conditionalPromptBool(useDefaults, "Enable GitHub App integration", true)
+			if ans.GithubApp {
+				ans.ScmAppIDSecret = nonDefault(
+					conditionalPrompt(useDefaults, "GitHub App client ID secret name for releases", "RELEASER_APP_ID"), "RELEASER_APP_ID")
+				ans.ScmAppPrivateKeySecret = nonDefault(
+					conditionalPrompt(useDefaults, "GitHub App private key secret name for releases", "RELEASER_APP_PRIVATE_KEY"), "RELEASER_APP_PRIVATE_KEY")
+			}
 
 			if useDefaults {
 				ans.IssueTemplates = false
