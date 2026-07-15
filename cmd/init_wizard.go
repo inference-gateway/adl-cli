@@ -586,8 +586,6 @@ func collectDeploymentSCM(ans *answers) {
 	ans.Opencode = slices.Contains(orchestrators, "opencode")
 	ans.Infer = slices.Contains(orchestrators, "infer")
 
-	// claudecode and infer generate workflows that authenticate with a
-	// GitHub App; let the user override the repository secret names.
 	secretFields := []huh.Field{}
 	claudeAppID, claudeAppKey := "CLAUDE_APP_ID", "CLAUDE_APP_PRIVATE_KEY"
 	inferAppID, inferAppKey := "INFER_APP_ID", "INFER_APP_PRIVATE_KEY"
