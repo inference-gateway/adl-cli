@@ -290,6 +290,7 @@ func collectAnswersWizard(projectName string) answers {
 	ans.Tools = wizardTools(ans.Services)
 	ans.Skills = wizardSkills()
 	ans.DocumentationPages = wizardDocumentationPages()
+	ans.Examples = wizardExamples()
 
 	// ---- server ----
 	portStr := "8080"
@@ -846,6 +847,58 @@ func wizardDocumentationPages() []docPageAnswer {
 		}
 	}
 	return pages
+}
+
+// wizardExamples runs the "add another example" loop.
+func wizardExamples() []exampleAnswer {
+	var add bool
+	if err := tui.RunForm(huh.NewForm(huh.NewGroup(
+		leftConfirm().
+			Title("Add examples?").
+			Description("Examples demonstrate your agent's capabilities in the generated README.").
+			Value(&add),
+	))); err != nil {
+		return nil
+	}
+	if !add {
+		return nil
+	}
+
+	var examples []exampleAnswer
+	for {
+		var (
+			title, description string
+			more               bool
+		)
+		form := huh.NewForm(
+			huh.NewGroup(
+				huh.NewInput().
+					Title("Example title").
+					Description("e.g. Basic chat").
+					Value(&title).
+					Validate(requireNonEmpty),
+				huh.NewInput().
+					Title("Example description").
+					Description("e.g. How to start a conversation with the agent").
+					Value(&description).
+					Validate(requireNonEmpty),
+				leftConfirm().Title("Add another example?").Value(&more),
+			),
+		)
+		if err := tui.RunForm(form); err != nil {
+			return examples
+		}
+
+		examples = append(examples, exampleAnswer{
+			Title:       strings.TrimSpace(title),
+			Description: strings.TrimSpace(description),
+		})
+
+		if !more {
+			break
+		}
+	}
+	return examples
 }
 
 // printInitSummary renders the closing summary panel and next steps. It is
