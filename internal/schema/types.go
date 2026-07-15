@@ -522,6 +522,14 @@ type RustConfig struct {
 }
 
 type SCM struct {
+	// Name of the repository secret holding the GitHub App client ID used by the
+	// generated release (CD) workflow when github_app is enabled.
+	AppIDSecret string `json:"app_id_secret,omitempty,omitzero" yaml:"app_id_secret,omitempty" mapstructure:"app_id_secret,omitempty"`
+
+	// Name of the repository secret holding the GitHub App private key used by the
+	// generated release (CD) workflow when github_app is enabled.
+	AppPrivateKeySecret string `json:"app_private_key_secret,omitempty,omitzero" yaml:"app_private_key_secret,omitempty" mapstructure:"app_private_key_secret,omitempty"`
+
 	// CD corresponds to the JSON schema field "cd".
 	CD bool `json:"cd,omitempty,omitzero" yaml:"cd,omitempty" mapstructure:"cd,omitempty"`
 

@@ -569,11 +569,11 @@ func TestGenerator_generateCD(t *testing.T) {
 				if !containsSubstring(string(cdContent), "actions/create-github-app-token") {
 					t.Errorf("expected GitHub App CD workflow to contain github-app-token action")
 				}
-				if !containsSubstring(string(cdContent), "BOT_GH_APP_ID") {
-					t.Errorf("expected GitHub App CD workflow to contain BOT_GH_APP_ID secret")
+				if !containsSubstring(string(cdContent), "RELEASER_APP_ID") {
+					t.Errorf("expected GitHub App CD workflow to contain RELEASER_APP_ID secret")
 				}
-				if !containsSubstring(string(cdContent), "BOT_GH_APP_PRIVATE_KEY") {
-					t.Errorf("expected GitHub App CD workflow to contain BOT_GH_APP_PRIVATE_KEY secret")
+				if !containsSubstring(string(cdContent), "RELEASER_APP_PRIVATE_KEY") {
+					t.Errorf("expected GitHub App CD workflow to contain RELEASER_APP_PRIVATE_KEY secret")
 				}
 				if !containsSubstring(string(cdContent), "Get GitHub App User ID") {
 					t.Errorf("expected GitHub App CD workflow to contain user ID step")
