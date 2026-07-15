@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.48.3](https://github.com/inference-gateway/adl-cli/compare/v0.48.2...v0.48.3) (2026-07-15)
+
+### 🐛 Bug Fixes
+
+* **templates:** document telemetry env vars in generated README ([#283](https://github.com/inference-gateway/adl-cli/issues/283)) ([785db66](https://github.com/inference-gateway/adl-cli/commit/785db662edc5aa87bc53002260271c54752707b8))
+
 ## [0.48.2](https://github.com/inference-gateway/adl-cli/compare/v0.48.1...v0.48.2) (2026-07-15)
 
 ### 🔧 Miscellaneous
