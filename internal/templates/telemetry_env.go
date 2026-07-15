@@ -7,10 +7,12 @@ import (
 )
 
 // TelemetryEnvVar is a single KEY=VALUE default emitted into the generated
-// .env.example for the OTel-aligned telemetry configuration.
+// .env.example for the OTel-aligned telemetry configuration. Description is the
+// human-readable label the README env-var table renders alongside it.
 type TelemetryEnvVar struct {
-	Key   string
-	Value string
+	Key         string
+	Value       string
+	Description string
 }
 
 // telemetryEnvVars maps a manifest's spec.telemetry exporter blocks to the
@@ -70,17 +72,20 @@ func telemetryEnvVars(adl *schema.ADL) []TelemetryEnvVar {
 		metricsProm = tel.Metrics.Exporter.Prometheus
 	}
 
+	const metricsDesc = "Metrics exporter (`otlp`, `prometheus`, or `none`)"
+
 	out := []TelemetryEnvVar{
-		{Key: prefix + "OTEL_TRACES_EXPORTER", Value: exporterValue(tracesOtlp != nil, "otlp")},
+		{Key: prefix + "OTEL_TRACES_EXPORTER", Value: exporterValue(tracesOtlp != nil, "otlp"),
+			Description: "Trace exporter (`otlp` or `none`)"},
 	}
 
 	switch {
 	case metricsOtlp != nil:
-		out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_METRICS_EXPORTER", Value: "otlp"})
+		out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_METRICS_EXPORTER", Value: "otlp", Description: metricsDesc})
 	case metricsProm != nil:
-		out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_METRICS_EXPORTER", Value: "prometheus"})
+		out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_METRICS_EXPORTER", Value: "prometheus", Description: metricsDesc})
 	default:
-		out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_METRICS_EXPORTER", Value: "none"})
+		out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_METRICS_EXPORTER", Value: "none", Description: metricsDesc})
 	}
 
 	if lang == "go" {
@@ -103,10 +108,12 @@ func telemetryEnvVars(adl *schema.ADL) []TelemetryEnvVar {
 
 	if metricsProm != nil && lang == "go" {
 		if metricsProm.Host != "" {
-			out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_EXPORTER_PROMETHEUS_HOST", Value: metricsProm.Host})
+			out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_EXPORTER_PROMETHEUS_HOST", Value: metricsProm.Host,
+				Description: "Prometheus metrics exporter host"})
 		}
 		if metricsProm.Port != 0 {
-			out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_EXPORTER_PROMETHEUS_PORT", Value: strconv.Itoa(metricsProm.Port)})
+			out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_EXPORTER_PROMETHEUS_PORT", Value: strconv.Itoa(metricsProm.Port),
+				Description: "Prometheus metrics exporter port"})
 		}
 	}
 
@@ -130,11 +137,27 @@ func appendOTLPEnv(out []TelemetryEnvVar, prefix, infix string, otlp *schema.Tel
 	if otlp == nil {
 		return out
 	}
+	label := otlpLabel(infix)
 	if otlp.Endpoint != "" {
-		out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_EXPORTER_OTLP_" + infix + "ENDPOINT", Value: otlp.Endpoint})
+		out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_EXPORTER_OTLP_" + infix + "ENDPOINT", Value: otlp.Endpoint,
+			Description: label + " collector endpoint"})
 	}
 	if otlp.Protocol != "" {
-		out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_EXPORTER_OTLP_" + infix + "PROTOCOL", Value: string(otlp.Protocol)})
+		out = append(out, TelemetryEnvVar{Key: prefix + "OTEL_EXPORTER_OTLP_" + infix + "PROTOCOL", Value: string(otlp.Protocol),
+			Description: label + " protocol (`grpc` or `http/protobuf`)"})
 	}
 	return out
+}
+
+// otlpLabel turns the OTLP env infix ("", "TRACES_", "METRICS_") into the
+// human-readable signal name used in the README env-var descriptions.
+func otlpLabel(infix string) string {
+	switch infix {
+	case "TRACES_":
+		return "OTLP traces"
+	case "METRICS_":
+		return "OTLP metrics"
+	default:
+		return "OTLP"
+	}
 }
