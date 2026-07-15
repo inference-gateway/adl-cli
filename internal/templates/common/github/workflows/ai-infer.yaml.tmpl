@@ -105,6 +105,15 @@ jobs:
         with:
           version: 3.48.0
           repo-token: ${{`{{ steps.app-token.outputs.token }}`}}
+
+      - name: Install ADL CLI
+        env:
+          VERSION: v{{ .Metadata.CLIVersion }}
+        run: |
+          curl -fsSL \
+            -H "Authorization: Bearer ${{`{{ steps.app-token.outputs.token }}`}}" \
+            https://raw.githubusercontent.com/inference-gateway/adl-cli/v{{ .Metadata.CLIVersion }}/install.sh | bash
+          adl --version
 {{- if eq .Language "go" }}
 
       - name: Set up Go
@@ -157,7 +166,7 @@ jobs:
           skills: |
             adl
           bash-allow-append: >-
-            ^task( .*)?${{- if eq .Language "go" }},^go( .*)?${{- else if eq .Language "rust" }},^cargo( .*)?$,^rustup( .*)?$,^rustc( .*)?${{- else if eq .Language "typescript" }},^bun( .*)?$,^node( .*)?$,^npm( .*)?$,^npx( .*)?${{- end }}
+            ^adl( .*)?$,^task( .*)?${{- if eq .Language "go" }},^go( .*)?${{- else if eq .Language "rust" }},^cargo( .*)?$,^rustup( .*)?$,^rustc( .*)?${{- else if eq .Language "typescript" }},^bun( .*)?$,^node( .*)?$,^npm( .*)?$,^npx( .*)?${{- end }}
           anthropic-api-key: ${{`{{ secrets.ANTHROPIC_API_KEY }}`}}
           openai-api-key: ${{`{{ secrets.OPENAI_API_KEY }}`}}
           google-api-key: ${{`{{ secrets.GOOGLE_API_KEY }}`}}
