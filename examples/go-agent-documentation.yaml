@@ -1,0 +1,68 @@
+---
+apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: go-agent-documentation
+  description: "Go A2A agent that ships hand-authored documentation pages scaffolded from spec.documentation.pages"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  card:
+    protocolVersion: "0.3.0"
+    preferredTransport: JSONRPC
+    defaultInputModes:
+      - text
+    defaultOutputModes:
+      - text
+  agent:
+    provider: deepseek
+    model: deepseek-v4-flash
+    systemPrompt: |
+      You are a documentation-friendly assistant. The generated project ships
+      its own hand-authored docs under docs/, scaffolded as stubs from
+      spec.documentation.pages for the maintainers to fill in.
+    maxTokens: 4096
+    temperature: 0.3
+  # spec.documentation.pages declares hand-authored documentation pages the
+  # generated project owns and ships in-tree. For each entry the generator seeds
+  # a stub markdown file at 'path' (headed with 'title'), and only if the file
+  # does not already exist - existing docs are never overwritten. This is
+  # distinct from spec.card.documentationUrl, which is a single link to
+  # already-published external docs. 'description' is optional and, like the one
+  # collected by `adl init`, documents intent for the maintainer.
+  documentation:
+    pages:
+      - title: Getting Started
+        path: docs/getting-started.md
+      - title: Architecture
+        path: docs/architecture.md
+        description: How the agent, tools, and skills fit together
+      - title: Deployment
+        path: docs/deployment.md
+        description: Deployment guide for production environments
+  config:
+    tools:
+      read:
+        enabled: true
+        max_lines: 2000
+  tools:
+    - id: read
+  server:
+    port: 8080
+    scheme: http
+    debug: false
+    auth:
+      enabled: false
+  language:
+    go:
+      module: "github.com/inference-gateway/adl-cli/test-output"
+      version: "1.26.4"
+  development:
+    sandbox:
+      flox:
+        enabled: true
+      devcontainer:
+        enabled: false

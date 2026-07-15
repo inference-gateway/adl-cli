@@ -130,6 +130,7 @@ tasks:
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-artifacts-minio.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-telemetry.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-ai.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-documentation.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/cloudrun-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/cloudrun-ghcr-agent.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/kubernetes-agent.yaml
@@ -157,6 +158,7 @@ tasks:
           - go-agent-artifacts-minio
           - go-agent-telemetry
           - go-agent-ai
+          - go-agent-documentation
           - cloudrun-agent
           - cloudrun-ghcr-agent
           - kubernetes-agent
