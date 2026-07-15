@@ -585,6 +585,31 @@ func collectDeploymentSCM(ans *answers) {
 	ans.Gemini = slices.Contains(orchestrators, "gemini")
 	ans.Opencode = slices.Contains(orchestrators, "opencode")
 	ans.Infer = slices.Contains(orchestrators, "infer")
+
+	// claudecode and infer generate workflows that authenticate with a
+	// GitHub App; let the user override the repository secret names.
+	secretFields := []huh.Field{}
+	claudeAppID, claudeAppKey := "CLAUDE_APP_ID", "CLAUDE_APP_PRIVATE_KEY"
+	inferAppID, inferAppKey := "INFER_APP_ID", "INFER_APP_PRIVATE_KEY"
+	if ans.Claudecode {
+		secretFields = append(secretFields,
+			huh.NewInput().Title("Claude Code GitHub App client ID secret name").Value(&claudeAppID),
+			huh.NewInput().Title("Claude Code GitHub App private key secret name").Value(&claudeAppKey),
+		)
+	}
+	if ans.Infer {
+		secretFields = append(secretFields,
+			huh.NewInput().Title("Infer GitHub App client ID secret name").Value(&inferAppID),
+			huh.NewInput().Title("Infer GitHub App private key secret name").Value(&inferAppKey),
+		)
+	}
+	if len(secretFields) > 0 {
+		runFields(secretFields)
+	}
+	ans.ClaudecodeAppIDSecret = nonDefault(claudeAppID, "CLAUDE_APP_ID")
+	ans.ClaudecodeAppPrivateKeySecret = nonDefault(claudeAppKey, "CLAUDE_APP_PRIVATE_KEY")
+	ans.InferAppIDSecret = nonDefault(inferAppID, "INFER_APP_ID")
+	ans.InferAppPrivateKeySecret = nonDefault(inferAppKey, "INFER_APP_PRIVATE_KEY")
 }
 
 // wizardServices runs the "add another service" loop.

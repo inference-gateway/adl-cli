@@ -218,11 +218,20 @@ type orchestratorToggle struct {
 // orchestratorsBlock mirrors spec.development.ai.orchestrators: each
 // coding agent is toggled independently and defaults to disabled.
 type orchestratorsBlock struct {
-	Claudecode *orchestratorToggle `yaml:"claudecode,omitempty"`
-	Codex      *orchestratorToggle `yaml:"codex,omitempty"`
-	Gemini     *orchestratorToggle `yaml:"gemini,omitempty"`
-	Opencode   *orchestratorToggle `yaml:"opencode,omitempty"`
-	Infer      *orchestratorToggle `yaml:"infer,omitempty"`
+	Claudecode *appOrchestratorToggle `yaml:"claudecode,omitempty"`
+	Codex      *orchestratorToggle    `yaml:"codex,omitempty"`
+	Gemini     *orchestratorToggle    `yaml:"gemini,omitempty"`
+	Opencode   *orchestratorToggle    `yaml:"opencode,omitempty"`
+	Infer      *appOrchestratorToggle `yaml:"infer,omitempty"`
+}
+
+// appOrchestratorToggle is an orchestrator switch that additionally carries
+// the GitHub App secret names used by its generated workflow (claudecode,
+// infer). Empty values are omitted and the schema defaults apply.
+type appOrchestratorToggle struct {
+	Enabled             bool   `yaml:"enabled"`
+	AppIDSecret         string `yaml:"appIdSecret,omitempty"`
+	AppPrivateKeySecret string `yaml:"appPrivateKeySecret,omitempty"`
 }
 
 // aiBlock mirrors spec.development.ai: coding-agent orchestrators nested
@@ -337,9 +346,9 @@ type adlData struct {
 		} `yaml:"deployment,omitempty"`
 		Documentation *struct {
 			Pages []struct {
-					Title       string `yaml:"title"`
-					Path        string `yaml:"path"`
-					Description string `yaml:"description,omitempty"`
+				Title       string `yaml:"title"`
+				Path        string `yaml:"path"`
+				Description string `yaml:"description,omitempty"`
 			} `yaml:"pages,omitempty"`
 		} `yaml:"documentation,omitempty"`
 		Examples []struct {
@@ -456,6 +465,14 @@ type answers struct {
 	Gemini     bool
 	Opencode   bool
 	Infer      bool
+
+	// GitHub App secret names for the claudecode / infer workflows. Empty
+	// means the schema default (CLAUDE_APP_ID / INFER_APP_ID etc.) and the
+	// field is omitted from the manifest.
+	ClaudecodeAppIDSecret         string
+	ClaudecodeAppPrivateKeySecret string
+	InferAppIDSecret              string
+	InferAppPrivateKeySecret      string
 }
 
 // defaultToolSchema returns the placeholder JSON schema generated for a freshly
@@ -785,11 +802,19 @@ func buildADL(ans answers) *adlData {
 	ensureDevelopment(adl)
 	adl.Spec.Development.AI = &aiBlock{
 		Orchestrators: &orchestratorsBlock{
-			Claudecode: &orchestratorToggle{Enabled: ans.Claudecode},
-			Codex:      &orchestratorToggle{Enabled: ans.Codex},
-			Gemini:     &orchestratorToggle{Enabled: ans.Gemini},
-			Opencode:   &orchestratorToggle{Enabled: ans.Opencode},
-			Infer:      &orchestratorToggle{Enabled: ans.Infer},
+			Claudecode: &appOrchestratorToggle{
+				Enabled:             ans.Claudecode,
+				AppIDSecret:         ans.ClaudecodeAppIDSecret,
+				AppPrivateKeySecret: ans.ClaudecodeAppPrivateKeySecret,
+			},
+			Codex:    &orchestratorToggle{Enabled: ans.Codex},
+			Gemini:   &orchestratorToggle{Enabled: ans.Gemini},
+			Opencode: &orchestratorToggle{Enabled: ans.Opencode},
+			Infer: &appOrchestratorToggle{
+				Enabled:             ans.Infer,
+				AppIDSecret:         ans.InferAppIDSecret,
+				AppPrivateKeySecret: ans.InferAppPrivateKeySecret,
+			},
 		},
 	}
 
@@ -1135,8 +1160,24 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 
 	tui.Println(tui.Header("AI Assistant Documentation"))
 	ans.Claudecode = promptBoolWithConfig("ai", useDefaults, "Enable Claude Code (CLAUDE.md + claude-code in sandboxes)", false)
+	if ans.Claudecode {
+		ans.ClaudecodeAppIDSecret = nonDefault(
+			conditionalPrompt(useDefaults, "GitHub App client ID secret name for Claude Code", "CLAUDE_APP_ID"), "CLAUDE_APP_ID")
+		ans.ClaudecodeAppPrivateKeySecret = nonDefault(
+			conditionalPrompt(useDefaults, "GitHub App private key secret name for Claude Code", "CLAUDE_APP_PRIVATE_KEY"), "CLAUDE_APP_PRIVATE_KEY")
+	}
 
 	return ans
+}
+
+// nonDefault returns v unless it equals the schema default, in which case it
+// returns "" so the field is omitted from the manifest and the default keeps
+// applying.
+func nonDefault(v, def string) string {
+	if v == def {
+		return ""
+	}
+	return v
 }
 
 // ensureDevelopment lazily initialises adl.Spec.Development so that callers
