@@ -1175,10 +1175,14 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 
 	tui.Println(tui.Header("AI Assistant Documentation"))
 	ans.Claudecode = promptBoolWithConfig("ai", useDefaults, "Enable Claude Code (CLAUDE.md + claude-code in sandboxes)", false)
+	ans.ClaudecodeAppIDSecret = "CLAUDE_APP_ID"
+	ans.ClaudecodeAppPrivateKeySecret = "CLAUDE_APP_PRIVATE_KEY"
 	if ans.Claudecode {
 		ans.ClaudecodeAppIDSecret = conditionalPrompt(useDefaults, "GitHub App client ID secret name for Claude Code", "CLAUDE_APP_ID")
 		ans.ClaudecodeAppPrivateKeySecret = conditionalPrompt(useDefaults, "GitHub App private key secret name for Claude Code", "CLAUDE_APP_PRIVATE_KEY")
 	}
+	ans.InferAppIDSecret = "INFER_APP_ID"
+	ans.InferAppPrivateKeySecret = "INFER_APP_PRIVATE_KEY"
 
 	return ans
 }
