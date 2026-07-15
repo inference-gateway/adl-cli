@@ -25,6 +25,9 @@ validates each manifest and `task examples:generate` scaffolds each one into
   server enabled
 - `go-agent-telemetry.yaml` - Go agent wired for OpenTelemetry - metrics server,
   OTLP traces, and per-tool-call spans
+- `go-agent-documentation.yaml` - Go agent that ships hand-authored documentation
+  pages (`spec.documentation.pages`); the generator seeds stub `docs/*.md` files
+  for the maintainers to fill in
 
 ### Rust
 

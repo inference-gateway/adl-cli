@@ -289,6 +289,7 @@ func collectAnswersWizard(projectName string) answers {
 	ans.Services = wizardServices()
 	ans.Tools = wizardTools(ans.Services)
 	ans.Skills = wizardSkills()
+	ans.DocumentationPages = wizardDocumentationPages()
 
 	// ---- server ----
 	portStr := "8080"
@@ -788,6 +789,63 @@ func wizardSkills() []skillAnswer {
 		}
 	}
 	return skills
+}
+
+// wizardDocumentationPages runs the "add another documentation page" loop.
+func wizardDocumentationPages() []docPageAnswer {
+	var add bool
+	if err := tui.RunForm(huh.NewForm(huh.NewGroup(
+		leftConfirm().
+			Title("Add documentation pages?").
+			Description("Hand-authored docs linked from the generated README.").
+			Value(&add),
+	))); err != nil {
+		return nil
+	}
+	if !add {
+		return nil
+	}
+
+	var pages []docPageAnswer
+	for {
+		var (
+			title, path, description string
+			more                     bool
+		)
+		form := huh.NewForm(
+			huh.NewGroup(
+				huh.NewInput().
+					Title("Page title").
+					Description("e.g. Architecture").
+					Value(&title).
+					Validate(requireNonEmpty),
+				huh.NewInput().
+					Title("Page path").
+					Description("e.g. docs/architecture.md").
+					Value(&path).
+					Validate(requireNonEmpty),
+				huh.NewInput().
+					Title("Description").
+					Description("Optional - e.g. How the mock LLM client is wired.").
+					Value(&description),
+				leftConfirm().Title("Add another page?").Value(&more),
+			),
+		)
+		if err := tui.RunForm(form); err != nil {
+			return pages
+		}
+
+		pages = append(pages, docPageAnswer{
+			Title:       strings.TrimSpace(title),
+			Path:        strings.TrimSpace(path),
+			Description: strings.TrimSpace(description),
+		})
+
+		if !more {
+			break
+		}
+	}
+	return pages
 }
 
 // printInitSummary renders the closing summary panel and next steps. It is

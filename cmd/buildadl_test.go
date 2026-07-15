@@ -123,6 +123,70 @@ func TestBuildADLAIPoweredEmptyProviderModel(t *testing.T) {
 	}
 }
 
+// TestBuildADLDocumentationPages verifies that documentation pages are
+// rendered in the manifest and omitted when empty.
+func TestBuildADLDocumentationPages(t *testing.T) {
+	t.Run("with pages", func(t *testing.T) {
+		ans := answers{
+			Name:     "doc-agent",
+			Language: "go",
+			DocumentationPages: []docPageAnswer{
+				{Title: "Architecture", Path: "docs/architecture.md", Description: "How it works"},
+				{Title: "Deployment", Path: "docs/deployment.md"},
+			},
+		}
+
+		adl := buildADL(ans)
+		if adl.Spec.Documentation == nil {
+			t.Fatal("expected documentation block")
+		}
+		if len(adl.Spec.Documentation.Pages) != 2 {
+			t.Fatalf("expected 2 pages, got %d", len(adl.Spec.Documentation.Pages))
+		}
+		if adl.Spec.Documentation.Pages[0].Title != "Architecture" {
+			t.Errorf("expected title Architecture, got %q", adl.Spec.Documentation.Pages[0].Title)
+		}
+		if adl.Spec.Documentation.Pages[0].Description != "How it works" {
+			t.Errorf("expected description, got %q", adl.Spec.Documentation.Pages[0].Description)
+		}
+		if adl.Spec.Documentation.Pages[1].Description != "" {
+			t.Errorf("expected empty description for second page, got %q", adl.Spec.Documentation.Pages[1].Description)
+		}
+
+		got := renderADL(t, ans)
+		for _, want := range []string{
+			"documentation:",
+			"pages:",
+			"title: Architecture",
+			"path: docs/architecture.md",
+			"description: How it works",
+			"title: Deployment",
+			"path: docs/deployment.md",
+		} {
+			if !strings.Contains(got, want) {
+				t.Errorf("manifest missing %q, got:\n%s", want, got)
+			}
+		}
+	})
+
+	t.Run("empty", func(t *testing.T) {
+		ans := answers{
+			Name:     "no-doc-agent",
+			Language: "go",
+		}
+
+		adl := buildADL(ans)
+		if adl.Spec.Documentation != nil {
+			t.Error("expected no documentation block when no pages provided")
+		}
+
+		got := renderADL(t, ans)
+		if strings.Contains(got, "documentation:") {
+			t.Errorf("manifest should not contain documentation block, got:\n%s", got)
+		}
+	})
+}
+
 // TestBuildADLLanguages asserts that exactly the chosen language block is
 // emitted, with its vendor extension points rendered as empty lists.
 func TestBuildADLLanguages(t *testing.T) {
