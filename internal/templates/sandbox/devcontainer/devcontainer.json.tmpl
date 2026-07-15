@@ -43,12 +43,16 @@
     }
   },
   "forwardPorts": [{{ .ADL.Spec.Server.Port }}],
+  {{- $infer := "" }}
+  {{- if .AIToggles.Infer }}
+  {{- $infer = " && curl -fsSL https://raw.githubusercontent.com/inference-gateway/cli/main/install.sh | bash -s -- --version v0.146.0" }}
+  {{- end }}
   {{- if eq .Language "go" }}
-  "postCreateCommand": "go mod download",
+  "postCreateCommand": "go mod download{{ $infer }}",
   {{- else if eq .Language "rust" }}
-  "postCreateCommand": "cargo build",
+  "postCreateCommand": "cargo build{{ $infer }}",
   {{- else if eq .Language "typescript" }}
-  "postCreateCommand": "corepack enable && pnpm install",
+  "postCreateCommand": "corepack enable && pnpm install{{ $infer }}",
   {{- end }}
   "remoteUser": "vscode"
 }

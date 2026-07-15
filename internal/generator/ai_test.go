@@ -400,3 +400,43 @@ func TestGenerator_AI_InferWorkflowContent(t *testing.T) {
 	attrs := readGenerated(t, out, ".gitattributes")
 	assertContains(t, attrs, ".github/workflows/infer.yml linguist-generated=true", ".gitattributes")
 }
+
+func TestGenerator_AI_InferSandboxInstall(t *testing.T) {
+	sandboxYAML := `    sandbox:
+      flox:
+        enabled: true
+      devcontainer:
+        enabled: true
+`
+	t.Run("infer enabled installs infer in flox and devcontainer", func(t *testing.T) {
+		tmp := t.TempDir()
+		manifest := writeManifest(t, tmp, `  development:
+    ai:
+      orchestrators:
+        infer:
+          enabled: true
+`+sandboxYAML)
+		out := filepath.Join(tmp, "out")
+		mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
+
+		flox := readGenerated(t, out, ".flox/env/manifest.toml")
+		assertContains(t, flox, `infer.flake = "github:inference-gateway/cli/v0.146.0"`, "flox manifest")
+
+		dc := readGenerated(t, out, ".devcontainer/devcontainer.json")
+		assertContains(t, dc, "install.sh | bash -s -- --version v0.146.0", "devcontainer postCreateCommand")
+	})
+
+	t.Run("infer disabled leaves sandbox untouched", func(t *testing.T) {
+		tmp := t.TempDir()
+		manifest := writeManifest(t, tmp, `  development:
+`+sandboxYAML)
+		out := filepath.Join(tmp, "out")
+		mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
+
+		flox := readGenerated(t, out, ".flox/env/manifest.toml")
+		assertNotContains(t, flox, "infer.flake", "flox manifest")
+
+		dc := readGenerated(t, out, ".devcontainer/devcontainer.json")
+		assertNotContains(t, dc, "install.sh", "devcontainer postCreateCommand")
+	})
+}

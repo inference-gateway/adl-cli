@@ -61,6 +61,10 @@ claude-code.pkg-path = "claude-code"
 claude-code.version = "^2.1.201"
 claude-code.pkg-group = "common"
 {{- end }}
+{{- if .AIToggles.Infer }}
+
+infer.flake = "github:inference-gateway/cli/v0.146.0"
+{{- end }}
 {{- if .SandboxDeps.HasDeps }}
 
 # Extra packages declared in spec.development.deps. Each entry is rendered
