@@ -96,9 +96,6 @@ func TestGenerator_TelemetryEnabled_EndToEnd(t *testing.T) {
 		t.Errorf("go.mod missing OpenTelemetry require:\n%s", goModBytes)
 	}
 
-	// The ADK builds the OTel resource (service.name / service.version) from
-	// cfg.A2A.AgentName / cfg.A2A.AgentVersion, which have no env mapping. main.go
-	// must propagate the build-time ldflags vars or those attributes export empty.
 	mainBytes, err := os.ReadFile(filepath.Join(outDir, "main.go"))
 	if err != nil {
 		t.Fatalf("read main.go: %v", err)
