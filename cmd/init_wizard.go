@@ -614,14 +614,10 @@ func collectDeploymentSCM(ans *answers) {
 	if len(secretFields) > 0 {
 		runFields(secretFields)
 	}
-	if ans.Claudecode {
-		ans.ClaudecodeAppIDSecret = claudeAppID
-		ans.ClaudecodeAppPrivateKeySecret = claudeAppKey
-	}
-	if ans.Infer {
-		ans.InferAppIDSecret = inferAppID
-		ans.InferAppPrivateKeySecret = inferAppKey
-	}
+	ans.ClaudecodeAppIDSecret = claudeAppID
+	ans.ClaudecodeAppPrivateKeySecret = claudeAppKey
+	ans.InferAppIDSecret = inferAppID
+	ans.InferAppPrivateKeySecret = inferAppKey
 }
 
 // wizardServices runs the "add another service" loop.
