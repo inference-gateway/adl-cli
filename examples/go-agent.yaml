@@ -227,6 +227,10 @@ spec:
         enabled: true
       devcontainer:
         enabled: false
+  examples:
+    - title: OTel collector stack
+      path: examples/otel/
+      description: docker-compose stack with tracing enabled
   # hooks:
   #   post:
   #     - "go mod tidy"

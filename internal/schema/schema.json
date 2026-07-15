@@ -106,6 +106,11 @@
         "hooks": { "$ref": "#/definitions/Hooks" },
         "scm": { "$ref": "#/definitions/SCM" },
         "development": { "$ref": "#/definitions/DevelopmentConfig" },
+        "examples": {
+          "type": "array",
+          "description": "Hand-authored runnable examples linked from the generated README. The generator does not scaffold them, it only validates the link targets exist and warns if missing.",
+          "items": { "$ref": "#/definitions/Example" }
+        },
         "deployment": { "$ref": "#/definitions/DeploymentConfig" },
         "telemetry": { "$ref": "#/definitions/TelemetryConfig" }
       }
@@ -607,6 +612,26 @@
       "required": ["enabled"],
       "properties": {
         "enabled": { "type": "boolean" }
+      }
+    },
+    "Example": {
+      "type": "object",
+      "description": "A hand-authored example referenced by spec.examples. The generator does not scaffold the example, it only validates the link target exists and warns if missing.",
+      "required": ["title", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Display title for the example link in the generated README."
+        },
+        "path": {
+          "type": "string",
+          "description": "Relative path to the example directory or file."
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional description of the example."
+        }
       }
     },
     "DeploymentConfig": {
