@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.48.5](https://github.com/inference-gateway/adl-cli/compare/v0.48.4...v0.48.5) (2026-07-15)
+
+### 🔧 Miscellaneous
+
+* **deps:** update Go and flox dependencies ([cbeecd8](https://github.com/inference-gateway/adl-cli/commit/cbeecd84c60d762eb5f2a1d361edc187a29c967c))
+
 ## [0.48.4](https://github.com/inference-gateway/adl-cli/compare/v0.48.3...v0.48.4) (2026-07-15)
 
 ### 🐛 Bug Fixes
