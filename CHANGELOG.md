@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.48.1](https://github.com/inference-gateway/adl-cli/compare/v0.48.0...v0.48.1) (2026-07-15)
+
+### 🐛 Bug Fixes
+
+* **templates:** install ADL CLI in generated AI workflows ([#282](https://github.com/inference-gateway/adl-cli/issues/282)) ([b100d5a](https://github.com/inference-gateway/adl-cli/commit/b100d5afe32dceb6dd0ab96d490a7933c72be905)), references [inference-gateway/mock-agent#59](https://github.com/inference-gateway/mock-agent/issues/59)
+
 ## [0.48.0](https://github.com/inference-gateway/adl-cli/compare/v0.47.1...v0.48.0) (2026-07-14)
 
 ### ✨ Features
