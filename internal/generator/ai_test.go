@@ -294,7 +294,7 @@ func TestGenerator_AI_ClaudeWorkflowGoContent(t *testing.T) {
 	assertContains(t, body, "actions: read", "Claude Code workflow body")
 
 	assertContains(t, body, "Set up Go", "Claude Code workflow body (go)")
-	assertContains(t, body, "actions/setup-go@v6.5.0", "Claude Code workflow body (go)")
+	assertContains(t, body, "actions/setup-go@v7.0.0", "Claude Code workflow body (go)")
 	assertContains(t, body, "Install golangci-lint", "Claude Code workflow body (go)")
 	assertNotContains(t, body, "Set up Rust", "Claude Code workflow body (go)")
 	assertNotContains(t, body, "actions-rs/toolchain", "Claude Code workflow body (go)")
