@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.51.2](https://github.com/inference-gateway/adl-cli/compare/v0.51.1...v0.51.2) (2026-07-16)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump infer CLI v0.146.0 -> v0.147.1 ([#302](https://github.com/inference-gateway/adl-cli/issues/302)) ([a625caa](https://github.com/inference-gateway/adl-cli/commit/a625caaf2018abacb800fdeeecf7f5ea1d1e8838))
+* **deps:** update ADK version to v0.23.3 in generator tests and vendor files ([d285976](https://github.com/inference-gateway/adl-cli/commit/d2859766eda0d35af5c8e970bbc4f51f2a291a7f))
+* **deps:** update setup-go action to v7.0.0 in CI and release workflows ([7a7d8b6](https://github.com/inference-gateway/adl-cli/commit/7a7d8b629ace857c70c6956a220a66554d430215))
+
 ## [0.51.1](https://github.com/inference-gateway/adl-cli/compare/v0.51.0...v0.51.1) (2026-07-16)
 
 ### 🐛 Bug Fixes
