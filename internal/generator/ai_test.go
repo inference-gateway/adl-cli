@@ -299,6 +299,12 @@ func TestGenerator_AI_ClaudeWorkflowGoContent(t *testing.T) {
 	assertNotContains(t, body, "Set up Rust", "Claude Code workflow body (go)")
 	assertNotContains(t, body, "actions-rs/toolchain", "Claude Code workflow body (go)")
 
+	assertContains(t, body, "actions/create-github-app-token@v3.2.0", "Claude Code workflow body")
+	assertContains(t, body, "token: ${{ steps.app-token.outputs.token }}", "Claude Code workflow checkout token")
+	if strings.Index(body, "Generate GitHub App token") > strings.Index(body, "Checkout repository") {
+		t.Errorf("Claude Code workflow: 'Generate GitHub App token' must come before 'Checkout repository'")
+	}
+
 	assertContains(t, body, "arduino/setup-task@v3.0.0", "Claude Code workflow body")
 	assertContains(t, body, "Install ADL skill", "Claude Code workflow body")
 	assertContains(t, body, "raw.githubusercontent.com/inference-gateway/skills/main/skills/adl/SKILL.md", "Claude Code workflow body")
