@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.51.1](https://github.com/inference-gateway/adl-cli/compare/v0.51.0...v0.51.1) (2026-07-16)
+
+### 🐛 Bug Fixes
+
+* generate app token before checkout in claude workflow ([#301](https://github.com/inference-gateway/adl-cli/issues/301)) ([b233ecc](https://github.com/inference-gateway/adl-cli/commit/b233ecc70e5cf84813e4862712885cfbefbf05a2))
+
+### 🔧 Miscellaneous
+
+* **release:** update GitHub App credentials to use RELEASER_APP_ID and RELEASER_APP_PRIVATE_KEY ([ea93198](https://github.com/inference-gateway/adl-cli/commit/ea93198b331dd4aba5f91317dd1fbb51e5ea9b47))
+
 ## [0.51.0](https://github.com/inference-gateway/adl-cli/compare/v0.50.2...v0.51.0) (2026-07-15)
 
 ### ✨ Features
