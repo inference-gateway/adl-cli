@@ -78,7 +78,7 @@ func TestParse(t *testing.T) {
 }
 
 func TestResolve(t *testing.T) {
-	builtins := map[string]string{"github.com/inference-gateway/adk": "v0.23.2"}
+	builtins := map[string]string{"github.com/inference-gateway/adk": "v0.23.3"}
 
 	t.Run("empty input yields nothing", func(t *testing.T) {
 		entries, conflicts, err := Resolve(nil, builtins, "deps")
