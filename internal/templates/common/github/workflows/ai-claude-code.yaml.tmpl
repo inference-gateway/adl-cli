@@ -50,10 +50,18 @@ jobs:
       id-token: write
       actions: read
     steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3.2.0
+        with:
+          client-id: ${{`{{ secrets.`}}{{ .ADL.Spec.Development.AI.Orchestrators.Claudecode.AppIDSecret | default "CLAUDE_APP_ID" }}{{` }}`}}
+          private-key: ${{`{{ secrets.`}}{{ .ADL.Spec.Development.AI.Orchestrators.Claudecode.AppPrivateKeySecret | default "CLAUDE_APP_PRIVATE_KEY" }}{{` }}`}}
+
       - name: Checkout repository
         uses: actions/checkout@v7.0.0
         with:
           fetch-depth: 1
+          token: ${{`{{ steps.app-token.outputs.token }}`}}
 {{- if eq .Language "go" }}
 
       - name: Set up Go
@@ -133,16 +141,9 @@ jobs:
             echo "EOF" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Generate GitHub App token
-        id: app-token
-        uses: actions/create-github-app-token@v3.2.0
-        with:
-          client-id: ${{`{{ secrets.`}}{{ .ADL.Spec.Development.AI.Orchestrators.Claudecode.AppIDSecret | default "CLAUDE_APP_ID" }}{{` }}`}}
-          private-key: ${{`{{ secrets.`}}{{ .ADL.Spec.Development.AI.Orchestrators.Claudecode.AppPrivateKeySecret | default "CLAUDE_APP_PRIVATE_KEY" }}{{` }}`}}
-
       - name: Run Claude Code
         id: claude
-        uses: anthropics/claude-code-action@v1.0.174
+        uses: anthropics/claude-code-action@v1.0.175
         env:
           GH_TOKEN: ${{`{{ steps.app-token.outputs.token }}`}}
         with:
