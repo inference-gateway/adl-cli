@@ -162,6 +162,12 @@ type View struct {
 	// Go has no separate test-dependency notion.
 	GoRequires []Entry
 
+	// GoBuiltinEntries mirrors GoBuiltins as a sorted slice so the
+	// go.mod template can iterate over it as a single source of truth.
+	// When bumping a built-in version, update GoBuiltins (the map) and
+	// the template picks it up automatically.
+	GoBuiltinEntries []Entry
+
 	// GoTools holds Go executable dev tools (`vendor.devdeps`). Each
 	// entry is rendered both as a `// indirect` line in `require` (so
 	// the module is downloadable) and as a bare package path inside the
@@ -200,6 +206,8 @@ func ResolveADL(adl *schema.ADL) (View, error) {
 	}
 
 	lang := adl.Spec.Language
+
+	view.GoBuiltinEntries = goBuiltinEntries()
 
 	if lang.Go != nil && lang.Go.Vendor != nil {
 		deps, depConflicts, err := Resolve(lang.Go.Vendor.Deps, GoBuiltins, "deps")
@@ -280,4 +288,15 @@ func cloneMap(m map[string]string) map[string]string {
 		out[k] = v
 	}
 	return out
+}
+
+// goBuiltinEntries converts the GoBuiltins map to a sorted slice of Entry
+// so the go.mod template can iterate over it deterministically.
+func goBuiltinEntries() []Entry {
+	entries := make([]Entry, 0, len(GoBuiltins))
+	for name, version := range GoBuiltins {
+		entries = append(entries, Entry{Name: name, Version: version})
+	}
+	sort.Slice(entries, func(i, j int) bool { return entries[i].Name < entries[j].Name })
+	return entries
 }
