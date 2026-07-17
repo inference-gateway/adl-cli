@@ -66,7 +66,7 @@ func TestGoModTemplate_DeclaresCobra(t *testing.T) {
 	adl := minimalGoADL()
 	v, err := vendor.ResolveADL(adl)
 	if err != nil {
-			t.Fatalf("vendor.ResolveADL: %v", err)
+		t.Fatalf("vendor.ResolveADL: %v", err)
 	}
 	engine := NewWithRegistry("go.mod", r)
 	rendered, err := engine.Execute(tmpl, Context{ADL: adl, Language: "go", Vendor: v})

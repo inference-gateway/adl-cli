@@ -20,6 +20,8 @@ This repository contains the `adl` Go CLI for generating A2A agent projects from
 
 Follow standard Go conventions: tabs from `gofmt`, short package names, documented exported identifiers, and early returns for errors. Keep command code in `cmd/` thin and move reusable behavior into `internal/`. Template files use `.tmpl` suffixes and should follow existing registry patterns. When schema files change, regenerate Go types with `task generate-types`.
 
+Internal libraries (`github.com/inference-gateway/adl-cli/internal/...`) always use named imports (e.g. `vendor "github.com/inference-gateway/adl-cli/internal/vendor"`) for clarity and consistency.
+
 ## Testing Guidelines
 
 Tests use Go's standard `testing` package and live in `*_test.go` files next to the code under test. Prefer table-driven tests for validators, generators, and template registries. Run `task test` before submitting changes; use `task examples:test` or `task examples:generate` when modifying templates, schema behavior, or examples. Add regression tests for fixes that affect CLI output, validation, or generated files.
