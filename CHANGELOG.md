@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.52.1](https://github.com/inference-gateway/adl-cli/compare/v0.52.0...v0.52.1) (2026-07-17)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump github.com/sethvargo/go-envconfig from 1.3.1 to 1.4.0 in templates ([#306](https://github.com/inference-gateway/adl-cli/issues/306)) ([935a414](https://github.com/inference-gateway/adl-cli/commit/935a4140539ff07dd3244a4ca2f4fcafd00e53bc))
+
 ## [0.52.0](https://github.com/inference-gateway/adl-cli/compare/v0.51.6...v0.52.0) (2026-07-17)
 
 ### ✨ Features
