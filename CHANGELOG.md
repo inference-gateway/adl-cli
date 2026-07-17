@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.51.5](https://github.com/inference-gateway/adl-cli/compare/v0.51.4...v0.51.5) (2026-07-17)
+
+### 🔧 Miscellaneous
+
+* **deps:** update ADK version to v0.23.4 in generator tests and templates ([53fc0f6](https://github.com/inference-gateway/adl-cli/commit/53fc0f68a83fc9a84fd060c4dc8e1ee64fbb1ff1))
+* **deps:** update infer-action version to v0.34.1 in workflow files ([594ef72](https://github.com/inference-gateway/adl-cli/commit/594ef722c6dba2b003e74ef944e4e073b6ff8de9))
+
 ## [0.51.4](https://github.com/inference-gateway/adl-cli/compare/v0.51.3...v0.51.4) (2026-07-17)
 
 ### 🐛 Bug Fixes
