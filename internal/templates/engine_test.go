@@ -470,13 +470,36 @@ func TestREADMETemplate_TitleIsHumanized(t *testing.T) {
 	}
 }
 
-// TestREADMETemplate_TelemetryEnvVars guards the regression from
+// TestREADMETemplate_LinksToConfigurations verifies the README delegates the
+// env-var reference to CONFIGURATIONS.md instead of inlining the A2A_* table.
+func TestREADMETemplate_LinksToConfigurations(t *testing.T) {
+	registry, err := NewRegistry("go")
+	if err != nil {
+		t.Fatalf("NewRegistry: %v", err)
+	}
+	engine := NewWithRegistry("minimal", registry)
+
+	out, err := engine.ExecuteTemplate("docs/README.md", Context{ADL: minimalGoADL(), Language: "go"})
+	if err != nil {
+		t.Fatalf("ExecuteTemplate(README.md): %v", err)
+	}
+
+	if !strings.Contains(out, "[CONFIGURATIONS.md](CONFIGURATIONS.md)") {
+		t.Error("README missing link to CONFIGURATIONS.md")
+	}
+	if strings.Contains(out, "A2A_AGENT_CLIENT_PROVIDER") {
+		t.Error("README still inlines the A2A_* env var table")
+	}
+}
+
+// TestCONFIGURATIONSTemplate_TelemetryEnvVars guards the regression from
 // inference-gateway/mock-agent#64: once telemetry moved from spec.config.telemetry
 // (which the "Custom Configuration" loop documented) to top-level spec.telemetry,
-// the README stopped documenting any telemetry env vars even though .env.example
-// still emits them. The env-var table must carry the language-specific master
-// switch plus every telemetryEnvVars entry, and stay empty when telemetry is off.
-func TestREADMETemplate_TelemetryEnvVars(t *testing.T) {
+// the docs stopped documenting any telemetry env vars even though .env.example
+// still emits them. The env-var table (now in CONFIGURATIONS.md) must carry the
+// language-specific master switch plus every telemetryEnvVars entry, and stay
+// empty when telemetry is off.
+func TestCONFIGURATIONSTemplate_TelemetryEnvVars(t *testing.T) {
 	enabledGo := &schema.TelemetryConfig{
 		Enabled: true,
 		Traces: &schema.TelemetryTracesConfig{
@@ -514,7 +537,7 @@ func TestREADMETemplate_TelemetryEnvVars(t *testing.T) {
 			},
 		},
 		{
-			name: "typescript enabled documents bare vars",
+			name: "typescript enabled documents A2A_-prefixed vars",
 			lang: "typescript",
 			adl: func() *schema.ADL {
 				adl := minimalTypeScriptADL()
@@ -529,10 +552,10 @@ func TestREADMETemplate_TelemetryEnvVars(t *testing.T) {
 				return adl
 			},
 			wantRows: []string{
-				"| **Telemetry** | `TELEMETRY_ENABLE` | Enable OpenTelemetry instrumentation | `true` |",
-				"| **Telemetry** | `OTEL_TRACES_EXPORTER` |",
+				"| **Telemetry** | `A2A_TELEMETRY_ENABLE` | Enable OpenTelemetry instrumentation | `true` |",
+				"| **Telemetry** | `A2A_OTEL_TRACES_EXPORTER` |",
 			},
-			wantAbsent: []string{"A2A_TELEMETRY_ENABLE"},
+			wantAbsent: []string{"| `TELEMETRY_ENABLE`", "| `OTEL_TRACES_EXPORTER`"},
 		},
 		{
 			name: "go disabled documents no telemetry rows",
@@ -554,19 +577,19 @@ func TestREADMETemplate_TelemetryEnvVars(t *testing.T) {
 			}
 			engine := NewWithRegistry("minimal", registry)
 
-			out, err := engine.ExecuteTemplate("docs/README.md", Context{ADL: tt.adl(), Language: tt.lang})
+			out, err := engine.ExecuteTemplate("docs/CONFIGURATIONS.md", Context{ADL: tt.adl(), Language: tt.lang})
 			if err != nil {
-				t.Fatalf("ExecuteTemplate(README.md): %v", err)
+				t.Fatalf("ExecuteTemplate(CONFIGURATIONS.md): %v", err)
 			}
 
 			for _, row := range tt.wantRows {
 				if !strings.Contains(out, row) {
-					t.Errorf("README missing telemetry row %q", row)
+					t.Errorf("CONFIGURATIONS.md missing telemetry row %q", row)
 				}
 			}
 			for _, absent := range tt.wantAbsent {
 				if strings.Contains(out, absent) {
-					t.Errorf("README unexpectedly contains %q", absent)
+					t.Errorf("CONFIGURATIONS.md unexpectedly contains %q", absent)
 				}
 			}
 		})

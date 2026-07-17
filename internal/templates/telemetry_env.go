@@ -17,23 +17,24 @@ type TelemetryEnvVar struct {
 
 // telemetryEnvVars maps a manifest's spec.telemetry exporter blocks to the
 // OpenTelemetry SDK environment variables. It returns only the exporter
-// variables; the master switch (A2A_TELEMETRY_ENABLE / TELEMETRY_ENABLE) is
-// emitted by the template since its name is language-specific.
+// variables; the master switch (A2A_TELEMETRY_ENABLE) is emitted by the
+// template.
 //
-// The key prefix is language-specific:
+// Every variable carries the A2A_ prefix regardless of language, so agents
+// document one consistent surface:
 //   - Go reads the OTel settings through the ADK config, which nests the whole
 //     server config under the A2A_ prefix (config.Config.A2A is
 //     `env:",prefix=A2A_"`) while its OTelConfig carries no prefix of its own -
-//     so every standard OTEL_* name is emitted as A2A_OTEL_*. The Go ADK only
+//     so every standard OTEL_* name is read as A2A_OTEL_*. The Go ADK only
 //     exposes the shared OTEL_EXPORTER_OTLP_{ENDPOINT,PROTOCOL} fields (it has no
 //     per-signal variants), so it always emits that shared pair from whichever
 //     signal pushes over OTLP.
-//   - TypeScript hands the OTLP settings straight to the OpenTelemetry Node SDK,
-//     which reads the bare OTEL_* names from process.env, so they stay
-//     unprefixed. The Node SDK honors the per-signal
-//     OTEL_EXPORTER_OTLP_{TRACES,METRICS}_* names, so when traces and metrics
-//     push to different collectors it emits those and otherwise collapses to the
-//     shared pair.
+//   - TypeScript hands the OTLP settings to the OpenTelemetry Node SDK, which
+//     reads the bare OTEL_* names from process.env - the generated index.ts
+//     mirrors each A2A_OTEL_* var onto its bare name before SDK init. The Node
+//     SDK honors the per-signal OTEL_EXPORTER_OTLP_{TRACES,METRICS}_* names, so
+//     when traces and metrics push to different collectors it emits those and
+//     otherwise collapses to the shared pair.
 //
 // Signal selection follows the schema's declarative-config model: a present
 // traces/metrics exporter sets OTEL_{TRACES,METRICS}_EXPORTER to the chosen key
@@ -53,10 +54,7 @@ func telemetryEnvVars(adl *schema.ADL) []TelemetryEnvVar {
 		return nil
 	}
 
-	prefix := ""
-	if lang == "go" {
-		prefix = "A2A_"
-	}
+	const prefix = "A2A_"
 
 	tel := adl.Spec.Telemetry
 
@@ -130,9 +128,9 @@ func exporterValue(configured bool, key string) string {
 }
 
 // appendOTLPEnv appends the endpoint/protocol vars for one OTLP exporter using
-// the given prefix ("" for TypeScript, "A2A_" for Go) and infix ("" shared, or
-// "TRACES_"/"METRICS_" per-signal). A nil exporter or an omitted field
-// contributes nothing so the SDK default applies.
+// the given prefix and infix ("" shared, or "TRACES_"/"METRICS_" per-signal).
+// A nil exporter or an omitted field contributes nothing so the SDK default
+// applies.
 func appendOTLPEnv(out []TelemetryEnvVar, prefix, infix string, otlp *schema.TelemetryOTLPExporter) []TelemetryEnvVar {
 	if otlp == nil {
 		return out
