@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.51.4](https://github.com/inference-gateway/adl-cli/compare/v0.51.3...v0.51.4) (2026-07-17)
+
+### 🐛 Bug Fixes
+
+* **ci:** update version pins in tests and devcontainer template to match latest deps ([#303](https://github.com/inference-gateway/adl-cli/issues/303)) ([ee7d696](https://github.com/inference-gateway/adl-cli/commit/ee7d69642b2538670e30f267dc2b1797f56648ac))
+
 ## [0.51.3](https://github.com/inference-gateway/adl-cli/compare/v0.51.2...v0.51.3) (2026-07-17)
 
 ### 🔧 Miscellaneous
