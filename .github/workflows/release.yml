@@ -58,7 +58,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v7.2.3
         with:
           install-only: true
-          version: v2.16.0
+          version: v2.17.0
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v22
