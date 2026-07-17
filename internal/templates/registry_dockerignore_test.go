@@ -68,6 +68,7 @@ func TestDockerignoreTemplate_ContainsExpectedExclusions(t *testing.T) {
 		"target/",
 		"node_modules/",
 		"README.md",
+		"CONFIGURATIONS.md",
 	}
 	for _, line := range wantLines {
 		if !strings.Contains(out, line) {

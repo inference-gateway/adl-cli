@@ -67,10 +67,11 @@ func TestTelemetryEnvVars_GoUsesA2APrefix(t *testing.T) {
 	}
 }
 
-// TestTelemetryEnvVars_TypeScriptStaysBare asserts the TypeScript contract: the
-// OTLP variables stay bare OTEL_* because the OpenTelemetry Node SDK reads them
-// from process.env directly, so prefixing them with A2A_ would disable telemetry.
-func TestTelemetryEnvVars_TypeScriptStaysBare(t *testing.T) {
+// TestTelemetryEnvVars_TypeScriptUsesA2APrefix asserts the TypeScript vars carry
+// the same A2A_ prefix as Go for a consistent surface; the generated index.ts
+// mirrors each A2A_OTEL_* var onto the bare OTEL_* name the OpenTelemetry Node
+// SDK actually reads.
+func TestTelemetryEnvVars_TypeScriptUsesA2APrefix(t *testing.T) {
 	adl := minimalTypeScriptADL()
 	adl.Spec.Telemetry = &schema.TelemetryConfig{
 		Enabled: true,
@@ -89,10 +90,10 @@ func TestTelemetryEnvVars_TypeScriptStaysBare(t *testing.T) {
 	got := envMap(telemetryEnvVars(adl))
 
 	want := map[string]string{
-		"OTEL_TRACES_EXPORTER":        "otlp",
-		"OTEL_METRICS_EXPORTER":       "otlp",
-		"OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4318",
-		"OTEL_EXPORTER_OTLP_PROTOCOL": "http/protobuf",
+		"A2A_OTEL_TRACES_EXPORTER":        "otlp",
+		"A2A_OTEL_METRICS_EXPORTER":       "otlp",
+		"A2A_OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4318",
+		"A2A_OTEL_EXPORTER_OTLP_PROTOCOL": "http/protobuf",
 	}
 	for k, v := range want {
 		if got[k] != v {
@@ -100,8 +101,8 @@ func TestTelemetryEnvVars_TypeScriptStaysBare(t *testing.T) {
 		}
 	}
 	for k := range got {
-		if strings.HasPrefix(k, "A2A_") {
-			t.Errorf("TypeScript telemetry var %q must not carry the A2A_ prefix", k)
+		if !strings.HasPrefix(k, "A2A_OTEL_") {
+			t.Errorf("TypeScript telemetry var %q must carry the A2A_ prefix", k)
 		}
 	}
 }
