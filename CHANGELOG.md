@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.51.3](https://github.com/inference-gateway/adl-cli/compare/v0.51.2...v0.51.3) (2026-07-17)
+
+### 🔧 Miscellaneous
+
+* **deps:** update ADL and infer CLI versions to v0.51.2 and v0.148.1 respectively ([2fd086e](https://github.com/inference-gateway/adl-cli/commit/2fd086e8442be23e517f94c5823e380c11223a25))
+
 ## [0.51.2](https://github.com/inference-gateway/adl-cli/compare/v0.51.1...v0.51.2) (2026-07-16)
 
 ### 🔧 Miscellaneous
