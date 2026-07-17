@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	schema "github.com/inference-gateway/adl-cli/internal/schema"
+	vendor "github.com/inference-gateway/adl-cli/internal/vendor"
 )
 
 // TestGoMainTemplate_IsCobraCLI verifies that the generated Go main.go is
@@ -62,8 +63,13 @@ func TestGoModTemplate_DeclaresCobra(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetTemplate(go.mod): %v", err)
 	}
+	adl := minimalGoADL()
+	v, err := vendor.ResolveADL(adl)
+	if err != nil {
+		t.Fatalf("vendor.ResolveADL: %v", err)
+	}
 	engine := NewWithRegistry("go.mod", r)
-	rendered, err := engine.Execute(tmpl, Context{ADL: minimalGoADL(), Language: "go"})
+	rendered, err := engine.Execute(tmpl, Context{ADL: adl, Language: "go", Vendor: v})
 	if err != nil {
 		t.Fatalf("Execute: %v", err)
 	}
