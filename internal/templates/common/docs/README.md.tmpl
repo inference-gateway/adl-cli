@@ -127,7 +127,7 @@ infer agents add {{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Scheme | default "
 | Example | Description |
 |---------|-------------|
 {{- range .ADL.Spec.Examples }}
-| {{ .Title }} | {{ .Description }} |
+| [{{ .Title }}](examples/{{ .Title | lower | replace " " "-" }}/) | {{ .Description }} |
 {{- end }}
 
 {{- end }}

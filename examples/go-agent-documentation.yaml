@@ -33,6 +33,11 @@ spec:
   # distinct from spec.card.documentationUrl, which is a single link to
   # already-published external docs. 'description' is optional and, like the one
   # collected by `adl init`, documents intent for the maintainer.
+  examples:
+    - title: Basic Chat
+      description: A minimal conversation with the agent.
+    - title: Tool Use
+      description: Invoking a tool from a prompt.
   documentation:
     pages:
       - title: Getting Started

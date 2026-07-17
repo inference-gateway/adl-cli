@@ -604,6 +604,40 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		return fmt.Errorf("failed to seed documentation pages: %w", err)
 	}
 
+	if err := g.seedExamples(adl, outputDir); err != nil {
+		return fmt.Errorf("failed to seed examples: %w", err)
+	}
+
+	return nil
+}
+
+// exampleSlug derives the examples/ subdirectory name from an example title.
+// Must stay in sync with the README.md.tmpl Examples table links
+// ({{ .Title | lower | replace " " "-" }}).
+func exampleSlug(title string) string {
+	return strings.ToLower(strings.ReplaceAll(title, " ", "-"))
+}
+
+// seedExamples seeds examples/<slug>/README.md for each spec.examples entry.
+// Files are created only if they do not already exist - never overwritten,
+// and the examples/ directory is listed in .adl-ignore.
+func (g *Generator) seedExamples(adl *schema.ADL, outputDir string) error {
+	for _, ex := range adl.Spec.Examples {
+		relPath := filepath.Join("examples", exampleSlug(ex.Title), "README.md")
+		filePath := filepath.Join(outputDir, relPath)
+		if _, err := os.Stat(filePath); err == nil {
+			fmt.Printf("📄 Example already exists: %s\n", relPath)
+			continue
+		}
+		if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
+			return fmt.Errorf("failed to create directory for %s: %w", relPath, err)
+		}
+		content := fmt.Sprintf("# %s\n\n%s\n\nTODO: Add the example implementation.\n", ex.Title, ex.Description)
+		if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+			return fmt.Errorf("failed to write example stub %s: %w", relPath, err)
+		}
+		fmt.Printf("📄 Seeded example stub: %s\n", relPath)
+	}
 	return nil
 }
 
@@ -882,6 +916,10 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 				filesToIgnore = append(filesToIgnore, fmt.Sprintf("skills/%s/", skill.ID))
 			}
 		}
+	}
+
+	if len(adl.Spec.Examples) > 0 {
+		filesToIgnore = append(filesToIgnore, "examples/")
 	}
 
 	if len(filesToIgnore) == 0 {
