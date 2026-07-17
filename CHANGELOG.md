@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.52.0](https://github.com/inference-gateway/adl-cli/compare/v0.51.6...v0.52.0) (2026-07-17)
+
+### ✨ Features
+
+* generate CONFIGURATIONS.md and unify telemetry env vars under A2A_ prefix ([#304](https://github.com/inference-gateway/adl-cli/issues/304)) ([708df7a](https://github.com/inference-gateway/adl-cli/commit/708df7ad0a0adec79bf391e95afabf249254f76b))
+* seed examples/<slug>/README.md stubs from spec.examples ([#305](https://github.com/inference-gateway/adl-cli/issues/305)) ([2933b51](https://github.com/inference-gateway/adl-cli/commit/2933b51fce5b07f1afc494e8765e34536b27e233))
+
 ## [0.51.6](https://github.com/inference-gateway/adl-cli/compare/v0.51.5...v0.51.6) (2026-07-17)
 
 ### 🐛 Bug Fixes
