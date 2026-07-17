@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	schema "github.com/inference-gateway/adl-cli/internal/schema"
-	"github.com/inference-gateway/adl-cli/internal/vendor"
+	vendor "github.com/inference-gateway/adl-cli/internal/vendor"
 )
 
 // TestGoMainTemplate_IsCobraCLI verifies that the generated Go main.go is
