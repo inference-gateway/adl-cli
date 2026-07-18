@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.52.2](https://github.com/inference-gateway/adl-cli/compare/v0.52.1...v0.52.2) (2026-07-18)
+
+### ⚠ BREAKING CHANGES
+
+* generated skills now live in .agents/skills/<id>/SKILL.md
+  (was skills/<id>/SKILL.md) and the default A2A_SKILLS_DIR is now
+  .agents/skills. Existing generated projects must move skills/ to
+  .agents/skills/ (or set A2A_SKILLS_DIR=skills) on regenerate.
+
+  * refactor: narrow pointer to .claude/skills -> .agents/skills
+
+### ♻️ Improvements
+
+* move generated skills to .agents/skills with .claude compatibility ([#308](https://github.com/inference-gateway/adl-cli/issues/308)) ([6d86459](https://github.com/inference-gateway/adl-cli/commit/6d864593ac2323f0641a8c565573f4cddd4b1b5a))
+
 ## [0.52.1](https://github.com/inference-gateway/adl-cli/compare/v0.52.0...v0.52.1) (2026-07-17)
 
 ### 🔧 Miscellaneous
