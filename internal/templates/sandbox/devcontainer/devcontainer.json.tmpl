@@ -45,7 +45,7 @@
   "forwardPorts": [{{ .ADL.Spec.Server.Port }}],
   {{- $infer := "" }}
   {{- if .AIToggles.Infer }}
-  {{- $infer = " && curl -fsSL https://raw.githubusercontent.com/inference-gateway/cli/main/install.sh | bash -s -- --version v0.148.1" }}
+  {{- $infer = " && curl -fsSL https://raw.githubusercontent.com/inference-gateway/cli/main/install.sh | bash -s -- --version v0.149.0" }}
   {{- end }}
   {{- if eq .Language "go" }}
   "postCreateCommand": "go mod download{{ $infer }}",
