@@ -100,9 +100,9 @@ This agent ships {{ len .ADL.Spec.Skills }} markdown skill{{ if ne (len .ADL.Spe
 - **Version**: {{ .Version }}
 {{- end }}
 {{- if .Bare }}
-- **Source**: scaffolded locally (`skills/{{ .ID }}/SKILL.md`)
+- **Source**: scaffolded locally (`.agents/skills/{{ .ID }}/SKILL.md`)
 {{- else }}
-- **Source**: fetched from the skills registry (`skills/{{ .ID }}/SKILL.md`)
+- **Source**: fetched from the skills registry (`.agents/skills/{{ .ID }}/SKILL.md`)
 {{- end }}
 {{- end }}
 {{- else }}
@@ -290,7 +290,7 @@ docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Me
 │   └── {{ printf "%-26s" (printf "%s.go" .ID) }}# {{ .Description }}
 {{- end }}
 {{- end }}
-├── skills/                       # Skill directories (SKILL.md + optional assets)
+├── .agents/skills/               # Skill directories (SKILL.md + optional assets)
 {{- range .Skills }}
 │   └── {{ printf "%-26s" (printf "%s/" .ID) }}# {{ .Description }}
 │       └── SKILL.md              # Playbook prepended to the system prompt
@@ -315,7 +315,7 @@ docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Me
 {{- end }}
 {{- end }}
 │       └── mod.rs                # Tools module
-├── skills/                       # Skill directories (SKILL.md + optional assets)
+├── .agents/skills/               # Skill directories (SKILL.md + optional assets)
 {{- range .Skills }}
 │   └── {{ printf "%-26s" (printf "%s/" .ID) }}# {{ .Description }}
 │       └── SKILL.md              # Playbook prepended to the system prompt
@@ -339,7 +339,7 @@ docker run -p {{ .ADL.Spec.Server.Port }}:{{ .ADL.Spec.Server.Port }} {{ .ADL.Me
 │       └── {{ printf "%-21s" (printf "%s.ts" .ID) }}# {{ .Description }}
 {{- end }}
 {{- end }}
-├── skills/                       # Skill directories (SKILL.md + optional assets)
+├── .agents/skills/               # Skill directories (SKILL.md + optional assets)
 {{- range .Skills }}
 │   └── {{ printf "%-26s" (printf "%s/" .ID) }}# {{ .Description }}
 │       └── SKILL.md              # Playbook prepended to the system prompt

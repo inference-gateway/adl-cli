@@ -184,7 +184,7 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 
 	for _, skill := range adl.Spec.Skills {
 		if skill.Bare {
-			files[fmt.Sprintf("skills/%s/SKILL.md", skill.ID)] = "skills/skill.md"
+			files[fmt.Sprintf(".agents/skills/%s/SKILL.md", skill.ID)] = "skills/skill.md"
 		}
 	}
 
@@ -257,7 +257,7 @@ func (r *Registry) getRustFiles(adl *schema.ADL) map[string]string {
 
 	for _, skill := range adl.Spec.Skills {
 		if skill.Bare {
-			files[fmt.Sprintf("skills/%s/SKILL.md", skill.ID)] = "skills/skill.md"
+			files[fmt.Sprintf(".agents/skills/%s/SKILL.md", skill.ID)] = "skills/skill.md"
 		}
 	}
 
@@ -337,7 +337,7 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 
 	for _, skill := range adl.Spec.Skills {
 		if skill.Bare {
-			files[fmt.Sprintf("skills/%s/SKILL.md", skill.ID)] = "skills/skill.md"
+			files[fmt.Sprintf(".agents/skills/%s/SKILL.md", skill.ID)] = "skills/skill.md"
 		}
 	}
 

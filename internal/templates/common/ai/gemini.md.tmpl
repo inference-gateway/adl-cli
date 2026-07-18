@@ -99,10 +99,12 @@ The following skills are currently shipped with the agent:
 - **{{ .Name }}** ({{ if .Bare }}bare scaffold{{ else }}registry{{ end }}): {{ .Description }}
 {{- end }}
 
-Each skill lives in its own directory at `skills/<id>/SKILL.md` and is
-loaded into the system prompt at startup. Bare skills can ship arbitrary
-bundled assets (scripts, templates, resources) alongside `SKILL.md` -
-the whole `skills/<id>/` directory is protected by `.adl-ignore` against
+Each skill lives in its own directory at `.agents/skills/<id>/SKILL.md`
+(a `.claude/skills` -> `../.agents/skills` symlink makes the same tree readable as
+`.claude/skills/<id>/SKILL.md` for Claude Code) and is loaded into the
+system prompt at startup. Bare skills can ship arbitrary bundled assets
+(scripts, templates, resources) alongside `SKILL.md` - the whole
+`.agents/skills/<id>/` directory is protected by `.adl-ignore` against
 regeneration overwrites.
 {{- else }}
 No skills are currently defined. To add skills:

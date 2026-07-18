@@ -100,7 +100,7 @@ export function loadConfig(): Config {
       version: envString('A2A_AGENT_VERSION', {{ .ADL.Metadata.Version | toJson }}),
       systemPrompt: envString('A2A_AGENT_SYSTEM_PROMPT', {{ $systemPrompt }}),
       cardPath: envString('A2A_AGENT_CARD_PATH', '.well-known/agent-card.json'),
-      skillsDir: envString('A2A_SKILLS_DIR', 'skills'),
+      skillsDir: envString('A2A_SKILLS_DIR', '.agents/skills'),
     },
     llm: {
       provider,
