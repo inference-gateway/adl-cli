@@ -788,31 +788,40 @@ func (g *Generator) writeResolvedSkillFiles(skills []*registry.ResolvedSkill, ou
 	return nil
 }
 
-// writeClaudePointer creates a .claude -> .agents relative symlink so Claude
-// Code (which reads skills from .claude/skills/) resolves the generated
-// .agents/skills/<id>/SKILL.md tree without duplicating it. It is committed
-// by the generated repo. Idempotent: a pre-existing correct symlink is left
-// alone; anything else at .claude is untouched with a warning.
+// writeClaudePointer creates a .claude/skills -> ../.agents/skills relative
+// symlink so Claude Code (which reads skills from .claude/skills/) resolves the
+// generated .agents/skills/<id>/SKILL.md tree without duplicating it. Only the
+// skills subdirectory is linked, so the rest of .claude/ (settings, commands,
+// agents) stays a real local directory and is never redirected into .agents/.
+// It is committed by the generated repo. Idempotent: a pre-existing correct
+// symlink is left alone; anything else at .claude/skills is untouched with a
+// warning.
 //
 // ponytail: best-effort symlink. On platforms without symlink support (e.g.
 // Windows checkouts with core.symlinks=false) creation warns instead of
 // aborting; Claude Code users there can point at .agents/skills manually.
 func (g *Generator) writeClaudePointer(outputDir string) error {
-	link := filepath.Join(outputDir, ".claude")
+	const target = "../.agents/skills"
+	claudeDir := filepath.Join(outputDir, ".claude")
+	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+		fmt.Printf("⚠️  failed to create .claude directory (%v); point Claude Code at .agents/skills manually\n", err)
+		return nil
+	}
+	link := filepath.Join(claudeDir, "skills")
 	if fi, err := os.Lstat(link); err == nil {
 		if fi.Mode()&os.ModeSymlink != 0 {
-			if target, _ := os.Readlink(link); target == ".agents" {
+			if existing, _ := os.Readlink(link); existing == target {
 				return nil
 			}
 		}
-		fmt.Printf("⚠️  %s already exists and is not a .agents symlink; leaving it untouched\n", link)
+		fmt.Printf("⚠️  %s already exists and is not the expected skills symlink; leaving it untouched\n", link)
 		return nil
 	}
-	if err := os.Symlink(".agents", link); err != nil {
-		fmt.Printf("⚠️  failed to create .claude -> .agents symlink (%v); set A2A_SKILLS_DIR or point Claude Code at .agents/skills manually\n", err)
+	if err := os.Symlink(target, link); err != nil {
+		fmt.Printf("⚠️  failed to create .claude/skills -> %s symlink (%v); set A2A_SKILLS_DIR or point Claude Code at .agents/skills manually\n", target, err)
 		return nil
 	}
-	fmt.Printf("✅ Generated: .claude -> .agents\n")
+	fmt.Printf("✅ Generated: .claude/skills -> %s\n", target)
 	return nil
 }
 

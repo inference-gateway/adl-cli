@@ -162,13 +162,13 @@ spec:
 		t.Errorf("expected .agents/skills/test-skill/SKILL.md to be scaffolded")
 	}
 
-	claudeLink := filepath.Join(outputPath, ".claude")
+	claudeLink := filepath.Join(outputPath, ".claude", "skills")
 	if fi, err := os.Lstat(claudeLink); err != nil {
-		t.Errorf("expected .claude pointer to be generated: %v", err)
+		t.Errorf("expected .claude/skills pointer to be generated: %v", err)
 	} else if fi.Mode()&os.ModeSymlink == 0 {
-		t.Errorf("expected .claude to be a symlink")
-	} else if target, _ := os.Readlink(claudeLink); target != ".agents" {
-		t.Errorf("expected .claude -> .agents, got .claude -> %s", target)
+		t.Errorf("expected .claude/skills to be a symlink")
+	} else if target, _ := os.Readlink(claudeLink); target != "../.agents/skills" {
+		t.Errorf("expected .claude/skills -> ../.agents/skills, got .claude/skills -> %s", target)
 	}
 
 	dockerfilePath := filepath.Join(outputPath, "Dockerfile")
