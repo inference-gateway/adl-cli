@@ -554,7 +554,7 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		}
 
 		isSkillFile := templateKey == "skills/skill.md" ||
-			(strings.HasPrefix(fileName, "skills/") && filepath.Base(fileName) == "SKILL.md")
+			(strings.HasPrefix(fileName, ".agents/skills/") && filepath.Base(fileName) == "SKILL.md")
 
 		isBuiltinToolFile := strings.HasPrefix(templateKey, "builtin/")
 		isToolFile := !isBuiltinToolFile && templateKey != "telemetry.go" &&
@@ -578,6 +578,12 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 
 	if err := g.writeResolvedSkillFiles(resolvedSkills, outputDir, ignoreChecker); err != nil {
 		return err
+	}
+
+	if len(adl.Spec.Skills) > 0 {
+		if err := g.writeClaudePointer(outputDir); err != nil {
+			return err
+		}
 	}
 
 	if err := g.generateADLIgnoreFile(outputDir, templateEngine.GetTemplate(), adl); err != nil {
@@ -755,8 +761,8 @@ func (g *Generator) seedDocumentationPages(adl *schema.ADL, outputDir string) er
 }
 
 // writeResolvedSkillFiles writes the file map of every non-bare resolved
-// skill to skills/<id>/<rel-path>. Bare skills are scaffolded earlier by
-// the template engine and don't appear here. Files matched by .adl-ignore
+// skill to .agents/skills/<id>/<rel-path>. Bare skills are scaffolded earlier
+// by the template engine and don't appear here. Files matched by .adl-ignore
 // are skipped so users can lock down a vendored skill if they need to.
 func (g *Generator) writeResolvedSkillFiles(skills []*registry.ResolvedSkill, outputDir string, ignoreChecker *IgnoreChecker) error {
 	for _, rs := range skills {
@@ -768,7 +774,7 @@ func (g *Generator) writeResolvedSkillFiles(skills []*registry.ResolvedSkill, ou
 			if strings.HasPrefix(cleaned, "../") || strings.HasPrefix(cleaned, "/") {
 				return fmt.Errorf("skill %s: refusing to write file with suspicious path %q", rs.ID, rel)
 			}
-			relPath := path.Join("skills", rs.ID, cleaned)
+			relPath := path.Join(".agents", "skills", rs.ID, cleaned)
 			if ignoreChecker.ShouldIgnore(relPath) {
 				fmt.Printf("🚫 Ignoring file (matches .adl-ignore): %s\n", relPath)
 				continue
@@ -779,6 +785,34 @@ func (g *Generator) writeResolvedSkillFiles(skills []*registry.ResolvedSkill, ou
 			}
 		}
 	}
+	return nil
+}
+
+// writeClaudePointer creates a .claude -> .agents relative symlink so Claude
+// Code (which reads skills from .claude/skills/) resolves the generated
+// .agents/skills/<id>/SKILL.md tree without duplicating it. It is committed
+// by the generated repo. Idempotent: a pre-existing correct symlink is left
+// alone; anything else at .claude is untouched with a warning.
+//
+// ponytail: best-effort symlink. On platforms without symlink support (e.g.
+// Windows checkouts with core.symlinks=false) creation warns instead of
+// aborting; Claude Code users there can point at .agents/skills manually.
+func (g *Generator) writeClaudePointer(outputDir string) error {
+	link := filepath.Join(outputDir, ".claude")
+	if fi, err := os.Lstat(link); err == nil {
+		if fi.Mode()&os.ModeSymlink != 0 {
+			if target, _ := os.Readlink(link); target == ".agents" {
+				return nil
+			}
+		}
+		fmt.Printf("⚠️  %s already exists and is not a .agents symlink; leaving it untouched\n", link)
+		return nil
+	}
+	if err := os.Symlink(".agents", link); err != nil {
+		fmt.Printf("⚠️  failed to create .claude -> .agents symlink (%v); set A2A_SKILLS_DIR or point Claude Code at .agents/skills manually\n", err)
+		return nil
+	}
+	fmt.Printf("✅ Generated: .claude -> .agents\n")
 	return nil
 }
 
@@ -913,7 +947,7 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 
 		for _, skill := range adl.Spec.Skills {
 			if skill.Bare {
-				filesToIgnore = append(filesToIgnore, fmt.Sprintf("skills/%s/", skill.ID))
+				filesToIgnore = append(filesToIgnore, fmt.Sprintf(".agents/skills/%s/", skill.ID))
 			}
 		}
 	}

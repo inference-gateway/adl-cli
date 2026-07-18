@@ -157,9 +157,18 @@ spec:
 		t.Errorf("expected test_tool_id.go to be generated")
 	}
 
-	testSkillPath := filepath.Join(outputPath, "skills", "test-skill", "SKILL.md")
+	testSkillPath := filepath.Join(outputPath, ".agents", "skills", "test-skill", "SKILL.md")
 	if _, err := os.Stat(testSkillPath); os.IsNotExist(err) {
-		t.Errorf("expected skills/test-skill/SKILL.md to be scaffolded")
+		t.Errorf("expected .agents/skills/test-skill/SKILL.md to be scaffolded")
+	}
+
+	claudeLink := filepath.Join(outputPath, ".claude")
+	if fi, err := os.Lstat(claudeLink); err != nil {
+		t.Errorf("expected .claude pointer to be generated: %v", err)
+	} else if fi.Mode()&os.ModeSymlink == 0 {
+		t.Errorf("expected .claude to be a symlink")
+	} else if target, _ := os.Readlink(claudeLink); target != ".agents" {
+		t.Errorf("expected .claude -> .agents, got .claude -> %s", target)
 	}
 
 	dockerfilePath := filepath.Join(outputPath, "Dockerfile")
@@ -168,8 +177,8 @@ spec:
 		t.Fatalf("failed to read generated Dockerfile: %v", err)
 	}
 	dockerfileContent := string(dockerfileBytes)
-	if !strings.Contains(dockerfileContent, "COPY --from=builder /app/skills ./skills") {
-		t.Errorf("expected Dockerfile to COPY skills/ when spec.skills is non-empty, got:\n%s", dockerfileContent)
+	if !strings.Contains(dockerfileContent, "COPY --from=builder /app/.agents/skills ./.agents/skills") {
+		t.Errorf("expected Dockerfile to COPY .agents/skills when spec.skills is non-empty, got:\n%s", dockerfileContent)
 	}
 }
 

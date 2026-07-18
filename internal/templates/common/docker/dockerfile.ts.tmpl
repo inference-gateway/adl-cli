@@ -38,7 +38,7 @@ COPY .well-known ./.well-known
 {{- if gt (len .ADL.Spec.Skills) 0 }}
 
 # Copy skills directory so loadSkillsManifest can read SKILL.md at runtime
-COPY skills ./skills
+COPY .agents/skills ./.agents/skills
 {{- end }}
 
 # Change ownership to agent user

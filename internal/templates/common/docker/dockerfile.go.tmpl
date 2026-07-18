@@ -49,7 +49,7 @@ COPY --from=builder /app/.well-known ./.well-known
 {{- if gt (len .ADL.Spec.Skills) 0 }}
 
 # Copy skills directory so loadSkillsManifest can read SKILL.md at runtime
-COPY --from=builder /app/skills ./skills
+COPY --from=builder /app/.agents/skills ./.agents/skills
 {{- end }}
 
 # Change ownership to agent user

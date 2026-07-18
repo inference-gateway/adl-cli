@@ -41,13 +41,14 @@ the ADL manifest), and the order in which they're typically invoked.
 
 ## Bundled assets
 
-This skill lives in its own directory under `skills/{{ .ID }}/`. You can ship
-arbitrary scripts, templates, or reference material alongside `SKILL.md` -
-the `.adl-ignore` file protects the whole directory from being clobbered on
-regeneration. Suggested layout:
+This skill lives in its own directory under `.agents/skills/{{ .ID }}/`
+(also reachable as `.claude/skills/{{ .ID }}/` via the generated `.claude`
+-> `.agents` symlink). You can ship arbitrary scripts, templates, or
+reference material alongside `SKILL.md` - the `.adl-ignore` file protects
+the whole directory from being clobbered on regeneration. Suggested layout:
 
 ```
-skills/{{ .ID }}/
+.agents/skills/{{ .ID }}/
 ├── SKILL.md          # this file
 ├── scripts/          # optional helper scripts (Python, shell, etc.)
 ├── templates/        # optional file templates the agent can fill in

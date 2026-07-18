@@ -158,7 +158,7 @@ async fn run_start() -> Result<(), Box<dyn std::error::Error>> {
     // documents the ADL-spec values you most likely want to set.
     let config: Config = envy::prefixed("A2A_").from_env()?;
 
-    let skills_dir = std::env::var("A2A_SKILLS_DIR").unwrap_or_else(|_| "skills".to_string());
+    let skills_dir = std::env::var("A2A_SKILLS_DIR").unwrap_or_else(|_| ".agents/skills".to_string());
     let skills_prompt = match load_skills_manifest(Path::new(&skills_dir)) {
         Ok(s) => {
             if !s.is_empty() {

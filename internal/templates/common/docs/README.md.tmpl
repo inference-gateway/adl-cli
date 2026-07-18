@@ -139,7 +139,7 @@ infer agents add {{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Scheme | default "
 | Skill | Description | Source |
 |-------|-------------|--------|
 {{- range .Skills }}
-| `{{ .ID }}` | {{ .Description }} | {{ if .Bare }}bare scaffold (`skills/{{ .ID }}.md`){{ else }}registry{{ if .Version }} @ {{ .Version }}{{ end }}{{ end }} |
+| `{{ .ID }}` | {{ .Description }} | {{ if .Bare }}bare scaffold (`.agents/skills/{{ .ID }}/SKILL.md`){{ else }}registry{{ if .Version }} @ {{ .Version }}{{ end }}{{ end }} |
 {{- end }}
 {{- end }}
 
