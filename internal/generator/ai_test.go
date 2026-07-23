@@ -293,6 +293,7 @@ func TestGenerator_AI_ClaudeWorkflowGoContent(t *testing.T) {
 	assertContains(t, body, "description: 'Effort level for Claude Code'", "Claude Code workflow body")
 	assertContains(t, body, "type: choice", "Claude Code workflow body")
 	assertContains(t, body, "- medium", "Claude Code workflow body")
+	assertContains(t, body, "- xhigh", "Claude Code workflow body")
 	assertContains(t, body, "default: medium", "Claude Code workflow body")
 	assertContains(t, body, "github.event_name == 'workflow_dispatch'", "Claude Code workflow body")
 
