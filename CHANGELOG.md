@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.54.0](https://github.com/inference-gateway/adl-cli/compare/v0.53.0...v0.54.0) (2026-07-23)
+
+### ✨ Features
+
+* generate ADK MCP client from spec.agent.mcp ([#317](https://github.com/inference-gateway/adl-cli/issues/317)) ([f24cc4c](https://github.com/inference-gateway/adl-cli/commit/f24cc4c95eeb6e1038b7fc615057cc5c076dc8c6)), references [adl#119](https://github.com/adl/issues/119) [adl#119](https://github.com/adl/issues/119)
+
+### 👷 CI
+
+* add schema sync workflow triggered from adl ([#319](https://github.com/inference-gateway/adl-cli/issues/319)) ([d003498](https://github.com/inference-gateway/adl-cli/commit/d003498331103940f785a4807c2010062b811106))
+
+### 📚 Documentation
+
+* document schema sync process and symlink CLAUDE.md to AGENTS.md ([#321](https://github.com/inference-gateway/adl-cli/issues/321)) ([851d662](https://github.com/inference-gateway/adl-cli/commit/851d662668e64347ca30f99eaef133a5fa2507e2))
+
+### 🔧 Miscellaneous
+
+* sync ADL schema to v0.23.0 ([#322](https://github.com/inference-gateway/adl-cli/issues/322)) ([50281c9](https://github.com/inference-gateway/adl-cli/commit/50281c98b6dbf16b00cc7bb23066b9bce2c26f46))
+
 ## [0.53.0](https://github.com/inference-gateway/adl-cli/compare/v0.52.2...v0.53.0) (2026-07-23)
 
 ### ✨ Features
