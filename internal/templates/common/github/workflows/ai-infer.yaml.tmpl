@@ -93,17 +93,6 @@ jobs:
           (github.event_name == 'issue_comment' && github.event.issue.pull_request != null) ||
           github.event_name == 'pull_request_review_comment' ||
           github.event_name == 'pull_request_review'
-        # Check out the PR head by its immutable commit SHA, never the mutable
-        # branch ref. This job runs with a write-scoped app token and provider
-        # secrets, gated only by the commenter's author_association, and then
-        # executes the PR's code (build/lint/test). review and review_comment
-        # events carry head.sha in the payload - the exact commit that was
-        # reviewed - so pinning to it and aborting when the branch has moved
-        # closes the TOCTOU window where the PR author force-pushes malicious
-        # code after the maintainer's @infer. issue_comment carries no head SHA,
-        # so the current head is used (no earlier anchor exists). The head ref is
-        # restored as a tracking branch so the agent's commit/push flow still
-        # targets the PR.
         env:
           GH_TOKEN: ${{`{{ steps.app-token.outputs.token }}`}}
           REVIEWED_SHA: ${{`{{ github.event.pull_request.head.sha }}`}}
