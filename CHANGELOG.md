@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.53.0](https://github.com/inference-gateway/adl-cli/compare/v0.52.2...v0.53.0) (2026-07-23)
+
+### ✨ Features
+
+* **deps:** bump ADK version from v0.23.4 to v0.24.0 ([#312](https://github.com/inference-gateway/adl-cli/issues/312)) ([7fa89ad](https://github.com/inference-gateway/adl-cli/commit/7fa89ada0f00b01cc0506e1c553157f68c3b5fd7))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump actions/checkout from 7.0.0 to 7.0.1 in workflow templates ([#314](https://github.com/inference-gateway/adl-cli/issues/314)) ([86cfa15](https://github.com/inference-gateway/adl-cli/commit/86cfa15f5341f6fd482d1bf7fe499bca8709eba5))
+* **deps:** bump actions/checkout in the github-actions group ([#311](https://github.com/inference-gateway/adl-cli/issues/311)) ([b29d49d](https://github.com/inference-gateway/adl-cli/commit/b29d49db28b3a6aed89e8284e5fdbc66297959a3))
+* **deps:** bump anthropics/claude-code-action from v1.0.176 to v1.0.181 ([#315](https://github.com/inference-gateway/adl-cli/issues/315)) ([4468202](https://github.com/inference-gateway/adl-cli/commit/44682026ce7275bf6495a3d0c4724b2d5ea4dc1a))
+* **deps:** bump go-envconfig version from v1.4.0 to v1.4.3 ([ec090f6](https://github.com/inference-gateway/adl-cli/commit/ec090f6b18fa709c38550034386d4314c4b40cd1))
+* **deps:** bump infer CLI v0.148.1 -> v0.149.0 in templates ([#309](https://github.com/inference-gateway/adl-cli/issues/309)) ([9f11c08](https://github.com/inference-gateway/adl-cli/commit/9f11c083b3ba56e0f5eef4392e8767f0f3054651))
+* **deps:** bump inference-gateway/infer-action from v0.34.1 to v0.34.5 ([#316](https://github.com/inference-gateway/adl-cli/issues/316)) ([b734a65](https://github.com/inference-gateway/adl-cli/commit/b734a65cfc81a66db6a134875ff86de2607c5193))
+
 ## [0.52.2](https://github.com/inference-gateway/adl-cli/compare/v0.52.1...v0.52.2) (2026-07-18)
 
 ### ⚠ BREAKING CHANGES
