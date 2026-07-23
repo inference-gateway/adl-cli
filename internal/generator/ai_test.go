@@ -426,10 +426,10 @@ func TestGenerator_AI_InferSandboxInstall(t *testing.T) {
 		mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
 
 		flox := readGenerated(t, out, ".flox/env/manifest.toml")
-		assertContains(t, flox, `infer.flake = "github:inference-gateway/cli/v0.149.0"`, "flox manifest")
+		assertContains(t, flox, `infer.flake = "github:inference-gateway/cli/v0.152.0"`, "flox manifest")
 
 		dc := readGenerated(t, out, ".devcontainer/devcontainer.json")
-		assertContains(t, dc, "install.sh | bash -s -- --version v0.149.0", "devcontainer postCreateCommand")
+		assertContains(t, dc, "install.sh | bash -s -- --version v0.152.0", "devcontainer postCreateCommand")
 	})
 
 	t.Run("infer disabled leaves sandbox untouched", func(t *testing.T) {
