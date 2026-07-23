@@ -94,8 +94,44 @@ func (v *Validator) ValidateFile(filePath string) ([]string, error) {
 	}
 
 	warnings = append(warnings, v.validateTelemetry(&adl)...)
+	warnings = append(warnings, v.validateMCP(&adl)...)
 
 	return warnings, nil
+}
+
+// validateMCP surfaces non-fatal warnings for spec.agent.mcp. The ADK's built-in
+// MCP client is Go-only and streamable-HTTP-only: the block is ignored for
+// TypeScript/Rust agents, and stdio/sse servers cannot be reached so they are
+// dropped from the derived A2A_MCP_SERVERS.
+func (v *Validator) validateMCP(adl *ADL) []string {
+	if adl.Spec.Agent == nil || adl.Spec.Agent.Mcp == nil || !adl.Spec.Agent.Mcp.Enabled {
+		return nil
+	}
+	if adl.Spec.Language.Go == nil {
+		return []string{
+			"spec.agent.mcp is enabled but the ADK MCP client is generated for Go agents only; the block is ignored for TypeScript and Rust agents.",
+		}
+	}
+
+	var warnings []string
+	httpServers := 0
+	for _, s := range adl.Spec.Agent.Mcp.Servers {
+		switch s.Transport {
+		case MCPServerTransportHttp:
+			if s.URL != "" {
+				httpServers++
+			}
+		case MCPServerTransportStdio, MCPServerTransportSse:
+			warnings = append(warnings, fmt.Sprintf(
+				"spec.agent.mcp.servers[%q] uses the %q transport, but the ADK MCP client is streamable-HTTP-only; it is dropped from A2A_MCP_SERVERS.",
+				s.Name, s.Transport))
+		}
+	}
+	if httpServers == 0 {
+		warnings = append(warnings,
+			"spec.agent.mcp is enabled but no http servers are declared in spec.agent.mcp.servers; A2A_MCP_SERVERS will be empty and the agent will fail to start until it is set via the environment.")
+	}
+	return warnings
 }
 
 // validateTelemetry surfaces non-fatal warnings for telemetry configurations the

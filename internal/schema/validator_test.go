@@ -50,6 +50,46 @@ spec:
 	}
 }
 
+func TestValidator_validateMCP(t *testing.T) {
+	v := NewValidator()
+
+	goWithMCP := func(mcp *MCP) *ADL {
+		adl := &ADL{}
+		adl.Spec.Language.Go = &GoConfig{Module: "github.com/example/a", Version: "1.26.4"}
+		adl.Spec.Agent = &Agent{Mcp: mcp}
+		return adl
+	}
+
+	if w := v.validateMCP(goWithMCP(&MCP{Enabled: false})); len(w) != 0 {
+		t.Errorf("disabled MCP warned: %v", w)
+	}
+
+	ts := &ADL{}
+	ts.Spec.Language.TypeScript = &TypeScriptConfig{}
+	ts.Spec.Agent = &Agent{Mcp: &MCP{Enabled: true}}
+	if w := v.validateMCP(ts); len(w) != 1 || !strings.Contains(w[0], "Go agents only") {
+		t.Errorf("TypeScript MCP warnings = %v, want the Go-only notice", w)
+	}
+
+	w := v.validateMCP(goWithMCP(&MCP{
+		Enabled: true,
+		Servers: []MCPServer{{Name: "local", Transport: MCPServerTransportStdio, Command: "npx"}},
+	}))
+	if len(w) != 2 {
+		t.Fatalf("stdio-only MCP warnings = %v, want 2", w)
+	}
+	if !strings.Contains(w[0], "stdio") || !strings.Contains(w[1], "no http servers") {
+		t.Errorf("unexpected warnings: %v", w)
+	}
+
+	if w := v.validateMCP(goWithMCP(&MCP{
+		Enabled: true,
+		Servers: []MCPServer{{Name: "tools", Transport: MCPServerTransportHttp, URL: "http://mcp:8080"}},
+	})); len(w) != 0 {
+		t.Errorf("valid http MCP warned: %v", w)
+	}
+}
+
 func TestValidator_ValidateFile_AgentWithoutProvider(t *testing.T) {
 	validADLWithAgent := `apiVersion: adl.inference-gateway.com/v1
 kind: Agent

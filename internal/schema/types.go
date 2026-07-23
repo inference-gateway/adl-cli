@@ -30,12 +30,8 @@ type Agent struct {
 	// MaxTokens corresponds to the JSON schema field "maxTokens".
 	MaxTokens int `json:"maxTokens,omitempty,omitzero" yaml:"maxTokens,omitempty" mapstructure:"maxTokens,omitempty"`
 
-	// MCP (Model Context Protocol) servers the agent connects to at runtime to
-	// discover and call external tools and capabilities, in addition to the locally
-	// generated 'spec.tools'. Only meaningful for an LLM-backed agent: A2A itself
-	// does not require an LLM, so this lives under 'spec.agent'. Each entry declares
-	// a transport plus the connection details for that transport.
-	Mcps []MCP `json:"mcps,omitempty,omitzero" yaml:"mcps,omitempty" mapstructure:"mcps,omitempty"`
+	// Mcp corresponds to the JSON schema field "mcp".
+	Mcp *MCP `json:"mcp,omitempty,omitzero" yaml:"mcp,omitempty" mapstructure:"mcp,omitempty"`
 
 	// Model corresponds to the JSON schema field "model".
 	Model string `json:"model,omitempty,omitzero" yaml:"model,omitempty" mapstructure:"model,omitempty"`
@@ -366,13 +362,71 @@ type Language struct {
 	TypeScript *TypeScriptConfig `json:"typescript,omitempty,omitzero" yaml:"typescript,omitempty" mapstructure:"typescript,omitempty"`
 }
 
+// MCP (Model Context Protocol) configuration for the agent: the servers it
+// connects to at runtime plus the runtime settings for the ADK's built-in MCP
+// client. Only meaningful for an LLM-backed agent - A2A itself does not require an
+// LLM - so this lives under 'spec.agent'. 'servers' declares *which* servers to
+// connect to; the remaining fields are the *how* (enable toggle, endpoint,
+// refresh, timeouts, retry/backoff), applied globally across those servers. They
+// mirror the connection/retry model the Go ADK exposes, which is HTTP-only with a
+// single endpoint and one timeout/retry set (there is no per-server override).
+// 'enabled' is the master switch, mapped to 'A2A_MCP_ENABLE': when false (the
+// default) no MCP client is wired in and no MCP code is generated, even if
+// 'servers' lists servers. Every config field maps 1:1 to an 'A2A_MCP_*'
+// environment variable, and its value in the manifest becomes the default the
+// generated project emits (e.g. in .env.example); the matching environment
+// variable overrides it at runtime. The list of server base URLs the client
+// connects to ('A2A_MCP_SERVERS') is derived from the 'servers' entries, not set
+// here. The MCP client is disabled by default - omit this block or set 'enabled:
+// false' to keep it off.
+type MCP struct {
+	// Timeout for a single MCP tool call, as a Go duration string. Maps 1:1 to
+	// 'A2A_MCP_CALL_TIMEOUT'.
+	CallTimeout string `json:"callTimeout,omitempty,omitzero" yaml:"callTimeout,omitempty" mapstructure:"callTimeout,omitempty"`
+
+	// Timeout for establishing a connection to an MCP server, as a Go duration
+	// string. Maps 1:1 to 'A2A_MCP_DIAL_TIMEOUT'.
+	DialTimeout string `json:"dialTimeout,omitempty,omitzero" yaml:"dialTimeout,omitempty" mapstructure:"dialTimeout,omitempty"`
+
+	// Master switch for the MCP client, mapped to 'A2A_MCP_ENABLE'. When false (the
+	// default) no MCP client is generated or wired in, regardless of any servers
+	// listed in 'servers'.
+	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
+
+	// Path appended to each server base URL to reach its MCP endpoint. Maps 1:1 to
+	// 'A2A_MCP_ENDPOINT'.
+	Endpoint string `json:"endpoint,omitempty,omitzero" yaml:"endpoint,omitempty" mapstructure:"endpoint,omitempty"`
+
+	// Maximum number of retries for a failed MCP operation. '0' means retry forever.
+	// Maps 1:1 to 'A2A_MCP_MAX_RETRIES'.
+	MaxRetries int `json:"maxRetries,omitempty,omitzero" yaml:"maxRetries,omitempty" mapstructure:"maxRetries,omitempty"`
+
+	// How often the client re-discovers the tools each server exposes, as a Go
+	// duration string (e.g. '5m', '30s', '1h30m'). Maps 1:1 to
+	// 'A2A_MCP_REFRESH_INTERVAL'.
+	RefreshInterval string `json:"refreshInterval,omitempty,omitzero" yaml:"refreshInterval,omitempty" mapstructure:"refreshInterval,omitempty"`
+
+	// Initial backoff between retries, as a Go duration string. Maps 1:1 to
+	// 'A2A_MCP_RETRY_INTERVAL'.
+	RetryInterval string `json:"retryInterval,omitempty,omitzero" yaml:"retryInterval,omitempty" mapstructure:"retryInterval,omitempty"`
+
+	// Maximum backoff between retries once the interval has grown, as a Go duration
+	// string. Maps 1:1 to 'A2A_MCP_RETRY_MAX_INTERVAL'.
+	RetryMaxInterval string `json:"retryMaxInterval,omitempty,omitzero" yaml:"retryMaxInterval,omitempty" mapstructure:"retryMaxInterval,omitempty"`
+
+	// MCP servers the agent connects to at runtime to discover and call external
+	// tools and capabilities, in addition to the locally generated 'spec.tools'. Each
+	// entry declares a transport plus the connection details for that transport.
+	Servers []MCPServer `json:"servers,omitempty,omitzero" yaml:"servers,omitempty" mapstructure:"servers,omitempty"`
+}
+
 // A single MCP (Model Context Protocol) server the agent can connect to. 'stdio'
 // launches a local subprocess and talks over stdin/stdout (use 'command', 'args',
 // and 'env'); 'http' and 'sse' connect to a remote endpoint (use 'url' and
 // 'headers'). Connection details that do not apply to the chosen transport are
 // simply omitted; the schema does not constrain which combination is present so
 // consumers can stay lenient.
-type MCP struct {
+type MCPServer struct {
 	// Arguments passed to 'command' when launching a 'stdio' server.
 	Args []string `json:"args,omitempty,omitzero" yaml:"args,omitempty" mapstructure:"args,omitempty"`
 
@@ -382,11 +436,11 @@ type MCP struct {
 
 	// Environment variables set when launching a 'stdio' server (e.g. API keys or
 	// tokens the server needs).
-	Env MCPEnv `json:"env,omitempty,omitzero" yaml:"env,omitempty" mapstructure:"env,omitempty"`
+	Env MCPServerEnv `json:"env,omitempty,omitzero" yaml:"env,omitempty" mapstructure:"env,omitempty"`
 
 	// Extra HTTP headers sent when connecting to an 'http' or 'sse' server (e.g.
 	// 'Authorization').
-	Headers MCPHeaders `json:"headers,omitempty,omitzero" yaml:"headers,omitempty" mapstructure:"headers,omitempty"`
+	Headers MCPServerHeaders `json:"headers,omitempty,omitzero" yaml:"headers,omitempty" mapstructure:"headers,omitempty"`
 
 	// Identifier for the MCP server, unique within the agent. Consumers typically use
 	// it to namespace the tools the server exposes.
@@ -394,7 +448,7 @@ type MCP struct {
 
 	// How the agent connects to the MCP server. New transports may be added in future
 	// minor versions; consumers should be lenient about unknown values.
-	Transport MCPTransport `json:"transport" yaml:"transport" mapstructure:"transport"`
+	Transport MCPServerTransport `json:"transport" yaml:"transport" mapstructure:"transport"`
 
 	// Endpoint URL for an 'http' or 'sse' server. Ignored by the 'stdio' transport.
 	URL string `json:"url,omitempty,omitzero" yaml:"url,omitempty" mapstructure:"url,omitempty"`
@@ -402,17 +456,17 @@ type MCP struct {
 
 // Environment variables set when launching a 'stdio' server (e.g. API keys or
 // tokens the server needs).
-type MCPEnv map[string]string
+type MCPServerEnv map[string]string
 
 // Extra HTTP headers sent when connecting to an 'http' or 'sse' server (e.g.
 // 'Authorization').
-type MCPHeaders map[string]string
+type MCPServerHeaders map[string]string
 
-type MCPTransport string
+type MCPServerTransport string
 
-const MCPTransportHttp MCPTransport = "http"
-const MCPTransportSse MCPTransport = "sse"
-const MCPTransportStdio MCPTransport = "stdio"
+const MCPServerTransportHttp MCPServerTransport = "http"
+const MCPServerTransportSse MCPServerTransport = "sse"
+const MCPServerTransportStdio MCPServerTransport = "stdio"
 
 type Metadata struct {
 	// Author of the agent. Optional; when provided, 'name' is required. 'email' and

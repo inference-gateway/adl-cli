@@ -242,6 +242,24 @@ func runStart(ctx context.Context) error {
 
 	// Create toolbox with default tools (like input_required, create_artifact etc)
 	toolBox := server.NewDefaultToolBox(&cfg.A2A.AgentConfig.ToolBoxConfig)
+{{- if and .ADL.Spec.Agent .ADL.Spec.Agent.Mcp .ADL.Spec.Agent.Mcp.Enabled }}
+
+	// Connect to the MCP servers declared in spec.agent.mcp. The manager connects
+	// in the background over streamable HTTP (never blocking startup) and registers
+	// the mcp_list_tools / mcp_call_tool selector tools into the toolbox. Everything
+	// is configured through the A2A_MCP_* environment (see .env.example); the
+	// A2A_MCP_ENABLE toggle gates it at runtime.
+	if cfg.A2A.MCPConfig.Enable {
+		mcpManager, err := server.NewMCPClientManager(cfg.A2A.MCPConfig, l)
+		if err != nil {
+			return fmt.Errorf("failed to create MCP client manager: %w", err)
+		}
+		mcpManager.Start(ctx)
+		defer mcpManager.Close()
+		mcpManager.RegisterTools(toolBox)
+		l.Info("MCP client enabled", zap.Strings("servers", cfg.A2A.MCPConfig.Servers))
+	}
+{{- end }}
 
 	{{- range .ADL.Spec.Tools }}
 	{{- if eq .ID "read" }}
