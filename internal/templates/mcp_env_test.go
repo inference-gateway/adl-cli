@@ -23,8 +23,7 @@ func TestMCPEnvVars_DerivesServersAndDefaults(t *testing.T) {
 	adl.Spec.Agent = &schema.Agent{
 		Mcp: &schema.MCP{
 			Enabled: true,
-			// endpoint/timeouts omitted on purpose - expect schema defaults.
-			CallTimeout: "45s", // one override to prove manifest wins over default
+			CallTimeout: "45s",
 			Servers: []schema.MCPServer{
 				{Name: "tools", Transport: schema.MCPServerTransportHttp, URL: "http://mcp-tools:8080"},
 				{Name: "local", Transport: schema.MCPServerTransportStdio, Command: "npx"},
@@ -57,21 +56,18 @@ func TestMCPEnvVars_DerivesServersAndDefaults(t *testing.T) {
 // TestMCPEnvVars_DisabledOrNonGo asserts nothing is emitted when MCP is disabled,
 // absent, or the agent is not Go (the ADK MCP client is Go-only).
 func TestMCPEnvVars_DisabledOrNonGo(t *testing.T) {
-	// Disabled.
 	disabled := minimalGoADL()
 	disabled.Spec.Agent = &schema.Agent{Mcp: &schema.MCP{Enabled: false}}
 	if got := mcpEnvVars(disabled); got != nil {
 		t.Errorf("disabled MCP emitted %v, want nil", got)
 	}
 
-	// No mcp block.
 	absent := minimalGoADL()
 	absent.Spec.Agent = &schema.Agent{}
 	if got := mcpEnvVars(absent); got != nil {
 		t.Errorf("absent MCP emitted %v, want nil", got)
 	}
 
-	// Enabled but TypeScript agent.
 	ts := minimalTypeScriptADL()
 	ts.Spec.Agent = &schema.Agent{Mcp: &schema.MCP{
 		Enabled: true,

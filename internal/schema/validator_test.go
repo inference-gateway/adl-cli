@@ -60,12 +60,10 @@ func TestValidator_validateMCP(t *testing.T) {
 		return adl
 	}
 
-	// Disabled -> no warnings.
 	if w := v.validateMCP(goWithMCP(&MCP{Enabled: false})); len(w) != 0 {
 		t.Errorf("disabled MCP warned: %v", w)
 	}
 
-	// Enabled on TypeScript -> ignored-block warning.
 	ts := &ADL{}
 	ts.Spec.Language.TypeScript = &TypeScriptConfig{}
 	ts.Spec.Agent = &Agent{Mcp: &MCP{Enabled: true}}
@@ -73,7 +71,6 @@ func TestValidator_validateMCP(t *testing.T) {
 		t.Errorf("TypeScript MCP warnings = %v, want the Go-only notice", w)
 	}
 
-	// Enabled Go with a stdio server and no http server -> stdio-drop + empty-servers.
 	w := v.validateMCP(goWithMCP(&MCP{
 		Enabled: true,
 		Servers: []MCPServer{{Name: "local", Transport: MCPServerTransportStdio, Command: "npx"}},
@@ -85,7 +82,6 @@ func TestValidator_validateMCP(t *testing.T) {
 		t.Errorf("unexpected warnings: %v", w)
 	}
 
-	// Enabled Go with a valid http server -> no warnings.
 	if w := v.validateMCP(goWithMCP(&MCP{
 		Enabled: true,
 		Servers: []MCPServer{{Name: "tools", Transport: MCPServerTransportHttp, URL: "http://mcp:8080"}},
