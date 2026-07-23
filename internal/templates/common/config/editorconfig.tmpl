@@ -34,6 +34,12 @@ indent_size = 2
 [*.sh]
 indent_style = space
 indent_size = 2
+{{- if .ADL.Spec.Skills }}
+
+# Skills pointer symlink (target path, not a text file - no trailing newline)
+[.claude/skills]
+insert_final_newline = false
+{{- end }}
 {{- if .ADL.Spec.Language.Rust }}
 
 # Rust files
