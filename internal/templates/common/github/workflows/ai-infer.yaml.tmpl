@@ -114,7 +114,6 @@ jobs:
           fi
           git checkout -B "$HEAD_REF" "${REVIEWED_SHA:-$CURRENT_SHA}"
           if [ "$IS_FORK" != "true" ]; then
-            # Same-repo PR: restore upstream so the agent's `git push` targets the PR branch.
             git config "branch.$HEAD_REF.remote" origin
             git config "branch.$HEAD_REF.merge" "refs/heads/$HEAD_REF"
           fi
