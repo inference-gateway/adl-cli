@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.54.1](https://github.com/inference-gateway/adl-cli/compare/v0.54.0...v0.54.1) (2026-07-23)
+
+### 🐛 Bug Fixes
+
+* exclude .claude/skills symlink from final-newline rule ([#325](https://github.com/inference-gateway/adl-cli/issues/325)) ([3fc0abb](https://github.com/inference-gateway/adl-cli/commit/3fc0abb94eed181648d39ff9b5042fc56b4f1e27)), closes [#323](https://github.com/inference-gateway/adl-cli/issues/323)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump infer CLI v0.149.0 -> v0.152.0 in templates ([#324](https://github.com/inference-gateway/adl-cli/issues/324)) ([4e1da1f](https://github.com/inference-gateway/adl-cli/commit/4e1da1f55e02aed4faab5f214eec95d355988a61))
+
 ## [0.54.0](https://github.com/inference-gateway/adl-cli/compare/v0.53.0...v0.54.0) (2026-07-23)
 
 ### ✨ Features

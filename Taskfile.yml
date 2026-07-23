@@ -3,7 +3,7 @@ version: "3"
 
 vars:
   APP_NAME: adl
-  VERSION: 0.54.0
+  VERSION: 0.54.1
   BUILD_DIR: bin
   DIST_DIR: dist
   # Pinned to the main-branch commit that consolidated MCP config under
