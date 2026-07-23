@@ -209,6 +209,28 @@ type serviceBlock struct {
 	Description string `yaml:"description"`
 }
 
+// mcpServerBlock mirrors a single entry under spec.agent.mcp.servers. Init
+// never populates it (defaults emit an empty servers list), but capturing the
+// full shape keeps an existing manifest's servers intact on the
+// "use existing ADL" read/rewrite round-trip.
+type mcpServerBlock struct {
+	Name      string            `yaml:"name"`
+	Transport string            `yaml:"transport"`
+	Command   string            `yaml:"command,omitempty"`
+	Args      []string          `yaml:"args,omitempty"`
+	Env       map[string]string `yaml:"env,omitempty"`
+	URL       string            `yaml:"url,omitempty"`
+	Headers   map[string]string `yaml:"headers,omitempty"`
+}
+
+// mcpBlock mirrors spec.agent.mcp. `servers` is rendered without `omitempty`
+// so `adl init` emits `servers: []` - the breadcrumb showing first-time users
+// where to add MCP servers - while the client stays disabled by default.
+type mcpBlock struct {
+	Enabled bool             `yaml:"enabled"`
+	Servers []mcpServerBlock `yaml:"servers"`
+}
+
 // orchestratorToggle is a single coding-agent on/off switch under
 // spec.development.ai.orchestrators.<agent>.
 type orchestratorToggle struct {
@@ -264,11 +286,12 @@ type adlData struct {
 			IconURL            string   `yaml:"iconUrl,omitempty"`
 		} `yaml:"card,omitempty"`
 		Agent *struct {
-			Provider     string  `yaml:"provider"`
-			Model        string  `yaml:"model"`
-			SystemPrompt string  `yaml:"systemPrompt,omitempty"`
-			MaxTokens    int     `yaml:"maxTokens,omitempty"`
-			Temperature  float64 `yaml:"temperature,omitempty"`
+			Provider     string    `yaml:"provider"`
+			Model        string    `yaml:"model"`
+			SystemPrompt string    `yaml:"systemPrompt,omitempty"`
+			MaxTokens    int       `yaml:"maxTokens,omitempty"`
+			Temperature  float64   `yaml:"temperature,omitempty"`
+			MCP          *mcpBlock `yaml:"mcp,omitempty"`
 		} `yaml:"agent,omitempty"`
 		Artifacts *struct {
 			Enabled bool `yaml:"enabled"`
@@ -545,17 +568,22 @@ func buildADL(ans answers) *adlData {
 
 	if ans.AgentType == "ai-powered" {
 		adl.Spec.Agent = &struct {
-			Provider     string  `yaml:"provider"`
-			Model        string  `yaml:"model"`
-			SystemPrompt string  `yaml:"systemPrompt,omitempty"`
-			MaxTokens    int     `yaml:"maxTokens,omitempty"`
-			Temperature  float64 `yaml:"temperature,omitempty"`
+			Provider     string    `yaml:"provider"`
+			Model        string    `yaml:"model"`
+			SystemPrompt string    `yaml:"systemPrompt,omitempty"`
+			MaxTokens    int       `yaml:"maxTokens,omitempty"`
+			Temperature  float64   `yaml:"temperature,omitempty"`
+			MCP          *mcpBlock `yaml:"mcp,omitempty"`
 		}{
 			Provider:     ans.Provider,
 			Model:        ans.Model,
 			SystemPrompt: ans.SystemPrompt,
 			MaxTokens:    ans.MaxTokens,
 			Temperature:  ans.Temperature,
+			MCP: &mcpBlock{
+				Enabled: false,
+				Servers: []mcpServerBlock{},
+			},
 		}
 	}
 

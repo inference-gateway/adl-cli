@@ -89,6 +89,62 @@ func TestInitDefaultsManifestValidates(t *testing.T) {
 	}
 }
 
+// TestInitDefaultsEmitsMCPDisabled verifies that `adl init --defaults` writes a
+// spec.agent.mcp block that is disabled with an explicit empty servers list, so
+// the MCP client is off by default and users can discover where to add servers.
+func TestInitDefaultsEmitsMCPDisabled(t *testing.T) {
+	tempDir := t.TempDir()
+	outputPath := filepath.Join(tempDir, "test-output")
+
+	cmd := initCmd
+	if err := cmd.Flags().Set("defaults", "true"); err != nil {
+		t.Fatal(err)
+	}
+	if err := cmd.Flags().Set("path", outputPath); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := runInit(cmd, []string{"test-agent"}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	adlPath := filepath.Join(outputPath, "agent.yaml")
+	content, err := os.ReadFile(adlPath)
+	if err != nil {
+		t.Fatalf("failed to read ADL file: %v", err)
+	}
+
+	var adl adlData
+	if err := yaml.Unmarshal(content, &adl); err != nil {
+		t.Fatalf("failed to parse ADL YAML: %v", err)
+	}
+
+	if adl.Spec.Agent == nil || adl.Spec.Agent.MCP == nil {
+		t.Fatalf("expected spec.agent.mcp to be present by default")
+	}
+	if adl.Spec.Agent.MCP.Enabled {
+		t.Errorf("expected spec.agent.mcp.enabled to be false by default")
+	}
+	if adl.Spec.Agent.MCP.Servers == nil {
+		t.Errorf("expected spec.agent.mcp.servers to be an empty list (not nil)")
+	}
+	if len(adl.Spec.Agent.MCP.Servers) != 0 {
+		t.Errorf("expected spec.agent.mcp.servers to be empty, got %v", adl.Spec.Agent.MCP.Servers)
+	}
+
+	contentStr := string(content)
+	if !strings.Contains(contentStr, "mcp:") {
+		t.Errorf("ADL file should contain 'mcp:', got:\n%s", contentStr)
+	}
+	if !strings.Contains(contentStr, "servers: []") {
+		t.Errorf("ADL file should contain 'servers: []', got:\n%s", contentStr)
+	}
+
+	if _, err := schema.NewValidator().ValidateFile(adlPath); err != nil {
+		t.Fatalf("default manifest with mcp block failed schema validation: %v", err)
+	}
+}
+
 func TestInitCommandIncludesSCMDefaults(t *testing.T) {
 	tempDir := t.TempDir()
 	outputPath := filepath.Join(tempDir, "test-output")
