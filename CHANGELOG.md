@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.55.0](https://github.com/inference-gateway/adl-cli/compare/v0.54.1...v0.55.0) (2026-07-23)
+
+### ✨ Features
+
+* **templates:** add effort level dropdown to Claude Code workflow ([#326](https://github.com/inference-gateway/adl-cli/issues/326)) ([a5e61a2](https://github.com/inference-gateway/adl-cli/commit/a5e61a2e5324060415a09bb88fbfc137fa774f4a))
+
+### 🐛 Bug Fixes
+
+* pin infer PR checkout to immutable SHA (TOCTOU) ([#327](https://github.com/inference-gateway/adl-cli/issues/327)) ([37fdd5a](https://github.com/inference-gateway/adl-cli/commit/37fdd5a9b1d00fdd46511c84f20e1c3aa77062a3)), closes [#5](https://github.com/inference-gateway/adl-cli/issues/5)
+
+### 👷 CI
+
+* **claude:** centralize claude.yml via reusable workflow ([#328](https://github.com/inference-gateway/adl-cli/issues/328)) ([bdabe6b](https://github.com/inference-gateway/adl-cli/commit/bdabe6bce2e1496d28e462fe7b70bfbf9ec6efac))
+
 ## [0.54.1](https://github.com/inference-gateway/adl-cli/compare/v0.54.0...v0.54.1) (2026-07-23)
 
 ### 🐛 Bug Fixes
