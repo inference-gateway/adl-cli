@@ -1,0 +1,107 @@
+---
+name: Sync schema
+
+# Bumps the pinned ADL schema version, re-fetches internal/schema/schema.json,
+# regenerates internal/schema/types.go, and opens a PR.
+#
+# Triggered by a repository_dispatch (event_type: schema-sync) from
+# inference-gateway/adl, or manually via workflow_dispatch.
+
+on:
+  repository_dispatch:
+    types: [schema-sync]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "ADL schema ref to pin (git tag or commit SHA, e.g. v0.22.0)"
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  sync:
+    name: Sync ADL schema and open PR
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/create-github-app-token@v3.2.0
+        id: app-token
+        with:
+          client-id: ${{ secrets.RELEASER_APP_ID }}
+          private-key: ${{ secrets.RELEASER_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            ${{ github.repository.name }}
+
+      - name: Get GitHub App User ID
+        id: get-user-id
+        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      - name: Set up Git
+        run: |
+          git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
+          git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com'
+          git config --global commit.gpgsign false
+          git config --global commit.signoff true
+
+      - name: Resolve schema ref
+        id: ref
+        env:
+          DISPATCH_REF: ${{ github.event.client_payload.ref }}
+          INPUT_REF: ${{ inputs.ref }}
+        run: |
+          REF="${DISPATCH_REF:-$INPUT_REF}"
+          if [ -z "$REF" ]; then
+            echo "No schema ref provided" >&2
+            exit 1
+          fi
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+          echo "Syncing ADL schema to: $REF"
+
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Install go-task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ steps.app-token.outputs.token }}
+
+      - name: Bump pinned schema version
+        env:
+          REF: ${{ steps.ref.outputs.ref }}
+        run: |
+          sed -i -E "s|^(  ADL_SCHEMA_VERSION: ).*|\1${REF}|" Taskfile.yml
+          grep -E "^  ADL_SCHEMA_VERSION: " Taskfile.yml
+
+      - name: Fetch schema and regenerate types
+        run: |
+          task fetch-schema
+          task generate-types
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v8.1.1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          base: main
+          branch: chore/sync-schema-${{ steps.ref.outputs.ref }}
+          commit-message: "chore: sync ADL schema to ${{ steps.ref.outputs.ref }}"
+          title: "chore: sync ADL schema to ${{ steps.ref.outputs.ref }}"
+          body: |
+            Bumps the pinned ADL schema version (`ADL_SCHEMA_VERSION`) to
+            [`${{ steps.ref.outputs.ref }}`](https://github.com/${{ github.repository_owner }}/adl/releases/tag/${{ steps.ref.outputs.ref }}),
+            re-fetches `internal/schema/schema.json`, and regenerates
+            `internal/schema/types.go` via `task fetch-schema` + `task generate-types`.
+
+            Dispatched from `inference-gateway/adl`.
