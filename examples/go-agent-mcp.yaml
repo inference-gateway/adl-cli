@@ -1,0 +1,69 @@
+---
+apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: go-agent-mcp
+  description: "Go A2A agent wired to MCP servers via the ADK's built-in MCP client"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  card:
+    protocolVersion: "0.3.0"
+    preferredTransport: JSONRPC
+    defaultInputModes:
+      - text
+    defaultOutputModes:
+      - text
+  agent:
+    provider: deepseek
+    model: deepseek-v4-flash
+    systemPrompt: |
+      You are an assistant with access to external MCP tools. Call mcp_list_tools
+      to discover what the connected MCP servers expose, read a tool's input
+      schema, then call mcp_call_tool to run it.
+    maxTokens: 4096
+    temperature: 0.3
+    # spec.agent.mcp configures the ADK's built-in MCP client. 'enabled' is the
+    # master switch: when true the generator wires an MCPClientManager into main.go
+    # (registering the mcp_list_tools / mcp_call_tool selector tools) and emits the
+    # A2A_MCP_* defaults in .env.example. Each field maps 1:1 to an A2A_MCP_* env
+    # var - the manifest value is the default, overridden by the env var at runtime.
+    # A2A_MCP_SERVERS is derived from the http servers below. The client is
+    # streamable-HTTP-only, so stdio/sse servers would be dropped with a warning.
+    mcp:
+      enabled: true
+      endpoint: /mcp
+      refreshInterval: 5m
+      dialTimeout: 30s
+      callTimeout: 30s
+      maxRetries: 0
+      retryInterval: 2s
+      retryMaxInterval: 30s
+      servers:
+        - name: tools
+          transport: http
+          url: http://mcp-tools:8080
+        - name: search
+          transport: http
+          url: http://mcp-search:8080
+  server:
+    port: 8080
+    scheme: http
+    debug: false
+    auth:
+      enabled: false
+  language:
+    go:
+      module: "github.com/inference-gateway/adl-cli/test-output"
+      version: "1.26.4"
+  development:
+    sandbox:
+      flox:
+        enabled: true
+      devcontainer:
+        enabled: false
+      dockerCompose:
+        enabled: true

@@ -66,6 +66,7 @@ The ADL CLI helps you build enterprise-ready A2A agents quickly by generating co
 - 🤖 **Multi-Provider AI** - OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama, Ollama Cloud, and Nvidia support
 - 📁 **Artifacts Support** - Integrated filesystem and MinIO object storage for artifact management
 - 📡 **OpenTelemetry Instrumentation** - Opt-in tracing and metrics via `spec.telemetry.enabled` (Go and TypeScript)
+- 🔌 **MCP Client** - Connect to MCP servers via `spec.agent.mcp` for `mcp_list_tools` / `mcp_call_tool` (Go)
 
 ## Installation
 
@@ -1859,6 +1860,31 @@ The manifest field is a single on/off switch - exporter endpoints, ports, and sa
 
 - `examples/go-agent-telemetry.yaml` - Go agent with metrics server, OTLP traces, and per-tool-call spans
 - `examples/typescript-agent-telemetry.yaml` - TypeScript agent with ADK-provided OTel wiring
+
+## MCP Client
+
+Connect the generated agent to one or more [MCP](https://modelcontextprotocol.io) servers via the ADK's built-in MCP client:
+
+```yaml
+spec:
+  agent:
+    provider: deepseek
+    model: deepseek-v4-flash
+    mcp:
+      enabled: true
+      servers:
+        - name: tools
+          transport: http
+          url: http://mcp-tools:8080
+```
+
+`enabled` is the master switch. When true (and omitted the block is off), the generator wires an `MCPClientManager` into `main.go` that connects to the servers in the background, discovers their tools, and registers two selector tools - `mcp_list_tools` and `mcp_call_tool` - into the agent's toolbox. Everything else is a runtime concern: each `mcp` field maps 1:1 to an `A2A_MCP_*` variable in the generated `.env.example` (the manifest value is the default, overridden by the environment). `A2A_MCP_SERVERS` is derived from the `http` servers' base URLs. Defaults: `endpoint=/mcp`, `refreshInterval=5m`, `dialTimeout=30s`, `callTimeout=30s`, `maxRetries=0`, `retryInterval=2s`, `retryMaxInterval=30s`.
+
+> **Note:** The ADK MCP client is generated for Go agents only and is streamable-HTTP-only; `stdio`/`sse` servers are dropped from `A2A_MCP_SERVERS` (the validator warns), and the block is ignored for TypeScript/Rust agents.
+
+**Example:**
+
+- `examples/go-agent-mcp.yaml` - Go agent wired to two http MCP servers
 
 ## GitHub Issue Templates
 
