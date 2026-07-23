@@ -22,7 +22,7 @@ func TestMCPEnvVars_DerivesServersAndDefaults(t *testing.T) {
 	adl := minimalGoADL()
 	adl.Spec.Agent = &schema.Agent{
 		Mcp: &schema.MCP{
-			Enabled: true,
+			Enabled:     true,
 			CallTimeout: "45s",
 			Servers: []schema.MCPServer{
 				{Name: "tools", Transport: schema.MCPServerTransportHttp, URL: "http://mcp-tools:8080"},
