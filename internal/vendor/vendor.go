@@ -106,7 +106,7 @@ func Resolve(raws []string, builtins map[string]string, depGroup string) ([]Entr
 // mirrored here.
 var GoBuiltins = map[string]string{
 	"github.com/inference-gateway/adk":  "v0.23.4",
-	"github.com/sethvargo/go-envconfig": "v1.4.0",
+	"github.com/sethvargo/go-envconfig": "v1.4.3",
 	"github.com/spf13/cobra":            "v1.10.2",
 	"go.uber.org/zap":                   "v1.28.0",
 	"gopkg.in/yaml.v3":                  "v3.0.1",
