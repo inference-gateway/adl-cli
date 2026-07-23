@@ -17,6 +17,16 @@ on:
         description: 'Task for Claude Code to run'
         type: string
         required: false
+      effort:
+        description: 'Effort level for Claude Code'
+        type: choice
+        options:
+          - low
+          - medium
+          - high
+          - xhigh
+          - max
+        default: medium
   issue_comment:
     types:
       - created
@@ -155,7 +165,7 @@ jobs:
           base_branch: main
           branch_prefix: ${{`{{ steps.prefix.outputs.value }}`}}
           claude_args: |
-            --effort max
+            --effort ${{`{{ inputs.effort || 'medium' }}`}}
             --model claude-opus-4-8
             --allowedTools "Bash(task:*),Bash(gh:*),Bash(git:*),Bash(adl:*){{- if eq .Language "go" }},Bash(go:*){{- else if eq .Language "rust" }},Bash(cargo:*){{- else if eq .Language "typescript" }},Bash(npm:*),Bash(node:*){{- end }}"
             --append-system-prompt "After pushing commits to a new branch (issue-triggered runs), open the pull request yourself with 'gh pr create' against main, titled with a conventional commit prefix and linking the triggering issue via 'Closes #<number>' in the body. GH_TOKEN is already set for gh. Do not just post a link to a PR creation page. When working on an existing pull request branch, do not create a new pull request."
