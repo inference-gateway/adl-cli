@@ -1810,7 +1810,7 @@ spec:
 
 **Required GitHub Secrets:**
 
-- `RELEASER_APP_ID` - Your GitHub App ID
+- `RELEASER_APP_CLIENT_ID` - Your GitHub App ID
 - `RELEASER_APP_PRIVATE_KEY` - Your GitHub App private key
 
 The secret names are configurable via `spec.scm.app_id_secret` and

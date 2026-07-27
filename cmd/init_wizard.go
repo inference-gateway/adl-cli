@@ -543,7 +543,7 @@ func collectDeploymentSCM(ans *answers) {
 		ans.Dependabot = dependabot
 
 		if githubApp {
-			releaserAppID, releaserAppKey := "RELEASER_APP_ID", "RELEASER_APP_PRIVATE_KEY"
+			releaserAppID, releaserAppKey := "RELEASER_APP_CLIENT_ID", "RELEASER_APP_PRIVATE_KEY"
 			runFields([]huh.Field{
 				huh.NewInput().Title("Release GitHub App client ID secret name").Value(&releaserAppID),
 				huh.NewInput().Title("Release GitHub App private key secret name").Value(&releaserAppKey),

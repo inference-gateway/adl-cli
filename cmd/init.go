@@ -479,7 +479,7 @@ type answers struct {
 	ScmURL      string
 	GithubApp   bool
 	// GitHub App secret names for the release (CD) workflow. Empty means the
-	// schema defaults (RELEASER_APP_ID / RELEASER_APP_PRIVATE_KEY) and the
+	// schema defaults (RELEASER_APP_CLIENT_ID / RELEASER_APP_PRIVATE_KEY) and the
 	// fields are omitted from the manifest.
 	ScmAppIDSecret         string
 	ScmAppPrivateKeySecret string
@@ -1178,7 +1178,7 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 			ans.ScmURL = conditionalPrompt(useDefaults, "Repository URL", defaultURL)
 			ans.GithubApp = conditionalPromptBool(useDefaults, "Enable GitHub App integration", true)
 			if ans.GithubApp {
-				ans.ScmAppIDSecret = conditionalPrompt(useDefaults, "GitHub App client ID secret name for releases", "RELEASER_APP_ID")
+				ans.ScmAppIDSecret = conditionalPrompt(useDefaults, "GitHub App client ID secret name for releases", "RELEASER_APP_CLIENT_ID")
 				ans.ScmAppPrivateKeySecret = conditionalPrompt(useDefaults, "GitHub App private key secret name for releases", "RELEASER_APP_PRIVATE_KEY")
 			}
 
