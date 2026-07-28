@@ -393,7 +393,7 @@ func TestGenerator_AI_InferWorkflowContent(t *testing.T) {
 	body := readGenerated(t, out, ".github/workflows/infer.yml")
 
 	assertContains(t, body, "name: Infer", "Infer workflow body")
-	assertContains(t, body, "inference-gateway/infer-action@v0.34.5", "Infer workflow body")
+	assertContains(t, body, "inference-gateway/infer-action@v0.38.1", "Infer workflow body")
 	assertContains(t, body, "github-token: ${{ steps.app-token.outputs.token }}", "Infer workflow body")
 	assertContains(t, body, "actions/create-github-app-token", "Infer workflow body")
 	assertContains(t, body, "model:", "Infer workflow body")
@@ -432,10 +432,10 @@ func TestGenerator_AI_InferSandboxInstall(t *testing.T) {
 		mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
 
 		flox := readGenerated(t, out, ".flox/env/manifest.toml")
-		assertContains(t, flox, `infer.flake = "github:inference-gateway/cli/v0.152.0"`, "flox manifest")
+		assertContains(t, flox, `infer.flake = "github:inference-gateway/cli/v0.154.0"`, "flox manifest")
 
 		dc := readGenerated(t, out, ".devcontainer/devcontainer.json")
-		assertContains(t, dc, "install.sh | bash -s -- --version v0.152.0", "devcontainer postCreateCommand")
+		assertContains(t, dc, "install.sh | bash -s -- --version v0.154.0", "devcontainer postCreateCommand")
 	})
 
 	t.Run("infer disabled leaves sandbox untouched", func(t *testing.T) {
