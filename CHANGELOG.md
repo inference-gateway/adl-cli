@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.57.0](https://github.com/inference-gateway/adl-cli/compare/v0.56.0...v0.57.0) (2026-07-29)
+
+### ✨ Features
+
+* **claude:** bump claude-code-action to v1.0.183 and add claude-opus-5 model option ([#336](https://github.com/inference-gateway/adl-cli/issues/336)) ([a13d795](https://github.com/inference-gateway/adl-cli/commit/a13d795c469cf13c7d4ff65cd959cfe375ae5508))
+
+### 🐛 Bug Fixes
+
+* **flox:** mark .flox/env/manifest.toml as generated in .gitattributes ([#337](https://github.com/inference-gateway/adl-cli/issues/337)) ([b715e3b](https://github.com/inference-gateway/adl-cli/commit/b715e3b7f819ac63ab2c1f91002e9266bf4324bc))
+
 ## [0.56.0](https://github.com/inference-gateway/adl-cli/compare/v0.55.0...v0.56.0) (2026-07-29)
 
 ### ✨ Features
