@@ -1,0 +1,62 @@
+---
+name: Regenerate
+
+# Runs `adl generate` on this project's manifest and opens a PR if the
+# generated output differs from what is committed. This keeps the project
+# in sync with the latest ADL CLI version and templates.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"  # every Monday at 06:00 UTC
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate:
+    name: Regenerate project from ADL manifest
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install ADL CLI
+        env:
+          VERSION: v{{ .Metadata.CLIVersion }}
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/inference-gateway/adl-cli/v{{ .Metadata.CLIVersion }}/install.sh | bash
+          adl --version
+
+      - name: Generate project from manifest
+        run: |
+          adl generate \
+            --file {{ .Metadata.ADLFile }} \
+            --output . \
+            --overwrite \
+            --ci
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v8.1.1
+        with:
+          token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
+          base: main
+          branch: chore/regenerate
+          commit-message: "chore: regenerate project from ADL manifest"
+          title: "chore: regenerate project from ADL manifest"
+          body: |
+            ## Summary
+
+            Regenerates this project from its ADL manifest by running
+            `adl generate`. This keeps the generated output in sync with
+            the latest ADL CLI version and templates.
+
+            ## Changes
+
+            - Updated generated project files
+          labels: |
+            automated

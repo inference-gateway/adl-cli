@@ -594,6 +594,9 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		if err := g.generateCI(adl, outputDir, ignoreChecker); err != nil {
 			return fmt.Errorf("failed to generate CI configuration: %w", err)
 		}
+		if err := g.generateRegenerateWorkflow(adl, outputDir, ignoreChecker); err != nil {
+			return fmt.Errorf("failed to generate regenerate workflow: %w", err)
+		}
 	}
 
 	if g.config.GenerateCD {
@@ -1123,6 +1126,61 @@ func (g *Generator) generateGitHubActionsWorkflow(adl *schema.ADL, outputDir str
 	}
 
 	fmt.Println("✅ CI workflow generated successfully!")
+	fmt.Printf("📁 GitHub Actions workflow: %s\n", workflowPath)
+
+	return nil
+}
+
+// generateRegenerateWorkflow generates a GitHub Actions workflow that
+// runs `adl generate` on the project's own manifest and opens a PR when
+// the generated output changes. This keeps the project in sync with the
+// latest ADL CLI version and templates.
+func (g *Generator) generateRegenerateWorkflow(adl *schema.ADL, outputDir string, ignoreChecker *IgnoreChecker) error {
+	workflowPath := ".github/workflows/generate.yml"
+
+	if ignoreChecker.ShouldIgnore(workflowPath) {
+			fmt.Printf("🚫 Ignoring file (matches .adl-ignore): %s\n", workflowPath)
+			return nil
+	}
+
+	language := g.detectLanguage(adl)
+	templateEngine, err := templates.NewRegistry(language)
+	if err != nil {
+			return fmt.Errorf("failed to create template registry: %w", err)
+	}
+
+	ctx := templates.Context{
+			ADL: adl,
+			Metadata: schema.GeneratedMetadata{
+				CLIVersion:  g.config.Version,
+				GeneratedAt: time.Now(),
+				ADLFile:     g.config.ADLFile,
+				Template:    g.config.Template,
+			},
+			Language:        language,
+			GenerateCI:      g.config.GenerateCI,
+			GenerateCD:      g.config.GenerateCD,
+			EnableAI:        g.config.EnableAI,
+			AIToggles:       g.config.AIToggles,
+			GenerateCommand: g.buildGenerateCommand(),
+	}
+
+	templateKey := "github/workflows/generate.yaml"
+	workflowContent, err := templates.NewWithRegistry("", templateEngine).ExecuteTemplate(templateKey, ctx)
+	if err != nil {
+			return fmt.Errorf("failed to execute regenerate workflow template: %w", err)
+	}
+
+	// Add header to the workflow content
+	header := templates.GetGeneratedFileHeader("yaml", ctx.Metadata.CLIVersion, ctx.Metadata.GeneratedAt)
+	workflowContent = header + workflowContent
+
+	fullWorkflowPath := filepath.Join(outputDir, workflowPath)
+	if err := g.writeFile(fullWorkflowPath, workflowContent); err != nil {
+			return fmt.Errorf("failed to write regenerate workflow: %w", err)
+	}
+
+	fmt.Println("✅ Regenerate workflow generated successfully!")
 	fmt.Printf("📁 GitHub Actions workflow: %s\n", workflowPath)
 
 	return nil
