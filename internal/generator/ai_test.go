@@ -323,6 +323,7 @@ func TestGenerator_AI_ClaudeWorkflowGoContent(t *testing.T) {
 	assertContains(t, body, "--model ${{ inputs.model || 'claude-opus-4-8' }}", "Claude Code workflow body")
 	assertContains(t, body, "model:", "Claude Code workflow body")
 	assertContains(t, body, "description: 'Claude model'", "Claude Code workflow body")
+	assertContains(t, body, "- claude-fable-5", "Claude Code workflow body")
 	assertContains(t, body, "- claude-opus-5", "Claude Code workflow body")
 	assertContains(t, body, "- claude-opus-4-8", "Claude Code workflow body")
 	assertContains(t, body, "name: Determine branch prefix", "Claude Code workflow body")
