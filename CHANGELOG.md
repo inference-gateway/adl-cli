@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.57.1](https://github.com/inference-gateway/adl-cli/compare/v0.57.0...v0.57.1) (2026-07-29)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump docker/login-action from v4.5.2 to v4.6.0 ([#338](https://github.com/inference-gateway/adl-cli/issues/338)) ([7554947](https://github.com/inference-gateway/adl-cli/commit/7554947dda4165613ecce81de0f69da76e9ac8e9))
+* replace standalone generate workflow with CI drift detection ([#339](https://github.com/inference-gateway/adl-cli/issues/339)) ([aef3f43](https://github.com/inference-gateway/adl-cli/commit/aef3f43c5182104813fd52ebe27722ad68b174e5))
+
 ## [0.57.0](https://github.com/inference-gateway/adl-cli/compare/v0.56.0...v0.57.0) (2026-07-29)
 
 ### ✨ Features
