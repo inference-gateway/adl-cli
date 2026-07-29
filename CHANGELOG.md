@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.56.0](https://github.com/inference-gateway/adl-cli/compare/v0.55.0...v0.56.0) (2026-07-29)
+
+### ✨ Features
+
+* **deps:** bump infer-action v0.34.5 -> v0.38.1 and infer CLI v0.152.0 -> v0.154.0 ([#333](https://github.com/inference-gateway/adl-cli/issues/333)) ([5cab156](https://github.com/inference-gateway/adl-cli/commit/5cab1567697e39e49fabdd8a82e23f24bf8d5954))
+
+### 🐛 Bug Fixes
+
+* **ci:** update maintainer app ID to client ID in workflows and documentation ([f980c2b](https://github.com/inference-gateway/adl-cli/commit/f980c2be740f4f91e854c1c04cc250c8ae376007))
+
+### 👷 CI
+
+* **claude:** centralize claude.yml via reusable workflow ([#330](https://github.com/inference-gateway/adl-cli/issues/330)) ([de12fd5](https://github.com/inference-gateway/adl-cli/commit/de12fd501b7e2313078c9a43848b2482257c0635))
+* **claude:** centralize claude.yml via reusable workflow ([#332](https://github.com/inference-gateway/adl-cli/issues/332)) ([afcef01](https://github.com/inference-gateway/adl-cli/commit/afcef01347d85985d4120b55f977a2cf93893c0a))
+* **claude:** centralize claude.yml via reusable workflow ([#334](https://github.com/inference-gateway/adl-cli/issues/334)) ([4392f12](https://github.com/inference-gateway/adl-cli/commit/4392f12ed58a14b5ab0a3b35146ae7741cff2164))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump docker/login-action from v4.4.0 to v4.5.0 ([#329](https://github.com/inference-gateway/adl-cli/issues/329)) ([6940315](https://github.com/inference-gateway/adl-cli/commit/6940315cdc3670d876bc9240865d48cebfea391c))
+* **deps:** bump docker/login-action from v4.5.0 to v4.5.2 ([f0940a8](https://github.com/inference-gateway/adl-cli/commit/f0940a85ff6fb41eb9a1233bf07c82afbf37bda6))
+* **deps:** bump infer CLI v0.148.1 -> v0.153.1 ([#331](https://github.com/inference-gateway/adl-cli/issues/331)) ([f0ce3db](https://github.com/inference-gateway/adl-cli/commit/f0ce3dbc9196428057a602b5aff35db7ab1c30ae))
+
 ## [0.55.0](https://github.com/inference-gateway/adl-cli/compare/v0.54.1...v0.55.0) (2026-07-23)
 
 ### ✨ Features
