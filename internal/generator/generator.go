@@ -594,7 +594,6 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		if err := g.generateCI(adl, outputDir, ignoreChecker); err != nil {
 			return fmt.Errorf("failed to generate CI configuration: %w", err)
 		}
-
 	}
 
 	if g.config.GenerateCD {
@@ -1128,8 +1127,6 @@ func (g *Generator) generateGitHubActionsWorkflow(adl *schema.ADL, outputDir str
 
 	return nil
 }
-
-
 
 // runPostGenerationSteps runs language-specific post-generation steps
 func (g *Generator) runPostGenerationSteps(adl *schema.ADL, outputDir, language string) error {
