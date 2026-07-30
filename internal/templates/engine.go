@@ -372,6 +372,8 @@ func customFuncMap() template.FuncMap {
 	funcMap["builtinToolMeta"] = schema.BuiltinToolMetaFor
 	funcMap["telemetryEnvVars"] = telemetryEnvVars
 	funcMap["mcpEnvVars"] = mcpEnvVars
+	funcMap["cardSecuritySchemes"] = cardSecuritySchemes
+	funcMap["cardSecurity"] = cardSecurity
 	return funcMap
 }
 
@@ -405,6 +407,8 @@ func customFuncMapWithAcronyms(acronyms map[string]string) template.FuncMap {
 	funcMap["builtinToolMeta"] = schema.BuiltinToolMetaFor
 	funcMap["telemetryEnvVars"] = telemetryEnvVars
 	funcMap["mcpEnvVars"] = mcpEnvVars
+	funcMap["cardSecuritySchemes"] = cardSecuritySchemes
+	funcMap["cardSecurity"] = cardSecurity
 	return funcMap
 }
 

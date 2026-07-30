@@ -104,9 +104,48 @@ type Card struct {
 	// ProtocolVersion corresponds to the JSON schema field "protocolVersion".
 	ProtocolVersion string `json:"protocolVersion,omitempty,omitzero" yaml:"protocolVersion,omitempty" mapstructure:"protocolVersion,omitempty"`
 
+	// Security requirements advertised on the AgentCard (A2A spec section 7). Each
+	// entry is a map from a scheme name declared in 'securitySchemes' to a list of
+	// required scopes (empty for schemes without scopes); multiple keys in one entry
+	// are ANDed, and separate array entries are ORed - the same semantics as the
+	// OpenAPI/A2A 'security' field. This flat DSL form is what authors write;
+	// consumers (e.g. adl-cli) map it onto the ADK's AgentCard 'security' shape ({
+	// schemes: { <name>: { list: [scopes] } } }).
+	Security []CardSecurityElem `json:"security,omitempty,omitzero" yaml:"security,omitempty" mapstructure:"security,omitempty"`
+
+	// Statically declared A2A/OpenAPI security schemes advertised on the AgentCard
+	// (A2A spec section 7), keyed by an arbitrary scheme name referenced from
+	// 'security'. Use this only for schemes that cannot be derived from runtime
+	// config - 'apiKey', 'http', and 'mutualTLS'. OIDC/OAuth2 schemes are
+	// deliberately excluded here: they are runtime concerns (AUTH_ISSUER_URL /
+	// AUTH_CLIENT_ID / AUTH_CLIENT_SECRET env) and the ADK derives their declaration
+	// at startup, so baking an issuer into the manifest would be wrong per
+	// environment.
+	SecuritySchemes CardSecuritySchemes `json:"securitySchemes,omitempty,omitzero" yaml:"securitySchemes,omitempty" mapstructure:"securitySchemes,omitempty"`
+
+	// Whether the deployed agent serves a richer, authenticated AgentCard via the A2A
+	// 'GetExtendedAgentCard' method (GET /extendedAgentCard; A2A spec section 7).
+	// When true, the generated ADK wires up that endpoint; clients that authenticate
+	// receive an extended card, and misconfigured/unsupported calls follow the A2A
+	// error contract (-32007 ExtendedAgentCardNotConfiguredError when the extended
+	// card is declared but not configured / -32004 UnsupportedOperationError when the
+	// agent does not support it). Optional; defaults to false when omitted.
+	SupportsExtendedAgentCard bool `json:"supportsExtendedAgentCard,omitempty,omitzero" yaml:"supportsExtendedAgentCard,omitempty" mapstructure:"supportsExtendedAgentCard,omitempty"`
+
 	// URL corresponds to the JSON schema field "url".
 	URL string `json:"url,omitempty,omitzero" yaml:"url,omitempty" mapstructure:"url,omitempty"`
 }
+
+type CardSecurityElem map[string][]string
+
+// Statically declared A2A/OpenAPI security schemes advertised on the AgentCard
+// (A2A spec section 7), keyed by an arbitrary scheme name referenced from
+// 'security'. Use this only for schemes that cannot be derived from runtime config
+// - 'apiKey', 'http', and 'mutualTLS'. OIDC/OAuth2 schemes are deliberately
+// excluded here: they are runtime concerns (AUTH_ISSUER_URL / AUTH_CLIENT_ID /
+// AUTH_CLIENT_SECRET env) and the ADK derives their declaration at startup, so
+// baking an issuer into the manifest would be wrong per environment.
+type CardSecuritySchemes map[string]SecurityScheme
 
 // Provision Anthropic's Claude Code coding agent inside the sandbox.
 type ClaudeCodeConfig struct {
@@ -635,6 +674,49 @@ type ScalingConfig struct {
 	// MinInstances corresponds to the JSON schema field "minInstances".
 	MinInstances int `json:"minInstances,omitempty,omitzero" yaml:"minInstances,omitempty" mapstructure:"minInstances,omitempty"`
 }
+
+// A single statically declared security scheme in a flat, OpenAPI-3.0-style
+// authoring form: a 'type' discriminator with sibling fields. This is the DSL form
+// authors write; consumers (e.g. adl-cli) map it onto the ADK's A2A v1.0 AgentCard
+// 'SecurityScheme', which is a per-variant wrapper object ('type' -> the wrapper
+// key, 'in' -> 'location'). The 'type' selects the variant: 'apiKey' (key passed
+// in a header, query param, or cookie), 'http' (HTTP auth such as Basic or
+// Bearer), or 'mutualTLS' (client-certificate auth). OIDC/OAuth2 are intentionally
+// not modelled here because the ADK derives them from runtime config.
+type SecurityScheme struct {
+	// For 'http' with a 'Bearer' scheme: a hint identifying the bearer token format
+	// (e.g. 'JWT'). Informational only.
+	BearerFormat string `json:"bearerFormat,omitempty,omitzero" yaml:"bearerFormat,omitempty" mapstructure:"bearerFormat,omitempty"`
+
+	// Human-readable description of the scheme.
+	Description string `json:"description,omitempty,omitzero" yaml:"description,omitempty" mapstructure:"description,omitempty"`
+
+	// For 'apiKey': where the key is sent.
+	In SecuritySchemeIn `json:"in,omitempty,omitzero" yaml:"in,omitempty" mapstructure:"in,omitempty"`
+
+	// For 'apiKey': the name of the header, query parameter, or cookie carrying the
+	// key.
+	Name string `json:"name,omitempty,omitzero" yaml:"name,omitempty" mapstructure:"name,omitempty"`
+
+	// For 'http': the HTTP Authorization scheme name (e.g. 'Basic', 'Bearer'), per
+	// RFC 7235.
+	Scheme string `json:"scheme,omitempty,omitzero" yaml:"scheme,omitempty" mapstructure:"scheme,omitempty"`
+
+	// Type corresponds to the JSON schema field "type".
+	Type SecuritySchemeType `json:"type" yaml:"type" mapstructure:"type"`
+}
+
+type SecuritySchemeIn string
+
+const SecuritySchemeInCookie SecuritySchemeIn = "cookie"
+const SecuritySchemeInHeader SecuritySchemeIn = "header"
+const SecuritySchemeInQuery SecuritySchemeIn = "query"
+
+type SecuritySchemeType string
+
+const SecuritySchemeTypeAPIKey SecuritySchemeType = "apiKey"
+const SecuritySchemeTypeHttp SecuritySchemeType = "http"
+const SecuritySchemeTypeMutualTLS SecuritySchemeType = "mutualTLS"
 
 type Server struct {
 	// Auth corresponds to the JSON schema field "auth".

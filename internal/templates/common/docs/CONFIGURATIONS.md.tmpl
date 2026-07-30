@@ -70,12 +70,12 @@ derived from `agent.yaml`; the env vars below override them at runtime.
 | **Artifacts** | `A2A_ARTIFACTS_RETENTION_CLEANUP_INTERVAL` | Cleanup frequency (0 = manual only) | `24h` |
 {{- end }}
 {{- if and .ADL.Spec.Server.Auth .ADL.Spec.Server.Auth.Enabled }}
-| **Authentication** | `A2A_AUTH_ENABLE` | Enable OIDC authentication | `true` |
+| **Authentication** | `A2A_AUTH_ENABLED` | Enable OIDC authentication | `true` |
 | **Authentication** | `A2A_AUTH_ISSUER_URL` | OIDC issuer URL | - |
 | **Authentication** | `A2A_AUTH_CLIENT_ID` | OIDC client ID | - |
 | **Authentication** | `A2A_AUTH_CLIENT_SECRET` | OIDC client secret | - |
 {{- else }}
-| **Authentication** | `A2A_AUTH_ENABLE` | Enable OIDC authentication | `false` |
+| **Authentication** | `A2A_AUTH_ENABLED` | Enable OIDC authentication | `false` |
 {{- end }}
 {{- if and .ADL.Spec.Telemetry .ADL.Spec.Telemetry.Enabled }}
 {{- if or (eq .Language "go") (eq .Language "typescript") }}

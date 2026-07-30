@@ -1,0 +1,60 @@
+---
+apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: go-agent-auth
+  description: "Agent advertising A2A card-driven authentication (spec section 7)"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  card:
+    protocolVersion: "0.3.0"
+    preferredTransport: JSONRPC
+    url: "https://my-agent.example.com:8443"
+    # Extended, authenticated card served via agent/getAuthenticatedExtendedCard.
+    supportsExtendedAgentCard: true
+    # Statically declared schemes (apiKey / http / mutualTLS). OIDC/OAuth2 are
+    # intentionally NOT declared here - the ADK derives them from runtime config
+    # (A2A_AUTH_* env) when spec.server.auth.enabled is true.
+    securitySchemes:
+      apiKey:
+        type: apiKey
+        description: "API key passed in the X-API-Key header"
+        name: X-API-Key
+        in: header
+      bearer:
+        type: http
+        description: "JWT bearer token"
+        scheme: Bearer
+        bearerFormat: JWT
+    security:
+      - apiKey: []
+      - bearer: []
+  agent:
+    provider: deepseek
+    model: deepseek-v4-flash
+    systemPrompt: |
+      You are a helpful assistant.
+    maxTokens: 4096
+    temperature: 0.3
+  server:
+    port: 8443
+    scheme: https
+    debug: false
+    auth:
+      enabled: true
+  language:
+    go:
+      module: "github.com/inference-gateway/adl-cli/test-output"
+      version: "1.26.4"
+  development:
+    sandbox:
+      flox:
+        enabled: false
+      devcontainer:
+        enabled: false
+      dockerCompose:
+        enabled: true
