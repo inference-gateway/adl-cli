@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.58.0](https://github.com/inference-gateway/adl-cli/compare/v0.57.2...v0.58.0) (2026-07-30)
+
+### ✨ Features
+
+* card-driven auth in generated agents + schema sync v0.24.0 ([#345](https://github.com/inference-gateway/adl-cli/issues/345)) ([2dbaf3a](https://github.com/inference-gateway/adl-cli/commit/2dbaf3aba16b156fefaf19b63ac86934723fe153))
+* **deps:** bump github.com/inference-gateway/adk from v0.25.4 to v0.26.0 ([#344](https://github.com/inference-gateway/adl-cli/issues/344)) ([ab3c5b1](https://github.com/inference-gateway/adl-cli/commit/ab3c5b165c545626d918e0a2e56e3aafc4c14c73))
+
 ## [0.57.2](https://github.com/inference-gateway/adl-cli/compare/v0.57.1...v0.57.2) (2026-07-30)
 
 ### 🔧 Miscellaneous
