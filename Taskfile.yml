@@ -8,7 +8,7 @@ vars:
   DIST_DIR: dist
   # Pinned to the main-branch commit that consolidated MCP config under
   # spec.agent.mcp (inference-gateway/adl#119); bump to the tagged release once cut.
-  ADL_SCHEMA_VERSION: v0.23.0
+  ADL_SCHEMA_VERSION: v0.24.0
   ADL_SCHEMA_URL: https://raw.githubusercontent.com/inference-gateway/adl/{{.ADL_SCHEMA_VERSION}}/schema/v1/schema.json
   ADL_SCHEMA_PATH: internal/schema/schema.json
 
