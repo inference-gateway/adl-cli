@@ -11,6 +11,17 @@
 	{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.IconURL }}
 	"iconUrl": {{ .ADL.Spec.Card.IconURL | toJson }},
 	{{- end }}{{- end }}
+	{{- if .ADL.Spec.Card }}
+	{{- if .ADL.Spec.Card.SupportsExtendedAgentCard }}
+	"supportsExtendedAgentCard": true,
+	{{- end }}
+	{{- with cardSecuritySchemes .ADL.Spec.Card }}
+	"securitySchemes": {{ . | toJson }},
+	{{- end }}
+	{{- with cardSecurity .ADL.Spec.Card }}
+	"security": {{ . | toJson }},
+	{{- end }}
+	{{- end }}
 	"defaultInputModes": {{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.DefaultInputModes }} {{ .ADL.Spec.Card.DefaultInputModes | toJson }}{{- else }} ["text"]{{- end }}{{- else }} ["text"]{{- end }},
 	"defaultOutputModes": {{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.DefaultOutputModes }} {{ .ADL.Spec.Card.DefaultOutputModes | toJson }}{{- else }} ["text"]{{- end }}{{- else }} ["text"]{{- end }},
 	"capabilities": {
