@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.57.2](https://github.com/inference-gateway/adl-cli/compare/v0.57.1...v0.57.2) (2026-07-30)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump arduino/setup-task from 2 to 3 in the github-actions group ([#340](https://github.com/inference-gateway/adl-cli/issues/340)) ([9e75f78](https://github.com/inference-gateway/adl-cli/commit/9e75f78e33a6e078f60abcb683d69c634d1b0888))
+* **deps:** bump github.com/inference-gateway/adk from 0.25.3 to 0.25.4 ([#341](https://github.com/inference-gateway/adl-cli/issues/341)) ([7a54497](https://github.com/inference-gateway/adl-cli/commit/7a54497c9bd834aa495c7b8ec6cc69d17e987ecc))
+
 ## [0.57.1](https://github.com/inference-gateway/adl-cli/compare/v0.57.0...v0.57.1) (2026-07-29)
 
 ### 🔧 Miscellaneous
