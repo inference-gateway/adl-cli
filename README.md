@@ -1851,8 +1851,8 @@ spec:
 
 The manifest field is a single on/off switch - exporter endpoints, ports, and sampling stay runtime concerns configured via environment variables in the generated `.env.example`:
 
-- **Go**: pulls the OpenTelemetry runtime dependencies into `go.mod`, generates `tools/telemetry.go` (each built-in tool call becomes its own span with `infer.tool.call.id`/`infer.session.id` attributes), and surfaces `A2A_TELEMETRY_ENABLE`, `A2A_TELEMETRY_METRICS_PORT`/`_HOST`, `A2A_TELEMETRY_TRACE_ENABLE`/`_ENDPOINT`/`_HEADERS` in `.env.example`.
-- **TypeScript**: wires the ADK's `createTelemetryProvider` into `src/index.ts` (no extra npm dependencies) and surfaces `TELEMETRY_ENABLE` plus the standard `OTEL_EXPORTER_OTLP_*` / `OTEL_SERVICE_*` variables in `.env.example`.
+- **Go**: pulls the OpenTelemetry runtime dependencies into `go.mod`, generates `tools/telemetry.go` (each built-in tool call becomes its own span with `infer.tool.call.id`/`infer.session.id` attributes), and surfaces `A2A_TELEMETRY_ENABLED`, `A2A_TELEMETRY_METRICS_PORT`/`_HOST`, `A2A_TELEMETRY_TRACE_ENABLED`/`_ENDPOINT`/`_HEADERS` in `.env.example`.
+- **TypeScript**: wires the ADK's `createTelemetryProvider` into `src/index.ts` (no extra npm dependencies) and surfaces `TELEMETRY_ENABLED` plus the standard `OTEL_EXPORTER_OTLP_*` / `OTEL_SERVICE_*` variables in `.env.example`.
 
 > **Note:** Telemetry generation currently supports Go and TypeScript only; Rust agents ignore `spec.telemetry`.
 

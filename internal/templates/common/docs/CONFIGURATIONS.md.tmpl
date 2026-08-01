@@ -54,7 +54,7 @@ derived from `agent.yaml`; the env vars below override them at runtime.
 | **Storage** | `A2A_QUEUE_MAX_SIZE` | Maximum queue size | `100` |
 | **Storage** | `A2A_QUEUE_CLEANUP_INTERVAL` | Task cleanup interval | `30s` |
 {{- if and .ADL.Spec.Artifacts .ADL.Spec.Artifacts.Enabled }}
-| **Artifacts** | `A2A_ARTIFACTS_ENABLE` | Enable artifacts support | `false` |
+| **Artifacts** | `A2A_ARTIFACTS_ENABLED` | Enable artifacts support | `false` |
 | **Artifacts** | `A2A_ARTIFACTS_SERVER_HOST` | Artifacts server host | `localhost` |
 | **Artifacts** | `A2A_ARTIFACTS_SERVER_PORT` | Artifacts server port | `8081` |
 | **Artifacts** | `A2A_ARTIFACTS_STORAGE_PROVIDER` | Storage backend (`filesystem` or `minio`) | `filesystem` |
@@ -79,7 +79,7 @@ derived from `agent.yaml`; the env vars below override them at runtime.
 {{- end }}
 {{- if and .ADL.Spec.Telemetry .ADL.Spec.Telemetry.Enabled }}
 {{- if or (eq .Language "go") (eq .Language "typescript") }}
-| **Telemetry** | `A2A_TELEMETRY_ENABLE` | Enable OpenTelemetry instrumentation | `true` |
+| **Telemetry** | `A2A_TELEMETRY_ENABLED` | Enable OpenTelemetry instrumentation | `true` |
 {{- end }}
 {{- range telemetryEnvVars .ADL }}
 | **Telemetry** | `{{ .Key }}` | {{ .Description }} | `{{ .Value }}` |

@@ -176,7 +176,7 @@ func TestDockerComposeTemplate_ArtifactsWiring(t *testing.T) {
 				"INFER_TOOLS_WEB_FETCH_ENABLED: \"false\"",
 			},
 			wantAbsent: []string{
-				"A2A_ARTIFACTS_ENABLE",
+				"A2A_ARTIFACTS_ENABLED",
 				"A2A_ARTIFACTS_SERVER_HOST",
 				"A2A_ARTIFACTS_SERVER_PORT",
 				"INFER_TOOLS_WEB_FETCH_WHITELISTED_DOMAINS",
@@ -187,7 +187,7 @@ func TestDockerComposeTemplate_ArtifactsWiring(t *testing.T) {
 			name:             "artifacts enabled",
 			artifactsEnabled: true,
 			wantPresent: []string{
-				"A2A_ARTIFACTS_ENABLE: \"true\"",
+				"A2A_ARTIFACTS_ENABLED: \"true\"",
 				"A2A_ARTIFACTS_SERVER_HOST: browser-agent",
 				"A2A_ARTIFACTS_SERVER_PORT: \"8081\"",
 				"INFER_TOOLS_WEB_FETCH_ENABLED: \"true\"",

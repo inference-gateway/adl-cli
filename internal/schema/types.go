@@ -409,7 +409,7 @@ type Language struct {
 // refresh, timeouts, retry/backoff), applied globally across those servers. They
 // mirror the connection/retry model the Go ADK exposes, which is HTTP-only with a
 // single endpoint and one timeout/retry set (there is no per-server override).
-// 'enabled' is the master switch, mapped to 'A2A_MCP_ENABLE': when false (the
+// 'enabled' is the master switch, mapped to 'A2A_MCP_ENABLED': when false (the
 // default) no MCP client is wired in and no MCP code is generated, even if
 // 'servers' lists servers. Every config field maps 1:1 to an 'A2A_MCP_*'
 // environment variable, and its value in the manifest becomes the default the
@@ -427,7 +427,7 @@ type MCP struct {
 	// string. Maps 1:1 to 'A2A_MCP_DIAL_TIMEOUT'.
 	DialTimeout string `json:"dialTimeout,omitempty,omitzero" yaml:"dialTimeout,omitempty" mapstructure:"dialTimeout,omitempty"`
 
-	// Master switch for the MCP client, mapped to 'A2A_MCP_ENABLE'. When false (the
+	// Master switch for the MCP client, mapped to 'A2A_MCP_ENABLED'. When false (the
 	// default) no MCP client is generated or wired in, regardless of any servers
 	// listed in 'servers'.
 	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
@@ -883,7 +883,7 @@ type SpecConfig map[string]map[string]any
 type SpecServices map[string]Service
 
 // OpenTelemetry instrumentation for the generated agent. 'enabled' is the master
-// switch (mapped to the ADK's A2A_TELEMETRY_ENABLE): when true the consumer (e.g.
+// switch (mapped to the ADK's A2A_TELEMETRY_ENABLED): when true the consumer (e.g.
 // adl-cli) pulls OpenTelemetry dependencies into the project, instruments the
 // built-in tool calls with spans, and turns on the telemetry/metrics server. The
 // optional 'traces' and 'metrics' blocks select a per-signal exporter following
@@ -900,7 +900,7 @@ type SpecServices map[string]Service
 // the block or set 'enabled: false' to keep it off.
 type TelemetryConfig struct {
 	// Master switch for OpenTelemetry instrumentation, mapped to the ADK's
-	// A2A_TELEMETRY_ENABLE. When false (the default) no telemetry is wired in,
+	// A2A_TELEMETRY_ENABLED. When false (the default) no telemetry is wired in,
 	// regardless of any 'traces'/'metrics' blocks.
 	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
 

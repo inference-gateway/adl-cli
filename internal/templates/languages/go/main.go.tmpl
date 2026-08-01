@@ -272,7 +272,7 @@ func runStart(ctx context.Context) error {
 	// in the background over streamable HTTP (never blocking startup) and registers
 	// the mcp_list_tools / mcp_call_tool selector tools into the toolbox. Everything
 	// is configured through the A2A_MCP_* environment (see .env.example); the
-	// A2A_MCP_ENABLE toggle gates it at runtime.
+	// A2A_MCP_ENABLED toggle gates it at runtime.
 	if cfg.A2A.MCPConfig.Enable {
 		mcpManager, err := server.NewMCPClientManager(cfg.A2A.MCPConfig, l)
 		if err != nil {
@@ -364,7 +364,7 @@ func runStart(ctx context.Context) error {
 {{ if and .ADL.Spec.Artifacts .ADL.Spec.Artifacts.Enabled }}
 	artifactService, err := server.NewArtifactService(&cfg.A2A.ArtifactsConfig, l)
 	if err != nil {
-		l.Warn("artifact service could not be created - check A2A_ARTIFACTS_ENABLE environment variable", zap.Error(err))
+		l.Warn("artifact service could not be created - check A2A_ARTIFACTS_ENABLED environment variable", zap.Error(err))
 		l.Info("continuing without artifact service support")
 		artifactService = nil
 	}
