@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.58.1](https://github.com/inference-gateway/adl-cli/compare/v0.58.0...v0.58.1) (2026-08-01)
+
+### ♻️ Improvements
+
+* rename all _ENABLE suffixes to _ENABLED in templates, schema, and docs ([#351](https://github.com/inference-gateway/adl-cli/issues/351)) ([29c32f7](https://github.com/inference-gateway/adl-cli/commit/29c32f721eb80aee495e6eed735df1353c304fcb))
+
+### 👷 CI
+
+* **claude:** centralize claude.yml via reusable workflow ([#348](https://github.com/inference-gateway/adl-cli/issues/348)) ([ad50fdb](https://github.com/inference-gateway/adl-cli/commit/ad50fdbaea1983434dd77ab99b9791b8121524d7))
+* **claude:** centralize claude.yml via reusable workflow ([#349](https://github.com/inference-gateway/adl-cli/issues/349)) ([9584d79](https://github.com/inference-gateway/adl-cli/commit/9584d79864b546fdf9de0ca47e1b68bfe0963334))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump infer CLI v0.153.1 -> v0.155.0 ([#347](https://github.com/inference-gateway/adl-cli/issues/347)) ([f999fb6](https://github.com/inference-gateway/adl-cli/commit/f999fb6f5e255cf521f9c613ec7357dde3a885b7))
+* sync ADL schema to v0.24.1 ([#352](https://github.com/inference-gateway/adl-cli/issues/352)) ([af7b5ff](https://github.com/inference-gateway/adl-cli/commit/af7b5ff5910ecb4b1c9226256eb64cc75e127c71))
+
 ## [0.58.0](https://github.com/inference-gateway/adl-cli/compare/v0.57.2...v0.58.0) (2026-07-30)
 
 ### ✨ Features
