@@ -79,7 +79,7 @@ derived from `agent.yaml`; the env vars below override them at runtime.
 {{- end }}
 {{- if and .ADL.Spec.Telemetry .ADL.Spec.Telemetry.Enabled }}
 {{- if or (eq .Language "go") (eq .Language "typescript") }}
-| **Telemetry** | `A2A_TELEMETRY_ENABLE` | Enable OpenTelemetry instrumentation | `true` |
+| **Telemetry** | `A2A_TELEMETRY_ENABLED` | Enable OpenTelemetry instrumentation | `true` |
 {{- end }}
 {{- range telemetryEnvVars .ADL }}
 | **Telemetry** | `{{ .Key }}` | {{ .Description }} | `{{ .Value }}` |

@@ -17,7 +17,7 @@ type TelemetryEnvVar struct {
 
 // telemetryEnvVars maps a manifest's spec.telemetry exporter blocks to the
 // OpenTelemetry SDK environment variables. It returns only the exporter
-// variables; the master switch (A2A_TELEMETRY_ENABLE) is emitted by the
+// variables; the master switch (A2A_TELEMETRY_ENABLED) is emitted by the
 // template.
 //
 // Every variable carries the A2A_ prefix regardless of language, so agents

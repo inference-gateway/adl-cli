@@ -883,7 +883,7 @@ type SpecConfig map[string]map[string]any
 type SpecServices map[string]Service
 
 // OpenTelemetry instrumentation for the generated agent. 'enabled' is the master
-// switch (mapped to the ADK's A2A_TELEMETRY_ENABLE): when true the consumer (e.g.
+// switch (mapped to the ADK's A2A_TELEMETRY_ENABLED): when true the consumer (e.g.
 // adl-cli) pulls OpenTelemetry dependencies into the project, instruments the
 // built-in tool calls with spans, and turns on the telemetry/metrics server. The
 // optional 'traces' and 'metrics' blocks select a per-signal exporter following
@@ -900,7 +900,7 @@ type SpecServices map[string]Service
 // the block or set 'enabled: false' to keep it off.
 type TelemetryConfig struct {
 	// Master switch for OpenTelemetry instrumentation, mapped to the ADK's
-	// A2A_TELEMETRY_ENABLE. When false (the default) no telemetry is wired in,
+	// A2A_TELEMETRY_ENABLED. When false (the default) no telemetry is wired in,
 	// regardless of any 'traces'/'metrics' blocks.
 	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
 
