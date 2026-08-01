@@ -36,7 +36,7 @@ func TestMCPEnvVars_DerivesServersAndDefaults(t *testing.T) {
 	got := mcpEnvMap(mcpEnvVars(adl))
 
 	want := map[string]string{
-		"A2A_MCP_ENABLE":             "true",
+		"A2A_MCP_ENABLED":             "true",
 		"A2A_MCP_SERVERS":            "http://mcp-tools:8080,http://mcp-search:8080",
 		"A2A_MCP_ENDPOINT":           "/mcp",
 		"A2A_MCP_REFRESH_INTERVAL":   "5m",

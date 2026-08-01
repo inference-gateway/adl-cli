@@ -27,7 +27,7 @@ spec:
   # spec.telemetry enables OpenTelemetry. The TypeScript ADK bundles the
   # OpenTelemetry Node SDK, so no extra npm dependencies are added; the
   # generator wires a TelemetryProvider into src/index.ts and surfaces
-  # TELEMETRY_ENABLE plus the standard OTEL_* variables in .env.example. Both
+  # TELEMETRY_ENABLED plus the standard OTEL_* variables in .env.example. Both
   # signals push over OTLP with identical settings, so the generator emits the
   # shared OTEL_EXPORTER_OTLP_ENDPOINT / OTEL_EXPORTER_OTLP_PROTOCOL pair. The TS
   # ADK does not support the Prometheus pull exporter yet - use OTLP for metrics.

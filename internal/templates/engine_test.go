@@ -530,7 +530,7 @@ func TestCONFIGURATIONSTemplate_TelemetryEnvVars(t *testing.T) {
 				return adl
 			},
 			wantRows: []string{
-				"| **Telemetry** | `A2A_TELEMETRY_ENABLE` | Enable OpenTelemetry instrumentation | `true` |",
+				"| **Telemetry** | `A2A_TELEMETRY_ENABLED` | Enable OpenTelemetry instrumentation | `true` |",
 				"| **Telemetry** | `A2A_OTEL_TRACES_EXPORTER` |",
 				"| **Telemetry** | `A2A_OTEL_EXPORTER_OTLP_ENDPOINT` |",
 				"| **Telemetry** | `A2A_OTEL_EXPORTER_PROMETHEUS_PORT` |",
@@ -552,10 +552,10 @@ func TestCONFIGURATIONSTemplate_TelemetryEnvVars(t *testing.T) {
 				return adl
 			},
 			wantRows: []string{
-				"| **Telemetry** | `A2A_TELEMETRY_ENABLE` | Enable OpenTelemetry instrumentation | `true` |",
+				"| **Telemetry** | `A2A_TELEMETRY_ENABLED` | Enable OpenTelemetry instrumentation | `true` |",
 				"| **Telemetry** | `A2A_OTEL_TRACES_EXPORTER` |",
 			},
-			wantAbsent: []string{"| `TELEMETRY_ENABLE`", "| `OTEL_TRACES_EXPORTER`"},
+			wantAbsent: []string{"| `TELEMETRY_ENABLED`", "| `OTEL_TRACES_EXPORTER`"},
 		},
 		{
 			name: "go disabled documents no telemetry rows",
@@ -565,7 +565,7 @@ func TestCONFIGURATIONSTemplate_TelemetryEnvVars(t *testing.T) {
 				adl.Spec.Telemetry = &schema.TelemetryConfig{Enabled: false}
 				return adl
 			},
-			wantAbsent: []string{"**Telemetry**", "TELEMETRY_ENABLE"},
+			wantAbsent: []string{"**Telemetry**", "TELEMETRY_ENABLED"},
 		},
 	}
 

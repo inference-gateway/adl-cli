@@ -88,7 +88,7 @@ There are also five **reserved tool IDs** (`read`/`bash`/`write`/`edit`/`fetch`)
 
 ### Telemetry (`spec.telemetry.enabled`)
 
-A manifest-only boolean (no CLI flag) that turns on OpenTelemetry instrumentation. Go gets a generated `tools/telemetry.go` (from `languages/go/telemetry.go.tmpl`, per-tool-call spans, OTel deps added to `go.mod`, `A2A_TELEMETRY_*` vars in `.env.example`); TypeScript gets `createTelemetryProvider` wiring in `index.ts.tmpl` (`TELEMETRY_ENABLE` + `OTEL_*` vars). Rust is not supported — the toggle is ignored there. Regression coverage: `examples/{go,typescript}-agent-telemetry.yaml`.
+A manifest-only boolean (no CLI flag) that turns on OpenTelemetry instrumentation. Go gets a generated `tools/telemetry.go` (from `languages/go/telemetry.go.tmpl`, per-tool-call spans, OTel deps added to `go.mod`, `A2A_TELEMETRY_*` vars in `.env.example`); TypeScript gets `createTelemetryProvider` wiring in `index.ts.tmpl` (`TELEMETRY_ENABLED` + `OTEL_*` vars). Rust is not supported — the toggle is ignored there. Regression coverage: `examples/{go,typescript}-agent-telemetry.yaml`.
 
 ### `.adl-ignore` protects user code on re-generate
 

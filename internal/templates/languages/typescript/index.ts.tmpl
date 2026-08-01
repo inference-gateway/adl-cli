@@ -96,12 +96,12 @@ const storage = new InMemoryTaskStorage();
 
 // OpenTelemetry (spec.telemetry.enabled): the agent documents all telemetry
 // settings under the A2A_ prefix, but the ADK provider and the OpenTelemetry
-// Node SDK read TELEMETRY_ENABLE and the standard OTEL_* names - mirror each
+// Node SDK read TELEMETRY_ENABLED and the standard OTEL_* names - mirror each
 // A2A_-prefixed var onto its bare name (without clobbering an explicitly set
 // bare one) before SDK init.
 for (const [key, value] of Object.entries(process.env)) {
   if (
-    (key.startsWith('A2A_OTEL_') || key === 'A2A_TELEMETRY_ENABLE') &&
+    (key.startsWith('A2A_OTEL_') || key === 'A2A_TELEMETRY_ENABLED') &&
     process.env[key.slice(4)] === undefined
   ) {
     process.env[key.slice(4)] = value;
@@ -110,7 +110,7 @@ for (const [key, value] of Object.entries(process.env)) {
 
 // Start the Node SDK before the server so inbound JSON-RPC requests get an
 // `adk.jsonrpc.request` span and the OTLP exporters are live. The provider is
-// a no-op unless A2A_TELEMETRY_ENABLE is truthy (see .env.example), so this is
+// a no-op unless A2A_TELEMETRY_ENABLED is truthy (see .env.example), so this is
 // safe to run unconditionally; its lifecycle is owned here - start() before
 // listen(), shutdown() after close().
 const telemetry = createTelemetryProvider({

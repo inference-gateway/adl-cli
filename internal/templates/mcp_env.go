@@ -35,7 +35,7 @@ func mcpEnvVars(adl *schema.ADL) []MCPEnvVar {
 	mcp := adl.Spec.Agent.Mcp
 
 	out := []MCPEnvVar{
-		{Key: "A2A_MCP_ENABLE", Value: "true", Description: "Enable the MCP client"},
+		{Key: "A2A_MCP_ENABLED", Value: "true", Description: "Enable the MCP client"},
 		{Key: "A2A_MCP_SERVERS", Value: strings.Join(mcpServerURLs(mcp), ","),
 			Description: "MCP server base URLs (comma-separated)"},
 	}
