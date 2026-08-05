@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.59.0](https://github.com/inference-gateway/adl-cli/compare/v0.58.1...v0.59.0) (2026-08-05)
+
+### ✨ Features
+
+* **infer:** add agents, vision-model, image-model inputs and bump to v0.44.4 ([#354](https://github.com/inference-gateway/adl-cli/issues/354)) ([645d7c5](https://github.com/inference-gateway/adl-cli/commit/645d7c5b79f48bf04fe85c819724ff054732025a))
+
+### 🔧 Miscellaneous
+
+* remove deprecated ollama-api-key input ([#353](https://github.com/inference-gateway/adl-cli/issues/353)) ([deac082](https://github.com/inference-gateway/adl-cli/commit/deac0827cd3f9f5a0b1a7901e97ea70e6233c8ba))
+
 ## [0.58.1](https://github.com/inference-gateway/adl-cli/compare/v0.58.0...v0.58.1) (2026-08-01)
 
 ### ♻️ Improvements
