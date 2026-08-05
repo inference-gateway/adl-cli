@@ -40,6 +40,18 @@ on:
         description: 'Enable debug logging'
         type: boolean
         default: false
+      agents:
+        description: 'A2A agents to spin up (comma/newline-separated, e.g. browser-agent)'
+        type: string
+        required: false
+      vision-model:
+        description: 'provider/model for image understanding (e.g. anthropic/claude-haiku-4-5-20251001)'
+        type: string
+        required: false
+      image-model:
+        description: 'provider/model for image generation (e.g. openai/gpt-image-2)'
+        type: string
+        required: false
 
 permissions:
   contents: read
@@ -173,7 +185,7 @@ jobs:
 {{- end }}
 
       - name: Run Infer
-        uses: inference-gateway/infer-action@v0.38.2
+        uses: inference-gateway/infer-action@v0.44.4
         with:
           github-token: ${{`{{ steps.app-token.outputs.token }}`}}
           github-app-slug: ${{`{{ steps.app-token.outputs.app-slug }}`}}
@@ -198,3 +210,6 @@ jobs:
           minimax-api-key: ${{`{{ secrets.MINIMAX_API_KEY }}`}}
           nvidia-api-key: ${{`{{ secrets.NVIDIA_API_KEY }}`}}
           zai-api-key: ${{`{{ secrets.ZAI_API_KEY }}`}}
+          agents: ${{`{{ inputs.agents }}`}}
+          vision-model: ${{`{{ inputs.vision-model }}`}}
+          image-model: ${{`{{ inputs.image-model }}`}}
