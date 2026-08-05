@@ -404,6 +404,9 @@ func TestGenerator_AI_InferWorkflowContent(t *testing.T) {
 	assertContains(t, body, "model:", "Infer workflow body")
 	assertContains(t, body, "deepseek-api-key: ${{ secrets.DEEPSEEK_API_KEY }}", "Infer workflow body")
 	assertContains(t, body, "anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}", "Infer workflow body")
+	assertContains(t, body, "agents: ${{ inputs.agents }}", "Infer workflow body")
+	assertContains(t, body, "vision-model: ${{ inputs.vision-model }}", "Infer workflow body")
+	assertContains(t, body, "image-model: ${{ inputs.image-model }}", "Infer workflow body")
 
 	assertContains(t, body, "contains(github.event.comment.body, '@infer')", "Infer workflow body")
 	assertContains(t, body, "issue_comment:", "Infer workflow body")
