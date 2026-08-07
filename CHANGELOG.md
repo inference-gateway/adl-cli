@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.59.1](https://github.com/inference-gateway/adl-cli/compare/v0.59.0...v0.59.1) (2026-08-07)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump otel deps in Go templates to v1.45.0 ([#355](https://github.com/inference-gateway/adl-cli/issues/355)) ([96c12a2](https://github.com/inference-gateway/adl-cli/commit/96c12a2ba9385f1f2f421b6f2d632ca8efd7e71b))
+
 ## [0.59.0](https://github.com/inference-gateway/adl-cli/compare/v0.58.1...v0.59.0) (2026-08-05)
 
 ### ✨ Features
