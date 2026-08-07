@@ -132,6 +132,7 @@ tasks:
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-artifacts-minio.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-telemetry.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-auth.yaml
+      - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-authz.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-mcp.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-ai.yaml
       - ./{{.BUILD_DIR}}/{{.APP_NAME}} validate examples/go-agent-documentation.yaml
@@ -162,6 +163,7 @@ tasks:
           - go-agent-artifacts-minio
           - go-agent-telemetry
           - go-agent-auth
+          - go-agent-authz
           - go-agent-mcp
           - go-agent-ai
           - go-agent-documentation

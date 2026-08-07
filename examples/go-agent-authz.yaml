@@ -1,0 +1,41 @@
+---
+apiVersion: adl.inference-gateway.com/v1
+kind: Agent
+metadata:
+  name: go-agent-authz
+  description: "Agent demonstrating authorization decision hook scaffold (internal/authz/authz.go)"
+  version: "0.1.0"
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  card:
+    protocolVersion: "0.3.0"
+    preferredTransport: JSONRPC
+    url: "https://my-agent.example.com:8443"
+  agent:
+    provider: deepseek
+    model: deepseek-v4-flash
+    systemPrompt: |
+      You are a helpful assistant.
+    maxTokens: 4096
+    temperature: 0.3
+  server:
+    port: 8443
+    scheme: https
+    debug: false
+    auth:
+      enabled: true
+  language:
+    go:
+      module: "github.com/inference-gateway/adl-cli/test-output"
+      version: "1.26.4"
+  development:
+    sandbox:
+      flox:
+        enabled: false
+      devcontainer:
+        enabled: false
+      dockerCompose:
+        enabled: true

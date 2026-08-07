@@ -31,6 +31,9 @@ import (
 {{- end }}
 
 	logger "{{ .ADL.Spec.Language.Go.Module }}/internal/logger"
+{{- if and .ADL.Spec.Server.Auth .ADL.Spec.Server.Auth.Enabled }}
+	authz "{{ .ADL.Spec.Language.Go.Module }}/internal/authz"
+{{- end }}
 {{- range $serviceName, $svc := .ADL.Spec.Services }}
 {{- $svcUsed := false }}
 {{- range $.ADL.Spec.Tools }}
@@ -356,6 +359,11 @@ func runStart(ctx context.Context) error {
 		WithToolBox(toolBox).
 		WithMaxChatCompletion(cfg.A2A.AgentConfig.MaxChatCompletionIterations).
 		WithSystemPrompt(systemPrompt).
+		{{- if and .ADL.Spec.Server.Auth .ADL.Spec.Server.Auth.Enabled }}
+		WithCallbacks(&server.CallbackConfig{
+				BeforeTool: []server.BeforeToolCallback{authz.BeforeTool(l)},
+		}).
+		{{- end }}
 		Build()
 	if err != nil {
 		return fmt.Errorf("failed to create agent: %w", err)

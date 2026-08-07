@@ -190,6 +190,10 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 
 	files["internal/logger/logger.go"] = "logger.go"
 
+	if adl.Spec.Server.Auth != nil && adl.Spec.Server.Auth.Enabled {
+		files["internal/authz/authz.go"] = "authz.go"
+	}
+
 	for serviceName := range adl.Spec.Services {
 		snakeCaseName := strings.ReplaceAll(serviceName, "-", "_")
 		files[fmt.Sprintf("internal/%s/%s.go", snakeCaseName, snakeCaseName)] = "service.go"
