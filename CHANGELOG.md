@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.60.0](https://github.com/inference-gateway/adl-cli/compare/v0.59.1...v0.60.0) (2026-08-07)
+
+### ✨ Features
+
+* **generate:** scaffold authorization decision hook in generated Go agents ([#357](https://github.com/inference-gateway/adl-cli/issues/357)) ([f2c3c68](https://github.com/inference-gateway/adl-cli/commit/f2c3c688e92c97c19c32e6c5f0ffdc9ba97d3c8d)), references [inference-gateway/adl#159](https://github.com/inference-gateway/adl/issues/159) [inference-gateway/adk#276](https://github.com/inference-gateway/adk/issues/276)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump infer CLI v0.155.0 -> v0.164.0 ([#356](https://github.com/inference-gateway/adl-cli/issues/356)) ([c5b31fc](https://github.com/inference-gateway/adl-cli/commit/c5b31fccffc6fbb300b684fe083cc911350004dc))
+
 ## [0.59.1](https://github.com/inference-gateway/adl-cli/compare/v0.59.0...v0.59.1) (2026-08-07)
 
 ### 🔧 Miscellaneous
