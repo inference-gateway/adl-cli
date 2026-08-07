@@ -73,6 +73,28 @@ type AuthConfig struct {
 	Enabled bool `json:"enabled,omitempty,omitzero" yaml:"enabled,omitempty" mapstructure:"enabled,omitempty"`
 }
 
+// Authorization decision hook configuration for the agent. When enabled, the
+// generator scaffolds a user-owned authorization callback
+// (internal/authz/authz.go) that is invoked before every tool call. 'mode' selects
+// the default policy when no custom logic is implemented yet: 'allow-all' logs a
+// warning and allows every call, 'deny-all' rejects every call, 'custom' expects
+// the user to implement their own policy.
+type AuthzConfig struct {
+	// Enabled corresponds to the JSON schema field "enabled".
+	Enabled bool `json:"enabled,omitempty,omitzero" yaml:"enabled,omitempty" mapstructure:"enabled,omitempty"`
+
+	// Default authorization mode. 'allow-all': log a warning and allow every call
+	// (same as pre-authz behavior). 'deny-all': reject every call. 'custom': user
+	// must implement the policy in internal/authz/authz.go.
+	Mode AuthzConfigMode `json:"mode,omitempty,omitzero" yaml:"mode,omitempty" mapstructure:"mode,omitempty"`
+}
+
+type AuthzConfigMode string
+
+const AuthzConfigModeAllowAll AuthzConfigMode = "allow-all"
+const AuthzConfigModeCustom AuthzConfigMode = "custom"
+const AuthzConfigModeDenyAll AuthzConfigMode = "deny-all"
+
 type Capabilities struct {
 	// PushNotifications corresponds to the JSON schema field "pushNotifications".
 	PushNotifications bool `json:"pushNotifications" yaml:"pushNotifications" mapstructure:"pushNotifications"`
@@ -721,6 +743,9 @@ const SecuritySchemeTypeMutualTLS SecuritySchemeType = "mutualTLS"
 type Server struct {
 	// Auth corresponds to the JSON schema field "auth".
 	Auth *AuthConfig `json:"auth,omitempty,omitzero" yaml:"auth,omitempty" mapstructure:"auth,omitempty"`
+
+	// Authz corresponds to the JSON schema field "authz".
+	Authz *AuthzConfig `json:"authz,omitempty,omitzero" yaml:"authz,omitempty" mapstructure:"authz,omitempty"`
 
 	// Debug corresponds to the JSON schema field "debug".
 	Debug bool `json:"debug,omitempty,omitzero" yaml:"debug,omitempty" mapstructure:"debug,omitempty"`

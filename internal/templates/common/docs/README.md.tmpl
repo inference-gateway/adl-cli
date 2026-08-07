@@ -101,8 +101,8 @@ infer agents add {{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Scheme | default "
 {{- end }}
 - ✅ Enterprise-ready
 - ✅ Minimal dependencies
-{{- if and .ADL.Spec.Server.Auth .ADL.Spec.Server.Auth.Enabled }}
-- ✅ Authorization decision hook scaffolded in `internal/authz/authz.go` (default: allow all)
+{{- if and .ADL.Spec.Server.Authz .ADL.Spec.Server.Authz.Enabled }}
+- ✅ Authorization decision hook scaffolded in `internal/authz/authz.go` (mode: {{ .ADL.Spec.Server.Authz.Mode | default "allow-all" }})
 {{- end }}
 
 ## Endpoints

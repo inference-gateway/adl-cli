@@ -31,7 +31,7 @@ import (
 {{- end }}
 
 	logger "{{ .ADL.Spec.Language.Go.Module }}/internal/logger"
-{{- if and .ADL.Spec.Server.Auth .ADL.Spec.Server.Auth.Enabled }}
+{{- if and .ADL.Spec.Server.Authz .ADL.Spec.Server.Authz.Enabled }}
 	authz "{{ .ADL.Spec.Language.Go.Module }}/internal/authz"
 {{- end }}
 {{- range $serviceName, $svc := .ADL.Spec.Services }}
@@ -359,9 +359,9 @@ func runStart(ctx context.Context) error {
 		WithToolBox(toolBox).
 		WithMaxChatCompletion(cfg.A2A.AgentConfig.MaxChatCompletionIterations).
 		WithSystemPrompt(systemPrompt).
-		{{- if and .ADL.Spec.Server.Auth .ADL.Spec.Server.Auth.Enabled }}
+		{{- if and .ADL.Spec.Server.Authz .ADL.Spec.Server.Authz.Enabled }}
 		WithCallbacks(&server.CallbackConfig{
-				BeforeTool: []server.BeforeToolCallback{authz.BeforeTool(l)},
+				BeforeTool: []server.BeforeToolCallback{authz.BeforeTool(l, "{{ .ADL.Spec.Server.Authz.Mode | default "allow-all" }}")},
 		}).
 		{{- end }}
 		Build()

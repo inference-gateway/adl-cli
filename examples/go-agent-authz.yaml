@@ -27,6 +27,9 @@ spec:
     debug: false
     auth:
       enabled: true
+    authz:
+      enabled: true
+      mode: allow-all
   language:
     go:
       module: "github.com/inference-gateway/adl-cli/test-output"

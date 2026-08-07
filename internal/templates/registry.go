@@ -190,7 +190,7 @@ func (r *Registry) getGoFiles(adl *schema.ADL) map[string]string {
 
 	files["internal/logger/logger.go"] = "logger.go"
 
-	if adl.Spec.Server.Auth != nil && adl.Spec.Server.Auth.Enabled {
+	if adl.Spec.Server.Authz != nil && adl.Spec.Server.Authz.Enabled {
 		files["internal/authz/authz.go"] = "authz.go"
 	}
 
