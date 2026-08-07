@@ -7,6 +7,52 @@ import (
 	zap "go.uber.org/zap"
 )
 
+// Identity represents a verified caller identity from an authenticated
+// request. Fields map to the OIDC ID token claims.
+type Identity struct {
+	// Subject is the unique identifier for the user (OIDC 'sub' claim).
+	Subject string
+
+	// Email is the user's email address (OIDC 'email' claim).
+	Email string
+
+	// Issuer is the OIDC issuer URL (OIDC 'iss' claim).
+	Issuer string
+}
+
+// IdentityFrom extracts the caller identity from the tool context.
+//
+// The ADK will surface verified OIDC claims as session state once
+// https://github.com/inference-gateway/adk/issues/276 is resolved.
+// Until then IdentityFrom returns an empty Identity - the authz hook
+// MUST allow calls through (identity being empty is not a rejection).
+//
+// Once claims are propagated, toolCtx.State will carry the identity
+// under the key "authz.identity" as a map with "sub", "email", "iss"
+// matching the OIDC ID token claims.
+func IdentityFrom(toolCtx *server.ToolContext) Identity {
+	raw, ok := toolCtx.State["authz.identity"]
+	if !ok {
+		return Identity{}
+	}
+	m, ok := raw.(map[string]any)
+	if !ok {
+		return Identity{}
+	}
+	return Identity{
+		Subject: asString(m["sub"]),
+		Email:   asString(m["email"]),
+		Issuer:  asString(m["iss"]),
+	}
+}
+
+// asString is a helper that extracts a string value from an any-typed map
+// value, returning "" on nil or wrong type.
+func asString(v any) string {
+	s, _ := v.(string)
+	return s
+}
+
 // AuthzMode selects the default authorization policy when no custom logic
 // is implemented. Used by BeforeTool to determine the callback behavior.
 type AuthzMode string
@@ -33,9 +79,17 @@ const (
 //
 //	func BeforeTool(logger *zap.Logger, mode AuthzMode) server.BeforeToolCallback {
 //	    return func(ctx context.Context, tool server.Tool, args map[string]any, toolCtx *server.ToolContext) map[string]any {
-//	        // tool.GetName() returns the tool ID matching spec.tools[spec.tools[].id
+//	        // tool.GetName() returns the tool ID matching spec.tools[].id
 //	        // toolCtx provides AgentName, InvocationID, TaskID, ContextID,
 //	        // Logger, and State (map[string]any for session state).
+//	        //
+//	        // Identity-aware check (once ADK surfaces OIDC claims - see IdentityFrom):
+//	        //   ident := authz.IdentityFrom(toolCtx)
+//	        //   if ident.Subject == "" {
+//	        //       logger.Warn("no identity in authz callback - allow until inference-gateway/adk#276 lands")
+//	        //   } else if !allowedUsers[ident.Subject] {
+//	        //       return map[string]any{"error": "not authorized"}
+//	        //   }
 //	        if tool.GetName() == "admin-only-tool" {
 //	            return map[string]any{"error": "not authorized"}
 //	        }
@@ -48,9 +102,9 @@ const (
 //     callback MUST read identity from the context/task it is handed -
 //     never from state captured at request time.
 //   - The ADK does NOT yet surface verified OIDC claims to BeforeTool
-//     callbacks (the background task processor drops request-scoped
-//     values). Track https://github.com/inference-gateway/adk/issues/276
-//     for progress.
+//     callbacks (tracked in inference-gateway/adk#276). IdentityFrom reads
+//     from toolCtx.State["authz.identity"] which will be populated when
+//     the ADK resolves issue #276; until then it returns an empty Identity.
 //   - Any policy cache the callback uses MUST be safe for concurrent
 //     access (go test -race clean).
 //   - A nil return means "allow" - tool execution proceeds normally.
