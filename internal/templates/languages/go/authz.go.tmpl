@@ -7,20 +7,33 @@ import (
 	zap "go.uber.org/zap"
 )
 
+// AuthzMode selects the default authorization policy when no custom logic
+// is implemented. Used by BeforeTool to determine the callback behavior.
+type AuthzMode string
+
+const (
+	// ModeAllowAll logs a warning and allows every call (same as pre-authz
+	// behavior). The default when no mode is explicitly configured.
+	ModeAllowAll AuthzMode = "allow-all"
+
+	// ModeDenyAll rejects every call (safe default for audit-first rollouts).
+	ModeDenyAll AuthzMode = "deny-all"
+
+	// ModeCustom expects you to implement your own policy inline.
+	ModeCustom AuthzMode = "custom"
+)
+
 // BeforeTool returns the ADK BeforeTool callback wired in main.go.
 //
-// mode selects the default policy when no custom logic is implemented:
-//   - "allow-all" logs a warning and allows every call (same as pre-authz behavior).
-//   - "deny-all" rejects every call (safe default for audit-first rollouts).
-//   - "custom" expects you to implement your own policy inline.
+// mode selects the default policy when no custom logic is implemented.
 //
 // TODO: implement your policy. When the callback returns a non-nil map the
 // tool is NOT executed and the map is returned to the caller as an error
 // response. Example:
 //
-//	func BeforeTool(logger *zap.Logger, mode string) server.BeforeToolCallback {
+//	func BeforeTool(logger *zap.Logger, mode AuthzMode) server.BeforeToolCallback {
 //	    return func(ctx context.Context, tool server.Tool, args map[string]any, toolCtx *server.ToolContext) map[string]any {
-//	        // tool.GetName() returns the tool ID matching spec.tools[].id
+//	        // tool.GetName() returns the tool ID matching spec.tools[spec.tools[].id
 //	        // toolCtx provides AgentName, InvocationID, TaskID, ContextID,
 //	        // Logger, and State (map[string]any for session state).
 //	        if tool.GetName() == "admin-only-tool" {
@@ -41,19 +54,19 @@ import (
 //   - Any policy cache the callback uses MUST be safe for concurrent
 //     access (go test -race clean).
 //   - A nil return means "allow" - tool execution proceeds normally.
-func BeforeTool(logger *zap.Logger, mode string) server.BeforeToolCallback {
+func BeforeTool(logger *zap.Logger, mode AuthzMode) server.BeforeToolCallback {
 	switch mode {
-	case "deny-all":
+	case ModeDenyAll:
 		logger.Warn("authz: BeforeTool is using deny-all policy - update spec.server.authz.mode or implement your policy")
 		return func(_ context.Context, _ server.Tool, _ map[string]any, _ *server.ToolContext) map[string]any {
 				return map[string]any{"error": "not authorized"}
 		}
-	case "custom":
+	case ModeCustom:
 		logger.Warn("authz: BeforeTool is in custom mode - implement your authorization logic in internal/authz/authz.go")
 		return func(_ context.Context, _ server.Tool, _ map[string]any, _ *server.ToolContext) map[string]any {
 				return nil // default-allow until logic is implemented
 		}
-	default: // "allow-all"
+	default: // ModeAllowAll
 		logger.Warn("authz: BeforeTool is using the default-allow policy - implement your authorization logic in internal/authz/authz.go")
 		return func(_ context.Context, _ server.Tool, _ map[string]any, _ *server.ToolContext) map[string]any {
 				return nil // default-allow preserves current behavior

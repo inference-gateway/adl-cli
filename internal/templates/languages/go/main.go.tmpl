@@ -361,7 +361,8 @@ func runStart(ctx context.Context) error {
 		WithSystemPrompt(systemPrompt).
 		{{- if and .ADL.Spec.Server.Authz .ADL.Spec.Server.Authz.Enabled }}
 		WithCallbacks(&server.CallbackConfig{
-				BeforeTool: []server.BeforeToolCallback{authz.BeforeTool(l, "{{ .ADL.Spec.Server.Authz.Mode | default "allow-all" }}")},
+				{{- $authzMode := .ADL.Spec.Server.Authz.Mode | default "allow-all" }}
+			BeforeTool: []server.BeforeToolCallback{authz.BeforeTool(l, {{ if eq $authzMode "deny-all" }}authz.ModeDenyAll{{ else if eq $authzMode "custom" }}authz.ModeCustom{{ else }}authz.ModeAllowAll{{ end }})},
 		}).
 		{{- end }}
 		Build()
