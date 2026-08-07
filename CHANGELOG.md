@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.60.1](https://github.com/inference-gateway/adl-cli/compare/v0.60.0...v0.60.1) (2026-08-07)
+
+### 🐛 Bug Fixes
+
+* run A2A task processors concurrently in generated Go agents ([#358](https://github.com/inference-gateway/adl-cli/issues/358)) ([78006e6](https://github.com/inference-gateway/adl-cli/commit/78006e6c54a9ff210e6f82e43ed0d07ece5b7451))
+
 ## [0.60.0](https://github.com/inference-gateway/adl-cli/compare/v0.59.1...v0.60.0) (2026-08-07)
 
 ### ✨ Features
