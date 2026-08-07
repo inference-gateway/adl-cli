@@ -73,19 +73,19 @@ type AuthConfig struct {
 	Enabled bool `json:"enabled,omitempty,omitzero" yaml:"enabled,omitempty" mapstructure:"enabled,omitempty"`
 }
 
-// Authorization decision hook configuration for the agent. When enabled, the
-// generator scaffolds a user-owned authorization callback
-// (internal/authz/authz.go) that is invoked before every tool call. 'mode' selects
-// the default policy when no custom logic is implemented yet: 'allow-all' logs a
-// warning and allows every call, 'deny-all' rejects every call, 'custom' expects
-// the user to implement their own policy.
+// Authorization configuration for the agent server. 'enabled' is the master
+// switch: when true the generated project scaffolds a user-owned authorization
+// callback. 'mode' selects the default policy when the user has not yet written
+// custom logic: 'allow-all' permits every request, 'deny-all' rejects every
+// request, 'custom' means the user must implement their own logic. Both fields are
+// optional; when omitted the scaffold is not generated and mode defaults to
+// 'allow-all'.
 type AuthzConfig struct {
-	// Enabled corresponds to the JSON schema field "enabled".
+	// Master switch for authorization. When true, the generated project scaffolds a
+	// user-owned BeforeTool callback for authorization. Off by default.
 	Enabled bool `json:"enabled,omitempty,omitzero" yaml:"enabled,omitempty" mapstructure:"enabled,omitempty"`
 
-	// Default authorization mode. 'allow-all': log a warning and allow every call
-	// (same as pre-authz behavior). 'deny-all': reject every call. 'custom': user
-	// must implement the policy in internal/authz/authz.go.
+	// Default authorization policy when the user has not yet written custom logic.
 	Mode AuthzConfigMode `json:"mode,omitempty,omitzero" yaml:"mode,omitempty" mapstructure:"mode,omitempty"`
 }
 

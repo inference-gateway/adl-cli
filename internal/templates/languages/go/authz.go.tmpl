@@ -22,14 +22,14 @@ type Identity struct {
 
 // IdentityFrom extracts the caller identity from the tool context.
 //
-// The ADK will surface verified OIDC claims as session state once
-// https://github.com/inference-gateway/adk/issues/276 is resolved.
-// Until then IdentityFrom returns an empty Identity - the authz hook
-// MUST allow calls through (identity being empty is not a rejection).
-//
-// Once claims are propagated, toolCtx.State will carry the identity
-// under the key "authz.identity" as a map with "sub", "email", "iss"
-// matching the OIDC ID token claims.
+// The ADK surfaces verified OIDC claims as session state since
+// https://github.com/inference-gateway/adk/issues/276 was resolved.
+// toolCtx.State carries the identity under the key "authz.identity"
+// as a map with "sub", "email", "iss" matching the OIDC ID token
+// claims. When identity is absent (e.g. unauthenticated requests or
+// background tasks without request context) IdentityFrom returns an
+// empty Identity - the authz hook MUST allow calls through (identity
+// being empty is not a rejection).
 func IdentityFrom(toolCtx *server.ToolContext) Identity {
 	raw, ok := toolCtx.State["authz.identity"]
 	if !ok {
@@ -101,10 +101,10 @@ const (
 //   - Tool execution is ASYNCHRONOUS relative to the HTTP request. The
 //     callback MUST read identity from the context/task it is handed -
 //     never from state captured at request time.
-//   - The ADK does NOT yet surface verified OIDC claims to BeforeTool
-//     callbacks (tracked in inference-gateway/adk#276). IdentityFrom reads
-//     from toolCtx.State["authz.identity"] which will be populated when
-//     the ADK resolves issue #276; until then it returns an empty Identity.
+//   - The ADK surfaces verified OIDC claims to BeforeTool callbacks since
+//     inference-gateway/adk#276 was resolved. IdentityFrom reads from
+//     toolCtx.State["authz.identity"]; see the IdentityFrom doc for
+//     details on the map structure.
 //   - Any policy cache the callback uses MUST be safe for concurrent
 //     access (go test -race clean).
 //   - A nil return means "allow" - tool execution proceeds normally.
