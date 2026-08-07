@@ -923,6 +923,10 @@ func (g *Generator) generateADLIgnoreFile(outputDir, templateName string, adl *s
 				snakeCaseName := strings.ReplaceAll(serviceName, "-", "_")
 				filesToIgnore = append(filesToIgnore, fmt.Sprintf("internal/%s/%s.go", snakeCaseName, snakeCaseName))
 			}
+
+			if adl.Spec.Server.Authz != nil && adl.Spec.Server.Authz.Enabled {
+				filesToIgnore = append(filesToIgnore, "internal/authz/authz.go")
+			}
 		case "rust":
 			if adl.Spec.Agent != nil {
 				for _, tool := range adl.Spec.Tools {

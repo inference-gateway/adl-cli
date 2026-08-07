@@ -73,6 +73,28 @@ type AuthConfig struct {
 	Enabled bool `json:"enabled,omitempty,omitzero" yaml:"enabled,omitempty" mapstructure:"enabled,omitempty"`
 }
 
+// Authorization configuration for the agent server. 'enabled' is the master
+// switch: when true the generated project scaffolds a user-owned authorization
+// callback. 'mode' selects the default policy when the user has not yet written
+// custom logic: 'allow-all' permits every request, 'deny-all' rejects every
+// request, 'custom' means the user must implement their own logic. Both fields are
+// optional; when omitted the scaffold is not generated and mode defaults to
+// 'allow-all'.
+type AuthzConfig struct {
+	// Master switch for authorization. When true, the generated project scaffolds a
+	// user-owned BeforeTool callback for authorization. Off by default.
+	Enabled bool `json:"enabled,omitempty,omitzero" yaml:"enabled,omitempty" mapstructure:"enabled,omitempty"`
+
+	// Default authorization policy when the user has not yet written custom logic.
+	Mode AuthzConfigMode `json:"mode,omitempty,omitzero" yaml:"mode,omitempty" mapstructure:"mode,omitempty"`
+}
+
+type AuthzConfigMode string
+
+const AuthzConfigModeAllowAll AuthzConfigMode = "allow-all"
+const AuthzConfigModeCustom AuthzConfigMode = "custom"
+const AuthzConfigModeDenyAll AuthzConfigMode = "deny-all"
+
 type Capabilities struct {
 	// PushNotifications corresponds to the JSON schema field "pushNotifications".
 	PushNotifications bool `json:"pushNotifications" yaml:"pushNotifications" mapstructure:"pushNotifications"`
@@ -721,6 +743,9 @@ const SecuritySchemeTypeMutualTLS SecuritySchemeType = "mutualTLS"
 type Server struct {
 	// Auth corresponds to the JSON schema field "auth".
 	Auth *AuthConfig `json:"auth,omitempty,omitzero" yaml:"auth,omitempty" mapstructure:"auth,omitempty"`
+
+	// Authz corresponds to the JSON schema field "authz".
+	Authz *AuthzConfig `json:"authz,omitempty,omitzero" yaml:"authz,omitempty" mapstructure:"authz,omitempty"`
 
 	// Debug corresponds to the JSON schema field "debug".
 	Debug bool `json:"debug,omitempty,omitzero" yaml:"debug,omitempty" mapstructure:"debug,omitempty"`

@@ -1,0 +1,129 @@
+package authz
+
+import (
+	"context"
+
+	server "github.com/inference-gateway/adk/server"
+	zap "go.uber.org/zap"
+)
+
+// Identity represents a verified caller identity from an authenticated
+// request. Fields map to the OIDC ID token claims.
+type Identity struct {
+	// Subject is the unique identifier for the user (OIDC 'sub' claim).
+	Subject string
+
+	// Email is the user's email address (OIDC 'email' claim).
+	Email string
+
+	// Issuer is the OIDC issuer URL (OIDC 'iss' claim).
+	Issuer string
+}
+
+// IdentityFrom extracts the caller identity from the tool context.
+//
+// The ADK surfaces verified OIDC claims as session state since
+// https://github.com/inference-gateway/adk/issues/276 was resolved.
+// toolCtx.State carries the identity under the key "authz.identity"
+// as a map with "sub", "email", "iss" matching the OIDC ID token
+// claims. When identity is absent (e.g. unauthenticated requests or
+// background tasks without request context) IdentityFrom returns an
+// empty Identity - the authz hook MUST allow calls through (identity
+// being empty is not a rejection).
+func IdentityFrom(toolCtx *server.ToolContext) Identity {
+	raw, ok := toolCtx.State["authz.identity"]
+	if !ok {
+		return Identity{}
+	}
+	m, ok := raw.(map[string]any)
+	if !ok {
+		return Identity{}
+	}
+	return Identity{
+		Subject: asString(m["sub"]),
+		Email:   asString(m["email"]),
+		Issuer:  asString(m["iss"]),
+	}
+}
+
+// asString is a helper that extracts a string value from an any-typed map
+// value, returning "" on nil or wrong type.
+func asString(v any) string {
+	s, _ := v.(string)
+	return s
+}
+
+// AuthzMode selects the default authorization policy when no custom logic
+// is implemented. Used by BeforeTool to determine the callback behavior.
+type AuthzMode string
+
+const (
+	// ModeAllowAll logs a warning and allows every call (same as pre-authz
+	// behavior). The default when no mode is explicitly configured.
+	ModeAllowAll AuthzMode = "allow-all"
+
+	// ModeDenyAll rejects every call (safe default for audit-first rollouts).
+	ModeDenyAll AuthzMode = "deny-all"
+
+	// ModeCustom expects you to implement your own policy inline.
+	ModeCustom AuthzMode = "custom"
+)
+
+// BeforeTool returns the ADK BeforeTool callback wired in main.go.
+//
+// mode selects the default policy when no custom logic is implemented.
+//
+// TODO: implement your policy. When the callback returns a non-nil map the
+// tool is NOT executed and the map is returned to the caller as an error
+// response. Example:
+//
+//	func BeforeTool(logger *zap.Logger, mode AuthzMode) server.BeforeToolCallback {
+//	    return func(ctx context.Context, tool server.Tool, args map[string]any, toolCtx *server.ToolContext) map[string]any {
+//	        // tool.GetName() returns the tool ID matching spec.tools[].id
+//	        // toolCtx provides AgentName, InvocationID, TaskID, ContextID,
+//	        // Logger, and State (map[string]any for session state).
+//	        //
+//	        // Identity-aware check (once ADK surfaces OIDC claims - see IdentityFrom):
+//	        //   ident := authz.IdentityFrom(toolCtx)
+//	        //   if ident.Subject == "" {
+//	        //       logger.Warn("no identity in authz callback - allow until inference-gateway/adk#276 lands")
+//	        //   } else if !allowedUsers[ident.Subject] {
+//	        //       return map[string]any{"error": "not authorized"}
+//	        //   }
+//	        if tool.GetName() == "admin-only-tool" {
+//	            return map[string]any{"error": "not authorized"}
+//	        }
+//	        return nil // allow
+//	    }
+//	}
+//
+// Caveats:
+//   - Tool execution is ASYNCHRONOUS relative to the HTTP request. The
+//     callback MUST read identity from the context/task it is handed -
+//     never from state captured at request time.
+//   - The ADK surfaces verified OIDC claims to BeforeTool callbacks since
+//     inference-gateway/adk#276 was resolved. IdentityFrom reads from
+//     toolCtx.State["authz.identity"]; see the IdentityFrom doc for
+//     details on the map structure.
+//   - Any policy cache the callback uses MUST be safe for concurrent
+//     access (go test -race clean).
+//   - A nil return means "allow" - tool execution proceeds normally.
+func BeforeTool(logger *zap.Logger, mode AuthzMode) server.BeforeToolCallback {
+	switch mode {
+	case ModeDenyAll:
+		logger.Warn("authz: BeforeTool is using deny-all policy - update spec.server.authz.mode or implement your policy")
+		return func(_ context.Context, _ server.Tool, _ map[string]any, _ *server.ToolContext) map[string]any {
+				return map[string]any{"error": "not authorized"}
+		}
+	case ModeCustom:
+		logger.Warn("authz: BeforeTool is in custom mode - implement your authorization logic in internal/authz/authz.go")
+		return func(_ context.Context, _ server.Tool, _ map[string]any, _ *server.ToolContext) map[string]any {
+				return nil // default-allow until logic is implemented
+		}
+	default: // ModeAllowAll
+		logger.Warn("authz: BeforeTool is using the default-allow policy - implement your authorization logic in internal/authz/authz.go")
+		return func(_ context.Context, _ server.Tool, _ map[string]any, _ *server.ToolContext) map[string]any {
+				return nil // default-allow preserves current behavior
+		}
+	}
+}
