@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.60.5](https://github.com/inference-gateway/adl-cli/compare/v0.60.4...v0.60.5) (2026-08-13)
+
+### 🔧 Miscellaneous
+
+* **model:** update the default model to an existing one ([713e35b](https://github.com/inference-gateway/adl-cli/commit/713e35b5a6562540c39625657b0e88a58fa6c60f))
+
 ## [0.60.4](https://github.com/inference-gateway/adl-cli/compare/v0.60.3...v0.60.4) (2026-08-13)
 
 ### 🔧 Miscellaneous
