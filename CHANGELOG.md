@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.61.0](https://github.com/inference-gateway/adl-cli/compare/v0.60.5...v0.61.0) (2026-08-13)
+
+### ✨ Features
+
+* **templates:** bump ADK versions to latest - Go v0.26.3, TS v0.15.0, Rust v0.11.0 ([#363](https://github.com/inference-gateway/adl-cli/issues/363)) ([32bab6e](https://github.com/inference-gateway/adl-cli/commit/32bab6e00e87f76f46f2f006de0d7f5e19aec3ed))
+
 ## [0.60.5](https://github.com/inference-gateway/adl-cli/compare/v0.60.4...v0.60.5) (2026-08-13)
 
 ### 🔧 Miscellaneous
