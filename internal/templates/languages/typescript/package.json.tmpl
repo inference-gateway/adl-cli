@@ -20,7 +20,7 @@
     "test:coverage": "node --test --experimental-test-coverage"
   },
   "dependencies": {
-    "@inference-gateway/adk": "0.11.0"{{- range .Vendor.NpmDeps }},
+    "@inference-gateway/adk": "0.15.0"{{- range .Vendor.NpmDeps }},
     {{ .Name | toJson }}: {{ .Version | toJson }}{{- end }}
   },
   "devDependencies": {
