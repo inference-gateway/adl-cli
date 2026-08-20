@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.61.1](https://github.com/inference-gateway/adl-cli/compare/v0.61.0...v0.61.1) (2026-08-20)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump anthropics/claude-code-action from v1.0.191 to v1.0.194 ([#366](https://github.com/inference-gateway/adl-cli/issues/366)) ([aa78d5f](https://github.com/inference-gateway/adl-cli/commit/aa78d5f71277436c9b2196412f1fb61dc8d11205))
+* **deps:** bump charm.land/lipgloss/v2 in the gomod group ([#364](https://github.com/inference-gateway/adl-cli/issues/364)) ([2e96c23](https://github.com/inference-gateway/adl-cli/commit/2e96c231c4af65c725449c832cfe65fe889225a2))
+* **deps:** bump docker/setup-buildx-action from v4.2.0 to v4.3.0 ([#365](https://github.com/inference-gateway/adl-cli/issues/365)) ([385960e](https://github.com/inference-gateway/adl-cli/commit/385960e7afa6f6285c02dd00da7186133d8159a2))
+* **deps:** bump infer-action from v0.47.0 to v0.49.1 ([#367](https://github.com/inference-gateway/adl-cli/issues/367)) ([7e07f2c](https://github.com/inference-gateway/adl-cli/commit/7e07f2ca26dc1edcbaf90ad5bdf7d63fc22f0a69))
+
 ## [0.61.0](https://github.com/inference-gateway/adl-cli/compare/v0.60.5...v0.61.0) (2026-08-13)
 
 ### ✨ Features
