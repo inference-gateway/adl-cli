@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.61.2](https://github.com/inference-gateway/adl-cli/compare/v0.61.1...v0.61.2) (2026-08-20)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump github.com/stretchr/testify from v1.11.1 to v1.12.1 ([#368](https://github.com/inference-gateway/adl-cli/issues/368)) ([64842c9](https://github.com/inference-gateway/adl-cli/commit/64842c9aa27d2bcd3363cf1f67498087d43f2402))
+
 ## [0.61.1](https://github.com/inference-gateway/adl-cli/compare/v0.61.0...v0.61.1) (2026-08-20)
 
 ### 🔧 Miscellaneous
