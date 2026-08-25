@@ -313,7 +313,7 @@ func TestGenerator_AI_ClaudeWorkflowGoContent(t *testing.T) {
 
 	assertContains(t, body, "arduino/setup-task@v3.0.0", "Claude Code workflow body")
 	assertContains(t, body, "Install ADL skill", "Claude Code workflow body")
-	assertContains(t, body, "raw.githubusercontent.com/inference-gateway/skills/main/skills/adl/SKILL.md", "Claude Code workflow body")
+	assertContains(t, body, "raw.githubusercontent.com/inference-gateway/adl/main/.agents/skills/adl/SKILL.md", "Claude Code workflow body")
 
 	assertContains(t, body, "anthropics/claude-code-action@v1.0.194", "Claude Code workflow body")
 	assertContains(t, body, "claude_code_oauth_token:", "Claude Code workflow body")

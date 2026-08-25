@@ -131,7 +131,7 @@ jobs:
           mkdir -p ~/.claude/skills/adl
           curl -fsSL \
             -H "Authorization: Bearer ${{`{{ secrets.GITHUB_TOKEN }}`}}" \
-            https://raw.githubusercontent.com/inference-gateway/skills/main/skills/adl/SKILL.md \
+            https://raw.githubusercontent.com/inference-gateway/adl/main/.agents/skills/adl/SKILL.md \
             -o ~/.claude/skills/adl/SKILL.md
 
       - name: Determine branch prefix
