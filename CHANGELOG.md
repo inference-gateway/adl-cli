@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.61.3](https://github.com/inference-gateway/adl-cli/compare/v0.61.2...v0.61.3) (2026-08-25)
+
+### 🐛 Bug Fixes
+
+* **templates:** update ADL skill download URL to inference-gateway/adl repo ([#369](https://github.com/inference-gateway/adl-cli/issues/369)) ([3d5d208](https://github.com/inference-gateway/adl-cli/commit/3d5d2089351abdd1e52abcb1853dc8d64dcd3695))
+
 ## [0.61.2](https://github.com/inference-gateway/adl-cli/compare/v0.61.1...v0.61.2) (2026-08-20)
 
 ### 🔧 Miscellaneous
