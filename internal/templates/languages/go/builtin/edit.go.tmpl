@@ -124,7 +124,7 @@ func (t *EditTool) Handler(ctx context.Context, args map[string]any) (string, er
 
 func (t *EditTool) validatePath(p string) error {
 	if len(t.cfg.AllowedRoots) == 0 {
-		return nil
+		return fmt.Errorf("path %q is denied: no allowed_roots configured; set spec.config.tools.edit.allowed_roots to permit access", p)
 	}
 	cleaned := filepath.Clean(p)
 	for _, root := range t.cfg.AllowedRoots {

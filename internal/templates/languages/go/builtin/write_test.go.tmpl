@@ -26,7 +26,7 @@ func TestWriteTool_DisabledReturnsError(t *testing.T) {
 
 func TestWriteTool_RequiresFilePathAndContent(t *testing.T) {
 	t.Parallel()
-	tool := newTestWriteTool(WriteConfig{Enabled: true})
+	tool := newTestWriteTool(WriteConfig{Enabled: true, AllowedRoots: []string{"/"}})
 	if _, err := tool.Handler(context.Background(), map[string]any{"content": "hi"}); err == nil {
 		t.Fatalf("expected error when file_path is missing, got nil")
 	}
@@ -40,7 +40,7 @@ func TestWriteTool_WritesFileAndCreatesParentDir(t *testing.T) {
 	dir := t.TempDir()
 	target := filepath.Join(dir, "nested", "deep", "out.txt")
 
-	tool := newTestWriteTool(WriteConfig{Enabled: true})
+	tool := newTestWriteTool(WriteConfig{Enabled: true, AllowedRoots: []string{dir}})
 	out, err := tool.Handler(context.Background(), map[string]any{
 		"file_path": target,
 		"content":   "payload",
@@ -74,7 +74,7 @@ func TestWriteTool_OverwritesExistingFile(t *testing.T) {
 		t.Fatalf("seed: %v", err)
 	}
 
-	tool := newTestWriteTool(WriteConfig{Enabled: true})
+	tool := newTestWriteTool(WriteConfig{Enabled: true, AllowedRoots: []string{dir}})
 	if _, err := tool.Handler(context.Background(), map[string]any{
 		"file_path": target,
 		"content":   "new",

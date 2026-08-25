@@ -41,7 +41,7 @@ func TestReadTool_ReadsFile(t *testing.T) {
 		t.Fatalf("seed file: %v", err)
 	}
 
-	tool := newTestReadTool(ReadConfig{Enabled: true, MaxLines: 100})
+	tool := newTestReadTool(ReadConfig{Enabled: true, MaxLines: 100, AllowedRoots: []string{dir}})
 	out, err := tool.Handler(context.Background(), map[string]any{"file_path": path})
 	if err != nil {
 		t.Fatalf("Handler returned error: %v", err)
@@ -67,7 +67,7 @@ func TestReadTool_HonorsOffsetAndLimit(t *testing.T) {
 		t.Fatalf("seed file: %v", err)
 	}
 
-	tool := newTestReadTool(ReadConfig{Enabled: true, MaxLines: 100})
+	tool := newTestReadTool(ReadConfig{Enabled: true, MaxLines: 100, AllowedRoots: []string{dir}})
 	out, err := tool.Handler(context.Background(), map[string]any{
 		"file_path": path,
 		"offset":    2,
@@ -90,7 +90,7 @@ func TestReadTool_HonorsOffsetAndLimit(t *testing.T) {
 
 func TestReadTool_RejectsImageExtensions(t *testing.T) {
 	t.Parallel()
-	tool := newTestReadTool(ReadConfig{Enabled: true, MaxLines: 100})
+	tool := newTestReadTool(ReadConfig{Enabled: true, MaxLines: 100, AllowedRoots: []string{"/"}})
 	if _, err := tool.Handler(context.Background(), map[string]any{"file_path": "screenshot.PNG"}); err == nil {
 		t.Fatalf("expected error for image extension, got nil")
 	}

@@ -87,7 +87,7 @@ pub async fn handle(args: Value, cfg: Config) -> anyhow::Result<String> {
 
 fn validate_path(allowed_roots: &[String], p: &str) -> anyhow::Result<()> {
     if allowed_roots.is_empty() {
-        return Ok(());
+        bail!("path {:?} is denied: no allowed_roots configured; set spec.config.tools.write.allowed_roots to permit access", p);
     }
     let cleaned = Path::new(p).to_path_buf();
     for root in allowed_roots {

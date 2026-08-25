@@ -105,7 +105,7 @@ func (t *WriteTool) Handler(ctx context.Context, args map[string]any) (string, e
 
 func (t *WriteTool) validatePath(p string) error {
 	if len(t.cfg.AllowedRoots) == 0 {
-		return nil
+		return fmt.Errorf("path %q is denied: no allowed_roots configured; set spec.config.tools.write.allowed_roots to permit access", p)
 	}
 	cleaned := filepath.Clean(p)
 	for _, root := range t.cfg.AllowedRoots {

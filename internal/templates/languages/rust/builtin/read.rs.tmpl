@@ -126,7 +126,7 @@ pub async fn handle(args: Value, cfg: Config) -> anyhow::Result<String> {
 
 fn validate_path(allowed_roots: &[String], p: &str) -> anyhow::Result<()> {
     if allowed_roots.is_empty() {
-        return Ok(());
+        bail!("path {:?} is denied: no allowed_roots configured; set spec.config.tools.read.allowed_roots to permit access", p);
     }
     let cleaned = Path::new(p).to_path_buf();
     for root in allowed_roots {
@@ -222,8 +222,8 @@ mod tests {
     }
 
     #[test]
-    fn validate_path_allows_empty_roots() {
-        assert!(validate_path(&[], "/whatever").is_ok());
+    fn validate_path_rejects_empty_roots() {
+        assert!(validate_path(&[], "/whatever").is_err());
     }
 
     #[test]

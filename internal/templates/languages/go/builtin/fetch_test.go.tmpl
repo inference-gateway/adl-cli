@@ -96,7 +96,7 @@ func TestFetchTool_GetReadsBody(t *testing.T) {
 	}))
 	defer server.Close()
 
-	tool := newTestFetchTool(FetchConfig{Enabled: true})
+	tool := newTestFetchTool(FetchConfig{Enabled: true, AllowInternal: true})
 	out, err := tool.Handler(context.Background(), map[string]any{"url": server.URL})
 	if err != nil {
 		t.Fatalf("Handler returned error: %v", err)
@@ -124,7 +124,7 @@ func TestFetchTool_HeadOmitsBody(t *testing.T) {
 	}))
 	defer server.Close()
 
-	tool := newTestFetchTool(FetchConfig{Enabled: true})
+	tool := newTestFetchTool(FetchConfig{Enabled: true, AllowInternal: true})
 	out, err := tool.Handler(context.Background(), map[string]any{"url": server.URL, "method": "HEAD"})
 	if err != nil {
 		t.Fatalf("Handler returned error: %v", err)
@@ -146,7 +146,7 @@ func TestFetchTool_TruncatesBodyOverMaxBytes(t *testing.T) {
 	}))
 	defer server.Close()
 
-	tool := newTestFetchTool(FetchConfig{Enabled: true, MaxBytes: 10})
+	tool := newTestFetchTool(FetchConfig{Enabled: true, MaxBytes: 10, AllowInternal: true})
 	out, err := tool.Handler(context.Background(), map[string]any{"url": server.URL})
 	if err != nil {
 		t.Fatalf("Handler returned error: %v", err)
@@ -176,6 +176,7 @@ func TestFetchTool_DownloadsToSavePath(t *testing.T) {
 		Enabled:        true,
 		AllowDownloads: true,
 		DownloadDir:    dir,
+		AllowInternal:  true,
 	})
 	out, err := tool.Handler(context.Background(), map[string]any{
 		"url":       server.URL,
@@ -212,7 +213,7 @@ func TestFetchTool_RejectsSavePathWhenDownloadsDisabled(t *testing.T) {
 	}))
 	defer server.Close()
 
-	tool := newTestFetchTool(FetchConfig{Enabled: true, AllowDownloads: false})
+	tool := newTestFetchTool(FetchConfig{Enabled: true, AllowDownloads: false, AllowInternal: true})
 	if _, err := tool.Handler(context.Background(), map[string]any{
 		"url":       server.URL,
 		"save_path": "should-fail.txt",
@@ -233,7 +234,8 @@ func TestFetchTool_RejectsParentDirTraversalInSavePath(t *testing.T) {
 		Enabled:        true,
 		AllowDownloads: true,
 		DownloadDir:    dir,
-	})
+		AllowInternal:  true,
+	}
 	if _, err := tool.Handler(context.Background(), map[string]any{
 		"url":       server.URL,
 		"save_path": "../escaped.txt",
