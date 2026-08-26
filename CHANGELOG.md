@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.62.1](https://github.com/inference-gateway/adl-cli/compare/v0.62.0...v0.62.1) (2026-08-26)
+
+### 🐛 Bug Fixes
+
+* **schema:** keep Spec.Config a free map in generated types ([#375](https://github.com/inference-gateway/adl-cli/issues/375)) ([5718292](https://github.com/inference-gateway/adl-cli/commit/5718292e618cba1276f1e6435e2531a8cc7147da))
+
+### 🔧 Miscellaneous
+
+* sync ADL schema to v0.26.0 ([#374](https://github.com/inference-gateway/adl-cli/issues/374)) ([16640ee](https://github.com/inference-gateway/adl-cli/commit/16640eea96c0f32a5995c52c4a2bdb9e6eb5172b))
+
 ## [0.62.0](https://github.com/inference-gateway/adl-cli/compare/v0.61.4...v0.62.0) (2026-08-26)
 
 ### ✨ Features
