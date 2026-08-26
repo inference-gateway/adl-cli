@@ -95,6 +95,21 @@ const AuthzConfigModeAllowAll AuthzConfigMode = "allow-all"
 const AuthzConfigModeCustom AuthzConfigMode = "custom"
 const AuthzConfigModeDenyAll AuthzConfigMode = "deny-all"
 
+// Configuration for the reserved bash built-in tool.
+type BashToolConfig struct {
+	// Enabled corresponds to the JSON schema field "enabled".
+	Enabled bool `json:"enabled,omitempty,omitzero" yaml:"enabled,omitempty" mapstructure:"enabled,omitempty"`
+
+	// TimeoutSeconds corresponds to the JSON schema field "timeout_seconds".
+	TimeoutSeconds int `json:"timeout_seconds,omitempty,omitzero" yaml:"timeout_seconds,omitempty" mapstructure:"timeout_seconds,omitempty"`
+
+	// Whitelist corresponds to the JSON schema field "whitelist".
+	Whitelist []string `json:"whitelist,omitempty,omitzero" yaml:"whitelist,omitempty" mapstructure:"whitelist,omitempty"`
+
+	// WorkingDir corresponds to the JSON schema field "working_dir".
+	WorkingDir string `json:"working_dir,omitempty,omitzero" yaml:"working_dir,omitempty" mapstructure:"working_dir,omitempty"`
+}
+
 type Capabilities struct {
 	// PushNotifications corresponds to the JSON schema field "pushNotifications".
 	PushNotifications bool `json:"pushNotifications" yaml:"pushNotifications" mapstructure:"pushNotifications"`
@@ -335,6 +350,15 @@ type DocumentationPage struct {
 	Title string `json:"title" yaml:"title" mapstructure:"title"`
 }
 
+// Configuration for the reserved edit built-in tool.
+type EditToolConfig struct {
+	// AllowedRoots corresponds to the JSON schema field "allowed_roots".
+	AllowedRoots []string `json:"allowed_roots,omitempty,omitzero" yaml:"allowed_roots,omitempty" mapstructure:"allowed_roots,omitempty"`
+
+	// Enabled corresponds to the JSON schema field "enabled".
+	Enabled bool `json:"enabled,omitempty,omitzero" yaml:"enabled,omitempty" mapstructure:"enabled,omitempty"`
+}
+
 // A single example entry. 'title' is the human-readable heading shown in the
 // generated README's Examples section; 'description' explains what the example
 // demonstrates.
@@ -351,6 +375,32 @@ type Example struct {
 // 'Examples' section in the generated README.md, linking each example to a
 // scratchpad or playground for the agent.
 type Examples []Example
+
+// Configuration for the reserved fetch built-in tool. When allowed_domains is
+// empty, internal/private addresses are denied by default (SSRF guard) unless
+// allow_internal is true.
+type FetchToolConfig struct {
+	// AllowDownloads corresponds to the JSON schema field "allow_downloads".
+	AllowDownloads bool `json:"allow_downloads,omitempty,omitzero" yaml:"allow_downloads,omitempty" mapstructure:"allow_downloads,omitempty"`
+
+	// AllowInternal corresponds to the JSON schema field "allow_internal".
+	AllowInternal bool `json:"allow_internal,omitempty,omitzero" yaml:"allow_internal,omitempty" mapstructure:"allow_internal,omitempty"`
+
+	// AllowedDomains corresponds to the JSON schema field "allowed_domains".
+	AllowedDomains []string `json:"allowed_domains,omitempty,omitzero" yaml:"allowed_domains,omitempty" mapstructure:"allowed_domains,omitempty"`
+
+	// DownloadDir corresponds to the JSON schema field "download_dir".
+	DownloadDir string `json:"download_dir,omitempty,omitzero" yaml:"download_dir,omitempty" mapstructure:"download_dir,omitempty"`
+
+	// Enabled corresponds to the JSON schema field "enabled".
+	Enabled bool `json:"enabled,omitempty,omitzero" yaml:"enabled,omitempty" mapstructure:"enabled,omitempty"`
+
+	// MaxBytes corresponds to the JSON schema field "max_bytes".
+	MaxBytes int `json:"max_bytes,omitempty,omitzero" yaml:"max_bytes,omitempty" mapstructure:"max_bytes,omitempty"`
+
+	// TimeoutSeconds corresponds to the JSON schema field "timeout_seconds".
+	TimeoutSeconds int `json:"timeout_seconds,omitempty,omitzero" yaml:"timeout_seconds,omitempty" mapstructure:"timeout_seconds,omitempty"`
+}
 
 type FloxConfig struct {
 	// Enabled corresponds to the JSON schema field "enabled".
@@ -611,6 +661,18 @@ type OrchestratorsConfig struct {
 	Opencode *OpenCodeConfig `json:"opencode,omitempty,omitzero" yaml:"opencode,omitempty" mapstructure:"opencode,omitempty"`
 }
 
+// Configuration for the reserved read built-in tool.
+type ReadToolConfig struct {
+	// AllowedRoots corresponds to the JSON schema field "allowed_roots".
+	AllowedRoots []string `json:"allowed_roots,omitempty,omitzero" yaml:"allowed_roots,omitempty" mapstructure:"allowed_roots,omitempty"`
+
+	// Enabled corresponds to the JSON schema field "enabled".
+	Enabled bool `json:"enabled,omitempty,omitzero" yaml:"enabled,omitempty" mapstructure:"enabled,omitempty"`
+
+	// MaxLines corresponds to the JSON schema field "max_lines".
+	MaxLines int `json:"max_lines,omitempty,omitzero" yaml:"max_lines,omitempty" mapstructure:"max_lines,omitempty"`
+}
+
 type ResourcesConfig struct {
 	// CPU corresponds to the JSON schema field "cpu".
 	CPU string `json:"cpu,omitempty,omitzero" yaml:"cpu,omitempty" mapstructure:"cpu,omitempty"`
@@ -864,7 +926,7 @@ type Spec struct {
 	Card *Card `json:"card,omitempty,omitzero" yaml:"card,omitempty" mapstructure:"card,omitempty"`
 
 	// Config corresponds to the JSON schema field "config".
-	Config SpecConfig `json:"config,omitempty,omitzero" yaml:"config,omitempty" mapstructure:"config,omitempty"`
+	Config *SpecConfig `json:"config,omitempty,omitzero" yaml:"config,omitempty" mapstructure:"config,omitempty"`
 
 	// Deployment corresponds to the JSON schema field "deployment".
 	Deployment *DeploymentConfig `json:"deployment,omitempty,omitzero" yaml:"deployment,omitempty" mapstructure:"deployment,omitempty"`
@@ -903,7 +965,12 @@ type Spec struct {
 	Tools []Tool `json:"tools,omitempty,omitzero" yaml:"tools,omitempty" mapstructure:"tools,omitempty"`
 }
 
-type SpecConfig map[string]map[string]any
+type SpecConfig struct {
+	// Tools corresponds to the JSON schema field "tools".
+	Tools *ToolsConfig `json:"tools,omitempty,omitzero" yaml:"tools,omitempty" mapstructure:"tools,omitempty"`
+
+	AdditionalProperties map[string]any `mapstructure:",remain"`
+}
 
 type SpecServices map[string]Service
 
@@ -1039,6 +1106,28 @@ type Tool struct {
 // Free-form JSON Schema describing the tool's input parameters.
 type ToolSchema map[string]any
 
+// Per-tool configuration under spec.config.tools. The five reserved built-in tool
+// IDs (read, bash, write, edit, fetch) have typed shapes validated here; any other
+// key is a user-defined tool's config and stays free-form.
+type ToolsConfig struct {
+	// Bash corresponds to the JSON schema field "bash".
+	Bash *BashToolConfig `json:"bash,omitempty,omitzero" yaml:"bash,omitempty" mapstructure:"bash,omitempty"`
+
+	// Edit corresponds to the JSON schema field "edit".
+	Edit *EditToolConfig `json:"edit,omitempty,omitzero" yaml:"edit,omitempty" mapstructure:"edit,omitempty"`
+
+	// Fetch corresponds to the JSON schema field "fetch".
+	Fetch *FetchToolConfig `json:"fetch,omitempty,omitzero" yaml:"fetch,omitempty" mapstructure:"fetch,omitempty"`
+
+	// Read corresponds to the JSON schema field "read".
+	Read *ReadToolConfig `json:"read,omitempty,omitzero" yaml:"read,omitempty" mapstructure:"read,omitempty"`
+
+	// Write corresponds to the JSON schema field "write".
+	Write *WriteToolConfig `json:"write,omitempty,omitzero" yaml:"write,omitempty" mapstructure:"write,omitempty"`
+
+	AdditionalProperties map[string]any `mapstructure:",remain"`
+}
+
 type TypeScriptConfig struct {
 	// NodeVersion corresponds to the JSON schema field "nodeVersion".
 	NodeVersion string `json:"nodeVersion" yaml:"nodeVersion" mapstructure:"nodeVersion"`
@@ -1120,3 +1209,12 @@ type VercelConfigRuntime string
 
 const VercelConfigRuntimeEdge VercelConfigRuntime = "edge"
 const VercelConfigRuntimeNodejs VercelConfigRuntime = "nodejs"
+
+// Configuration for the reserved write built-in tool.
+type WriteToolConfig struct {
+	// AllowedRoots corresponds to the JSON schema field "allowed_roots".
+	AllowedRoots []string `json:"allowed_roots,omitempty,omitzero" yaml:"allowed_roots,omitempty" mapstructure:"allowed_roots,omitempty"`
+
+	// Enabled corresponds to the JSON schema field "enabled".
+	Enabled bool `json:"enabled,omitempty,omitzero" yaml:"enabled,omitempty" mapstructure:"enabled,omitempty"`
+}
