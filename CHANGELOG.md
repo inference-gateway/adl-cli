@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.62.0](https://github.com/inference-gateway/adl-cli/compare/v0.61.4...v0.62.0) (2026-08-26)
+
+### ✨ Features
+
+* **schema:** deny-by-default network/filesystem access for built-in tool templates ([#373](https://github.com/inference-gateway/adl-cli/issues/373)) ([25637b4](https://github.com/inference-gateway/adl-cli/commit/25637b4c6b1685cd43efcf4b2ceabb7dd9c41588)), references [rust-adk#134](https://github.com/rust-adk/issues/134) [typescript-adk#206](https://github.com/typescript-adk/issues/206)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump flox deps ([f51dd95](https://github.com/inference-gateway/adl-cli/commit/f51dd957fd61dda7fc12d901f7d87fa45bdd98c7))
+
 ## [0.61.4](https://github.com/inference-gateway/adl-cli/compare/v0.61.3...v0.61.4) (2026-08-25)
 
 ### 🐛 Bug Fixes
