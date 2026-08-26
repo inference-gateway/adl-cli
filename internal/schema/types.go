@@ -926,7 +926,7 @@ type Spec struct {
 	Card *Card `json:"card,omitempty,omitzero" yaml:"card,omitempty" mapstructure:"card,omitempty"`
 
 	// Config corresponds to the JSON schema field "config".
-	Config *SpecConfig `json:"config,omitempty,omitzero" yaml:"config,omitempty" mapstructure:"config,omitempty"`
+	Config SpecConfig `json:"config,omitempty,omitzero" yaml:"config,omitempty" mapstructure:"config,omitempty"`
 
 	// Deployment corresponds to the JSON schema field "deployment".
 	Deployment *DeploymentConfig `json:"deployment,omitempty,omitzero" yaml:"deployment,omitempty" mapstructure:"deployment,omitempty"`
@@ -965,12 +965,7 @@ type Spec struct {
 	Tools []Tool `json:"tools,omitempty,omitzero" yaml:"tools,omitempty" mapstructure:"tools,omitempty"`
 }
 
-type SpecConfig struct {
-	// Tools corresponds to the JSON schema field "tools".
-	Tools *ToolsConfig `json:"tools,omitempty,omitzero" yaml:"tools,omitempty" mapstructure:"tools,omitempty"`
-
-	AdditionalProperties map[string]any `mapstructure:",remain"`
-}
+type SpecConfig map[string]map[string]any
 
 type SpecServices map[string]Service
 
