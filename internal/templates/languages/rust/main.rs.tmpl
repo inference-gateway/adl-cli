@@ -237,6 +237,7 @@ async fn run_start() -> Result<(), Box<dyn std::error::Error>> {
                 timeout_seconds: {{ $.BuiltinConfigs.Fetch.TimeoutSeconds }},
                 download_dir: {{ if $.BuiltinConfigs.Fetch.DownloadDir }}{{ $.BuiltinConfigs.Fetch.DownloadDir | quote }}{{ else }}"/tmp"{{ end }}.to_string(),
                 allow_downloads: {{ $.BuiltinConfigs.Fetch.AllowDownloads }},
+                allow_internal: {{ $.BuiltinConfigs.Fetch.AllowInternal }},
             }
             .with_env_overrides();
             tools::fetch::handle(args, cfg).await

@@ -104,11 +104,18 @@ pub async fn handle(args: Value, cfg: Config) -> anyhow::Result<String> {
     .to_string())
 }
 
+/// Enforces `allowed_roots` (fail-closed when empty). The artifacts storage
+/// directory is always editable regardless of `allowed_roots`.
 fn validate_path(allowed_roots: &[String], p: &str) -> anyhow::Result<()> {
+    let cleaned = Path::new(p).to_path_buf();
+    let artifacts = std::env::var("A2A_ARTIFACTS_STORAGE_BASE_PATH")
+        .unwrap_or_else(|_| "/tmp/artifacts".to_string());
+    if cleaned.starts_with(Path::new(&artifacts)) {
+        return Ok(());
+    }
     if allowed_roots.is_empty() {
         bail!("path {:?} is denied: no allowed_roots configured; set spec.config.tools.edit.allowed_roots to permit access", p);
     }
-    let cleaned = Path::new(p).to_path_buf();
     for root in allowed_roots {
         let root_clean = Path::new(root).to_path_buf();
         if cleaned == root_clean || cleaned.starts_with(&root_clean) {

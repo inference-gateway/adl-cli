@@ -290,7 +290,7 @@ func (t *FetchTool) checkDomain(host string) error {
 			if strings.HasPrefix(entry, ".") {
 				suffix := strings.TrimPrefix(entry, ".")
 				if host == suffix || strings.HasSuffix(host, "."+suffix) {
-                        return nil
+					return nil
 				}
 				continue
 			}
@@ -303,7 +303,7 @@ func (t *FetchTool) checkDomain(host string) error {
 
 	// No explicit allowlist - deny internal/private by default (SSRF guard).
 	if !t.cfg.AllowInternal && isInternalHost(host) {
-            return fmt.Errorf("host %q resolves to an internal or private address which is not allowed by default; set spec.config.tools.fetch.allow_internal: true to permit", host)
+		return fmt.Errorf("host %q resolves to an internal or private address which is not allowed by default; set spec.config.tools.fetch.allow_internal: true to permit", host)
 	}
 
 	return nil
@@ -314,20 +314,20 @@ func (t *FetchTool) checkDomain(host string) error {
 // is a domain name rather than an IP literal.
 func isInternalHost(host string) bool {
 	if addr, err := netip.ParseAddr(host); err == nil {
-	return addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() || addr.IsUnspecified()
+		return addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() || addr.IsUnspecified()
 	}
 	ips, err := net.LookupIP(host)
 	if err != nil {
-	return false
+		return false
 	}
 	for _, ip := range ips {
-	addr, ok := netip.AddrFromSlice(ip.To16())
-	if !ok {
+		addr, ok := netip.AddrFromSlice(ip.To16())
+		if !ok {
 			continue
-	}
-	if addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() || addr.IsUnspecified() {
+		}
+		if addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() || addr.IsUnspecified() {
 			return true
-	}
+		}
 	}
 	return false
 }

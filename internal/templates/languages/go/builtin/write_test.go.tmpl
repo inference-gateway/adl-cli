@@ -91,6 +91,19 @@ func TestWriteTool_OverwritesExistingFile(t *testing.T) {
 	}
 }
 
+func TestWriteTool_AlwaysAllowsArtifactsDir(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("A2A_ARTIFACTS_STORAGE_BASE_PATH", dir)
+
+	tool := newTestWriteTool(WriteConfig{Enabled: true})
+	if _, err := tool.Handler(context.Background(), map[string]any{
+		"file_path": filepath.Join(dir, "out.txt"),
+		"content":   "artifact",
+	}); err != nil {
+		t.Fatalf("expected artifacts dir to be writable without allowed_roots, got: %v", err)
+	}
+}
+
 func TestWriteTool_EnforcesAllowedRoots(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()

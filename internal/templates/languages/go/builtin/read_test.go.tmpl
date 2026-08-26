@@ -96,6 +96,23 @@ func TestReadTool_RejectsImageExtensions(t *testing.T) {
 	}
 }
 
+func TestReadTool_AlwaysAllowsSkillsDir(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("A2A_SKILLS_DIR", dir)
+	path := filepath.Join(dir, "example", "SKILL.md")
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("mkdir skill dir: %v", err)
+	}
+	if err := os.WriteFile(path, []byte("playbook\n"), 0o644); err != nil {
+		t.Fatalf("seed skill file: %v", err)
+	}
+
+	tool := newTestReadTool(ReadConfig{Enabled: true, MaxLines: 100})
+	if _, err := tool.Handler(context.Background(), map[string]any{"file_path": path}); err != nil {
+		t.Fatalf("expected skills dir to be readable without allowed_roots, got: %v", err)
+	}
+}
+
 func TestReadTool_EnforcesAllowedRoots(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()

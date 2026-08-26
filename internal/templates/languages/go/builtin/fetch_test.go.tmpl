@@ -235,7 +235,7 @@ func TestFetchTool_RejectsParentDirTraversalInSavePath(t *testing.T) {
 		AllowDownloads: true,
 		DownloadDir:    dir,
 		AllowInternal:  true,
-	}
+	})
 	if _, err := tool.Handler(context.Background(), map[string]any{
 		"url":       server.URL,
 		"save_path": "../escaped.txt",

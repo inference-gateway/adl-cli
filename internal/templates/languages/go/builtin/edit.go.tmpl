@@ -122,11 +122,21 @@ func (t *EditTool) Handler(ctx context.Context, args map[string]any) (string, er
 	return string(payload), nil
 }
 
+// validatePath enforces allowed_roots (fail-closed when empty). The
+// artifacts storage directory is always editable regardless of
+// allowed_roots.
 func (t *EditTool) validatePath(p string) error {
+	cleaned := filepath.Clean(p)
+	artifacts := os.Getenv("A2A_ARTIFACTS_STORAGE_BASE_PATH")
+	if artifacts == "" {
+		artifacts = "/tmp/artifacts"
+	}
+	if aClean := filepath.Clean(artifacts); cleaned == aClean || strings.HasPrefix(cleaned, aClean+string(filepath.Separator)) {
+		return nil
+	}
 	if len(t.cfg.AllowedRoots) == 0 {
 		return fmt.Errorf("path %q is denied: no allowed_roots configured; set spec.config.tools.edit.allowed_roots to permit access", p)
 	}
-	cleaned := filepath.Clean(p)
 	for _, root := range t.cfg.AllowedRoots {
 		rootClean := filepath.Clean(root)
 		if cleaned == rootClean || strings.HasPrefix(cleaned, rootClean+string(filepath.Separator)) {

@@ -5,7 +5,7 @@ use reqwest::{Client, Method};
 use serde_json::{Map, Value, json};
 use std::collections::HashMap;
 use std::env;
-use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, ToSocketAddrs};
+use std::net::{IpAddr, ToSocketAddrs};
 use std::path::{Component, Path, PathBuf};
 use std::time::{Duration, Instant};
 use tokio::fs;
@@ -14,26 +14,28 @@ use tokio::fs;
 /// spec.config.tools.fetch at generation time. Runtime env vars
 /// `A2A_FETCH_DISABLED` and `A2A_FETCH_ALLOWED_DOMAINS` override these.
 ///
-/// `allowed_domains` is the host whitelist enforced against the request                                    
-/// URL. Entries are matched case-insensitively; an entry that begins                                   
-/// with "." (e.g. ".example.com") is a suffix match that allows any                                        
-/// subdomain. An empty list means "any host is allowed" - intentional                                      
-/// for unrestricted access but strongly discouraged. When `allowed_domains`                              
-/// is empty, internal/private addresses are denied by default (SSRF guard)                              
-/// unless `allow_internal` is set to true.                                                               
-///                                                                                                      
-/// `max_bytes` caps how much of the response body the tool reads.                                       
-/// `download_dir` is the root the tool writes to when the model                                         
-/// requests `save_path`; `allow_downloads` must be true to enable file                                  
-/// output at all. `allow_internal` opts out of the default SSRF guard; set                              
-#[derive(Clone, Debug)]                                                                                 
-pub struct Config {                                                                                     
-    pub enabled: bool,                                                                                  
-    pub allowed_domains: Vec<String>,                                                                    
-    pub max_bytes: u64,                                                                                  
-    pub timeout_seconds: u64,                                                                            
-    pub download_dir: String,                                                                            
-    pub allow_downloads: bool,                                                                           
+/// `allowed_domains` is the host whitelist enforced against the request
+/// URL. Entries are matched case-insensitively; an entry that begins
+/// with "." (e.g. ".example.com") is a suffix match that allows any
+/// subdomain. An empty list means "any host is allowed" - intentional
+/// for unrestricted access but strongly discouraged. When `allowed_domains`
+/// is empty, internal/private addresses are denied by default (SSRF guard)
+/// unless `allow_internal` is set to true.
+///
+/// `max_bytes` caps how much of the response body the tool reads.
+/// `download_dir` is the root the tool writes to when the model
+/// requests `save_path`; `allow_downloads` must be true to enable file
+/// output at all. `allow_internal` opts out of the default SSRF guard; set
+/// it to true to permit fetching from loopback, RFC 1918, link-local, or
+/// ULA addresses without an explicit `allowed_domains` list.
+#[derive(Clone, Debug)]
+pub struct Config {
+    pub enabled: bool,
+    pub allowed_domains: Vec<String>,
+    pub max_bytes: u64,
+    pub timeout_seconds: u64,
+    pub download_dir: String,
+    pub allow_downloads: bool,
     pub allow_internal: bool,
 }
 
@@ -68,11 +70,11 @@ impl Config {
                 self.download_dir = value;
             }
         }
-        if let Ok(value) = env::var("A2A_FETCH_ALLOW_DOWNLOADS") {                                      
-            self.allow_downloads = matches!(value.trim(), "1" | "true" | "TRUE" | "True");             
-        }                                                                                                 
-        if let Ok(value) = env::var("A2A_FETCH_ALLOW_INTERNAL") {                                        
-            self.allow_internal = matches!(value.trim(), "1" | "true" | "TRUE" | "True");             
+        if let Ok(value) = env::var("A2A_FETCH_ALLOW_DOWNLOADS") {
+            self.allow_downloads = matches!(value.trim(), "1" | "true" | "TRUE" | "True");
+        }
+        if let Ok(value) = env::var("A2A_FETCH_ALLOW_INTERNAL") {
+            self.allow_internal = matches!(value.trim(), "1" | "true" | "TRUE" | "True");
         }
         if self.max_bytes == 0 {
             self.max_bytes = DEFAULT_MAX_BYTES;
@@ -191,8 +193,22 @@ pub async fn handle(args: Value, cfg: Config) -> anyhow::Result<String> {
         None
     };
 
+    // Re-run the domain/SSRF check on every redirect hop so an allowed
+    // host cannot redirect the tool to an internal address.
+    let redirect_domains = cfg.allowed_domains.clone();
+    let redirect_allow_internal = cfg.allow_internal;
     let client = Client::builder()
         .timeout(Duration::from_secs(cfg.timeout_seconds))
+        .redirect(reqwest::redirect::Policy::custom(move |attempt| {
+            let host = attempt.url().host_str().unwrap_or_default().to_string();
+            if check_domain(&redirect_domains, redirect_allow_internal, &host).is_err() {
+                return attempt.error(anyhow!("redirect to disallowed host {:?}", host));
+            }
+            if attempt.previous().len() >= 10 {
+                return attempt.error(anyhow!("too many redirects"));
+            }
+            attempt.follow()
+        }))
         .build()
         .map_err(|e| anyhow!("build http client: {}", e))?;
 
@@ -254,8 +270,8 @@ fn check_domain(allowed: &[String], allow_internal: bool, host: &str) -> anyhow:
 
     if allowed.is_empty() {
         // No explicit allowlist - deny internal/private by default (SSRF guard).
-        if !allow_internal && is_internal_host(host) {
-                bail!("host {:?} resolves to an internal or private address which is not allowed by default; set allow_internal: true in spec.config.tools.fetch to permit", host);
+        if !allow_internal && is_internal_host(&host) {
+            bail!("host {:?} resolves to an internal or private address which is not allowed by default; set allow_internal: true in spec.config.tools.fetch to permit", host);
         }
         return Ok(());
     }
@@ -361,6 +377,7 @@ mod tests {
             timeout_seconds: DEFAULT_TIMEOUT_SECONDS,
             download_dir: "/tmp".to_string(),
             allow_downloads: false,
+            allow_internal: false,
         }
     }
 
@@ -425,8 +442,11 @@ mod tests {
     }
 
     #[test]
-    fn check_domain_allows_empty_list() {
-        assert!(check_domain(&[], "example.com").is_ok());
+    fn check_domain_empty_list_blocks_internal_hosts() {
+        assert!(check_domain(&[], false, "example.com").is_ok());
+        assert!(check_domain(&[], false, "127.0.0.1").is_err());
+        assert!(check_domain(&[], false, "10.0.0.1").is_err());
+        assert!(check_domain(&[], true, "127.0.0.1").is_ok());
     }
 
     #[test]
