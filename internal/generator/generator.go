@@ -796,10 +796,6 @@ func (g *Generator) writeResolvedSkillFiles(skills []*registry.ResolvedSkill, ou
 // It is committed by the generated repo. Idempotent: a pre-existing correct
 // symlink is left alone; anything else at .claude/skills is untouched with a
 // warning.
-//
-// ponytail: best-effort symlink. On platforms without symlink support (e.g.
-// Windows checkouts with core.symlinks=false) creation warns instead of
-// aborting; Claude Code users there can point at .agents/skills manually.
 func (g *Generator) writeClaudePointer(outputDir string) error {
 	const target = "../.agents/skills"
 	claudeDir := filepath.Join(outputDir, ".claude")

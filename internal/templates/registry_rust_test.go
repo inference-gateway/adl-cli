@@ -153,12 +153,12 @@ func TestRustCargoToml_RedisFeatureFlag(t *testing.T) {
 		{
 			name:     "no features -> plain dep",
 			features: nil,
-			want:     `inference-gateway-adk = "0.11.0"`,
+			want:     `inference-gateway-adk = "0.11.2"`,
 		},
 		{
 			name:     "redis feature -> feature flag",
 			features: []string{"redis"},
-			want:     `inference-gateway-adk = { version = "0.11.0", features = ["redis"] }`,
+			want:     `inference-gateway-adk = { version = "0.11.2", features = ["redis"] }`,
 		},
 	}
 

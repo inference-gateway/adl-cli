@@ -29,7 +29,7 @@ func TestEditTool_DisabledReturnsError(t *testing.T) {
 
 func TestEditTool_ValidatesRequiredArgs(t *testing.T) {
 	t.Parallel()
-	tool := newTestEditTool(EditConfig{Enabled: true})
+	tool := newTestEditTool(EditConfig{Enabled: true, AllowedRoots: []string{"/"}})
 
 	if _, err := tool.Handler(context.Background(), map[string]any{
 		"old_string": "a",
@@ -60,7 +60,7 @@ func TestEditTool_ReplacesUniqueMatch(t *testing.T) {
 		t.Fatalf("seed file: %v", err)
 	}
 
-	tool := newTestEditTool(EditConfig{Enabled: true})
+	tool := newTestEditTool(EditConfig{Enabled: true, AllowedRoots: []string{dir}})
 	if _, err := tool.Handler(context.Background(), map[string]any{
 		"file_path":  path,
 		"old_string": "world",
@@ -86,7 +86,7 @@ func TestEditTool_RejectsMissingOldString(t *testing.T) {
 		t.Fatalf("seed file: %v", err)
 	}
 
-	tool := newTestEditTool(EditConfig{Enabled: true})
+	tool := newTestEditTool(EditConfig{Enabled: true, AllowedRoots: []string{dir}})
 	if _, err := tool.Handler(context.Background(), map[string]any{
 		"file_path":  path,
 		"old_string": "missing",
@@ -104,7 +104,7 @@ func TestEditTool_RejectsAmbiguousOldString(t *testing.T) {
 		t.Fatalf("seed file: %v", err)
 	}
 
-	tool := newTestEditTool(EditConfig{Enabled: true})
+	tool := newTestEditTool(EditConfig{Enabled: true, AllowedRoots: []string{dir}})
 	if _, err := tool.Handler(context.Background(), map[string]any{
 		"file_path":  path,
 		"old_string": "dup",

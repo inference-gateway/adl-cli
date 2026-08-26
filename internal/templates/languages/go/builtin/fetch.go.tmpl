@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"net/netip"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -27,11 +29,16 @@ import (
 // Entries are matched case-insensitively; an entry that begins with "."
 // (e.g. ".example.com") is treated as a suffix match that allows any
 // subdomain. An empty list means "any host is allowed" - intentional for
-// fully unrestricted access but strongly discouraged.
+// fully unrestricted access but strongly discouraged. When AllowedDomains
+// is empty, internal/private addresses are denied by default (SSRF guard)
+// unless AllowInternal is set to true.
 //
 // MaxBytes caps how much of the response body the tool reads. DownloadDir
 // is the root the tool writes to when the model requests `save_path`;
-// AllowDownloads must be true to enable file output at all.
+// AllowDownloads must be true to enable file output at all. AllowInternal
+// opts out of the default SSRF guard; set to true to permit fetching from
+// loopback, RFC1918, link-local, or ULA addresses without an explicit
+// AllowedDomains list.
 type FetchConfig struct {
 	Enabled        bool     `env:"TOOLS_FETCH_ENABLED, default={{ printf "%t" .Config.Enabled }}"`
 	AllowedDomains []string `env:"TOOLS_FETCH_ALLOWED_DOMAINS{{- if .Config.AllowedDomains }}, default={{ join "," .Config.AllowedDomains }}{{- end }}"`
@@ -39,6 +46,7 @@ type FetchConfig struct {
 	TimeoutSeconds int      `env:"TOOLS_FETCH_TIMEOUT_SECONDS, default={{ .Config.TimeoutSeconds }}"`
 	DownloadDir    string   `env:"TOOLS_FETCH_DOWNLOAD_DIR, default={{ if .Config.DownloadDir }}{{ .Config.DownloadDir }}{{ else }}/tmp{{ end }}"`
 	AllowDownloads bool     `env:"TOOLS_FETCH_ALLOW_DOWNLOADS, default={{ printf "%t" .Config.AllowDownloads }}"`
+	AllowInternal  bool     `env:"TOOLS_FETCH_ALLOW_INTERNAL, default={{ printf "%t" .Config.AllowInternal }}"`
 }
 
 // defaultMaxBytes is the cap applied when neither the ADL nor the env
@@ -78,7 +86,12 @@ func NewFetchTool(ctx context.Context, logger *zap.Logger) (server.Tool, error) 
 	t := &FetchTool{
 		logger: logger,
 		cfg:    cfg,
-		client: &http.Client{Timeout: time.Duration(cfg.TimeoutSeconds) * time.Second},
+	}
+	t.client = &http.Client{
+		Timeout: time.Duration(cfg.TimeoutSeconds) * time.Second,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return t.checkDomain(req.URL.Hostname())
+		},
 	}
 	return server.NewBasicTool(
 		"Fetch",
@@ -262,30 +275,61 @@ func (t *FetchTool) Handler(ctx context.Context, args map[string]any) (string, e
 	return string(payload), nil
 }
 
-// checkDomain enforces the configured allowed_domains list. An empty list
-// means any host is allowed.
+// checkDomain enforces the configured allowed_domains list. When the list is
+// empty, internal/private addresses are denied by default (SSRF guard)
+// unless AllowInternal is set to true.
 func (t *FetchTool) checkDomain(host string) error {
-	if len(t.cfg.AllowedDomains) == 0 {
-		return nil
-	}
 	host = strings.ToLower(host)
-	for _, entry := range t.cfg.AllowedDomains {
-		entry = strings.TrimSpace(strings.ToLower(entry))
-		if entry == "" {
-			continue
-		}
-		if strings.HasPrefix(entry, ".") {
-			suffix := strings.TrimPrefix(entry, ".")
-			if host == suffix || strings.HasSuffix(host, "."+suffix) {
+
+	if len(t.cfg.AllowedDomains) > 0 {
+		for _, entry := range t.cfg.AllowedDomains {
+			entry = strings.TrimSpace(strings.ToLower(entry))
+			if entry == "" {
+				continue
+			}
+			if strings.HasPrefix(entry, ".") {
+				suffix := strings.TrimPrefix(entry, ".")
+				if host == suffix || strings.HasSuffix(host, "."+suffix) {
+					return nil
+				}
+				continue
+			}
+			if host == entry {
 				return nil
 			}
+		}
+		return fmt.Errorf("host %q is not in the configured allowed_domains", host)
+	}
+
+	// No explicit allowlist - deny internal/private by default (SSRF guard).
+	if !t.cfg.AllowInternal && isInternalHost(host) {
+		return fmt.Errorf("host %q resolves to an internal or private address which is not allowed by default; set spec.config.tools.fetch.allow_internal: true to permit", host)
+	}
+
+	return nil
+}
+
+// isInternalHost reports whether host is a loopback, private (RFC 1918/ULA),
+// link-local, or unspecified address. Performs DNS resolution if the host
+// is a domain name rather than an IP literal.
+func isInternalHost(host string) bool {
+	if addr, err := netip.ParseAddr(host); err == nil {
+		return addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() || addr.IsUnspecified()
+	}
+	ips, err := net.LookupIP(host)
+	if err != nil {
+		return false
+	}
+	for _, ip := range ips {
+		addr, ok := netip.AddrFromSlice(ip.To16())
+		if !ok {
 			continue
 		}
-		if host == entry {
-			return nil
+		if addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() || addr.IsUnspecified() {
+			return true
 		}
 	}
-	return fmt.Errorf("host %q is not in the configured allowed_domains", host)
+	return false
 }
 
 // resolveDownloadPath joins savePath under DownloadDir and rejects paths

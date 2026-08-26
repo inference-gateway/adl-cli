@@ -124,11 +124,20 @@ pub async fn handle(args: Value, cfg: Config) -> anyhow::Result<String> {
     .to_string())
 }
 
+/// Enforces `allowed_roots` (fail-closed when empty). The skills directory
+/// (so the model can load skill playbooks on demand) and the artifacts
+/// storage directory are always readable regardless of `allowed_roots`.
 fn validate_path(allowed_roots: &[String], p: &str) -> anyhow::Result<()> {
-    if allowed_roots.is_empty() {
+    let cleaned = Path::new(p).to_path_buf();
+    let skills = std::env::var("A2A_SKILLS_DIR").unwrap_or_else(|_| ".agents/skills".to_string());
+    let artifacts = std::env::var("A2A_ARTIFACTS_STORAGE_BASE_PATH")
+        .unwrap_or_else(|_| "/tmp/artifacts".to_string());
+    if cleaned.starts_with(Path::new(&skills)) || cleaned.starts_with(Path::new(&artifacts)) {
         return Ok(());
     }
-    let cleaned = Path::new(p).to_path_buf();
+    if allowed_roots.is_empty() {
+        bail!("path {:?} is denied: no allowed_roots configured; set spec.config.tools.read.allowed_roots to permit access", p);
+    }
     for root in allowed_roots {
         let root_clean = Path::new(root).to_path_buf();
         if cleaned == root_clean || cleaned.starts_with(&root_clean) {
@@ -181,7 +190,11 @@ mod tests {
         let path = dir.path().join("hello.txt");
         tokio::fs::write(&path, b"hello\nworld\n").await.unwrap();
 
-        let out = handle(json!({"file_path": path.to_string_lossy()}), enabled_cfg())
+        let cfg = Config {
+            allowed_roots: vec![dir.path().to_string_lossy().into_owned()],
+            ..enabled_cfg()
+        };
+        let out = handle(json!({"file_path": path.to_string_lossy()}), cfg)
             .await
             .expect("handle");
         let parsed: serde_json::Value = serde_json::from_str(&out).unwrap();
@@ -196,9 +209,13 @@ mod tests {
         let path = dir.path().join("lines.txt");
         tokio::fs::write(&path, b"a\nb\nc\nd\ne\n").await.unwrap();
 
+        let cfg = Config {
+            allowed_roots: vec![dir.path().to_string_lossy().into_owned()],
+            ..enabled_cfg()
+        };
         let out = handle(
             json!({"file_path": path.to_string_lossy(), "offset": 2, "limit": 2}),
-            enabled_cfg(),
+            cfg,
         )
         .await
         .expect("handle");
@@ -222,8 +239,13 @@ mod tests {
     }
 
     #[test]
-    fn validate_path_allows_empty_roots() {
-        assert!(validate_path(&[], "/whatever").is_ok());
+    fn validate_path_rejects_empty_roots() {
+        assert!(validate_path(&[], "/whatever").is_err());
+    }
+
+    #[test]
+    fn validate_path_always_allows_skills_dir() {
+        assert!(validate_path(&[], ".agents/skills/example/SKILL.md").is_ok());
     }
 
     #[test]

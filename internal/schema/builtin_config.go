@@ -122,13 +122,18 @@ type EditBuiltinConfig struct {
 // request URL's host (case-insensitive). An entry beginning with "." is
 // treated as a suffix match, so ".example.com" allows any subdomain. An
 // empty list with Enabled=true means "any host is allowed" - intentional
-// for users who want unrestricted HTTP access, but discouraged.
+// for users who want unrestricted HTTP access, but strongly discouraged.
+// When AllowedDomains is empty, internal/private addresses are denied by
+// default (SSRF guard) unless AllowInternal is set to true.
 //
 // MaxBytes caps how much of the response body the tool reads (0 means
 // "use the built-in default of 10 MiB"). DownloadDir is the root the
 // tool writes to when the model requests `save_path`; AllowDownloads
 // must be true to enable file output at all. TimeoutSeconds caps the
 // total request time (0 means "use the built-in default of 30s").
+// AllowInternal opts out of the default SSRF guard; set to true if you
+// need to fetch from loopback, RFC1918, link-local, or ULA addresses
+// without an explicit AllowedDomains list.
 type FetchBuiltinConfig struct {
 	Enabled        bool     `mapstructure:"enabled"`
 	AllowedDomains []string `mapstructure:"allowed_domains"`
@@ -136,6 +141,7 @@ type FetchBuiltinConfig struct {
 	TimeoutSeconds int      `mapstructure:"timeout_seconds"`
 	DownloadDir    string   `mapstructure:"download_dir"`
 	AllowDownloads bool     `mapstructure:"allow_downloads"`
+	AllowInternal  bool     `mapstructure:"allow_internal"`
 }
 
 // ResolvedBuiltinConfigs holds the decoded config blocks for every reserved
