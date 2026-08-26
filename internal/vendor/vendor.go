@@ -118,8 +118,8 @@ var GoBuiltins = map[string]string{
 // them all so users can't shadow them regardless of which features they
 // activate.
 var CargoBuiltinDeps = map[string]string{
-	"inference-gateway-adk": "0.11.0",
-	"inference-gateway-sdk": "0.13.3",
+	"inference-gateway-adk": "0.11.2",
+	"inference-gateway-sdk": "0.19.0",
 	"tokio":                 "1",
 	"tracing":               "0.1",
 	"tracing-subscriber":    "0.3",
