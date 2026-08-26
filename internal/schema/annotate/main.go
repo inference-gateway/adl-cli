@@ -41,6 +41,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	restoreFreeConfigMap(doc)
 	walk(doc)
 
 	enc := json.NewEncoder(os.Stdout)
@@ -49,6 +50,27 @@ func main() {
 		fmt.Fprintf(os.Stderr, "encode schema: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+// restoreFreeConfigMap rewrites definitions.Spec.properties.config back to
+// its pre-v0.26.0 free-map shape before code generation. Schema v0.26.0
+// added typed shapes for the reserved spec.config.tools blocks, which is
+// right for validation (it runs against the raw manifest with the
+// unmodified schema.json and now rejects typo'd keys) but wrong for the
+// generated Go types: manifests are parsed with yaml.Unmarshal, which
+// cannot populate a struct's mapstructure ",remain" catch-all, so a
+// struct-typed Config would silently drop user-defined config sections
+// and break templates that range over the map. Typed decoding of the
+// reserved tool blocks stays in builtin_config.go.
+func restoreFreeConfigMap(doc map[string]any) {
+	defs, _ := doc["definitions"].(map[string]any)
+	spec, _ := defs["Spec"].(map[string]any)
+	props, _ := spec["properties"].(map[string]any)
+	cfg, _ := props["config"].(map[string]any)
+	if cfg == nil {
+		return
+	}
+	delete(cfg, "properties")
 }
 
 // walk recursively visits every subschema and applies the annotation to
