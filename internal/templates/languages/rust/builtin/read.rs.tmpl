@@ -190,7 +190,11 @@ mod tests {
         let path = dir.path().join("hello.txt");
         tokio::fs::write(&path, b"hello\nworld\n").await.unwrap();
 
-        let out = handle(json!({"file_path": path.to_string_lossy()}), enabled_cfg())
+        let cfg = Config {
+            allowed_roots: vec![dir.path().to_string_lossy().into_owned()],
+            ..enabled_cfg()
+        };
+        let out = handle(json!({"file_path": path.to_string_lossy()}), cfg)
             .await
             .expect("handle");
         let parsed: serde_json::Value = serde_json::from_str(&out).unwrap();
@@ -205,9 +209,13 @@ mod tests {
         let path = dir.path().join("lines.txt");
         tokio::fs::write(&path, b"a\nb\nc\nd\ne\n").await.unwrap();
 
+        let cfg = Config {
+            allowed_roots: vec![dir.path().to_string_lossy().into_owned()],
+            ..enabled_cfg()
+        };
         let out = handle(
             json!({"file_path": path.to_string_lossy(), "offset": 2, "limit": 2}),
-            enabled_cfg(),
+            cfg,
         )
         .await
         .expect("handle");

@@ -149,9 +149,13 @@ mod tests {
         let dir = TempDir::new().expect("tempdir");
         let target = dir.path().join("nested/deep/out.txt");
 
+        let cfg = Config {
+            allowed_roots: vec![dir.path().to_string_lossy().into_owned()],
+            ..enabled_cfg()
+        };
         let out = handle(
             json!({"file_path": target.to_string_lossy(), "content": "payload"}),
-            enabled_cfg(),
+            cfg,
         )
         .await
         .expect("handle");
@@ -168,9 +172,13 @@ mod tests {
         let target = dir.path().join("out.txt");
         tokio::fs::write(&target, b"old").await.unwrap();
 
+        let cfg = Config {
+            allowed_roots: vec![dir.path().to_string_lossy().into_owned()],
+            ..enabled_cfg()
+        };
         handle(
             json!({"file_path": target.to_string_lossy(), "content": "new"}),
-            enabled_cfg(),
+            cfg,
         )
         .await
         .expect("handle");

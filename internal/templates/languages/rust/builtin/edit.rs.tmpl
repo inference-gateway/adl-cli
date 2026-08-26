@@ -175,13 +175,17 @@ mod tests {
         let path = dir.path().join("f.txt");
         tokio::fs::write(&path, b"hello world\n").await.unwrap();
 
+        let cfg = Config {
+            allowed_roots: vec![dir.path().to_string_lossy().into_owned()],
+            ..enabled_cfg()
+        };
         handle(
             json!({
                 "file_path": path.to_string_lossy(),
                 "old_string": "world",
                 "new_string": "there",
             }),
-            enabled_cfg(),
+            cfg,
         )
         .await
         .expect("handle");
@@ -195,13 +199,17 @@ mod tests {
         let path = dir.path().join("f.txt");
         tokio::fs::write(&path, b"hello\n").await.unwrap();
 
+        let cfg = Config {
+            allowed_roots: vec![dir.path().to_string_lossy().into_owned()],
+            ..enabled_cfg()
+        };
         let err = handle(
             json!({
                 "file_path": path.to_string_lossy(),
                 "old_string": "missing",
                 "new_string": "x",
             }),
-            enabled_cfg(),
+            cfg,
         )
         .await
         .unwrap_err();
@@ -214,13 +222,17 @@ mod tests {
         let path = dir.path().join("f.txt");
         tokio::fs::write(&path, b"dup\ndup\n").await.unwrap();
 
+        let cfg = Config {
+            allowed_roots: vec![dir.path().to_string_lossy().into_owned()],
+            ..enabled_cfg()
+        };
         let err = handle(
             json!({
                 "file_path": path.to_string_lossy(),
                 "old_string": "dup",
                 "new_string": "x",
             }),
-            enabled_cfg(),
+            cfg,
         )
         .await
         .unwrap_err();
