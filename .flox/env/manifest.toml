@@ -1,4 +1,4 @@
-schema-version = "1.13.0"
+schema-version = "1.15.0"
 
 [install]
 go.pkg-path = "go"
@@ -14,13 +14,13 @@ prettier.version = "^3.8.3"
 markdownlint-cli.pkg-path = "markdownlint-cli"
 markdownlint-cli.version = "0.48.0"
 markdownlint-cli.pkg-group = "markdownlint"
-infer.flake = "github:inference-gateway/cli/v0.164.0"
-adl.flake = "github:inference-gateway/adl-cli/v0.51.2"
+infer.flake = "github:inference-gateway/cli/v0.181.0"
+adl.flake = "github:inference-gateway/adl-cli/v0.61.4"
 claude-code.pkg-path = "claude-code"
-claude-code.version = "^2.1.201"
+claude-code.version = "^2.1.238"
 claude-code.pkg-group = "claude-code"
 codex.pkg-path = "codex"
-codex.version = "^0.142.3"
+codex.version = "^0.149.0"
 codex.pkg-group = "codex"
 
 [hook]
@@ -28,7 +28,10 @@ on-activate = """
   export GOENV="$FLOX_ENV_CACHE/goenv"
   export PATH="$(go env GOPATH)/bin:$PATH"
   go get .
+"""
 
+[profile]
+zsh = """
   source <(goreleaser completion zsh)
   source <(task --completion zsh)
 """
