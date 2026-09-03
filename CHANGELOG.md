@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.62.5](https://github.com/inference-gateway/adl-cli/compare/v0.62.4...v0.62.5) (2026-09-03)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump claude-code 2.1.238 -> 2.1.245 ([#385](https://github.com/inference-gateway/adl-cli/issues/385)) ([2b5d92a](https://github.com/inference-gateway/adl-cli/commit/2b5d92abc1878431b26aa1ff8d8c4f365cddce10))
+* **deps:** bump claude-code-action v1.0.211 -> v1.0.214 in templates ([#386](https://github.com/inference-gateway/adl-cli/issues/386)) ([17e16ef](https://github.com/inference-gateway/adl-cli/commit/17e16ef0d0df3a480aae2609add417a8e667879f))
+
 ## [0.62.4](https://github.com/inference-gateway/adl-cli/compare/v0.62.3...v0.62.4) (2026-09-03)
 
 ### 📚 Documentation
