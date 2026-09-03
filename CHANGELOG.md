@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.62.4](https://github.com/inference-gateway/adl-cli/compare/v0.62.3...v0.62.4) (2026-09-03)
+
+### 📚 Documentation
+
+* rewrite AGENTS.md to follow the agents.md open standard ([#379](https://github.com/inference-gateway/adl-cli/issues/379)) ([3f37d34](https://github.com/inference-gateway/adl-cli/commit/3f37d34580a72f210fc75c3ffe407e0009130aff))
+* rewrite AGENTS.md to follow the agents.md open standard ([#380](https://github.com/inference-gateway/adl-cli/issues/380)) ([cf72f53](https://github.com/inference-gateway/adl-cli/commit/cf72f536a36a8e661463c1790f7fc9d816ec2329))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump anthropics/claude-code-action from v1.0.202 to v1.0.211 in templates ([#381](https://github.com/inference-gateway/adl-cli/issues/381)) ([e0170b5](https://github.com/inference-gateway/adl-cli/commit/e0170b5bc8c7461152be2f80fc703524d9ba5019))
+* **deps:** bump go.opentelemetry.io/otel/trace from 1.45.0 to 1.46.0 ([#384](https://github.com/inference-gateway/adl-cli/issues/384)) ([4799029](https://github.com/inference-gateway/adl-cli/commit/4799029c501fa5fa11c48364d8f638ff5666debf))
+* **deps:** bump infer CLI v0.181.0 -> v0.183.0 ([#378](https://github.com/inference-gateway/adl-cli/issues/378)) ([17bee00](https://github.com/inference-gateway/adl-cli/commit/17bee003899a14fcbbc2dc5fa52395ea2f034810))
+* **deps:** bump inference-gateway/infer-action from v0.49.2 to v0.51.2 ([#382](https://github.com/inference-gateway/adl-cli/issues/382)) ([5b2fc59](https://github.com/inference-gateway/adl-cli/commit/5b2fc59efc1cb492c561a3f4a1e95d6cdae0cbbe))
+* **deps:** bump otel deps in go templates to v1.46.0 ([#383](https://github.com/inference-gateway/adl-cli/issues/383)) ([68f5da6](https://github.com/inference-gateway/adl-cli/commit/68f5da686c32f7d7d45a4900b599a59cf6624e67))
+
 ## [0.62.3](https://github.com/inference-gateway/adl-cli/compare/v0.62.2...v0.62.3) (2026-08-27)
 
 ### 🔧 Miscellaneous
