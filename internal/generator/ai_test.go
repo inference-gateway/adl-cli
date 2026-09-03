@@ -398,7 +398,7 @@ func TestGenerator_AI_InferWorkflowContent(t *testing.T) {
 	body := readGenerated(t, out, ".github/workflows/infer.yml")
 
 	assertContains(t, body, "name: Infer", "Infer workflow body")
-	assertContains(t, body, "inference-gateway/infer-action@v0.49.2", "Infer workflow body")
+	assertContains(t, body, "inference-gateway/infer-action@v0.51.2", "Infer workflow body")
 	assertContains(t, body, "github-token: ${{ steps.app-token.outputs.token }}", "Infer workflow body")
 	assertContains(t, body, "actions/create-github-app-token", "Infer workflow body")
 	assertContains(t, body, "model:", "Infer workflow body")
