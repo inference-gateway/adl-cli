@@ -105,7 +105,11 @@ func Resolve(raws []string, builtins map[string]string, depGroup string) ([]Entr
 // tests will fail loudly if a built-in is added there without being
 // mirrored here.
 var GoBuiltins = map[string]string{
-	"github.com/inference-gateway/adk":  "v0.26.4",
+	"github.com/inference-gateway/adk": "v0.26.4",
+	// Explicit pin: the ADK requires the SDK only transitively (v1.35.0 at
+	// adk v0.26.4); MVS picks the higher version, so generated agents stay
+	// on the latest SDK release.
+	"github.com/inference-gateway/sdk":  "v1.37.1",
 	"github.com/sethvargo/go-envconfig": "v1.4.3",
 	"github.com/spf13/cobra":            "v1.10.2",
 	"go.uber.org/zap":                   "v1.28.0",
