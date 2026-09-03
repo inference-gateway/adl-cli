@@ -33,12 +33,12 @@ jobs:
       id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@{{ pin "action" "actions/checkout" }}
         with:
           fetch-depth: 1
 
       - name: Run Codex
-        uses: openai/codex-action@v1.8
+        uses: openai/codex-action@{{ pin "action" "openai/codex-action" }}
         with:
           openai_api_key: ${{`{{ secrets.OPENAI_API_KEY }}`}}
           github_token: ${{`{{ secrets.GITHUB_TOKEN }}`}}

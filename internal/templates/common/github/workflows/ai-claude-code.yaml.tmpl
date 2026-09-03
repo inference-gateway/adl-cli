@@ -71,28 +71,28 @@ jobs:
     steps:
       - name: Generate GitHub App token
         id: app-token
-        uses: actions/create-github-app-token@v3.2.0
+        uses: actions/create-github-app-token@{{ pin "action" "actions/create-github-app-token" }}
         with:
           client-id: ${{`{{ secrets.`}}{{ .ADL.Spec.Development.AI.Orchestrators.Claudecode.AppIDSecret | default "CLAUDE_APP_ID" }}{{` }}`}}
           private-key: ${{`{{ secrets.`}}{{ .ADL.Spec.Development.AI.Orchestrators.Claudecode.AppPrivateKeySecret | default "CLAUDE_APP_PRIVATE_KEY" }}{{` }}`}}
 
       - name: Checkout repository
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@{{ pin "action" "actions/checkout" }}
         with:
           fetch-depth: 1
           token: ${{`{{ steps.app-token.outputs.token }}`}}
 {{- if eq .Language "go" }}
 
       - name: Set up Go
-        uses: actions/setup-go@v7.0.0
+        uses: actions/setup-go@{{ pin "action" "actions/setup-go" }}
         with:
           go-version-file: 'go.mod'
           cache: true
 
       - name: Install golangci-lint
-        uses: golangci/golangci-lint-action@v9.3.0
+        uses: golangci/golangci-lint-action@{{ pin "action" "golangci/golangci-lint-action" }}
         with:
-          version: v2.12.2
+          version: v{{ pin "tool" "golangci-lint" }}
           args: --help
 {{- else if eq .Language "rust" }}
 
@@ -105,16 +105,16 @@ jobs:
 {{- else if eq .Language "typescript" }}
 
       - name: Set up Node.js
-        uses: actions/setup-node@v7.0.0
+        uses: actions/setup-node@{{ pin "action" "actions/setup-node" }}
         with:
           node-version: {{ if and .ADL.Spec.Language.TypeScript .ADL.Spec.Language.TypeScript.NodeVersion }}{{ .ADL.Spec.Language.TypeScript.NodeVersion }}{{ else }}24{{ end }}
           cache: 'npm'
 {{- end }}
 
       - name: Install task
-        uses: arduino/setup-task@v3.0.0
+        uses: arduino/setup-task@{{ pin "action" "arduino/setup-task" }}
         with:
-          version: 3.48.0
+          version: {{ pin "tool" "go-task" }}
           repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
       - name: Install ADL CLI
@@ -162,7 +162,7 @@ jobs:
 
       - name: Run Claude Code
         id: claude
-        uses: anthropics/claude-code-action@v1.0.214
+        uses: anthropics/claude-code-action@{{ pin "action" "anthropics/claude-code-action" }}
         env:
           GH_TOKEN: ${{`{{ steps.app-token.outputs.token }}`}}
         with:

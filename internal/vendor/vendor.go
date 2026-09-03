@@ -144,13 +144,108 @@ var CargoBuiltinDevDeps = map[string]string{
 	"tempfile": "3",
 }
 
-// NpmBuiltinDeps / NpmBuiltinDevDeps are placeholders for the TypeScript
-// generator. There are no TS templates today (only `.gitkeep`), but the
-// schema accepts vendor entries for TypeScript so we still parse and
-// dedupe them when the generator eventually wires them through. Keep the
-// maps empty until a `package.json` template lands.
-var NpmBuiltinDeps = map[string]string{}
-var NpmBuiltinDevDeps = map[string]string{}
+// GoTelemetryDeps are the extra go.mod requires emitted only when
+// `spec.telemetry.enabled` is set. They still count as built-ins for
+// vendor conflict checks so users can't downgrade them.
+var GoTelemetryDeps = map[string]string{
+	"go.opentelemetry.io/otel":       "v1.46.0",
+	"go.opentelemetry.io/otel/sdk":   "v1.46.0",
+	"go.opentelemetry.io/otel/trace": "v1.46.0",
+}
+
+// NpmBuiltinDeps / NpmBuiltinDevDeps mirror the package.json template.
+// `@inference-gateway/adl-cli` is intentionally absent: it tracks the CLI
+// version at generation time rather than a static pin.
+var NpmBuiltinDeps = map[string]string{
+	"@inference-gateway/adk": "0.15.1",
+}
+var NpmBuiltinDevDeps = map[string]string{
+	"@types/node": "^24.1.0",
+	"prettier":    "^3.8.3",
+	"tsx":         "^4.19.2",
+	"typescript":  "^6.0.3",
+}
+
+// Tools pins the toolchain / sandbox package versions the generated Flox
+// manifest, devcontainer and CI workflows install. Bare numbers: templates
+// add their own `^` / `v` prefix as the target format requires.
+var Tools = map[string]string{
+	"flox-schema":   "1.13.0",
+	"golangci-lint": "2.12.2",
+	"go-task":       "3.48.0",
+	"rust":          "1.94.1",
+	"rust-analyzer": "2026-04-27",
+	"nodejs":        "24.15.0",
+	"pnpm":          "11.8.0",
+	"git":           "2.53.0",
+	"docker":        "29.5.1",
+	"claude-code":   "2.1.201",
+	"infer":         "0.154.0",
+}
+
+// Actions pins the GitHub Actions referenced by the generated workflows
+// (`uses: <name>@<version>`).
+var Actions = map[string]string{
+	"actions/cache":                        "v5.0.5",
+	"actions/checkout":                     "v7.0.1",
+	"actions/create-github-app-token":      "v3.2.0",
+	"actions/setup-go":                     "v7.0.0",
+	"actions/setup-node":                   "v7.0.0",
+	"anthropics/claude-code-action":        "v1.0.214",
+	"arduino/setup-task":                   "v3.0.0",
+	"azure/setup-kubectl":                  "v4.0.1",
+	"docker/login-action":                  "v4.6.0",
+	"docker/setup-buildx-action":           "v4.3.0",
+	"docker/setup-qemu-action":             "v4.2.0",
+	"golangci/golangci-lint-action":        "v9.3.0",
+	"google-github-actions/auth":           "v2.1.13",
+	"google-github-actions/run-gemini-cli": "v0.1.22",
+	"google-github-actions/setup-gcloud":   "v3.0.1",
+	"inference-gateway/infer-action":       "v0.51.2",
+	"openai/codex-action":                  "v1.8",
+	"oven-sh/setup-bun":                    "v2.2.0",
+	"peter-evans/create-pull-request":      "v8.1.1",
+}
+
+// Release pins the semantic-release npm packages the generated CD
+// workflow installs into a throwaway package.json.
+var Release = map[string]string{
+	"semantic-release":                           "25.0.5",
+	"@semantic-release/commit-analyzer":          "13.0.1",
+	"@semantic-release/release-notes-generator":  "14.1.1",
+	"@semantic-release/changelog":                "6.0.3",
+	"@semantic-release/exec":                     "7.1.0",
+	"@semantic-release/git":                      "10.0.1",
+	"@semantic-release/github":                   "12.0.9",
+	"conventional-changelog-conventionalcommits": "10.2.0",
+	"conventional-changelog-writer":              "^9.1.0",
+}
+
+// Pin returns the pinned version for `name` in `group`. It is exposed to
+// templates as the `pin` func; an unknown group or name fails template
+// execution instead of silently rendering an empty string.
+func Pin(group, name string) (string, error) {
+	groups := map[string]map[string]string{
+		"go":           GoBuiltins,
+		"go-telemetry": GoTelemetryDeps,
+		"cargo":        CargoBuiltinDeps,
+		"cargo-dev":    CargoBuiltinDevDeps,
+		"npm":          NpmBuiltinDeps,
+		"npm-dev":      NpmBuiltinDevDeps,
+		"tool":         Tools,
+		"action":       Actions,
+		"release":      Release,
+	}
+	m, ok := groups[group]
+	if !ok {
+		return "", fmt.Errorf("pin: unknown group %q", group)
+	}
+	v, ok := m[name]
+	if !ok {
+		return "", fmt.Errorf("pin: no %q version pinned in group %q", name, group)
+	}
+	return v, nil
+}
 
 // View is the resolved vendor data injected into the template Context.
 // Each field is a sorted, deduped slice ready to be rendered by the
@@ -210,14 +305,18 @@ func ResolveADL(adl *schema.ADL) (View, error) {
 	view.GoBuiltinEntries = goBuiltinEntries()
 
 	if lang.Go != nil && lang.Go.Vendor != nil {
-		deps, depConflicts, err := Resolve(lang.Go.Vendor.Deps, GoBuiltins, "deps")
+		goBuiltins := cloneMap(GoBuiltins)
+		for k, v := range GoTelemetryDeps {
+			goBuiltins[k] = v
+		}
+		deps, depConflicts, err := Resolve(lang.Go.Vendor.Deps, goBuiltins, "deps")
 		if err != nil {
 			return View{}, fmt.Errorf("spec.language.go.vendor.deps: %w", err)
 		}
 		view.GoRequires = deps
 		view.Conflicts = append(view.Conflicts, depConflicts...)
 
-		toolEffectiveBuiltins := cloneMap(GoBuiltins)
+		toolEffectiveBuiltins := goBuiltins
 		for _, e := range deps {
 			toolEffectiveBuiltins[e.Name] = e.Version
 		}

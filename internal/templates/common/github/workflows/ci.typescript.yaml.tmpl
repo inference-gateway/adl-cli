@@ -17,18 +17,18 @@ jobs:
     runs-on: ubuntu-24.04
     
     steps:
-    - uses: actions/checkout@v7.0.1
+    - uses: actions/checkout@{{ pin "action" "actions/checkout" }}
     
     - name: Set up Node.js
-      uses: actions/setup-node@v7.0.0
+      uses: actions/setup-node@{{ pin "action" "actions/setup-node" }}
       with:
         node-version: {{ if and .ADL.Spec.Language.TypeScript .ADL.Spec.Language.TypeScript.NodeVersion }}{{ .ADL.Spec.Language.TypeScript.NodeVersion }}{{ else }}24{{ end }}
         cache: 'npm'
     
     - name: Install task
-      uses: arduino/setup-task@v3.0.0
+      uses: arduino/setup-task@{{ pin "action" "arduino/setup-task" }}
       with:
-        version: 3.48.0
+        version: {{ pin "tool" "go-task" }}
         repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
     
     - name: Install dependencies
@@ -53,7 +53,7 @@ jobs:
 
     steps:
 {{- if and .ADL.Spec.SCM .ADL.Spec.SCM.GithubApp }}
-    - uses: actions/create-github-app-token@v3.2.0
+    - uses: actions/create-github-app-token@{{ pin "action" "actions/create-github-app-token" }}
       id: app-token
       with:
         client-id: ${{`{{ secrets.`}}{{ .ADL.Spec.SCM.AppIDSecret | default "RELEASER_APP_CLIENT_ID" }}{{` }}`}}
@@ -63,14 +63,14 @@ jobs:
           ${{`{{ github.event.repository.name }}`}}
 {{- end }}
 
-    - uses: actions/checkout@v7.0.1
+    - uses: actions/checkout@{{ pin "action" "actions/checkout" }}
       with:
         persist-credentials: false
 
     - name: Install task
-      uses: arduino/setup-task@v3.0.0
+      uses: arduino/setup-task@{{ pin "action" "arduino/setup-task" }}
       with:
-        version: 3.48.0
+        version: {{ pin "tool" "go-task" }}
         repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
     - name: Install ADL CLI
@@ -84,7 +84,7 @@ jobs:
       run: task generate
 
     - name: Open pull request on drift
-      uses: peter-evans/create-pull-request@v8.1.1
+      uses: peter-evans/create-pull-request@{{ pin "action" "peter-evans/create-pull-request" }}
       with:
 {{- if and .ADL.Spec.SCM .ADL.Spec.SCM.GithubApp }}
         token: ${{`{{ steps.app-token.outputs.token }}`}}

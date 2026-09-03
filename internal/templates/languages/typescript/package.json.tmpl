@@ -20,7 +20,7 @@
     "test:coverage": "node --test --experimental-test-coverage"
   },
   "dependencies": {
-    "@inference-gateway/adk": "0.15.1"{{- range .Vendor.NpmDeps }},
+    "@inference-gateway/adk": {{ pin "npm" "@inference-gateway/adk" | toJson }}{{- range .Vendor.NpmDeps }},
     {{ .Name | toJson }}: {{ .Version | toJson }}{{- end }}
   },
   "devDependencies": {
@@ -29,10 +29,10 @@
     {{- else }}
     "@inference-gateway/adl-cli": "latest",
     {{- end }}
-    "@types/node": "^24.1.0",
-    "prettier": "^3.8.3",
-    "tsx": "^4.19.2",
-    "typescript": "^6.0.3"{{- range .Vendor.NpmDevDeps }},
+    "@types/node": {{ pin "npm-dev" "@types/node" | toJson }},
+    "prettier": {{ pin "npm-dev" "prettier" | toJson }},
+    "tsx": {{ pin "npm-dev" "tsx" | toJson }},
+    "typescript": {{ pin "npm-dev" "typescript" | toJson }}{{- range .Vendor.NpmDevDeps }},
     {{ .Name | toJson }}: {{ .Version | toJson }}{{- end }}
   }
 }

@@ -327,3 +327,26 @@ func TestResolveADL_MalformedEntrySurfacesError(t *testing.T) {
 		t.Fatalf("error should point at offending key, got %v", err)
 	}
 }
+
+func TestPin(t *testing.T) {
+	if got, err := Pin("cargo", "tokio"); err != nil || got != CargoBuiltinDeps["tokio"] {
+		t.Fatalf("Pin(cargo, tokio) = %q, %v", got, err)
+	}
+	if _, err := Pin("cargo", "nope"); err == nil {
+		t.Fatal("expected error for unknown name")
+	}
+	if _, err := Pin("nope", "tokio"); err == nil {
+		t.Fatal("expected error for unknown group")
+	}
+}
+
+func TestResolveADL_GoTelemetryDepIsBuiltin(t *testing.T) {
+	adl := goADLWithVendor([]string{"go.opentelemetry.io/otel@v0.0.1"}, nil)
+	view, err := ResolveADL(adl)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(view.GoRequires) != 0 || len(view.Conflicts) != 1 {
+		t.Fatalf("expected otel to be dropped as built-in, got requires=%+v conflicts=%+v", view.GoRequires, view.Conflicts)
+	}
+}

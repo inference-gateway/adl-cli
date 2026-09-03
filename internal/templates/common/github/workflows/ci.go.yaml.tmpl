@@ -17,24 +17,24 @@ jobs:
     runs-on: ubuntu-24.04
     
     steps:
-    - uses: actions/checkout@v7.0.1
+    - uses: actions/checkout@{{ pin "action" "actions/checkout" }}
     
     - name: Set up Go
-      uses: actions/setup-go@v7.0.0
+      uses: actions/setup-go@{{ pin "action" "actions/setup-go" }}
       with:
         go-version-file: go.mod
         cache: true
 
     - name: Install golangci-lint
-      uses: golangci/golangci-lint-action@v9.3.0
+      uses: golangci/golangci-lint-action@{{ pin "action" "golangci/golangci-lint-action" }}
       with:
-        version: v2.12.2
+        version: v{{ pin "tool" "golangci-lint" }}
         args: --help
 
     - name: Install task
-      uses: arduino/setup-task@v3.0.0
+      uses: arduino/setup-task@{{ pin "action" "arduino/setup-task" }}
       with:
-        version: 3.48.0
+        version: {{ pin "tool" "go-task" }}
         repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
     - name: Install ADL CLI
@@ -72,7 +72,7 @@ jobs:
 
     steps:
 {{- if and .ADL.Spec.SCM .ADL.Spec.SCM.GithubApp }}
-    - uses: actions/create-github-app-token@v3.2.0
+    - uses: actions/create-github-app-token@{{ pin "action" "actions/create-github-app-token" }}
       id: app-token
       with:
         client-id: ${{`{{ secrets.`}}{{ .ADL.Spec.SCM.AppIDSecret | default "RELEASER_APP_CLIENT_ID" }}{{` }}`}}
@@ -82,14 +82,14 @@ jobs:
           ${{`{{ github.event.repository.name }}`}}
 {{- end }}
 
-    - uses: actions/checkout@v7.0.1
+    - uses: actions/checkout@{{ pin "action" "actions/checkout" }}
       with:
         persist-credentials: false
 
     - name: Install task
-      uses: arduino/setup-task@v3.0.0
+      uses: arduino/setup-task@{{ pin "action" "arduino/setup-task" }}
       with:
-        version: 3.48.0
+        version: {{ pin "tool" "go-task" }}
         repo-token: ${{`{{ secrets.GITHUB_TOKEN }}`}}
 
     - name: Install ADL CLI
@@ -103,7 +103,7 @@ jobs:
       run: task generate
 
     - name: Open pull request on drift
-      uses: peter-evans/create-pull-request@v8.1.1
+      uses: peter-evans/create-pull-request@{{ pin "action" "peter-evans/create-pull-request" }}
       with:
 {{- if and .ADL.Spec.SCM .ADL.Spec.SCM.GithubApp }}
         token: ${{`{{ steps.app-token.outputs.token }}`}}
