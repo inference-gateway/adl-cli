@@ -34,7 +34,7 @@ func TestGenerator_Generate(t *testing.T) {
 			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-agent",
-					Version: "1.26.4",
+					Version: "1.26.7",
 				},
 			},
 		},
@@ -93,7 +93,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Language: schema.Language{
 						Go: &schema.GoConfig{
 							Module:  "github.com/example/test-agent",
-							Version: "1.26.4",
+							Version: "1.26.7",
 						},
 					},
 				},
@@ -121,7 +121,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					},
 					Language: schema.Language{
 						Go: &schema.GoConfig{
-							Version: "1.26.4",
+							Version: "1.26.7",
 						},
 					},
 				},
@@ -151,7 +151,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Language: schema.Language{
 						Go: &schema.GoConfig{
 							Module:  "github.com/example/test-agent",
-							Version: "1.26.4",
+							Version: "1.26.7",
 						},
 					},
 				},
@@ -212,7 +212,7 @@ func TestGenerator_validateADL(t *testing.T) {
 					Language: schema.Language{
 						Go: &schema.GoConfig{
 							Module:  "github.com/example/test-agent",
-							Version: "1.26.4",
+							Version: "1.26.7",
 						},
 						TypeScript: &schema.TypeScriptConfig{
 							PackageName: "test-agent",
@@ -261,7 +261,7 @@ func TestGenerator_generateADLIgnoreFile(t *testing.T) {
 			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-agent",
-					Version: "1.26.4",
+					Version: "1.26.7",
 				},
 			},
 			Tools: []schema.Tool{
@@ -436,7 +436,7 @@ func TestGenerator_generateCD(t *testing.T) {
 			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-cd-agent",
-					Version: "1.26.4",
+					Version: "1.26.7",
 				},
 			},
 			SCM: &schema.SCM{
@@ -467,7 +467,7 @@ func TestGenerator_generateCD(t *testing.T) {
 			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-github-app-agent",
-					Version: "1.26.4",
+					Version: "1.26.7",
 				},
 			},
 			SCM: &schema.SCM{
@@ -705,7 +705,7 @@ func TestGenerator_Dependabot(t *testing.T) {
 	goLang := schema.Language{
 		Go: &schema.GoConfig{
 			Module:  "github.com/example/test",
-			Version: "1.26.4",
+			Version: "1.26.7",
 		},
 	}
 	rustLang := schema.Language{
@@ -741,7 +741,7 @@ func TestGenerator_Dependabot(t *testing.T) {
 				"package-ecosystem: docker",
 				"ignore:",
 				"dependency-name: golang",
-				`">1.26.4"`,
+				`">1.26.7"`,
 				"dependency-name: ubuntu",
 				`">24.04"`,
 			},
@@ -913,7 +913,7 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-agent",
-					Version: "1.26.4",
+					Version: "1.26.7",
 				},
 			},
 			SCM: &schema.SCM{
@@ -945,7 +945,7 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/test-agent-no-templates",
-					Version: "1.26.4",
+					Version: "1.26.7",
 				},
 			},
 			SCM: &schema.SCM{
@@ -1028,7 +1028,7 @@ func TestGenerator_VendorWiring(t *testing.T) {
 				Language: schema.Language{
 					Go: &schema.GoConfig{
 						Module:  "github.com/example/agent",
-						Version: "1.26.4",
+						Version: "1.26.7",
 						Vendor:  v,
 					},
 				},
@@ -1214,7 +1214,7 @@ func TestGenerator_SandboxDevelopmentDeps(t *testing.T) {
 			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/deps-agent",
-					Version: "1.26.4",
+					Version: "1.26.7",
 				},
 			},
 			Development: &schema.DevelopmentConfig{
@@ -1296,7 +1296,7 @@ func TestGenerator_SandboxDevelopmentDeps_AbsentIsNoop(t *testing.T) {
 			Capabilities: schema.Capabilities{},
 			Server:       schema.Server{Port: 8080},
 			Language: schema.Language{
-				Go: &schema.GoConfig{Module: "github.com/example/x", Version: "1.26.4"},
+				Go: &schema.GoConfig{Module: "github.com/example/x", Version: "1.26.7"},
 			},
 			Development: &schema.DevelopmentConfig{
 				Sandbox: &schema.SandboxConfig{

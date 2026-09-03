@@ -166,7 +166,7 @@ func goADLWithVendor(deps, devdeps []string) *schema.ADL {
 			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "example.com/agent",
-					Version: "1.26.4",
+					Version: "1.26.7",
 					Vendor: &schema.VendorConfig{
 						Deps:    deps,
 						Devdeps: devdeps,
@@ -199,7 +199,7 @@ func TestResolveADL_NoVendor(t *testing.T) {
 	adl := &schema.ADL{
 		Spec: schema.Spec{
 			Language: schema.Language{
-				Go: &schema.GoConfig{Module: "example.com/agent", Version: "1.26.4"},
+				Go: &schema.GoConfig{Module: "example.com/agent", Version: "1.26.7"},
 			},
 		},
 	}
