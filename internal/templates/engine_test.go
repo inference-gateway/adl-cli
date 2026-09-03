@@ -444,7 +444,7 @@ func TestREADMETemplate_TitleIsHumanized(t *testing.T) {
 				Spec: schema.Spec{
 					Acronyms: tt.acronyms,
 					Language: schema.Language{
-						Go: &schema.GoConfig{Module: "example.com/x", Version: "1.26.4"},
+						Go: &schema.GoConfig{Module: "example.com/x", Version: "1.26.7"},
 					},
 				},
 			}

@@ -39,7 +39,7 @@ func TestBuildADLGolden(t *testing.T) {
 		Scheme:      "http",
 		Language:    "go",
 		GoModule:    "github.com/example/weather-agent",
-		GoVersion:   "1.26.4",
+		GoVersion:   "1.26.7",
 		ScmProvider: "github",
 		ScmURL:      "https://github.com/example/weather-agent",
 		GithubApp:   true,
@@ -269,7 +269,7 @@ func TestBuildADLLanguages(t *testing.T) {
 		},
 		{
 			name:     "go default for unknown",
-			ans:      answers{Name: "a", Language: "elixir", GoModule: "github.com/example/a", GoVersion: "1.26.4"},
+			ans:      answers{Name: "a", Language: "elixir", GoModule: "github.com/example/a", GoVersion: "1.26.7"},
 			wantKey:  "go:",
 			wrongKey: "rust:",
 		},

@@ -208,7 +208,7 @@ spec:
   language:
     go:
       module: "github.com/inference-gateway/adl-cli/test-output"
-      version: "1.26.4"
+      version: "1.26.7"
       vendor:
         deps:
           - github.com/stretchr/testify@v1.10.0

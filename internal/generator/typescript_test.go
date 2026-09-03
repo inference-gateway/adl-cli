@@ -803,7 +803,7 @@ func TestFloxManifest_KeepsGlobalAdlForGo(t *testing.T) {
 	adl := &schema.ADL{
 		Metadata: schema.Metadata{Name: "go-agent"},
 		Spec: schema.Spec{
-			Language: schema.Language{Go: &schema.GoConfig{Version: "1.26.4"}},
+			Language: schema.Language{Go: &schema.GoConfig{Version: "1.26.7"}},
 		},
 	}
 	got, err := templates.NewWithRegistry("", registry).ExecuteTemplate("flox/manifest.toml", templates.Context{

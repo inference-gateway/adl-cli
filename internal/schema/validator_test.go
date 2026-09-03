@@ -24,7 +24,7 @@ spec:
   language:
     go:
       module: "github.com/example/test-agent"
-      version: "1.26.4"
+      version: "1.26.7"
 `
 
 	tmpFile, err := os.CreateTemp("", "test-adl-*.yaml")
@@ -55,7 +55,7 @@ func TestValidator_validateMCP(t *testing.T) {
 
 	goWithMCP := func(mcp *MCP) *ADL {
 		adl := &ADL{}
-		adl.Spec.Language.Go = &GoConfig{Module: "github.com/example/a", Version: "1.26.4"}
+		adl.Spec.Language.Go = &GoConfig{Module: "github.com/example/a", Version: "1.26.7"}
 		adl.Spec.Agent = &Agent{Mcp: mcp}
 		return adl
 	}
@@ -113,7 +113,7 @@ spec:
   language:
     go:
       module: "github.com/example/test-agent"
-      version: "1.26.4"
+      version: "1.26.7"
 `
 
 	tmpFile, err := os.CreateTemp("", "test-adl-agent-*.yaml")
@@ -249,7 +249,7 @@ spec:
   language:
     go:
       module: "github.com/example/agent"
-      version: "1.26.4"
+      version: "1.26.7"
       vendor:
         deps:
           - github.com/google/uuid@v1.6.0
@@ -304,7 +304,7 @@ spec:
   language:
     go:
       module: "github.com/example/agent"
-      version: "1.26.4"
+      version: "1.26.7"
       vendor:
         deps:
           - github.com/missing-version-here
@@ -434,7 +434,7 @@ spec:
   language:
     go:
       module: github.com/test/legacy
-      version: "1.26.4"
+      version: "1.26.7"
   sandbox:
     flox:
       enabled: true
@@ -460,7 +460,7 @@ spec:
   language:
     go:
       module: github.com/test/legacy
-      version: "1.26.4"
+      version: "1.26.7"
   ai:
     enabled: true
 `,
@@ -485,7 +485,7 @@ spec:
   language:
     go:
       module: github.com/test/legacy
-      version: "1.26.4"
+      version: "1.26.7"
   development:
     ai:
       enabled: true
@@ -511,7 +511,7 @@ spec:
   language:
     go:
       module: github.com/test/legacy
-      version: "1.26.4"
+      version: "1.26.7"
   development:
     ai:
       claudecode:
@@ -599,7 +599,7 @@ spec:
   language:
     go:
       module: "github.com/example/split"
-      version: "1.26.4"
+      version: "1.26.7"
 `,
 			wantErr: false,
 		},
@@ -629,7 +629,7 @@ spec:
   language:
     go:
       module: "github.com/example/x"
-      version: "1.26.4"
+      version: "1.26.7"
 `,
 			wantErr: false,
 			warnSub: "missing '- id: read'",
@@ -662,7 +662,7 @@ spec:
   language:
     go:
       module: "github.com/example/x"
-      version: "1.26.4"
+      version: "1.26.7"
 `,
 			wantErr: false,
 			warnSub: "spec.config.tools.read.enabled",
@@ -690,7 +690,7 @@ spec:
   language:
     go:
       module: "github.com/example/x"
-      version: "1.26.4"
+      version: "1.26.7"
 `,
 			wantErr: false,
 		},
@@ -715,7 +715,7 @@ spec:
   language:
     go:
       module: "github.com/example/x"
-      version: "1.26.4"
+      version: "1.26.7"
 `,
 			wantErr: true,
 			errSub:  "reserved tool 'bash' must not set 'name'",
@@ -745,7 +745,7 @@ spec:
   language:
     go:
       module: "github.com/example/x"
-      version: "1.26.4"
+      version: "1.26.7"
 `,
 			wantErr: true,
 			errSub:  "spec.config.tools.bash",
@@ -781,7 +781,7 @@ spec:
   language:
     go:
       module: "github.com/example/x"
-      version: "1.26.4"
+      version: "1.26.7"
 `,
 			wantErr: true,
 			errSub:  "reserved namespace 'config.tools'",
@@ -812,7 +812,7 @@ spec:
   language:
     go:
       module: "github.com/example/x"
-      version: "1.26.4"
+      version: "1.26.7"
 `,
 			wantErr: false,
 		},
@@ -847,7 +847,7 @@ spec:
   language:
     go:
       module: "github.com/example/x"
-      version: "1.26.4"
+      version: "1.26.7"
 `,
 			wantErr: false,
 		},
@@ -876,7 +876,7 @@ spec:
   language:
     go:
       module: "github.com/example/x"
-      version: "1.26.4"
+      version: "1.26.7"
 `,
 			wantErr: true,
 			errSub:  "spec.config.tools.fetch",
@@ -902,7 +902,7 @@ spec:
   language:
     go:
       module: "github.com/example/x"
-      version: "1.26.4"
+      version: "1.26.7"
 `,
 			wantErr: true,
 			errSub:  "reserved tool 'fetch' must not set 'name'",
@@ -929,7 +929,7 @@ spec:
   language:
     go:
       module: "github.com/example/incomplete"
-      version: "1.26.4"
+      version: "1.26.7"
 `,
 			wantErr: true,
 			errSub:  "missing description",
@@ -965,7 +965,7 @@ spec:
   language:
     go:
       module: "github.com/example/m"
-      version: "1.26.4"
+      version: "1.26.7"
 `,
 			wantErr: true,
 			errSub:  "injects service 'mystery'",
@@ -1038,7 +1038,7 @@ spec:
   language:
     go:
       module: "github.com/example/doc-agent"
-      version: "1.26.4"
+      version: "1.26.7"
   documentation:
     pages:
       - title: Architecture

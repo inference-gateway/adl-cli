@@ -40,7 +40,7 @@ spec:
   language:
     go:
       module: github.com/example/kubernetes-example
-      version: "1.26.4"
+      version: "1.26.7"
   scm:
     provider: github
     url: "https://github.com/example/kubernetes-example"
