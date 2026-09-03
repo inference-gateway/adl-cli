@@ -8,24 +8,24 @@ license = "Apache-2.0"
 
 [dependencies]
 {{- if .ADL.Spec.Language.Rust.Features }}
-inference-gateway-adk = { version = "0.11.2", features = [{{- range $i, $f := .ADL.Spec.Language.Rust.Features }}{{ if $i }}, {{ end }}{{ $f | quote }}{{- end }}] }
+inference-gateway-adk = { version = "{{ pin "cargo" "inference-gateway-adk" }}", features = [{{- range $i, $f := .ADL.Spec.Language.Rust.Features }}{{ if $i }}, {{ end }}{{ $f | quote }}{{- end }}] }
 {{- else }}
-inference-gateway-adk = "0.11.2"
+inference-gateway-adk = "{{ pin "cargo" "inference-gateway-adk" }}"
 {{- end }}
-inference-gateway-sdk = "0.19.0"
-tokio = { version = "1", features = ["full", "signal"] }
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-clap = { version = "4", features = ["derive"] }
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-serde_yaml = "0.9"
-anyhow = "1"
-async-trait = "0.1"
-uuid = { version = "1", features = ["v4", "serde"] }
-chrono = { version = "0.4", features = ["serde"] }
-dotenvy = "0.15.7"
-envy = "0.4.2"
+inference-gateway-sdk = "{{ pin "cargo" "inference-gateway-sdk" }}"
+tokio = { version = "{{ pin "cargo" "tokio" }}", features = ["full", "signal"] }
+tracing = "{{ pin "cargo" "tracing" }}"
+tracing-subscriber = { version = "{{ pin "cargo" "tracing-subscriber" }}", features = ["env-filter"] }
+clap = { version = "{{ pin "cargo" "clap" }}", features = ["derive"] }
+serde = { version = "{{ pin "cargo" "serde" }}", features = ["derive"] }
+serde_json = "{{ pin "cargo" "serde_json" }}"
+serde_yaml = "{{ pin "cargo" "serde_yaml" }}"
+anyhow = "{{ pin "cargo" "anyhow" }}"
+async-trait = "{{ pin "cargo" "async-trait" }}"
+uuid = { version = "{{ pin "cargo" "uuid" }}", features = ["v4", "serde"] }
+chrono = { version = "{{ pin "cargo" "chrono" }}", features = ["serde"] }
+dotenvy = "{{ pin "cargo" "dotenvy" }}"
+envy = "{{ pin "cargo" "envy" }}"
 {{- $hasFetch := false }}
 {{- $hasBuiltin := false }}
 {{- range .ADL.Spec.Tools }}
@@ -37,7 +37,7 @@ envy = "0.4.2"
 {{- end }}
 {{- end }}
 {{- if $hasFetch }}
-reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+reqwest = { version = "{{ pin "cargo" "reqwest" }}", default-features = false, features = ["rustls-tls", "json"] }
 {{- end }}
 {{- range .Vendor.CargoDeps }}
 {{ .Name }} = "{{ .Version }}"
@@ -46,7 +46,7 @@ reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"
 
 [dev-dependencies]
 {{- if $hasBuiltin }}
-tempfile = "3"
+tempfile = "{{ pin "cargo-dev" "tempfile" }}"
 {{- end }}
 {{- range .Vendor.CargoDevDeps }}
 {{ .Name }} = "{{ .Version }}"

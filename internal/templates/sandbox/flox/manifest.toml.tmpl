@@ -1,4 +1,4 @@
-schema-version = "1.13.0"
+schema-version = "{{ pin "tool" "flox-schema" }}"
 
 [install]
 {{- if ne .Language "typescript" }}
@@ -13,57 +13,57 @@ go.pkg-path = "go"
 go.version = "{{ .ADL.Spec.Language.Go.Version }}"
 
 golangci-lint.pkg-path = "golangci-lint"
-golangci-lint.version = "^2.12.2"
+golangci-lint.version = "^{{ pin "tool" "golangci-lint" }}"
 golangci-lint.pkg-group = "common"
 
 {{- else if eq .Language "rust" }}
 cargo.pkg-path = "cargo"
-cargo.version = "^1.94.1"
+cargo.version = "^{{ pin "tool" "rust" }}"
 cargo.pkg-group = "rust-toolchain"
 
 rustc.pkg-path = "rustc"
-rustc.version = "^1.94.1"
+rustc.version = "^{{ pin "tool" "rust" }}"
 rustc.pkg-group = "rust-toolchain"
 
 clippy.pkg-path = "clippy"
-clippy.version = "^1.94.1"
+clippy.version = "^{{ pin "tool" "rust" }}"
 clippy.pkg-group = "rust-toolchain"
 
 rustfmt.pkg-path = "rustfmt"
-rustfmt.version = "^1.94.1"
+rustfmt.version = "^{{ pin "tool" "rust" }}"
 rustfmt.pkg-group = "rust-toolchain"
 
 rust-analyzer.pkg-path = "rust-analyzer"
-rust-analyzer.version = "2026-04-27"
+rust-analyzer.version = "{{ pin "tool" "rust-analyzer" }}"
 rust-analyzer.pkg-group = "rust-analyzer"
 {{- else if eq .Language "typescript" }}
 nodejs_24.pkg-path = "nodejs_24"
-nodejs_24.version = "^24.15.0"
+nodejs_24.version = "^{{ pin "tool" "nodejs" }}"
 
 pnpm.pkg-path = "pnpm"
-pnpm.version = "^11.8.0"
+pnpm.version = "^{{ pin "tool" "pnpm" }}"
 {{- end }}
 
 go-task.pkg-path = "go-task"
-go-task.version = "^3.48.0"
+go-task.version = "^{{ pin "tool" "go-task" }}"
 go-task.pkg-group = "common"
 
 git.pkg-path = "git"
-git.version = "^2.53.0"
+git.version = "^{{ pin "tool" "git" }}"
 git.pkg-group = "common"
 
 docker.pkg-path = "docker"
-docker.version = "^29.5.1"
+docker.version = "^{{ pin "tool" "docker" }}"
 docker.pkg-group = "common"
 {{- if .AIToggles.ClaudeCode }}
 
 claude-code.pkg-path = "claude-code"
-claude-code.version = "^2.1.201"
+claude-code.version = "^{{ pin "tool" "claude-code" }}"
 claude-code.pkg-group = "common"
 {{- end }}
 {{- if .AIToggles.Infer }}
 
-infer.flake = "github:inference-gateway/cli/v0.154.0"
+infer.flake = "github:inference-gateway/cli/v{{ pin "tool" "infer" }}"
 {{- end }}
 {{- if .SandboxDeps.HasDeps }}
 

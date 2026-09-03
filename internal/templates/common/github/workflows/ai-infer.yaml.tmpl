@@ -77,7 +77,7 @@ jobs:
     steps:
       - name: Generate GitHub App token
         id: app-token
-        uses: actions/create-github-app-token@v3.2.0
+        uses: actions/create-github-app-token@{{ pin "action" "actions/create-github-app-token" }}
         with:
           client-id: ${{`{{ secrets.`}}{{ .ADL.Spec.Development.AI.Orchestrators.Infer.AppIDSecret | default "INFER_APP_ID" }}{{` }}`}}
           private-key: ${{`{{ secrets.`}}{{ .ADL.Spec.Development.AI.Orchestrators.Infer.AppPrivateKeySecret | default "INFER_APP_PRIVATE_KEY" }}{{` }}`}}
@@ -96,7 +96,7 @@ jobs:
           git config --global commit.signoff true
 
       - name: Checkout repository
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@{{ pin "action" "actions/checkout" }}
         with:
           token: ${{`{{ steps.app-token.outputs.token }}`}}
 
@@ -131,9 +131,9 @@ jobs:
           fi
 
       - name: Install task
-        uses: arduino/setup-task@v3.0.0
+        uses: arduino/setup-task@{{ pin "action" "arduino/setup-task" }}
         with:
-          version: 3.48.0
+          version: {{ pin "tool" "go-task" }}
           repo-token: ${{`{{ steps.app-token.outputs.token }}`}}
 
       - name: Install ADL CLI
@@ -147,15 +147,15 @@ jobs:
 {{- if eq .Language "go" }}
 
       - name: Set up Go
-        uses: actions/setup-go@v7.0.0
+        uses: actions/setup-go@{{ pin "action" "actions/setup-go" }}
         with:
           go-version-file: 'go.mod'
           cache: true
 
       - name: Install golangci-lint
-        uses: golangci/golangci-lint-action@v9.3.0
+        uses: golangci/golangci-lint-action@{{ pin "action" "golangci/golangci-lint-action" }}
         with:
-          version: v2.12.2
+          version: v{{ pin "tool" "golangci-lint" }}
           install-only: true
 {{- else if eq .Language "rust" }}
 
@@ -168,10 +168,10 @@ jobs:
 {{- else if eq .Language "typescript" }}
 
       - name: Set up Bun
-        uses: oven-sh/setup-bun@v2.2.0
+        uses: oven-sh/setup-bun@{{ pin "action" "oven-sh/setup-bun" }}
 
       - name: Set up Node.js
-        uses: actions/setup-node@v7.0.0
+        uses: actions/setup-node@{{ pin "action" "actions/setup-node" }}
         with:
           node-version: {{ if and .ADL.Spec.Language.TypeScript .ADL.Spec.Language.TypeScript.NodeVersion }}{{ .ADL.Spec.Language.TypeScript.NodeVersion }}{{ else }}24{{ end }}
 
@@ -185,7 +185,7 @@ jobs:
 {{- end }}
 
       - name: Run Infer
-        uses: inference-gateway/infer-action@v0.51.2
+        uses: inference-gateway/infer-action@{{ pin "action" "inference-gateway/infer-action" }}
         with:
           github-token: ${{`{{ steps.app-token.outputs.token }}`}}
           github-app-slug: ${{`{{ steps.app-token.outputs.app-slug }}`}}
