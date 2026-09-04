@@ -170,7 +170,7 @@ var NpmBuiltinDevDeps = map[string]string{
 // manifest, devcontainer and CI workflows install. Bare numbers: templates
 // add their own `^` / `v` prefix as the target format requires.
 var Tools = map[string]string{
-	"flox-schema":   "1.13.0",
+	"flox-schema":   "1.15.0",
 	"golangci-lint": "2.12.2",
 	"go-task":       "3.48.0",
 	"rust":          "1.94.1",
