@@ -197,6 +197,7 @@ var Actions = map[string]string{
 	"docker/login-action":                  "v4.6.0",
 	"docker/setup-buildx-action":           "v4.3.0",
 	"docker/setup-qemu-action":             "v4.3.0",
+	"flox/install-flox-action":             "v2.6.0",
 	"golangci/golangci-lint-action":        "v9.3.0",
 	"google-github-actions/auth":           "v2.1.13",
 	"google-github-actions/run-gemini-cli": "v0.1.22",
