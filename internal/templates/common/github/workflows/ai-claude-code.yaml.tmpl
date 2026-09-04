@@ -110,6 +110,11 @@ jobs:
           node-version: {{ if and .ADL.Spec.Language.TypeScript .ADL.Spec.Language.TypeScript.NodeVersion }}{{ .ADL.Spec.Language.TypeScript.NodeVersion }}{{ else }}24{{ end }}
           cache: 'npm'
 {{- end }}
+{{- if and .ADL.Spec.Development .ADL.Spec.Development.Sandbox .ADL.Spec.Development.Sandbox.Flox .ADL.Spec.Development.Sandbox.Flox.Enabled }}
+
+      - name: Install flox
+        uses: flox/install-flox-action@{{ pin "action" "flox/install-flox-action" }}
+{{- end }}
 
       - name: Install task
         uses: arduino/setup-task@{{ pin "action" "arduino/setup-task" }}
@@ -176,7 +181,7 @@ jobs:
           claude_args: |
             --effort ${{`{{ inputs.effort || 'medium' }}`}}
             --model ${{`{{ inputs.model || 'claude-opus-5' }}`}}
-            --allowedTools "Bash(task:*),Bash(gh:*),Bash(git:*),Bash(adl:*){{- if eq .Language "go" }},Bash(go:*){{- else if eq .Language "rust" }},Bash(cargo:*){{- else if eq .Language "typescript" }},Bash(npm:*),Bash(node:*){{- end }}"
+            --allowedTools "Bash(task:*),Bash(gh:*),Bash(git:*),Bash(adl:*){{- if and .ADL.Spec.Development .ADL.Spec.Development.Sandbox .ADL.Spec.Development.Sandbox.Flox .ADL.Spec.Development.Sandbox.Flox.Enabled }},Bash(flox:*){{- end }}{{- if eq .Language "go" }},Bash(go:*){{- else if eq .Language "rust" }},Bash(cargo:*){{- else if eq .Language "typescript" }},Bash(npm:*),Bash(node:*){{- end }}"
             --append-system-prompt "After pushing commits to a new branch (issue-triggered runs), open the pull request yourself with 'gh pr create' against main, titled with a conventional commit prefix and linking the triggering issue via 'Closes #<number>' in the body. GH_TOKEN is already set for gh. Do not just post a link to a PR creation page. When working on an existing pull request branch, do not create a new pull request."
           prompt: ${{`{{ steps.set-prompt.outputs.value }}`}}
           track_progress: ${{`{{ github.event_name != 'workflow_dispatch' }}`}}

@@ -448,6 +448,44 @@ func TestGenerator_AI_InferSandboxInstall(t *testing.T) {
 		assertContains(t, dc, "install.sh | bash -s -- --version v0.154.0", "devcontainer postCreateCommand")
 	})
 
+	t.Run("flox enabled installs flox in AI workflows", func(t *testing.T) {
+		tmp := t.TempDir()
+		manifest := writeManifest(t, tmp, `  development:
+    ai:
+      orchestrators:
+        infer:
+          enabled: true
+        claudecode:
+          enabled: true
+`+sandboxYAML)
+		out := filepath.Join(tmp, "out")
+		mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
+
+		infer := readGenerated(t, out, ".github/workflows/infer.yml")
+		assertContains(t, infer, "flox/install-flox-action@v2.6.0", "Infer workflow body")
+		assertContains(t, infer, ",^flox( .*)?$", "Infer workflow bash-allow-append")
+
+		claude := readGenerated(t, out, ".github/workflows/claude.yml")
+		assertContains(t, claude, "flox/install-flox-action@v2.6.0", "Claude Code workflow body")
+		assertContains(t, claude, "Bash(flox:*)", "Claude Code workflow allowedTools")
+	})
+
+	t.Run("flox disabled skips flox install in AI workflows", func(t *testing.T) {
+		tmp := t.TempDir()
+		manifest := writeManifest(t, tmp, `  development:
+    ai:
+      orchestrators:
+        infer:
+          enabled: true
+`)
+		out := filepath.Join(tmp, "out")
+		mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
+
+		infer := readGenerated(t, out, ".github/workflows/infer.yml")
+		assertNotContains(t, infer, "install-flox-action", "Infer workflow body")
+		assertNotContains(t, infer, "^flox", "Infer workflow bash-allow-append")
+	})
+
 	t.Run("infer disabled leaves sandbox untouched", func(t *testing.T) {
 		tmp := t.TempDir()
 		manifest := writeManifest(t, tmp, `  development:
