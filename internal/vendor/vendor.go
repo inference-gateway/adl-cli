@@ -196,7 +196,7 @@ var Actions = map[string]string{
 	"azure/setup-kubectl":                  "v4.0.1",
 	"docker/login-action":                  "v4.6.0",
 	"docker/setup-buildx-action":           "v4.3.0",
-	"docker/setup-qemu-action":             "v4.2.0",
+	"docker/setup-qemu-action":             "v4.3.0",
 	"golangci/golangci-lint-action":        "v9.3.0",
 	"google-github-actions/auth":           "v2.1.13",
 	"google-github-actions/run-gemini-cli": "v0.1.22",
