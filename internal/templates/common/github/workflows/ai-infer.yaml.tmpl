@@ -12,9 +12,10 @@ name: Infer
 # (names configurable via spec.development.ai.orchestrators.infer
 # appIdSecret / appPrivateKeySecret).
 #
-# The model / provider below is a starting point - swap it (and the matching
-# provider API key secret) for whichever model you prefer. A `/model
-# provider/name` override in the triggering issue or comment wins per-run.
+# The model comes from the INFER_MODEL repository variable (set it to e.g.
+# anthropic/claude-opus-4-8 and provide the matching provider API key secret);
+# when unset, infer-action uses its own default. A `/model provider/name`
+# override in the triggering issue or comment wins per-run.
 
 on:
   issue_comment:
@@ -189,7 +190,7 @@ jobs:
         with:
           github-token: ${{`{{ steps.app-token.outputs.token }}`}}
           github-app-slug: ${{`{{ steps.app-token.outputs.app-slug }}`}}
-          model: ${{`{{ vars.INFER_MODEL || 'ollama_cloud/deepseek-v4-flash:preview' }}`}}
+          model: ${{`{{ vars.INFER_MODEL }}`}}
           direct-prompt: ${{`{{ inputs.prompt }}`}}
           debug: ${{`{{ inputs.debug || vars.INFER_DEBUG == 'true' }}`}}
           mirror-agent-logs: ${{`{{ inputs.debug || vars.INFER_DEBUG == 'true' }}`}}

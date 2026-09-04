@@ -402,6 +402,8 @@ func TestGenerator_AI_InferWorkflowContent(t *testing.T) {
 	assertContains(t, body, "github-token: ${{ steps.app-token.outputs.token }}", "Infer workflow body")
 	assertContains(t, body, "actions/create-github-app-token", "Infer workflow body")
 	assertContains(t, body, "model:", "Infer workflow body")
+	assertContains(t, body, "model: ${{ vars.INFER_MODEL }}", "Infer workflow body")
+	assertNotContains(t, body, "ollama_cloud/deepseek", "Infer workflow body")
 	assertContains(t, body, "deepseek-api-key: ${{ secrets.DEEPSEEK_API_KEY }}", "Infer workflow body")
 	assertContains(t, body, "anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}", "Infer workflow body")
 	assertContains(t, body, "agents: ${{ inputs.agents }}", "Infer workflow body")
