@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.62.7](https://github.com/inference-gateway/adl-cli/compare/v0.62.6...v0.62.7) (2026-09-04)
+
+### 🐛 Bug Fixes
+
+* **templates:** drop hardcoded ollama_cloud model default from infer workflow ([#394](https://github.com/inference-gateway/adl-cli/issues/394)) ([723cd37](https://github.com/inference-gateway/adl-cli/commit/723cd376d07af9b0cd3a27dbf905158df01bedd2))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump docker/setup-qemu-action from v4.2.0 to v4.3.0 ([#393](https://github.com/inference-gateway/adl-cli/issues/393)) ([2e19f6a](https://github.com/inference-gateway/adl-cli/commit/2e19f6a26b108ef98c53828ea9531fc052a77fc5))
+
 ## [0.62.6](https://github.com/inference-gateway/adl-cli/compare/v0.62.5...v0.62.6) (2026-09-04)
 
 ### ♻️ Improvements
