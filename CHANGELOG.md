@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.62.6](https://github.com/inference-gateway/adl-cli/compare/v0.62.5...v0.62.6) (2026-09-04)
+
+### ♻️ Improvements
+
+* centralize template version pins in vendor package ([#390](https://github.com/inference-gateway/adl-cli/issues/390)) ([ddb926b](https://github.com/inference-gateway/adl-cli/commit/ddb926bcf6749c68abd60f2217ebeafded629720))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump go toolchain to 1.26.7 and pin explicitly ([#391](https://github.com/inference-gateway/adl-cli/issues/391)) ([b0b8b6f](https://github.com/inference-gateway/adl-cli/commit/b0b8b6f9c6a68c4373f960eebd37285c99108a31))
+* **deps:** bump go.opentelemetry.io/otel/sdk from 1.45.0 to 1.46.0 ([#388](https://github.com/inference-gateway/adl-cli/issues/388)) ([6ebd1df](https://github.com/inference-gateway/adl-cli/commit/6ebd1df56b3a3e14caabe7edb6b676535e9017dc))
+
 ## [0.62.5](https://github.com/inference-gateway/adl-cli/compare/v0.62.4...v0.62.5) (2026-09-03)
 
 ### 🔧 Miscellaneous
