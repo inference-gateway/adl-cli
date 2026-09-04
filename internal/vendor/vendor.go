@@ -1,5 +1,5 @@
-// Package vendor resolves the optional `spec.language.<lang>.vendor.deps`
-// and `spec.language.<lang>.vendor.devdeps` fields on an ADL manifest into
+// Package vendor resolves the optional `spec.language.<lang>.vendor.deps`,
+// `vendor.devdeps` and `vendor.indirect` fields on an ADL manifest into
 // per-language dependency lists that the templates can render directly.
 //
 // The schema validates the raw entries up front (each must match
@@ -285,6 +285,18 @@ type View struct {
 	NpmDeps    []Entry
 	NpmDevDeps []Entry
 
+	// GoIndirect / CargoIndirect / NpmOverrides hold `vendor.indirect`
+	// entries: version pins for transitive dependencies the generated
+	// project never imports. They render as `// indirect` requires in
+	// go.mod, as floor requirements in Cargo's `[dependencies]` (Cargo
+	// has no version-only override, and an unused requirement is what
+	// forces the resolver's minimum up), and as package.json
+	// `overrides`. Each list is deduped against the matching direct
+	// dependency list so a package is never emitted twice.
+	GoIndirect   []Entry
+	CargoIndirect []Entry
+	NpmOverrides []Entry
+
 	// Conflicts collects every entry that was dropped because of a
 	// built-in collision so the caller can surface warnings to the user.
 	Conflicts []Conflict
@@ -327,6 +339,17 @@ func ResolveADL(adl *schema.ADL) (View, error) {
 		}
 		view.GoTools = tools
 		view.Conflicts = append(view.Conflicts, toolConflicts...)
+
+		indirectEffectiveBuiltins := cloneMap(toolEffectiveBuiltins)
+		for _, e := range tools {
+			indirectEffectiveBuiltins[e.Name] = e.Version
+		}
+		indirect, indirectConflicts, err := Resolve(lang.Go.Vendor.Indirect, indirectEffectiveBuiltins, "indirect")
+		if err != nil {
+			return View{}, fmt.Errorf("spec.language.go.vendor.indirect: %w", err)
+		}
+		view.GoIndirect = indirect
+		view.Conflicts = append(view.Conflicts, indirectConflicts...)
 	}
 
 	if lang.Rust != nil && lang.Rust.Vendor != nil {
@@ -352,6 +375,17 @@ func ResolveADL(adl *schema.ADL) (View, error) {
 		}
 		view.CargoDevDeps = devdeps
 		view.Conflicts = append(view.Conflicts, devConflicts...)
+
+		indirectEffectiveBuiltins := cloneMap(devEffectiveBuiltins)
+		for _, e := range devdeps {
+			indirectEffectiveBuiltins[e.Name] = e.Version
+		}
+		indirect, indirectConflicts, err := Resolve(lang.Rust.Vendor.Indirect, indirectEffectiveBuiltins, "indirect")
+		if err != nil {
+			return View{}, fmt.Errorf("spec.language.rust.vendor.indirect: %w", err)
+		}
+		view.CargoIndirect = indirect
+		view.Conflicts = append(view.Conflicts, indirectConflicts...)
 	}
 
 	if lang.TypeScript != nil && lang.TypeScript.Vendor != nil {
@@ -377,6 +411,17 @@ func ResolveADL(adl *schema.ADL) (View, error) {
 		}
 		view.NpmDevDeps = devdeps
 		view.Conflicts = append(view.Conflicts, devConflicts...)
+
+		indirectEffectiveBuiltins := cloneMap(devEffectiveBuiltins)
+		for _, e := range devdeps {
+			indirectEffectiveBuiltins[e.Name] = e.Version
+		}
+		indirect, indirectConflicts, err := Resolve(lang.TypeScript.Vendor.Indirect, indirectEffectiveBuiltins, "indirect")
+		if err != nil {
+			return View{}, fmt.Errorf("spec.language.typescript.vendor.indirect: %w", err)
+		}
+		view.NpmOverrides = indirect
+		view.Conflicts = append(view.Conflicts, indirectConflicts...)
 	}
 
 	return view, nil

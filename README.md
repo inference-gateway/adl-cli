@@ -673,6 +673,38 @@ downgrades of the core runtime SDK.
 | Rust       | `Cargo.toml` `[dependencies]` | `Cargo.toml` `[dev-dependencies]`                                                                                                                                                                                                                                                                         |
 | TypeScript | `package.json` `dependencies` | `package.json` `devDependencies`                                                                                                                                                                                                                                                                          |
 
+#### Indirect (transitive) pins (`vendor.indirect`)
+
+`deps` and `devdeps` describe packages the project actually imports.
+`indirect` is for the other case: a transitive dependency you never
+import but need pinned - typically a security patch that landed
+upstream before the SDK that pulls it in was released. Entries are
+constraints, not imports, and they survive `adl generate --overwrite`
+because the manifest stays the source of truth.
+
+| Language   | `indirect` lands in                                                                                                     |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Go         | `go.mod` `require` with a `// indirect` marker - the explicit requirement participates in MVS, so `go mod tidy` keeps it |
+| Rust       | `Cargo.toml` `[dependencies]` as a floor requirement (Cargo has no version-only override for registry crates)            |
+| TypeScript | `package.json` [`overrides`](https://docs.npmjs.com/cli/v11/configuring-npm/package-json#overrides) (npm and pnpm)        |
+
+```yaml
+# Pin a patched grpc that arrives transitively through the ADK.
+spec:
+  language:
+    go:
+      module: github.com/example/agent
+      version: "1.26.7"
+      vendor:
+        deps:
+          - github.com/google/uuid@v1.6.0
+        indirect:
+          - google.golang.org/grpc@v1.83.1
+```
+
+Built-in pins win over `indirect` too, and an entry already listed in
+`deps`/`devdeps` is dropped rather than emitted twice.
+
 For Go, supply the **full tool package path** (the binary's `main` package,
 e.g. `golang.org/x/tools/cmd/stringer`) with a version. After generation,
 run `go mod tidy` so Go normalises the indirect `require` entry to the

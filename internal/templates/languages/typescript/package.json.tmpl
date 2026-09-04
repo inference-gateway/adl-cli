@@ -34,5 +34,9 @@
     "tsx": {{ pin "npm-dev" "tsx" | toJson }},
     "typescript": {{ pin "npm-dev" "typescript" | toJson }}{{- range .Vendor.NpmDevDeps }},
     {{ .Name | toJson }}: {{ .Version | toJson }}{{- end }}
-  }
+  }{{- if .Vendor.NpmOverrides }},
+  "overrides": {
+    {{- range $i, $e := .Vendor.NpmOverrides }}{{ if $i }},{{ end }}
+    {{ $e.Name | toJson }}: {{ $e.Version | toJson }}{{- end }}
+  }{{- end }}
 }

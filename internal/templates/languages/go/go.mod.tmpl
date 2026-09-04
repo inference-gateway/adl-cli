@@ -17,6 +17,9 @@ require (
 {{- range .Vendor.GoTools }}
 	{{ .Name }} {{ .Version }} // indirect
 {{- end }}
+{{- range .Vendor.GoIndirect }}
+	{{ .Name }} {{ .Version }} // indirect
+{{- end }}
 )
 {{ if .Vendor.GoTools }}
 tool (

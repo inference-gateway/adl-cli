@@ -630,6 +630,14 @@
             "type": "string",
             "pattern": "^\\S+@\\S+$"
           }
+        },
+        "indirect": {
+          "type": "array",
+          "description": "Version pins for indirect (transitive) dependencies the generated project never imports directly - typically a security patch that has to be picked up before the upstream SDK bumps it. Entries are constraints, not imports: Go renders them as '<module> <version> // indirect' requires (so MVS keeps them through 'go mod tidy'), TypeScript as package.json 'overrides', Rust as a floor version requirement in '[dependencies]'. Each entry follows the '<package>@<version>' form.",
+          "items": {
+            "type": "string",
+            "pattern": "^\\S+@\\S+$"
+          }
         }
       }
     },

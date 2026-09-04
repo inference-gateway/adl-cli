@@ -42,6 +42,9 @@ reqwest = { version = "{{ pin "cargo" "reqwest" }}", default-features = false, f
 {{- range .Vendor.CargoDeps }}
 {{ .Name }} = "{{ .Version }}"
 {{- end }}
+{{- range .Vendor.CargoIndirect }}
+{{ .Name }} = "{{ .Version }}" # indirect: transitive version pin, not imported directly
+{{- end }}
 {{- if or $hasBuiltin .Vendor.CargoDevDeps }}
 
 [dev-dependencies]

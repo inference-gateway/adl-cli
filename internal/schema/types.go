@@ -1152,6 +1152,15 @@ type VendorConfig struct {
 	// testing libraries, linters, mock generators), each in '<package>@<version>'
 	// form.
 	Devdeps []string `json:"devdeps,omitempty,omitzero" yaml:"devdeps,omitempty" mapstructure:"devdeps,omitempty"`
+
+	// Version pins for indirect (transitive) dependencies the generated project
+	// never imports directly - typically a security patch that has to be picked up
+	// before the upstream SDK bumps it. Entries are constraints, not imports: Go
+	// renders them as '<module> <version> // indirect' requires (so MVS keeps them
+	// through 'go mod tidy'), TypeScript as package.json 'overrides', Rust as a floor
+	// version requirement in '[dependencies]'. Each entry follows the
+	// '<package>@<version>' form.
+	Indirect []string `json:"indirect,omitempty,omitzero" yaml:"indirect,omitempty" mapstructure:"indirect,omitempty"`
 }
 
 // Configuration for deploying to Vercel. Unlike kubernetes/cloudrun which deploy

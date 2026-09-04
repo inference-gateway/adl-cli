@@ -193,12 +193,15 @@ is rendered by `adl init --defaults` precisely so it's discoverable:
 {{- if eq .Language "go" }}
 | `spec.language.go.vendor.deps` | Runtime Go modules | `github.com/stretchr/testify@v1.10.0` | `go.mod` `require` block |
 | `spec.language.go.vendor.devdeps` | Executable dev tools (Go 1.24 `tool` directive) | `golang.org/x/tools/cmd/stringer@v0.20.0` | `go.mod` `tool` directive |
+| `spec.language.go.vendor.indirect` | Version pins for transitive deps you never import (CVE patches) | `google.golang.org/grpc@v1.83.1` | `go.mod` `require` `// indirect` |
 {{- else if eq .Language "rust" }}
 | `spec.language.rust.vendor.deps` | Runtime crates | `tokio@1.36.0` | `Cargo.toml` `[dependencies]` |
 | `spec.language.rust.vendor.devdeps` | Test / dev-only crates | `mockall@0.12.0` | `Cargo.toml` `[dev-dependencies]` |
+| `spec.language.rust.vendor.indirect` | Version pins for transitive crates you never import (CVE patches) | `rustls@0.23.18` | `Cargo.toml` `[dependencies]` floor requirement |
 {{- else if eq .Language "typescript" }}
 | `spec.language.typescript.vendor.deps` | Runtime npm packages | `zod@3.23.0` | `package.json` `dependencies` |
 | `spec.language.typescript.vendor.devdeps` | Test / dev-only packages | `vitest@1.6.0` | `package.json` `devDependencies` |
+| `spec.language.typescript.vendor.indirect` | Version pins for transitive packages you never import (CVE patches) | `tar-fs@2.1.2` | `package.json` `overrides` |
 {{- end }}
 | `spec.development.deps` | Cross-cutting sandbox tools (not tied to one language) | `kubectl@1.31.0`, `terraform@1.9.5`, `deno@2.1.4` | Flox `manifest.toml` / devcontainer feature |
 

@@ -1186,6 +1186,40 @@ func TestGenerator_VendorWiring(t *testing.T) {
 		}
 	})
 
+	t.Run("go: indirect pins render as // indirect requires without a tool entry", func(t *testing.T) {
+		got := render(t, "go", "go.mod", makeGo(&schema.VendorConfig{
+			Indirect: []string{"google.golang.org/grpc@v1.83.1"},
+		}))
+		if !strings.Contains(got, "google.golang.org/grpc v1.83.1 // indirect") {
+			t.Fatalf("expected grpc as // indirect require, got:\n%s", got)
+		}
+		if strings.Contains(got, "tool (") {
+			t.Fatalf("indirect pins must not create a tool directive, got:\n%s", got)
+		}
+	})
+
+	t.Run("go: indirect entry already declared in deps is dropped", func(t *testing.T) {
+		got := render(t, "go", "go.mod", makeGo(&schema.VendorConfig{
+			Deps:     []string{"google.golang.org/grpc@v1.83.1"},
+			Indirect: []string{"google.golang.org/grpc@v1.70.0"},
+		}))
+		if strings.Count(got, "google.golang.org/grpc") != 1 {
+			t.Fatalf("expected grpc emitted exactly once, got:\n%s", got)
+		}
+		if strings.Contains(got, "v1.70.0") {
+			t.Fatalf("expected direct dep version to win, got:\n%s", got)
+		}
+	})
+
+	t.Run("rust: indirect pins land in [dependencies] as a floor requirement", func(t *testing.T) {
+		got := render(t, "rust", "Cargo.toml", makeRust(&schema.VendorConfig{
+			Indirect: []string{"rustls@0.23.18"},
+		}))
+		if !strings.Contains(got, `rustls = "0.23.18" # indirect`) {
+			t.Fatalf("expected rustls pin in [dependencies], got:\n%s", got)
+		}
+	})
+
 	t.Run("rust: empty vendor block + no built-in tools omits [dev-dependencies]", func(t *testing.T) {
 		got := render(t, "rust", "Cargo.toml", makeRust(nil))
 		if strings.Contains(got, "[dev-dependencies]") {
