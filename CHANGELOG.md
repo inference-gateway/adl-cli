@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.62.8](https://github.com/inference-gateway/adl-cli/compare/v0.62.7...v0.62.8) (2026-09-04)
+
+### 🐛 Bug Fixes
+
+* **templates:** install flox in AI workflows when the flox sandbox is enabled ([#396](https://github.com/inference-gateway/adl-cli/issues/396)) ([58d2750](https://github.com/inference-gateway/adl-cli/commit/58d27502ad2178cbac8745928e9bcf7461551c1f))
+
 ## [0.62.7](https://github.com/inference-gateway/adl-cli/compare/v0.62.6...v0.62.7) (2026-09-04)
 
 ### 🐛 Bug Fixes
