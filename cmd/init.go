@@ -1190,8 +1190,8 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 			if ans.GithubApp {
 				ans.ScmAppIDSecret = conditionalPrompt(useDefaults, "GitHub App client ID secret name for releases", "RELEASER_APP_CLIENT_ID")
 				ans.ScmAppPrivateKeySecret = conditionalPrompt(useDefaults, "GitHub App private key secret name for releases", "RELEASER_APP_PRIVATE_KEY")
-				ans.ScmCIAppIDSecret = conditionalPrompt(useDefaults, "GitHub App client ID secret name for CI", "INFERENCE_GATEWAY_MAINTAINER_APP_CLIENT_ID")
-				ans.ScmCIAppPrivateKeySecret = conditionalPrompt(useDefaults, "GitHub App private key secret name for CI", "INFERENCE_GATEWAY_MAINTAINER_APP_PRIVATE_KEY")
+				ans.ScmCIAppIDSecret = conditionalPrompt(useDefaults, "GitHub App client ID secret name for CI", "MAINTAINER_APP_CLIENT_ID")
+				ans.ScmCIAppPrivateKeySecret = conditionalPrompt(useDefaults, "GitHub App private key secret name for CI", "MAINTAINER_APP_PRIVATE_KEY")
 			}
 
 			if useDefaults {
