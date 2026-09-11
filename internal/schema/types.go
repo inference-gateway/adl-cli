@@ -713,6 +713,17 @@ type SCM struct {
 	// CI corresponds to the JSON schema field "ci".
 	CI bool `json:"ci,omitempty,omitzero" yaml:"ci,omitempty" mapstructure:"ci,omitempty"`
 
+	// Name of the repository secret holding the GitHub App client ID used by the
+	// generated CI workflow (e.g. the ADL drift pull request) when github_app is
+	// enabled. Falls back to app_id_secret when unset, so CI and CD can run as
+	// different GitHub Apps.
+	CIAppIDSecret string `json:"ci_app_id_secret,omitempty,omitzero" yaml:"ci_app_id_secret,omitempty" mapstructure:"ci_app_id_secret,omitempty"`
+
+	// Name of the repository secret holding the GitHub App private key used by the
+	// generated CI workflow when github_app is enabled. Falls back to
+	// app_private_key_secret when unset.
+	CIAppPrivateKeySecret string `json:"ci_app_private_key_secret,omitempty,omitzero" yaml:"ci_app_private_key_secret,omitempty" mapstructure:"ci_app_private_key_secret,omitempty"`
+
 	// Dependabot corresponds to the JSON schema field "dependabot".
 	Dependabot bool `json:"dependabot,omitempty,omitzero" yaml:"dependabot,omitempty" mapstructure:"dependabot,omitempty"`
 

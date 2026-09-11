@@ -56,8 +56,8 @@ jobs:
     - uses: actions/create-github-app-token@{{ pin "action" "actions/create-github-app-token" }}
       id: app-token
       with:
-        client-id: ${{`{{ secrets.`}}{{ .ADL.Spec.SCM.AppIDSecret | default "RELEASER_APP_CLIENT_ID" }}{{` }}`}}
-        private-key: ${{`{{ secrets.`}}{{ .ADL.Spec.SCM.AppPrivateKeySecret | default "RELEASER_APP_PRIVATE_KEY" }}{{` }}`}}
+        client-id: ${{`{{ secrets.`}}{{ .ADL.Spec.SCM.CIAppIDSecret | default .ADL.Spec.SCM.AppIDSecret | default "RELEASER_APP_CLIENT_ID" }}{{` }}`}}
+        private-key: ${{`{{ secrets.`}}{{ .ADL.Spec.SCM.CIAppPrivateKeySecret | default .ADL.Spec.SCM.AppPrivateKeySecret | default "RELEASER_APP_PRIVATE_KEY" }}{{` }}`}}
         owner: ${{`{{ github.repository_owner }}`}}
         repositories: |
           ${{`{{ github.event.repository.name }}`}}

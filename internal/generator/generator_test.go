@@ -1352,3 +1352,62 @@ func writeYAML(t *testing.T, path string, adl *schema.ADL) {
 		t.Fatalf("write %s: %v", path, err)
 	}
 }
+
+func TestGenerator_generateCI_GithubAppSecrets(t *testing.T) {
+	base := func(scm *schema.SCM) *schema.ADL {
+		return &schema.ADL{
+			APIVersion: "adl.inference-gateway.com/v1",
+			Kind:       "Agent",
+			Metadata:   schema.Metadata{Name: "test-ci-agent", Description: "Test CI agent", Version: "1.0.0"},
+			Spec: schema.Spec{
+				Capabilities: schema.Capabilities{Streaming: true},
+				Server:       schema.Server{Port: 8080},
+				Language:     schema.Language{Go: &schema.GoConfig{Module: "github.com/example/test-ci-agent", Version: "1.26.7"}},
+				SCM:          scm,
+			},
+		}
+	}
+
+	tests := []struct {
+		name string
+		scm  *schema.SCM
+		want []string
+	}{
+		{
+			name: "falls back to release secrets",
+			scm:  &schema.SCM{Provider: schema.SCMProviderGithub, GithubApp: true},
+			want: []string{"secrets.RELEASER_APP_CLIENT_ID", "secrets.RELEASER_APP_PRIVATE_KEY", "Get GitHub App User ID", "author: ${{ steps.app-token.outputs.app-slug }}[bot]"},
+		},
+		{
+			name: "uses dedicated CI secrets",
+			scm:  &schema.SCM{Provider: schema.SCMProviderGithub, GithubApp: true, AppIDSecret: "RELEASER_APP_CLIENT_ID", CIAppIDSecret: "MAINTAINER_APP_CLIENT_ID", CIAppPrivateKeySecret: "MAINTAINER_APP_PRIVATE_KEY"},
+			want: []string{"secrets.MAINTAINER_APP_CLIENT_ID", "secrets.MAINTAINER_APP_PRIVATE_KEY"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			gen := New(Config{Template: "minimal", Overwrite: true, Version: "test-version", GenerateCI: true})
+			ignoreChecker, err := NewIgnoreChecker(tmpDir)
+			if err != nil {
+				t.Fatalf("Failed to create ignore checker: %v", err)
+			}
+			if err := gen.generateCI(base(tt.scm), tmpDir, ignoreChecker); err != nil {
+				t.Fatalf("generateCI() error = %v", err)
+			}
+			content, err := os.ReadFile(filepath.Join(tmpDir, ".github", "workflows", "ci.yml"))
+			if err != nil {
+				t.Fatalf("failed to read CI workflow: %v", err)
+			}
+			for _, w := range tt.want {
+				if !containsSubstring(string(content), w) {
+					t.Errorf("expected CI workflow to contain %q", w)
+				}
+			}
+			if tt.scm.CIAppIDSecret != "" && containsSubstring(string(content), "RELEASER_APP_CLIENT_ID") {
+				t.Errorf("expected CI workflow not to use the release App secret")
+			}
+		})
+	}
+}
