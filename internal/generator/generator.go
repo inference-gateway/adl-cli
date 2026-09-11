@@ -572,6 +572,9 @@ func (g *Generator) generateProject(templateEngine *templates.Engine, adl *schem
 		}
 
 		filePath := filepath.Join(outputDir, fileName)
+		if templateKey == "go.mod" {
+			content = preserveIndirectRequires(filePath, content)
+		}
 		if err := g.writeFile(filePath, content); err != nil {
 			return fmt.Errorf("failed to write %s: %w", fileName, err)
 		}
