@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.62.9](https://github.com/inference-gateway/adl-cli/compare/v0.62.8...v0.62.9) (2026-09-11)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump golangci-lint to 2.13.2 and go-task to 3.53.1 ([#399](https://github.com/inference-gateway/adl-cli/issues/399)) ([67e13ab](https://github.com/inference-gateway/adl-cli/commit/67e13ab757d30a46bb92d53a426aa7f3f2154a9d))
+* **deps:** bump template pins from agent dependabot PRs ([#400](https://github.com/inference-gateway/adl-cli/issues/400)) ([e750716](https://github.com/inference-gateway/adl-cli/commit/e750716ef6df4b6062af90cf5189bd647d9fc573))
+
 ## [0.62.8](https://github.com/inference-gateway/adl-cli/compare/v0.62.7...v0.62.8) (2026-09-04)
 
 ### 🐛 Bug Fixes
