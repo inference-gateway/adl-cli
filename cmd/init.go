@@ -341,15 +341,17 @@ type adlData struct {
 			} `yaml:"rust,omitempty"`
 		} `yaml:"language,omitempty"`
 		SCM *struct {
-			Provider            string `yaml:"provider"`
-			URL                 string `yaml:"url,omitempty"`
-			GithubApp           bool   `yaml:"github_app,omitempty"`
-			AppIDSecret         string `yaml:"app_id_secret,omitempty"`
-			AppPrivateKeySecret string `yaml:"app_private_key_secret,omitempty"`
-			IssueTemplates      bool   `yaml:"issue_templates"`
-			Dependabot          bool   `yaml:"dependabot"`
-			CI                  bool   `yaml:"ci"`
-			CD                  bool   `yaml:"cd"`
+			Provider              string `yaml:"provider"`
+			URL                   string `yaml:"url,omitempty"`
+			GithubApp             bool   `yaml:"github_app,omitempty"`
+			AppIDSecret           string `yaml:"app_id_secret,omitempty"`
+			AppPrivateKeySecret   string `yaml:"app_private_key_secret,omitempty"`
+			CIAppIDSecret         string `yaml:"ci_app_id_secret,omitempty"`
+			CIAppPrivateKeySecret string `yaml:"ci_app_private_key_secret,omitempty"`
+			IssueTemplates        bool   `yaml:"issue_templates"`
+			Dependabot            bool   `yaml:"dependabot"`
+			CI                    bool   `yaml:"ci"`
+			CD                    bool   `yaml:"cd"`
 		} `yaml:"scm,omitempty"`
 		Development *struct {
 			Sandbox *struct {
@@ -483,10 +485,14 @@ type answers struct {
 	// fields are omitted from the manifest.
 	ScmAppIDSecret         string
 	ScmAppPrivateKeySecret string
-	IssueTemplates         bool
-	Dependabot             bool
-	CI                     bool
-	CD                     bool
+	// GitHub App secret names for the CI workflow (ADL drift PR). Empty means
+	// the CI workflow falls back to the release App above.
+	ScmCIAppIDSecret         string
+	ScmCIAppPrivateKeySecret string
+	IssueTemplates           bool
+	Dependabot               bool
+	CI                       bool
+	CD                       bool
 
 	// Coding-agent orchestrators (spec.development.ai.orchestrators). Only
 	// claudecode has a CLI flag (--ai); the rest are wizard/manifest-only.
@@ -812,15 +818,17 @@ func buildADL(ans answers) *adlData {
 
 	if ans.ScmProvider != "" {
 		adl.Spec.SCM = &struct {
-			Provider            string `yaml:"provider"`
-			URL                 string `yaml:"url,omitempty"`
-			GithubApp           bool   `yaml:"github_app,omitempty"`
-			AppIDSecret         string `yaml:"app_id_secret,omitempty"`
-			AppPrivateKeySecret string `yaml:"app_private_key_secret,omitempty"`
-			IssueTemplates      bool   `yaml:"issue_templates"`
-			Dependabot          bool   `yaml:"dependabot"`
-			CI                  bool   `yaml:"ci"`
-			CD                  bool   `yaml:"cd"`
+			Provider              string `yaml:"provider"`
+			URL                   string `yaml:"url,omitempty"`
+			GithubApp             bool   `yaml:"github_app,omitempty"`
+			AppIDSecret           string `yaml:"app_id_secret,omitempty"`
+			AppPrivateKeySecret   string `yaml:"app_private_key_secret,omitempty"`
+			CIAppIDSecret         string `yaml:"ci_app_id_secret,omitempty"`
+			CIAppPrivateKeySecret string `yaml:"ci_app_private_key_secret,omitempty"`
+			IssueTemplates        bool   `yaml:"issue_templates"`
+			Dependabot            bool   `yaml:"dependabot"`
+			CI                    bool   `yaml:"ci"`
+			CD                    bool   `yaml:"cd"`
 		}{
 			Provider: ans.ScmProvider,
 		}
@@ -830,6 +838,8 @@ func buildADL(ans answers) *adlData {
 			adl.Spec.SCM.GithubApp = ans.GithubApp
 			adl.Spec.SCM.AppIDSecret = ans.ScmAppIDSecret
 			adl.Spec.SCM.AppPrivateKeySecret = ans.ScmAppPrivateKeySecret
+			adl.Spec.SCM.CIAppIDSecret = ans.ScmCIAppIDSecret
+			adl.Spec.SCM.CIAppPrivateKeySecret = ans.ScmCIAppPrivateKeySecret
 			adl.Spec.SCM.IssueTemplates = ans.IssueTemplates
 			adl.Spec.SCM.Dependabot = ans.Dependabot
 		}
@@ -1180,6 +1190,8 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 			if ans.GithubApp {
 				ans.ScmAppIDSecret = conditionalPrompt(useDefaults, "GitHub App client ID secret name for releases", "RELEASER_APP_CLIENT_ID")
 				ans.ScmAppPrivateKeySecret = conditionalPrompt(useDefaults, "GitHub App private key secret name for releases", "RELEASER_APP_PRIVATE_KEY")
+				ans.ScmCIAppIDSecret = conditionalPrompt(useDefaults, "GitHub App client ID secret name for CI", "INFERENCE_GATEWAY_MAINTAINER_APP_CLIENT_ID")
+				ans.ScmCIAppPrivateKeySecret = conditionalPrompt(useDefaults, "GitHub App private key secret name for CI", "INFERENCE_GATEWAY_MAINTAINER_APP_PRIVATE_KEY")
 			}
 
 			if useDefaults {
