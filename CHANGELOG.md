@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.62.12](https://github.com/inference-gateway/adl-cli/compare/v0.62.11...v0.62.12) (2026-09-11)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump ADK template pin to v0.26.5 ([#406](https://github.com/inference-gateway/adl-cli/issues/406)) ([7421098](https://github.com/inference-gateway/adl-cli/commit/7421098a3c2c2ab4cb5683131bde0eb93155740d))
+
 ## [0.62.11](https://github.com/inference-gateway/adl-cli/compare/v0.62.10...v0.62.11) (2026-09-11)
 
 ### 🐛 Bug Fixes
