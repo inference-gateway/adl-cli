@@ -3,6 +3,7 @@ package generator
 import (
 	"context"
 	"fmt"
+	"go/format"
 	"os"
 	"os/exec"
 	"path"
@@ -848,7 +849,16 @@ func (g *Generator) writeFile(filePath, content string) error {
 		return err
 	}
 
-	if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+	data := []byte(content)
+	if filepath.Ext(filePath) == ".go" {
+		formatted, err := format.Source(data)
+		if err != nil {
+			return fmt.Errorf("generated %s is not valid Go: %w", filePath, err)
+		}
+		data = formatted
+	}
+
+	if err := os.WriteFile(filePath, data, 0644); err != nil {
 		return err
 	}
 
