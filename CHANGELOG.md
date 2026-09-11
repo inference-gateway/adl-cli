@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.62.11](https://github.com/inference-gateway/adl-cli/compare/v0.62.10...v0.62.11) (2026-09-11)
+
+### 🐛 Bug Fixes
+
+* gofmt generated Go files in-process ([#404](https://github.com/inference-gateway/adl-cli/issues/404)) ([baec1b2](https://github.com/inference-gateway/adl-cli/commit/baec1b2d34509f336b44e6d16ebe320682ca0a0d)), closes [#403](https://github.com/inference-gateway/adl-cli/issues/403)
+* preserve indirect go.mod requirements on regenerate ([#405](https://github.com/inference-gateway/adl-cli/issues/405)) ([973312d](https://github.com/inference-gateway/adl-cli/commit/973312d9586bbd29770134d59a040ef9a7cef2fa)), closes [#402](https://github.com/inference-gateway/adl-cli/issues/402)
+
 ## [0.62.10](https://github.com/inference-gateway/adl-cli/compare/v0.62.9...v0.62.10) (2026-09-11)
 
 ### 🔧 Miscellaneous
