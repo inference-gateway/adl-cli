@@ -20,7 +20,6 @@ func preserveIndirectRequires(path, generated string) string {
 	var keep []string
 	for _, line := range strings.Split(string(old), "\n") {
 		fields := strings.Fields(line)
-		// ponytail: line scan instead of x/mod/modfile; go.mod require lines are `path version // indirect`
 		if len(fields) < 4 || fields[2] != "//" || fields[3] != "indirect" {
 			continue
 		}
