@@ -544,7 +544,7 @@ func collectDeploymentSCM(ans *answers) {
 
 		if githubApp {
 			releaserAppID, releaserAppKey := "RELEASER_APP_CLIENT_ID", "RELEASER_APP_PRIVATE_KEY"
-			ciAppID, ciAppKey := "INFERENCE_GATEWAY_MAINTAINER_APP_CLIENT_ID", "INFERENCE_GATEWAY_MAINTAINER_APP_PRIVATE_KEY"
+			ciAppID, ciAppKey := "MAINTAINER_APP_CLIENT_ID", "MAINTAINER_APP_PRIVATE_KEY"
 			runFields([]huh.Field{
 				huh.NewInput().Title("Release GitHub App client ID secret name").Value(&releaserAppID),
 				huh.NewInput().Title("Release GitHub App private key secret name").Value(&releaserAppKey),
