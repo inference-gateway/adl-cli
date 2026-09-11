@@ -171,8 +171,8 @@ var NpmBuiltinDevDeps = map[string]string{
 // add their own `^` / `v` prefix as the target format requires.
 var Tools = map[string]string{
 	"flox-schema":   "1.15.0",
-	"golangci-lint": "2.12.2",
-	"go-task":       "3.48.0",
+	"golangci-lint": "2.13.2",
+	"go-task":       "3.53.1",
 	"rust":          "1.94.1",
 	"rust-analyzer": "2026-04-27",
 	"nodejs":        "24.15.0",
