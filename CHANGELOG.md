@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.63.0](https://github.com/inference-gateway/adl-cli/compare/v0.62.12...v0.63.0) (2026-09-11)
+
+### ✨ Features
+
+* **init:** emit ci_app_id_secret and ci_app_private_key_secret defaults ([#409](https://github.com/inference-gateway/adl-cli/issues/409)) ([62a4a52](https://github.com/inference-gateway/adl-cli/commit/62a4a52328ee9895b6ae0a19dc37c43507a46052))
+* **scm:** mint the CI drift-PR token from a dedicated GitHub App ([#408](https://github.com/inference-gateway/adl-cli/issues/408)) ([c559394](https://github.com/inference-gateway/adl-cli/commit/c5593944113405517ba1b78f695aff261cc22b80))
+
+### 🐛 Bug Fixes
+
+* **templates:** commit drift PRs as the configured GitHub App bot ([#407](https://github.com/inference-gateway/adl-cli/issues/407)) ([10dcaf5](https://github.com/inference-gateway/adl-cli/commit/10dcaf5e47611ccbcf5498876852b22c72c9d542))
+
 ## [0.62.12](https://github.com/inference-gateway/adl-cli/compare/v0.62.11...v0.62.12) (2026-09-11)
 
 ### 🔧 Miscellaneous
