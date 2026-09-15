@@ -1851,7 +1851,7 @@ spec:
 
 The manifest field is a single on/off switch - exporter endpoints, ports, and sampling stay runtime concerns configured via environment variables in the generated `.env.example`:
 
-- **Go**: pulls the OpenTelemetry runtime dependencies into `go.mod`, generates `tools/telemetry.go` (each built-in tool call becomes its own span with `infer.tool.call.id`/`infer.session.id` attributes), and surfaces `A2A_TELEMETRY_ENABLED`, `A2A_TELEMETRY_METRICS_PORT`/`_HOST`, `A2A_TELEMETRY_TRACE_ENABLED`/`_ENDPOINT`/`_HEADERS` in `.env.example`.
+- **Go**: the ADK spans every tool call (`tool.<name>`, carrying the propagated `session.id`/`gen_ai.tool.call.id`) and the generator surfaces `A2A_TELEMETRY_ENABLED`, `A2A_TELEMETRY_METRICS_PORT`/`_HOST`, `A2A_TELEMETRY_TRACE_ENABLED`/`_ENDPOINT`/`_HEADERS` in `.env.example`.
 - **TypeScript**: wires the ADK's `createTelemetryProvider` into `src/index.ts` (no extra npm dependencies) and surfaces `TELEMETRY_ENABLED` plus the standard `OTEL_EXPORTER_OTLP_*` / `OTEL_SERVICE_*` variables in `.env.example`.
 
 > **Note:** Telemetry generation currently supports Go and TypeScript only; Rust agents ignore `spec.telemetry`.
@@ -2004,7 +2004,6 @@ Each language has its own file mapping that determines what gets generated:
 - `internal/{service}/{service}.go` → Service implementation per ADL service
 - `tools/{toolname}.go` → Individual function-call tool implementations
 - `tools/{builtin}.go` + `tools/{builtin}_test.go` → Reserved built-in tool implementations (read, bash, write, edit, fetch)
-- `tools/telemetry.go` → OpenTelemetry instrumentation (when telemetry enabled and built-in tools present)
 - `skills/{skillid}/SKILL.md` → Markdown skill playbooks (loaded into system prompt at runtime)
 - `go.mod` → Go module configuration
 - `Dockerfile` → Container image
