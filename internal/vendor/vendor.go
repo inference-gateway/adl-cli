@@ -105,7 +105,7 @@ func Resolve(raws []string, builtins map[string]string, depGroup string) ([]Entr
 // tests will fail loudly if a built-in is added there without being
 // mirrored here.
 var GoBuiltins = map[string]string{
-	"github.com/inference-gateway/adk":  "v0.26.6",
+	"github.com/inference-gateway/adk":  "v0.26.5",
 	"github.com/sethvargo/go-envconfig": "v1.4.3",
 	"github.com/spf13/cobra":            "v1.10.2",
 	"go.uber.org/zap":                   "v1.28.0",
@@ -191,7 +191,7 @@ var Actions = map[string]string{
 	"actions/create-github-app-token":      "v3.2.0",
 	"actions/setup-go":                     "v7.0.0",
 	"actions/setup-node":                   "v7.0.0",
-	"anthropics/claude-code-action":        "v1.0.221",
+	"anthropics/claude-code-action":        "v1.0.223",
 	"arduino/setup-task":                   "v3.0.0",
 	"azure/setup-kubectl":                  "v4.0.1",
 	"docker/login-action":                  "v4.6.0",
