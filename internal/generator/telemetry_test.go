@@ -106,11 +106,3 @@ func TestGenerator_TelemetryDisabled_EndToEnd(t *testing.T) {
 		t.Errorf("go.mod should not require OpenTelemetry when telemetry is off:\n%s", goModBytes)
 	}
 }
-
-func firstLines(s string, n int) string {
-	lines := strings.SplitN(s, "\n", n+1)
-	if len(lines) > n {
-		lines = lines[:n]
-	}
-	return strings.Join(lines, "\n")
-}
