@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.63.2](https://github.com/inference-gateway/adl-cli/compare/v0.63.1...v0.63.2) (2026-09-15)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump template pins from agent dependabot PRs ([#413](https://github.com/inference-gateway/adl-cli/issues/413)) ([1c232c7](https://github.com/inference-gateway/adl-cli/commit/1c232c713fb6a4abb6a08fbe38b52ced6d0b5c27))
+
 ## [0.63.1](https://github.com/inference-gateway/adl-cli/compare/v0.63.0...v0.63.1) (2026-09-15)
 
 ### 🔧 Miscellaneous
