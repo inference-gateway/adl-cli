@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.63.3](https://github.com/inference-gateway/adl-cli/compare/v0.63.2...v0.63.3) (2026-09-15)
+
+### ♻️ Improvements
+
+* **templates:** drop generated per-tool spans, the ADK toolbox spans every call ([#414](https://github.com/inference-gateway/adl-cli/issues/414)) ([66580ff](https://github.com/inference-gateway/adl-cli/commit/66580ff610a0e8ff7d05e6cb4e719f1901ab0630)), references [adk#305](https://github.com/adk/issues/305)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump ADK template pin to v0.27.0 ([#415](https://github.com/inference-gateway/adl-cli/issues/415)) ([90e41ce](https://github.com/inference-gateway/adl-cli/commit/90e41ce3bd274d2d1ddd24c8624a13a17a536e66)), references [adk#305](https://github.com/adk/issues/305) [#414](https://github.com/inference-gateway/adl-cli/issues/414)
+
 ## [0.63.2](https://github.com/inference-gateway/adl-cli/compare/v0.63.1...v0.63.2) (2026-09-15)
 
 ### 🔧 Miscellaneous
