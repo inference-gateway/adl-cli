@@ -144,9 +144,10 @@ var CargoBuiltinDevDeps = map[string]string{
 	"tempfile": "3",
 }
 
-// GoTelemetryDeps are the extra go.mod requires emitted only when
-// `spec.telemetry.enabled` is set. They still count as built-ins for
-// vendor conflict checks so users can't downgrade them.
+// GoTelemetryDeps are the OpenTelemetry modules the ADK depends on. Generated
+// code no longer imports them directly (the ADK spans tool calls itself), but
+// they still count as built-ins for vendor conflict checks so users can't
+// downgrade them below what the ADK needs.
 var GoTelemetryDeps = map[string]string{
 	"go.opentelemetry.io/otel":       "v1.46.0",
 	"go.opentelemetry.io/otel/sdk":   "v1.46.0",
@@ -227,15 +228,14 @@ var Release = map[string]string{
 // execution instead of silently rendering an empty string.
 func Pin(group, name string) (string, error) {
 	groups := map[string]map[string]string{
-		"go":           GoBuiltins,
-		"go-telemetry": GoTelemetryDeps,
-		"cargo":        CargoBuiltinDeps,
-		"cargo-dev":    CargoBuiltinDevDeps,
-		"npm":          NpmBuiltinDeps,
-		"npm-dev":      NpmBuiltinDevDeps,
-		"tool":         Tools,
-		"action":       Actions,
-		"release":      Release,
+		"go":        GoBuiltins,
+		"cargo":     CargoBuiltinDeps,
+		"cargo-dev": CargoBuiltinDevDeps,
+		"npm":       NpmBuiltinDeps,
+		"npm-dev":   NpmBuiltinDevDeps,
+		"tool":      Tools,
+		"action":    Actions,
+		"release":   Release,
 	}
 	m, ok := groups[group]
 	if !ok {
