@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/chzyer/readline"
+	readline "github.com/chzyer/readline"
 )
 
 // ReadString reads a line of input from the terminal with support for arrow keys and editing

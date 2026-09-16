@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"charm.land/huh/v2"
-	"golang.org/x/term"
+	huh "charm.land/huh/v2"
+	term "golang.org/x/term"
 )
 
 // IsTTY reports whether both stdin and stdout are connected to a terminal. The

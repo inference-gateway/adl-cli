@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/inference-gateway/adl-cli/internal/schema"
-	"github.com/spf13/cobra"
+	cobra "github.com/spf13/cobra"
+
+	schema "github.com/inference-gateway/adl-cli/internal/schema"
 )
 
 // validateCmd represents the validate command

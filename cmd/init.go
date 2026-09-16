@@ -10,12 +10,12 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
+	cobra "github.com/spf13/cobra"
+	viper "github.com/spf13/viper"
+	yaml "gopkg.in/yaml.v3"
 
-	"github.com/inference-gateway/adl-cli/internal/prompt"
-	"github.com/inference-gateway/adl-cli/internal/tui"
+	prompt "github.com/inference-gateway/adl-cli/internal/prompt"
+	tui "github.com/inference-gateway/adl-cli/internal/tui"
 )
 
 // aiProviders are the LLM providers the inference-gateway supports, in the order

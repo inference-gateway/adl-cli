@@ -11,12 +11,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/inference-gateway/adl-cli/internal/registry"
-	"github.com/inference-gateway/adl-cli/internal/sandbox"
-	"github.com/inference-gateway/adl-cli/internal/schema"
-	"github.com/inference-gateway/adl-cli/internal/templates"
-	"github.com/inference-gateway/adl-cli/internal/vendor"
-	"gopkg.in/yaml.v3"
+	yaml "gopkg.in/yaml.v3"
+
+	registry "github.com/inference-gateway/adl-cli/internal/registry"
+	sandbox "github.com/inference-gateway/adl-cli/internal/sandbox"
+	schema "github.com/inference-gateway/adl-cli/internal/schema"
+	templates "github.com/inference-gateway/adl-cli/internal/templates"
+	vendor "github.com/inference-gateway/adl-cli/internal/vendor"
 )
 
 // Generator generates A2A agent projects from ADL files

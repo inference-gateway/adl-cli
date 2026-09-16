@@ -10,10 +10,11 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/Masterminds/sprig/v3"
-	"github.com/inference-gateway/adl-cli/internal/sandbox"
-	"github.com/inference-gateway/adl-cli/internal/schema"
-	"github.com/inference-gateway/adl-cli/internal/vendor"
+	sprig "github.com/Masterminds/sprig/v3"
+
+	sandbox "github.com/inference-gateway/adl-cli/internal/sandbox"
+	schema "github.com/inference-gateway/adl-cli/internal/schema"
+	vendor "github.com/inference-gateway/adl-cli/internal/vendor"
 )
 
 // Engine handles template execution

@@ -6,8 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	cobra "github.com/spf13/cobra"
+	viper "github.com/spf13/viper"
 )
 
 var cfgFile string

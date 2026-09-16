@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/inference-gateway/adl-cli/internal/schema"
+	schema "github.com/inference-gateway/adl-cli/internal/schema"
 )
 
 // MCPEnvVar is a single KEY=VALUE default emitted into the generated .env.example

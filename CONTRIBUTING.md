@@ -86,6 +86,7 @@ We welcome several types of contributions:
 #### Go Code Style
 
 - Follow standard Go conventions (`gofmt`, `golint`)
+- Imports are grouped by `gci` (standard library, `testify`, third-party, `github.com/inference-gateway/*`, this module) and every non-standard-library import is named after its last path element (`importas`); fix both with `golangci-lint fmt` and `golangci-lint run --fix`
 - Use meaningful variable and function names
 - Add comments for exported functions and complex logic
 - Keep functions focused and reasonably sized

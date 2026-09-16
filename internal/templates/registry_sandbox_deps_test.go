@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/inference-gateway/adl-cli/internal/sandbox"
+	sandbox "github.com/inference-gateway/adl-cli/internal/sandbox"
 	schema "github.com/inference-gateway/adl-cli/internal/schema"
 )
 

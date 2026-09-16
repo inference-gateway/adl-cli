@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/xeipuuv/gojsonschema"
-	"gopkg.in/yaml.v3"
+	gojsonschema "github.com/xeipuuv/gojsonschema"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // schemaBytes holds the canonical ADL JSON Schema, vendored from

@@ -4,8 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	schema "github.com/inference-gateway/adl-cli/internal/schema"
 	yaml "gopkg.in/yaml.v3"
+
+	schema "github.com/inference-gateway/adl-cli/internal/schema"
 )
 
 // TestRegistry_DockerCompose_AllLanguages verifies that
