@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/inference-gateway/adl-cli/internal/schema"
+	schema "github.com/inference-gateway/adl-cli/internal/schema"
 )
 
 // SkillFile is the canonical filename of a skill's playbook within the

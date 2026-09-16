@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/inference-gateway/adl-cli/internal/schema"
+	schema "github.com/inference-gateway/adl-cli/internal/schema"
 )
 
 func newTestResolver(t *testing.T, handler http.HandlerFunc) (*Resolver, func()) {

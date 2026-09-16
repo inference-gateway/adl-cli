@@ -3,7 +3,7 @@ package schema
 import (
 	"fmt"
 
-	"github.com/go-viper/mapstructure/v2"
+	mapstructure "github.com/go-viper/mapstructure/v2"
 )
 
 // ReservedToolID is the set of tool IDs that map to built-in

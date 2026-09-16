@@ -10,8 +10,8 @@ package tui
 import (
 	"image/color"
 
-	"charm.land/huh/v2"
-	"charm.land/lipgloss/v2"
+	huh "charm.land/huh/v2"
+	lipgloss "charm.land/lipgloss/v2"
 )
 
 // Brand palette. Violet primary (the recognizable Charm look) with emerald for

@@ -3,7 +3,7 @@ package templates
 import (
 	"strconv"
 
-	"github.com/inference-gateway/adl-cli/internal/schema"
+	schema "github.com/inference-gateway/adl-cli/internal/schema"
 )
 
 // TelemetryEnvVar is a single KEY=VALUE default emitted into the generated

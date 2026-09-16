@@ -1,7 +1,7 @@
 package tui
 
 import (
-	"charm.land/lipgloss/v2"
+	lipgloss "charm.land/lipgloss/v2"
 )
 
 // Banner returns the rounded, violet-accented intro card shown at the top of

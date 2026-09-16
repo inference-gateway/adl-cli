@@ -33,7 +33,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/inference-gateway/adl-cli/internal/schema"
+	schema "github.com/inference-gateway/adl-cli/internal/schema"
 )
 
 // Entry is a parsed `<package>@<version>` tuple for a sandbox-level

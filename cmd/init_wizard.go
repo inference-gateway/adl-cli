@@ -9,11 +9,11 @@ import (
 	"strconv"
 	"strings"
 
-	"charm.land/huh/v2"
-	"charm.land/lipgloss/v2"
-	"github.com/spf13/viper"
+	huh "charm.land/huh/v2"
+	lipgloss "charm.land/lipgloss/v2"
+	viper "github.com/spf13/viper"
 
-	"github.com/inference-gateway/adl-cli/internal/tui"
+	tui "github.com/inference-gateway/adl-cli/internal/tui"
 )
 
 // runInitInteractive drives the branded huh wizard. It is only reached on a real

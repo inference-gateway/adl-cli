@@ -33,6 +33,7 @@ Single test: `go test -v ./internal/generator -run TestGenerate_Go`.
 ## Conventions & gotchas
 
 - Go 1.26.x; Flox sandbox (`.flox/env/manifest.toml`) pins `go`, `golangci-lint`, `go-task`, `prettier`, `markdownlint-cli` — `flox activate` to enter.
+- Import order is enforced by the `gci` formatter (see `.golangci.yml`): standard library, `github.com/stretchr/testify`, third-party, `github.com/inference-gateway/*`, then this module. Every non-standard-library import must be named after its last path element (`yaml "gopkg.in/yaml.v3"`), enforced by `importas`. Fix locally with `golangci-lint fmt` and `golangci-lint run --fix`.
 - Tabs in Go, 2-space in YAML/JSON/Markdown.
 - Conventional commits (`feat:`, `fix:`, …) — semantic-release derives versions from them.
 - **`examples/` is the regression suite.** When adding a feature, add/update an example and wire it into both lists (`examples:test` + `examples:generate`) in `Taskfile.yml`.

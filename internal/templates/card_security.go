@@ -1,6 +1,6 @@
 package templates
 
-import "github.com/inference-gateway/adl-cli/internal/schema"
+import schema "github.com/inference-gateway/adl-cli/internal/schema"
 
 // cardSecuritySchemes maps the manifest's flat security-scheme DSL
 // (spec.card.securitySchemes) onto the ADK AgentCard wrapper shape that the

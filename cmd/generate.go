@@ -5,9 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/inference-gateway/adl-cli/internal/generator"
-	"github.com/inference-gateway/adl-cli/internal/schema"
-	"github.com/spf13/cobra"
+	cobra "github.com/spf13/cobra"
+
+	generator "github.com/inference-gateway/adl-cli/internal/generator"
+	schema "github.com/inference-gateway/adl-cli/internal/schema"
 )
 
 // generateCmd represents the generate command

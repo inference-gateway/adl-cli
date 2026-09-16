@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"gopkg.in/yaml.v3"
+	yaml "gopkg.in/yaml.v3"
 
-	"github.com/inference-gateway/adl-cli/internal/schema"
+	schema "github.com/inference-gateway/adl-cli/internal/schema"
 )
 
 func TestInitCommand(t *testing.T) {

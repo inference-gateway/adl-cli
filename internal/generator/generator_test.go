@@ -6,10 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/inference-gateway/adl-cli/internal/schema"
-	"github.com/inference-gateway/adl-cli/internal/templates"
-	"github.com/inference-gateway/adl-cli/internal/vendor"
-	"gopkg.in/yaml.v3"
+	yaml "gopkg.in/yaml.v3"
+
+	schema "github.com/inference-gateway/adl-cli/internal/schema"
+	templates "github.com/inference-gateway/adl-cli/internal/templates"
+	vendor "github.com/inference-gateway/adl-cli/internal/vendor"
 )
 
 func TestGenerator_Generate(t *testing.T) {

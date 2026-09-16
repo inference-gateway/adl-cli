@@ -3,7 +3,7 @@ package tui
 import (
 	"strings"
 
-	"charm.land/lipgloss/v2"
+	lipgloss "charm.land/lipgloss/v2"
 )
 
 // Print and Println write to stdout through lipgloss's color-profile writer,
