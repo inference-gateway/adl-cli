@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.63.4](https://github.com/inference-gateway/adl-cli/compare/v0.63.3...v0.63.4) (2026-09-17)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump DeterminateSystems/nix-installer-action ([#419](https://github.com/inference-gateway/adl-cli/issues/419)) ([ababe8f](https://github.com/inference-gateway/adl-cli/commit/ababe8fc14641a52791d3969d16f4213ea32f129))
+* **deps:** bump golang.org/x/term in the gomod group ([#418](https://github.com/inference-gateway/adl-cli/issues/418)) ([9b7e179](https://github.com/inference-gateway/adl-cli/commit/9b7e179e3bd74720e7c8f93aad6cd58d604dcd4b))
+* **deps:** bump template pins from agent dependabot PRs ([#420](https://github.com/inference-gateway/adl-cli/issues/420)) ([7d20ad4](https://github.com/inference-gateway/adl-cli/commit/7d20ad4e0951c8b8f62d1451cbc171f913da66de))
+* **deps:** bump template pins to latest ([#423](https://github.com/inference-gateway/adl-cli/issues/423)) ([8b01295](https://github.com/inference-gateway/adl-cli/commit/8b01295a38e9f5d179d89180673a1d75a3d8c759))
+* **lint:** enforce Go import grouping and named imports ([#417](https://github.com/inference-gateway/adl-cli/issues/417)) ([c64fa23](https://github.com/inference-gateway/adl-cli/commit/c64fa2318ce51fdaff9660895391464fbe4a65c3))
+
+### ✅ Miscellaneous
+
+* read template pins from vendor maps instead of hardcoding ([#421](https://github.com/inference-gateway/adl-cli/issues/421)) ([a4eda21](https://github.com/inference-gateway/adl-cli/commit/a4eda212960f827fdf575c897fc77e89cfe5969d))
+
 ## [0.63.3](https://github.com/inference-gateway/adl-cli/compare/v0.63.2...v0.63.3) (2026-09-15)
 
 ### ♻️ Improvements
