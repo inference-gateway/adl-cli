@@ -143,7 +143,7 @@ func TestResolve_FloxConflict(t *testing.T) {
 		Spec: schema.Spec{
 			Development: &schema.DevelopmentConfig{
 				Deps: []string{
-					"git@2.53.0",
+					"git@2.55.0",
 					"deno@2.1.4",
 					"go-task@3.50",
 				},
@@ -176,7 +176,7 @@ func TestResolve_DevContainerConflict(t *testing.T) {
 	adl := &schema.ADL{
 		Spec: schema.Spec{
 			Development: &schema.DevelopmentConfig{
-				Deps: []string{"git@2.53.0", "kubectl@1.31.0"},
+				Deps: []string{"git@2.55.0", "kubectl@1.31.0"},
 			},
 		},
 	}
