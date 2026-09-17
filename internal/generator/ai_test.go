@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	vendor "github.com/inference-gateway/adl-cli/internal/vendor"
 )
 
 const baseManifest = `apiVersion: adl.inference-gateway.com/v1
@@ -442,10 +444,10 @@ func TestGenerator_AI_InferSandboxInstall(t *testing.T) {
 		mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
 
 		flox := readGenerated(t, out, ".flox/env/manifest.toml")
-		assertContains(t, flox, `infer.flake = "github:inference-gateway/cli/v0.154.0"`, "flox manifest")
+		assertContains(t, flox, `infer.flake = "github:inference-gateway/cli/v`+vendor.Tools["infer"]+`"`, "flox manifest")
 
 		dc := readGenerated(t, out, ".devcontainer/devcontainer.json")
-		assertContains(t, dc, "install.sh | bash -s -- --version v0.154.0", "devcontainer postCreateCommand")
+		assertContains(t, dc, "install.sh | bash -s -- --version v"+vendor.Tools["infer"], "devcontainer postCreateCommand")
 	})
 
 	t.Run("flox enabled installs flox in AI workflows", func(t *testing.T) {
