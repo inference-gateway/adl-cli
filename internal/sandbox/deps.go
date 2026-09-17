@@ -101,7 +101,7 @@ var floxBuiltinPackages = map[string]struct{}{
 // devcontainer template always provisions. The Devcontainer Features
 // model is feature-id-keyed (not package-name-keyed), so collisions are
 // rare; we only flag the most common shorthand matches here so users
-// who type `git@2.53.0` get a helpful warning that git is already
+// who type `git@2.55.0` get a helpful warning that git is already
 // installed by the base image.
 //
 // Keep this in sync with `internal/templates/sandbox/devcontainer/devcontainer.json.tmpl`.

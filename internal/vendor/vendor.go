@@ -105,7 +105,7 @@ func Resolve(raws []string, builtins map[string]string, depGroup string) ([]Entr
 // tests will fail loudly if a built-in is added there without being
 // mirrored here.
 var GoBuiltins = map[string]string{
-	"github.com/inference-gateway/adk":  "v0.27.0",
+	"github.com/inference-gateway/adk":  "v0.28.0",
 	"github.com/sethvargo/go-envconfig": "v1.4.3",
 	"github.com/spf13/cobra":            "v1.10.2",
 	"go.uber.org/zap":                   "v1.28.0",
@@ -118,8 +118,8 @@ var GoBuiltins = map[string]string{
 // them all so users can't shadow them regardless of which features they
 // activate.
 var CargoBuiltinDeps = map[string]string{
-	"inference-gateway-adk": "0.11.2",
-	"inference-gateway-sdk": "0.19.0",
+	"inference-gateway-adk": "0.12.0",
+	"inference-gateway-sdk": "0.25.1",
 	"tokio":                 "1",
 	"tracing":               "0.1",
 	"tracing-subscriber":    "0.3",
@@ -133,7 +133,7 @@ var CargoBuiltinDeps = map[string]string{
 	"chrono":                "0.4",
 	"dotenvy":               "0.15.7",
 	"envy":                  "0.4.2",
-	"reqwest":               "0.12",
+	"reqwest":               "0.13",
 }
 
 // CargoBuiltinDevDeps mirrors CargoBuiltinDeps for the `[dev-dependencies]`
@@ -158,13 +158,13 @@ var GoTelemetryDeps = map[string]string{
 // `@inference-gateway/adl-cli` is intentionally absent: it tracks the CLI
 // version at generation time rather than a static pin.
 var NpmBuiltinDeps = map[string]string{
-	"@inference-gateway/adk": "0.15.1",
+	"@inference-gateway/adk": "0.16.0",
 }
 var NpmBuiltinDevDeps = map[string]string{
 	"@types/node": "^24.1.0",
-	"prettier":    "^3.8.3",
-	"tsx":         "^4.19.2",
-	"typescript":  "^6.0.3",
+	"prettier":    "^3.9.7",
+	"tsx":         "^4.23.13",
+	"typescript":  "^7.0.2",
 }
 
 // Tools pins the toolchain / sandbox package versions the generated Flox
@@ -174,37 +174,37 @@ var Tools = map[string]string{
 	"flox-schema":   "1.15.0",
 	"golangci-lint": "2.13.2",
 	"go-task":       "3.53.1",
-	"rust":          "1.94.1",
-	"rust-analyzer": "2026-04-27",
-	"nodejs":        "24.15.0",
-	"pnpm":          "11.8.0",
-	"git":           "2.53.0",
-	"docker":        "29.5.1",
-	"claude-code":   "2.1.201",
-	"infer":         "0.154.0",
+	"rust":          "1.98.1",
+	"rust-analyzer": "2026-08-03",
+	"nodejs":        "24.20.0",
+	"pnpm":          "11.25.0",
+	"git":           "2.55.0",
+	"docker":        "29.8.0",
+	"claude-code":   "2.1.268",
+	"infer":         "0.199.5",
 }
 
 // Actions pins the GitHub Actions referenced by the generated workflows
 // (`uses: <name>@<version>`).
 var Actions = map[string]string{
-	"actions/cache":                        "v5.0.5",
+	"actions/cache":                        "v6.1.0",
 	"actions/checkout":                     "v7.0.1",
 	"actions/create-github-app-token":      "v3.2.0",
 	"actions/setup-go":                     "v7.0.0",
 	"actions/setup-node":                   "v7.0.0",
-	"anthropics/claude-code-action":        "v1.0.224",
+	"anthropics/claude-code-action":        "v1.0.227",
 	"arduino/setup-task":                   "v3.0.0",
-	"azure/setup-kubectl":                  "v4.0.1",
+	"azure/setup-kubectl":                  "v5.1.0",
 	"docker/login-action":                  "v4.6.0",
-	"docker/setup-buildx-action":           "v4.3.0",
-	"docker/setup-qemu-action":             "v4.3.0",
+	"docker/setup-buildx-action":           "v4.4.1",
+	"docker/setup-qemu-action":             "v4.4.0",
 	"flox/install-flox-action":             "v2.6.0",
 	"golangci/golangci-lint-action":        "v9.3.0",
-	"google-github-actions/auth":           "v2.1.13",
+	"google-github-actions/auth":           "v3.0.0",
 	"google-github-actions/run-gemini-cli": "v0.1.22",
 	"google-github-actions/setup-gcloud":   "v3.0.1",
-	"inference-gateway/infer-action":       "v0.51.3",
-	"openai/codex-action":                  "v1.8",
+	"inference-gateway/infer-action":       "v0.51.4",
+	"openai/codex-action":                  "v1.12",
 	"oven-sh/setup-bun":                    "v2.2.0",
 	"peter-evans/create-pull-request":      "v8.1.1",
 }
@@ -212,15 +212,15 @@ var Actions = map[string]string{
 // Release pins the semantic-release npm packages the generated CD
 // workflow installs into a throwaway package.json.
 var Release = map[string]string{
-	"semantic-release":                           "25.0.5",
+	"semantic-release":                           "25.0.9",
 	"@semantic-release/commit-analyzer":          "13.0.1",
 	"@semantic-release/release-notes-generator":  "14.1.1",
-	"@semantic-release/changelog":                "6.0.3",
+	"@semantic-release/changelog":                "7.0.0",
 	"@semantic-release/exec":                     "7.1.0",
-	"@semantic-release/git":                      "10.0.1",
+	"@semantic-release/git":                      "11.0.1",
 	"@semantic-release/github":                   "12.0.9",
-	"conventional-changelog-conventionalcommits": "10.2.0",
-	"conventional-changelog-writer":              "^9.1.0",
+	"conventional-changelog-conventionalcommits": "10.4.0",
+	"conventional-changelog-writer":              "^9.2.1",
 }
 
 // Pin returns the pinned version for `name` in `group`. It is exposed to
