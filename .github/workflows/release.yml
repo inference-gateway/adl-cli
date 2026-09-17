@@ -61,7 +61,7 @@ jobs:
           version: v2.17.0
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v22
+        uses: DeterminateSystems/nix-installer-action@v23
         with:
           determinate: false
 
