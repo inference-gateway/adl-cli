@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	schema "github.com/inference-gateway/adl-cli/internal/schema"
+	vendor "github.com/inference-gateway/adl-cli/internal/vendor"
 )
 
 func minimalRustADL() *schema.ADL {
@@ -153,12 +154,12 @@ func TestRustCargoToml_RedisFeatureFlag(t *testing.T) {
 		{
 			name:     "no features -> plain dep",
 			features: nil,
-			want:     `inference-gateway-adk = "0.11.2"`,
+			want:     `inference-gateway-adk = "` + vendor.CargoBuiltinDeps["inference-gateway-adk"] + `"`,
 		},
 		{
 			name:     "redis feature -> feature flag",
 			features: []string{"redis"},
-			want:     `inference-gateway-adk = { version = "0.11.2", features = ["redis"] }`,
+			want:     `inference-gateway-adk = { version = "` + vendor.CargoBuiltinDeps["inference-gateway-adk"] + `", features = ["redis"] }`,
 		},
 	}
 

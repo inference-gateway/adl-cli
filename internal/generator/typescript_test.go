@@ -94,7 +94,7 @@ func TestGenerator_TypeScriptPackageJSON(t *testing.T) {
 			t.Fatalf("expected engines.node from nodeVersion, got %q", engines["node"])
 		}
 		deps, _ := pkg["dependencies"].(map[string]any)
-		if deps["@inference-gateway/adk"] != "0.15.1" {
+		if deps["@inference-gateway/adk"] != vendor.NpmBuiltinDeps["@inference-gateway/adk"] {
 			t.Fatalf("expected pinned ADK dependency, got %q\n%s", deps["@inference-gateway/adk"], got)
 		}
 		scripts, _ := pkg["scripts"].(map[string]any)
