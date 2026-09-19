@@ -25,16 +25,16 @@ Single test: `go test -v ./internal/generator -run TestGenerate_Go`.
 - **Pipeline:** `cmd/generate.go` → `internal/generator` → `internal/templates`. `internal/templates/registry.go` `GetFiles(adl)` maps output path → template key — wire new output files there. `engine.go` executes templates with Sprig + custom case-conversion funcs.
 - **Never hand-edit generated code.** `internal/schema/types.go` (go-jsonschema output, DO NOT EDIT header) and `internal/schema/schema.json` (vendored upstream). `ADL_SCHEMA_VERSION` in `Taskfile.yml` is the single source of truth; `task verify-schema` fails CI on drift. Bump: `task fetch-schema && task generate-types`.
 - **Version pins live in `internal/vendor/vendor.go`** (SDK deps, toolchains, GitHub Actions, semantic-release). Templates read them via `{{ pin "<group>" "<name>" }}`; an unknown key fails generation. Bump there, never in a `.tmpl`.
-- **`.adl-ignore` protects user code.** The generator writes gitignore-style globs for TODO-placeholder files (tool implementations, custom services, bare skills); re-generate (even `--overwrite`) skips matched paths. Add new user-owned files to it.
-- **Flag/manifest reconciliation is OR semantics** — a CLI flag (`--ci`, `--cd`, `--deployment`, …) wins over the manifest field.
-- **Tools vs skills.** `spec.tools[]` → one generated file per tool (`tools/<id>.go`); `spec.skills[]` → markdown playbooks resolved from a registry/GitHub (`source:`) or scaffolded locally (`bare: true`). Five reserved tool IDs (`read`/`bash`/`write`/`edit`/`fetch`) render from `languages/<lang>/builtin/`.
+- **`.adl-ignore` protects user code.** The generator writes `.adl-ignore` into the *output project*, listing the TODO-placeholder files it just scaffolded (tool implementations, custom services, bare skills); re-generate (even `--overwrite`) skips matched paths, and the file is only created once — afterwards it is user-owned. When adding a new placeholder template, register its glob in `generateA2aIgnoreContent` (`internal/generator/generator.go`).
+- **Flag/manifest reconciliation is OR semantics** — a CLI flag (`--ci`, `--cd`, `--deployment`, …) wins over the manifest field; runtime config follows the same pattern: manifest values render as defaults into the generated `.env.example` (`A2A_*` vars) and env vars override them.
+- **Tools vs skills.** `spec.tools[]` → one generated file per tool (`tools/<id>.go`, `src/tools/<id>.ts`); `spec.skills[]` → markdown playbooks resolved from a registry/GitHub (`source:`) or scaffolded locally (`bare: true`). Five reserved tool IDs (`read`/`bash`/`write`/`edit`/`fetch`) render from `languages/<lang>/builtin/` (Go and Rust; TypeScript's ADK supplies its own).
 - **Telemetry** (`spec.telemetry.enabled`, manifest-only): Go and TypeScript only; Rust ignores it.
 
 ## Conventions & gotchas
 
 - Go 1.26.x; Flox sandbox (`.flox/env/manifest.toml`) pins `go`, `golangci-lint`, `go-task`, `prettier`, `markdownlint-cli` — `flox activate` to enter.
 - Import order is enforced by the `gci` formatter (see `.golangci.yml`): standard library, `github.com/stretchr/testify`, third-party, `github.com/inference-gateway/*`, then this module. Every non-standard-library import must be named after its last path element (`yaml "gopkg.in/yaml.v3"`), enforced by `importas`. Fix locally with `golangci-lint fmt` and `golangci-lint run --fix`.
-- Tabs in Go, 2-space in YAML/JSON/Markdown.
+- Tabs in Go, 2-space in YAML/JSON/Markdown (`task format` runs prettier; `task lint:md:fix` autofixes markdownlint).
 - Conventional commits (`feat:`, `fix:`, …) — semantic-release derives versions from them.
 - **`examples/` is the regression suite.** When adding a feature, add/update an example and wire it into both lists (`examples:test` + `examples:generate`) in `Taskfile.yml`.
 - Skills resolution hits the network (registry/GitHub, cached under `~/.adl/skills-cache`); `--offline` skips all network access.
