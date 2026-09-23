@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.63.5](https://github.com/inference-gateway/adl-cli/compare/v0.63.4...v0.63.5) (2026-09-23)
+
+### 📚 Documentation
+
+* verify AGENTS.md claims and refine conventions ([#424](https://github.com/inference-gateway/adl-cli/issues/424)) ([8ca3f90](https://github.com/inference-gateway/adl-cli/commit/8ca3f906e8ecce7e501cb72e273baa7c8ac44ff4))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump claude-code 2.1.266 -> 2.1.278 ([#426](https://github.com/inference-gateway/adl-cli/issues/426)) ([0894a6e](https://github.com/inference-gateway/adl-cli/commit/0894a6e8584451cbed06e19927d42b05850cb546))
+* **deps:** bump infer CLI v0.192.0 -> v0.205.3 ([#427](https://github.com/inference-gateway/adl-cli/issues/427)) ([1fa9148](https://github.com/inference-gateway/adl-cli/commit/1fa914864fc5b319020d9b0b3d7112ea5c0be796))
+* **deps:** bump template pins to latest ([#425](https://github.com/inference-gateway/adl-cli/issues/425)) ([f07d3ca](https://github.com/inference-gateway/adl-cli/commit/f07d3ca85de03613d55dd1a3eb7d462194e35e16))
+
 ## [0.63.4](https://github.com/inference-gateway/adl-cli/compare/v0.63.3...v0.63.4) (2026-09-17)
 
 ### 🔧 Miscellaneous
