@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.64.0](https://github.com/inference-gateway/adl-cli/compare/v0.63.6...v0.64.0) (2026-09-23)
+
+### ✨ Features
+
+* add claude-opus-5-5 to claude-code workflow model options ([#429](https://github.com/inference-gateway/adl-cli/issues/429)) ([e3b0dbc](https://github.com/inference-gateway/adl-cli/commit/e3b0dbce00beddea7b4b0b7bc262417c1551b57e))
+
 ## [0.63.6](https://github.com/inference-gateway/adl-cli/compare/v0.63.5...v0.63.6) (2026-09-23)
 
 ### 🔧 Miscellaneous
