@@ -326,6 +326,7 @@ func TestGenerator_AI_ClaudeWorkflowGoContent(t *testing.T) {
 	assertContains(t, body, "model:", "Claude Code workflow body")
 	assertContains(t, body, "description: 'Claude model'", "Claude Code workflow body")
 	assertContains(t, body, "- claude-fable-5", "Claude Code workflow body")
+    assertContains(t, body, "- claude-fable-5-1", "Claude Code workflow body")
 	assertContains(t, body, "- claude-opus-5", "Claude Code workflow body")
 	assertContains(t, body, "- claude-opus-5-5", "Claude Code workflow body")
 	assertContains(t, body, "- claude-sonnet-5", "Claude Code workflow body")
