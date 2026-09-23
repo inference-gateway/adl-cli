@@ -118,8 +118,8 @@ var GoBuiltins = map[string]string{
 // them all so users can't shadow them regardless of which features they
 // activate.
 var CargoBuiltinDeps = map[string]string{
-	"inference-gateway-adk": "0.12.0",
-	"inference-gateway-sdk": "0.25.1",
+	"inference-gateway-adk": "0.12.1",
+	"inference-gateway-sdk": "0.26.1",
 	"tokio":                 "1",
 	"tracing":               "0.1",
 	"tracing-subscriber":    "0.3",
@@ -162,7 +162,7 @@ var NpmBuiltinDeps = map[string]string{
 }
 var NpmBuiltinDevDeps = map[string]string{
 	"@types/node": "^26.6.2",
-	"prettier":    "^3.9.8",
+	"prettier":    "^3.9.9",
 	"tsx":         "^4.23.15",
 	"typescript":  "^7.0.2",
 }
@@ -175,13 +175,13 @@ var Tools = map[string]string{
 	"golangci-lint": "2.13.2",
 	"go-task":       "3.53.1",
 	"rust":          "1.98.1",
-	"rust-analyzer": "2026-08-03",
+	"rust-analyzer": "2026-09-21",
 	"nodejs":        "24.20.0",
 	"pnpm":          "12.3.4",
 	"git":           "2.55.0",
 	"docker":        "29.8.0",
-	"claude-code":   "2.1.276",
-	"infer":         "0.205.1",
+	"claude-code":   "2.1.278",
+	"infer":         "0.206.0",
 }
 
 // Actions pins the GitHub Actions referenced by the generated workflows
@@ -192,7 +192,7 @@ var Actions = map[string]string{
 	"actions/create-github-app-token":      "v3.2.0",
 	"actions/setup-go":                     "v7.0.0",
 	"actions/setup-node":                   "v7.0.0",
-	"anthropics/claude-code-action":        "v1.0.231",
+	"anthropics/claude-code-action":        "v1.0.233",
 	"arduino/setup-task":                   "v3.0.0",
 	"azure/setup-kubectl":                  "v5.1.0",
 	"docker/login-action":                  "v4.6.0",
@@ -203,7 +203,7 @@ var Actions = map[string]string{
 	"google-github-actions/auth":           "v3.0.0",
 	"google-github-actions/run-gemini-cli": "v0.1.22",
 	"google-github-actions/setup-gcloud":   "v3.0.1",
-	"inference-gateway/infer-action":       "v0.51.8",
+	"inference-gateway/infer-action":       "v0.51.9",
 	"openai/codex-action":                  "v1.12",
 	"oven-sh/setup-bun":                    "v2.2.0",
 	"peter-evans/create-pull-request":      "v8.1.1",
@@ -218,7 +218,7 @@ var Release = map[string]string{
 	"@semantic-release/changelog":                "7.0.0",
 	"@semantic-release/exec":                     "7.1.0",
 	"@semantic-release/git":                      "11.0.1",
-	"@semantic-release/github":                   "12.0.9",
+	"@semantic-release/github":                   "12.0.10",
 	"conventional-changelog-conventionalcommits": "10.4.0",
 	"conventional-changelog-writer":              "^9.2.1",
 }
