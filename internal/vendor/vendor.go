@@ -119,7 +119,7 @@ var GoBuiltins = map[string]string{
 // activate.
 var CargoBuiltinDeps = map[string]string{
 	"inference-gateway-adk": "0.12.1",
-	"inference-gateway-sdk": "0.26.1",
+	"inference-gateway-sdk": "0.27.1",
 	"tokio":                 "1",
 	"tracing":               "0.1",
 	"tracing-subscriber":    "0.3",
@@ -180,8 +180,8 @@ var Tools = map[string]string{
 	"pnpm":          "12.3.4",
 	"git":           "2.55.0",
 	"docker":        "29.8.0",
-	"claude-code":   "2.1.278",
-	"infer":         "0.206.0",
+	"claude-code":   "2.1.280",
+	"infer":         "0.207.0",
 }
 
 // Actions pins the GitHub Actions referenced by the generated workflows
@@ -192,7 +192,7 @@ var Actions = map[string]string{
 	"actions/create-github-app-token":      "v3.2.0",
 	"actions/setup-go":                     "v7.0.0",
 	"actions/setup-node":                   "v7.0.0",
-	"anthropics/claude-code-action":        "v1.0.233",
+	"anthropics/claude-code-action":        "v1.0.234",
 	"arduino/setup-task":                   "v3.0.0",
 	"azure/setup-kubectl":                  "v5.1.0",
 	"docker/login-action":                  "v4.6.0",
@@ -203,7 +203,7 @@ var Actions = map[string]string{
 	"google-github-actions/auth":           "v3.0.0",
 	"google-github-actions/run-gemini-cli": "v0.1.22",
 	"google-github-actions/setup-gcloud":   "v3.0.1",
-	"inference-gateway/infer-action":       "v0.51.9",
+	"inference-gateway/infer-action":       "v0.51.10",
 	"openai/codex-action":                  "v1.12",
 	"oven-sh/setup-bun":                    "v2.2.0",
 	"peter-evans/create-pull-request":      "v8.1.1",
