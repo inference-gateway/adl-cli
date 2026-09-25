@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.64.1](https://github.com/inference-gateway/adl-cli/compare/v0.64.0...v0.64.1) (2026-09-25)
+
+### 👷 CI
+
+* **claude:** centralize claude.yml via reusable workflow ([#430](https://github.com/inference-gateway/adl-cli/issues/430)) ([962fe8e](https://github.com/inference-gateway/adl-cli/commit/962fe8ebbbf32ae5331dea0f29f051a3081df3ce))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump template pins to latest ([#431](https://github.com/inference-gateway/adl-cli/issues/431)) ([583f2fc](https://github.com/inference-gateway/adl-cli/commit/583f2fc5828e76c6e52666393d535952b12c8154))
+
 ## [0.64.0](https://github.com/inference-gateway/adl-cli/compare/v0.63.6...v0.64.0) (2026-09-23)
 
 ### ✨ Features
