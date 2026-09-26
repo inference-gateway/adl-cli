@@ -141,7 +141,10 @@ func runInitNonInteractive(args []string, useDefaults bool) error {
 
 	if useExisting {
 		for {
-			existingFile := promptString("Path to existing ADL schema file (relative or absolute)", "")
+			existingFile, answered := readPrompt("Path to existing ADL schema file (relative or absolute)", "")
+			if !answered {
+				return fmt.Errorf("an ADL file path is required but stdin has no input")
+			}
 			if existingFile == "" {
 				tui.Println(tui.Note("An ADL file path is required. Please provide a path to the existing schema file."))
 				continue
@@ -883,22 +886,22 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 	ans.Version = promptWithConfig("version", useDefaults, "Version", "0.1.0")
 
 	tui.Println(tui.Header("Agent Type"))
-	ans.AgentType = conditionalPromptChoice(useDefaults, "Agent type", []string{"ai-powered", "minimal"}, "ai-powered")
+	ans.AgentType = promptChoiceWithConfig("type", useDefaults, "Agent type", []string{"ai-powered", "minimal"}, "ai-powered")
 
 	if ans.AgentType == "ai-powered" {
 		tui.Println(tui.Header("AI Configuration"))
 		tui.Println(tui.Note("Leave the provider and model empty to stay vendor-neutral and select them at runtime via environment variables."))
 		ans.Provider = promptChoiceWithConfig("provider", useDefaults, "AI Provider (optional, empty to choose at runtime)", aiProviders, "")
 		ans.Model = promptWithConfig("model", useDefaults, "Model (optional, empty to choose at runtime)", "")
-		ans.SystemPrompt = conditionalPrompt(useDefaults, "System prompt", "You are a helpful AI assistant.")
+		ans.SystemPrompt = promptWithConfig("system-prompt", useDefaults, "System prompt", "You are a helpful AI assistant.")
 
-		if maxTokensStr := conditionalPrompt(useDefaults, "Max tokens (optional, press enter to skip)", ""); maxTokensStr != "" {
+		if maxTokensStr := promptWithConfig("max-tokens", useDefaults, "Max tokens (optional, press enter to skip)", ""); maxTokensStr != "" {
 			if maxTokens, err := strconv.Atoi(maxTokensStr); err == nil {
 				ans.MaxTokens = maxTokens
 			}
 		}
 
-		if tempStr := conditionalPrompt(useDefaults, "Temperature (0.0-2.0, optional)", ""); tempStr != "" {
+		if tempStr := promptWithConfig("temperature", useDefaults, "Temperature (0.0-2.0, optional)", ""); tempStr != "" {
 			if temp, err := strconv.ParseFloat(tempStr, 64); err == nil {
 				ans.Temperature = temp
 			}
@@ -906,9 +909,9 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 	}
 
 	tui.Println(tui.Header("Capabilities"))
-	ans.Streaming = conditionalPromptBool(useDefaults, "Enable streaming", true)
-	ans.PushNotifications = conditionalPromptBool(useDefaults, "Enable push notifications", false)
-	ans.StateTransitionHistory = conditionalPromptBool(useDefaults, "Enable state transition history", false)
+	ans.Streaming = promptBoolWithConfig("streaming", useDefaults, "Enable streaming", true)
+	ans.PushNotifications = promptBoolWithConfig("notifications", useDefaults, "Enable push notifications", false)
+	ans.StateTransitionHistory = promptBoolWithConfig("history", useDefaults, "Enable state transition history", false)
 
 	tui.Println(tui.Header("Artifacts Configuration"))
 	ans.ArtifactsEnabled = conditionalPromptBool(useDefaults, "Enable artifacts support (filesystem/MinIO storage)", false)
@@ -1119,14 +1122,14 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 	}
 
 	tui.Println(tui.Header("Server Configuration"))
-	portStr := conditionalPrompt(useDefaults, "Server port", "8080")
-	if port, err := strconv.Atoi(portStr); err == nil {
+	portStr := promptWithConfig("port", useDefaults, "Server port", "8080")
+	if port, err := strconv.Atoi(portStr); err == nil && port > 0 {
 		ans.Port = port
 	} else {
 		ans.Port = 8080
 	}
 	ans.Scheme = conditionalPrompt(useDefaults, "Server scheme (http/https)", "http")
-	ans.Debug = conditionalPromptBool(useDefaults, "Enable debug mode", false)
+	ans.Debug = promptBoolWithConfig("debug", useDefaults, "Enable debug mode", false)
 	ans.AuthEnabled = conditionalPromptBool(useDefaults, "Enable server authentication", false)
 
 	tui.Println(tui.Header("Agent Card Configuration"))
@@ -1371,12 +1374,33 @@ func conditionalPromptChoice(useDefaults bool, promptText string, choices []stri
 	return promptChoice(promptText, choices, defaultValue)
 }
 
-func promptString(promptText, defaultValue string) string {
+// stdinExhausted records that a prompt hit EOF on a non-terminal stdin (piped or
+// /dev/null, without --defaults). From then on every remaining prompt resolves to
+// its default without re-reading stdin, so the run completes and writes agent.yaml
+// instead of exiting mid-wizard (issue #438). On a real terminal EOF is still a
+// deliberate Ctrl+D abort and keeps exiting.
+var stdinExhausted bool
+
+// readPrompt reads one answer. The second return value reports whether the answer
+// came from the user; false means stdin was exhausted and defaultValue is returned.
+func readPrompt(promptText, defaultValue string) (string, bool) {
+	if stdinExhausted {
+		return defaultValue, false
+	}
 	input, err := prompt.ReadString(promptText, defaultValue)
 	if err != nil {
 		fmt.Println()
+		if !tui.IsTTY() {
+			stdinExhausted = true
+			return defaultValue, false
+		}
 		os.Exit(0)
 	}
+	return input, true
+}
+
+func promptString(promptText, defaultValue string) string {
+	input, _ := readPrompt(promptText, defaultValue)
 	return input
 }
 
@@ -1387,10 +1411,9 @@ func promptBool(promptText string, defaultValue bool) bool {
 	}
 
 	promptWithDefault := fmt.Sprintf("%s [y/n]", promptText)
-	input, err := prompt.ReadString(promptWithDefault, defaultStr)
-	if err != nil {
-		fmt.Println()
-		os.Exit(0)
+	input, answered := readPrompt(promptWithDefault, defaultStr)
+	if !answered {
+		return defaultValue
 	}
 
 	input = strings.ToLower(strings.TrimSpace(input))
@@ -1403,10 +1426,9 @@ func promptBool(promptText string, defaultValue bool) bool {
 
 func promptChoice(promptText string, choices []string, defaultValue string) string {
 	promptWithChoices := fmt.Sprintf("%s (%s)", promptText, strings.Join(choices, "/"))
-	input, err := prompt.ReadString(promptWithChoices, defaultValue)
-	if err != nil {
-		fmt.Println()
-		os.Exit(0)
+	input, answered := readPrompt(promptWithChoices, defaultValue)
+	if !answered {
+		return defaultValue
 	}
 
 	input = strings.TrimSpace(input)

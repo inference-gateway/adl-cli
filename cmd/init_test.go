@@ -722,3 +722,163 @@ func TestInitProviderModelFlags(t *testing.T) {
 		t.Errorf("ADL file should contain 'model: claude-sonnet-4-5', got:\n%s", contentStr)
 	}
 }
+
+// TestInitAITuningAndServerFlags guards issue #438: the AI tuning, capability and
+// server flags documented in the README must win over the prompt defaults in
+// `--defaults` mode instead of being silently dropped.
+func TestInitAITuningAndServerFlags(t *testing.T) {
+	outputPath := filepath.Join(t.TempDir(), "test-output")
+
+	cmd := initCmd
+	flags := map[string]string{
+		"defaults":      "true",
+		"path":          outputPath,
+		"type":          "ai-powered",
+		"system-prompt": "Custom prompt",
+		"max-tokens":    "100",
+		"temperature":   "0.5",
+		"streaming":     "false",
+		"notifications": "true",
+		"history":       "true",
+		"port":          "9000",
+		"debug":         "true",
+	}
+	for name, value := range flags {
+		if err := cmd.Flags().Set(name, value); err != nil {
+			t.Fatal(err)
+		}
+	}
+	defer func() {
+		for _, reset := range [][2]string{
+			{"type", ""}, {"system-prompt", ""}, {"max-tokens", "0"}, {"temperature", "0"},
+			{"streaming", "false"}, {"notifications", "false"}, {"history", "false"},
+			{"port", "0"}, {"debug", "false"},
+		} {
+			_ = cmd.Flags().Set(reset[0], reset[1])
+		}
+	}()
+
+	if err := runInit(cmd, []string{"test-agent"}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	content, err := os.ReadFile(filepath.Join(outputPath, "agent.yaml"))
+	if err != nil {
+		t.Fatalf("failed to read ADL file: %v", err)
+	}
+
+	var adl adlData
+	if err := yaml.Unmarshal(content, &adl); err != nil {
+		t.Fatalf("failed to parse ADL YAML: %v", err)
+	}
+
+	if adl.Spec.Agent == nil {
+		t.Fatalf("expected agent spec to be present for ai-powered agent")
+	}
+	if adl.Spec.Agent.SystemPrompt != "Custom prompt" {
+		t.Errorf("expected systemPrompt from --system-prompt, got: %q", adl.Spec.Agent.SystemPrompt)
+	}
+	if adl.Spec.Agent.MaxTokens != 100 {
+		t.Errorf("expected maxTokens 100 from --max-tokens, got: %d", adl.Spec.Agent.MaxTokens)
+	}
+	if adl.Spec.Agent.Temperature != 0.5 {
+		t.Errorf("expected temperature 0.5 from --temperature, got: %v", adl.Spec.Agent.Temperature)
+	}
+	if adl.Spec.Capabilities == nil {
+		t.Fatalf("expected capabilities to be present")
+	}
+	if adl.Spec.Capabilities.Streaming {
+		t.Errorf("expected streaming false from --streaming=false")
+	}
+	if !adl.Spec.Capabilities.PushNotifications {
+		t.Errorf("expected pushNotifications true from --notifications")
+	}
+	if !adl.Spec.Capabilities.StateTransitionHistory {
+		t.Errorf("expected stateTransitionHistory true from --history")
+	}
+	if adl.Spec.Server.Port != 9000 {
+		t.Errorf("expected port 9000 from --port, got: %d", adl.Spec.Server.Port)
+	}
+	if !adl.Spec.Server.Debug {
+		t.Errorf("expected debug true from --debug")
+	}
+}
+
+// TestInitTypeMinimalFlag guards issue #438: `--type minimal` must drop the
+// spec.agent block instead of scaffolding an ai-powered agent.
+func TestInitTypeMinimalFlag(t *testing.T) {
+	outputPath := filepath.Join(t.TempDir(), "test-output")
+
+	cmd := initCmd
+	if err := cmd.Flags().Set("defaults", "true"); err != nil {
+		t.Fatal(err)
+	}
+	if err := cmd.Flags().Set("path", outputPath); err != nil {
+		t.Fatal(err)
+	}
+	if err := cmd.Flags().Set("type", "minimal"); err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = cmd.Flags().Set("type", "") }()
+
+	if err := runInit(cmd, []string{"test-agent"}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	content, err := os.ReadFile(filepath.Join(outputPath, "agent.yaml"))
+	if err != nil {
+		t.Fatalf("failed to read ADL file: %v", err)
+	}
+
+	var adl adlData
+	if err := yaml.Unmarshal(content, &adl); err != nil {
+		t.Fatalf("failed to parse ADL YAML: %v", err)
+	}
+
+	if adl.Spec.Agent != nil {
+		t.Errorf("expected no spec.agent block for --type minimal, got: %+v", adl.Spec.Agent)
+	}
+}
+
+// TestInitNonInteractiveWithoutDefaults guards issue #438: with no TTY and no
+// --defaults, prompts must fall back to their defaults and still write
+// agent.yaml instead of exiting on the first EOF.
+func TestInitNonInteractiveWithoutDefaults(t *testing.T) {
+	outputPath := filepath.Join(t.TempDir(), "test-output")
+
+	cmd := initCmd
+	if err := cmd.Flags().Set("defaults", "false"); err != nil {
+		t.Fatal(err)
+	}
+	if err := cmd.Flags().Set("path", outputPath); err != nil {
+		t.Fatal(err)
+	}
+	if err := cmd.Flags().Set("name", "weather-agent"); err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		_ = cmd.Flags().Set("defaults", "true")
+		_ = cmd.Flags().Set("name", "")
+		stdinExhausted = false
+	}()
+
+	if err := runInit(cmd, nil); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	content, err := os.ReadFile(filepath.Join(outputPath, "agent.yaml"))
+	if err != nil {
+		t.Fatalf("expected agent.yaml to be written without --defaults: %v", err)
+	}
+
+	var adl adlData
+	if err := yaml.Unmarshal(content, &adl); err != nil {
+		t.Fatalf("failed to parse ADL YAML: %v", err)
+	}
+	if adl.Metadata.Name != "weather-agent" {
+		t.Errorf("expected name from --name flag, got: %q", adl.Metadata.Name)
+	}
+	if adl.Spec.Server.Port != 8080 {
+		t.Errorf("expected default port 8080 for unanswered prompt, got: %d", adl.Spec.Server.Port)
+	}
+}
