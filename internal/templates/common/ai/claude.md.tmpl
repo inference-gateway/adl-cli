@@ -187,6 +187,16 @@ No sandboxed environments are configured. Install the toolchain manually:
 - **ADL Version**: Ensure ADL CLI {{ .Metadata.CLIVersion }} or compatible version for regeneration
 - **Port Configuration**: Default {{ .ADL.Spec.Server.Port | default "8080" }}, configurable via `A2A_PORT` or `A2A_SERVER_PORT`
 
+## Code Readability
+
+- Write self-explanatory code: clear names and small, single-purpose functions carry the intent.
+  If a block needs a comment to be understood, extract it into a well-named function or variable.
+- No inline comments inside function bodies.
+- Doc comments on functions and types are at most 5 lines: what it does and why, not how.
+- No comments above modules, packages, or files.
+- Tool directives are not comments and stay where the tool needs them (lint suppressions, build
+  tags, compiler pragmas, code generation markers).
+
 ## Debugging Tips
 
 - Enable debug mode: `A2A_DEBUG=true`{{ if .ADL.Spec.Server.Debug }} (currently enabled in agent.yaml){{ end }}
