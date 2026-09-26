@@ -518,7 +518,7 @@ The complete ADL schema includes:
 - **services**: Service services with interfaces, factories, and type definitions
 - **agent**: AI provider configuration (OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama, Ollama Cloud, Nvidia)
 - **tools**: Function-call definitions with JSON schemas, validation, and service injection support
-- **skills**: Markdown playbooks (id + optional `bare`, version, source) pulled from the skills registry, fetched as a full directory from a GitHub repo (shorthand or URL), or scaffolded locally; advertised on the agent card and prepended to the system prompt at runtime
+- **skills**: Markdown playbooks (id + optional `bare`, version, source) pulled from the skills registry, fetched as a full directory from a GitHub repo (shorthand or URL), or scaffolded locally into `.agents/skills/<id>/`; advertised on the agent card, and summarised at runtime in an `AVAILABLE SKILLS:` block appended to the system prompt (frontmatter only - the model reads each `SKILL.md` body on demand)
 - **server**: HTTP server configuration with authentication support
 - **language**: Programming language-specific settings (Go, Rust, TypeScript) and configurable acronyms
 - **scm**: Source control management configuration (GitHub, GitLab)
@@ -835,7 +835,9 @@ spec:
 The ADL spec distinguishes two complementary concepts:
 
 - **Tools** (`spec.tools`) are function-call entrypoints with explicit JSON schemas. They are generated as code in the target language and registered with the agent's toolbox. The model invokes them by name with structured arguments.
-- **Skills** (`spec.skills`) are markdown playbooks (with YAML frontmatter) that describe _when and how_ to use the tools. Each is written to its own directory at `skills/<id>/SKILL.md` in the generated project, advertised on the agent card so orchestrators can discover them, and prepended to the system prompt at runtime. The directory layout matches Anthropic's [agent skills convention](https://github.com/anthropics/skills) - bare skills can ship arbitrary scripts, templates, or reference material alongside `SKILL.md`.
+- **Skills** (`spec.skills`) are markdown playbooks (with YAML frontmatter) that describe _when and how_ to use the tools. Each is written to its own directory at `.agents/skills/<id>/SKILL.md` in the generated project, advertised on the agent card so orchestrators can discover them, and summarised at runtime in an `AVAILABLE SKILLS:` block appended to the system prompt - only the frontmatter is inlined; the model reads each `SKILL.md` body on demand (see [Runtime: AVAILABLE SKILLS manifest + on-demand Read](#runtime-available-skills-manifest--on-demand-read)). The directory layout matches Anthropic's [agent skills convention](https://github.com/anthropics/skills) - bare skills can ship arbitrary scripts, templates, or reference material alongside `SKILL.md`.
+
+When `spec.skills` is non-empty, `adl generate` also creates a `.claude/skills` → `../.agents/skills` relative symlink in the generated project, so Claude Code discovers the same skill tree at its conventional path without duplicating any files.
 
 A skill entry is small:
 
@@ -859,9 +861,9 @@ spec:
 
 ### Resolution rules
 
-- **`bare: true`** → the CLI scaffolds `skills/<id>/SKILL.md` with frontmatter from the manifest and a TODO body that you author by hand. The whole `skills/<id>/` directory is listed in `.adl-ignore`, so any bundled scripts, templates, or resources you drop alongside `SKILL.md` are preserved on regeneration.
-- **`source:` set** → the source must resolve to a public GitHub directory (a `/tree/<ref>/<path>` URL, or one of the shorthand forms below). The CLI pulls the _entire_ directory - `SKILL.md`, reference docs, bundled scripts, anything else - and writes it to `skills/<id>/`. Non-`github.com` URLs are rejected so the same code path always produces a complete skill bundle, not a stray markdown file.
-- **Otherwise** → fetch `https://registry.inference-gateway.com/skills/<id>[/<version>].md` (becomes `skills/<id>/SKILL.md`). Override the registry with `ADL_SKILLS_REGISTRY`. Registry-by-id currently ships `SKILL.md` only; if you need bundled assets, use `source:` to point at a GitHub directory.
+- **`bare: true`** → the CLI scaffolds `.agents/skills/<id>/SKILL.md` with frontmatter from the manifest and a TODO body that you author by hand. The whole `.agents/skills/<id>/` directory is listed in `.adl-ignore`, so any bundled scripts, templates, or resources you drop alongside `SKILL.md` are preserved on regeneration.
+- **`source:` set** → the source must resolve to a public GitHub directory (a `/tree/<ref>/<path>` URL, or one of the shorthand forms below). The CLI pulls the _entire_ directory - `SKILL.md`, reference docs, bundled scripts, anything else - and writes it to `.agents/skills/<id>/`. Non-`github.com` URLs are rejected so the same code path always produces a complete skill bundle, not a stray markdown file.
+- **Otherwise** → fetch `https://registry.inference-gateway.com/skills/<id>[/<version>].md` (becomes `.agents/skills/<id>/SKILL.md`). Override the registry with `ADL_SKILLS_REGISTRY`. Registry-by-id currently ships `SKILL.md` only; if you need bundled assets, use `source:` to point at a GitHub directory.
 
 ### Licensing
 
@@ -917,7 +919,7 @@ The 3-segment form assumes a `skills/<id>/` subdirectory inside the repo (the co
 
 ### Runtime: AVAILABLE SKILLS manifest + on-demand Read
 
-The generated agent advertises skills to the LLM via a frontmatter-only manifest, **not** by inlining SKILL.md bodies. At startup it walks first-level subdirectories under `skills/` (overridable with `A2A_SKILLS_DIR`), parses each `<id>/SKILL.md`'s YAML frontmatter, and appends an `AVAILABLE SKILLS:` block to the system prompt:
+The generated agent advertises skills to the LLM via a frontmatter-only manifest, **not** by inlining SKILL.md bodies. At startup it walks first-level subdirectories under `.agents/skills` (overridable with `A2A_SKILLS_DIR`), parses each `<id>/SKILL.md`'s YAML frontmatter, and appends an `AVAILABLE SKILLS:` block to the system prompt:
 
 ```text
 AVAILABLE SKILLS:
@@ -926,12 +928,14 @@ skill's description, read the SKILL.md file at the listed path using the Read
 tool, then follow its instructions.
 
 - incident-response: Use this when the user reports a production incident...
-  Path: skills/incident-response/SKILL.md
+  Path: .agents/skills/incident-response/SKILL.md
 - pdf: Fill in PDF forms and extract structured data from PDFs.
-  Path: skills/pdf/SKILL.md
+  Path: .agents/skills/pdf/SKILL.md
 ```
 
-The model loads each SKILL.md body on demand via the `Read` built-in tool, and executes any bundled scripts via `Bash` / `Write` / `Edit`. **A skills-using agent must therefore list `- id: read` in `spec.tools` and set `spec.config.tools.read.enabled: true`** - the validator enforces this; see [Reserved built-in tools](#reserved-built-in-tools).
+The model loads each SKILL.md body on demand via the `Read` built-in tool, and executes any bundled scripts via `Bash` / `Write` / `Edit`. **A skills-using agent must therefore list `- id: read` in `spec.tools` and set `spec.config.tools.read.enabled: true`** - see [Reserved built-in tools](#reserved-built-in-tools). `adl validate` does not enforce this: when `spec.skills` and `spec.agent` are both set, `validateSkills` (`internal/schema/validator.go`) emits a non-fatal **warning** if `- id: read` is missing from `spec.tools` or `spec.config.tools.read.enabled` is not `true`. The manifest still validates; the agent just cannot load any SKILL.md body at runtime.
+
+The `Read` built-in always allows the skills directory regardless of `allowed_roots`, so skills work even with a narrow read allowlist.
 
 ### Reserved built-in tools
 
@@ -969,25 +973,35 @@ spec:
       read:
         enabled: true
         max_lines: 2000 # offset/limit default window
-        allowed_roots: [] # empty = project-wide
+        allowed_roots: # REQUIRED: empty denies every path (fail-closed)
+          - ./docs
+          - ./data
       bash:
         enabled: true
         whitelist: [ls, cat, grep, jq]
         timeout_seconds: 30
+        working_dir: ./workspace # optional cwd for the command (default: process cwd)
       write:
         enabled: false # listed but explicitly disabled
+        allowed_roots: # REQUIRED when enabled: empty denies every path
+          - ./output
       edit:
         enabled: true
+        allowed_roots: # REQUIRED: empty denies every path
+          - ./output
       fetch:
         enabled: true
-        allowed_domains: # whitelist of hosts (empty = unrestricted, discouraged)
+        allowed_domains: # whitelist of hosts (empty = any public host)
           - example.com
           - .api.dev # entries starting with "." match any subdomain
+        allow_internal: false # true to permit loopback/private/link-local hosts
         max_bytes: 10485760 # 10 MiB cap on response body (default)
         timeout_seconds: 30 # total request timeout (default)
         download_dir: /tmp # root for save_path writes (default /tmp)
         allow_downloads: false # set true to allow writing response bodies to disk
 ```
+
+**`allowed_roots` fails closed.** In the Go and Rust built-in templates an empty (or omitted) `allowed_roots` denies **every** path for `read`, `write` and `edit` - it is not "project-wide". You must list the roots you want to permit. Two directories are exempt: `read` always allows the skills directory (`A2A_SKILLS_DIR`, default `.agents/skills`) and the artifacts directory (`A2A_ARTIFACTS_STORAGE_BASE_PATH`, default `/tmp/artifacts`); `write` and `edit` always allow the artifacts directory.
 
 Values are baked into the generated constructor as compile-time literals - there's no `ToolsConfig` struct in `config/config.go` because reserved-namespace sections are intentionally skipped. The validator decodes each `spec.config.tools.<id>` block into the built-in's typed shape and rejects unknown keys (typos like `tymeout_seconds` fail with `spec.config.tools.bash.tymeout_seconds`).
 
@@ -998,8 +1012,10 @@ Runtime overrides for Bash (read inside `tools/bash.go`):
 
 Runtime overrides for Fetch (resolution precedence: env > compile-time literal > default-disabled):
 
-- Go: `TOOLS_FETCH_ENABLED`, `TOOLS_FETCH_ALLOWED_DOMAINS`, `TOOLS_FETCH_MAX_BYTES`, `TOOLS_FETCH_TIMEOUT_SECONDS`, `TOOLS_FETCH_DOWNLOAD_DIR`, `TOOLS_FETCH_ALLOW_DOWNLOADS` (envconfig-style; comma-separated for lists).
-- Rust: `A2A_FETCH_DISABLED=1` (kill switch), `A2A_FETCH_ALLOWED_DOMAINS`, `A2A_FETCH_MAX_BYTES`, `A2A_FETCH_TIMEOUT_SECONDS`, `A2A_FETCH_DOWNLOAD_DIR`, `A2A_FETCH_ALLOW_DOWNLOADS`.
+- Go: `TOOLS_FETCH_ENABLED`, `TOOLS_FETCH_ALLOWED_DOMAINS`, `TOOLS_FETCH_ALLOW_INTERNAL`, `TOOLS_FETCH_MAX_BYTES`, `TOOLS_FETCH_TIMEOUT_SECONDS`, `TOOLS_FETCH_DOWNLOAD_DIR`, `TOOLS_FETCH_ALLOW_DOWNLOADS` (envconfig-style; comma-separated for lists).
+- Rust: `A2A_FETCH_DISABLED=1` (kill switch), `A2A_FETCH_ALLOWED_DOMAINS`, `A2A_FETCH_ALLOW_INTERNAL`, `A2A_FETCH_MAX_BYTES`, `A2A_FETCH_TIMEOUT_SECONDS`, `A2A_FETCH_DOWNLOAD_DIR`, `A2A_FETCH_ALLOW_DOWNLOADS`.
+
+**An empty `allowed_domains` is not unrestricted.** With no allowlist, `fetch` still refuses any host that resolves to a loopback, private (RFC 1918 / IPv6 ULA), link-local or unspecified address - an SSRF guard applied to the initial request and to every redirect hop. Set `allow_internal: true` (or `TOOLS_FETCH_ALLOW_INTERNAL` / `A2A_FETCH_ALLOW_INTERNAL` at runtime) to reach internal hosts, e.g. when calling a sidecar or a service on the cluster network. When `allowed_domains` _is_ non-empty the allowlist decides on its own and `allow_internal` is not consulted.
 
 The Fetch tool supports `GET` and `HEAD` only. Optional `save_path` writes the response body to a path resolved under `download_dir` - absolute paths and parent-directory traversal (`..`) are rejected, and the request fails unless `allow_downloads: true`. Bodies (and on-disk files) are capped at `max_bytes`; oversized responses are truncated and the result payload sets `"truncated": true`. The Go template uses only the standard library (`net/http`); the Rust template adds `reqwest` (rustls-tls + json features) to `Cargo.toml` automatically when `- id: fetch` is present in `spec.tools`.
 
@@ -1136,7 +1152,7 @@ spec:
 
 **Generated Tool Code:**
 
-> Illustrative example - see `internal/templates/languages/go/tool.go.tmpl` for the actual template. Generated tools live under `tools/`, not `skills/`.
+> Illustrative example - see `internal/templates/languages/go/tool.go.tmpl` for the actual template. Generated tools live under `tools/`, not `.agents/skills/`.
 
 ```go
 type ExportReportTool struct {
@@ -1230,8 +1246,8 @@ my-agent/
 ├── tools/
 │   ├── create_event.go             # Function-call tools with injected services
 │   └── list_events.go
-├── skills/
-│   ├── calendar-workflow/          # Markdown playbooks loaded into the system prompt
+├── .agents/skills/
+│   ├── calendar-workflow/          # Markdown playbooks read on demand by the model
 │   │   └── SKILL.md
 │   └── meeting-summary/
 │       └── SKILL.md
@@ -1270,7 +1286,7 @@ Skills automatically receive injected services as constructor parameters:
 
 **Example `tools/create_event.go`:**
 
-> Illustrative example - see `internal/templates/languages/go/tool.go.tmpl` for the actual template. Generated tools live under `tools/`, not `skills/`.
+> Illustrative example - see `internal/templates/languages/go/tool.go.tmpl` for the actual template. Generated tools live under `tools/`, not `.agents/skills/`.
 
 ```go
 type CreateEventTool struct {
@@ -1332,11 +1348,13 @@ my-go-agent/
 ├── tools/                     # Function-call tool implementations
 │   ├── query_database.go      # Individual tool files (TODO placeholders)
 │   └── send_notification.go
-├── skills/                    # Skill directories (SKILL.md + optional bundled assets)
-│   ├── incident-response/     # Loaded into the system prompt at startup
+├── .agents/skills/            # Skill directories (SKILL.md + optional bundled assets)
+│   ├── incident-response/     # Frontmatter listed in the AVAILABLE SKILLS block at startup
 │   │   └── SKILL.md
 │   └── support-handoff/
 │       └── SKILL.md
+├── .claude/
+│   └── skills -> ../.agents/skills  # Symlink so Claude Code finds the same tree
 ├── Taskfile.yml               # Development tasks (build, test, lint)
 ├── Dockerfile                 # Container configuration
 ├── .adl-ignore                # Files to protect from regeneration
@@ -1376,11 +1394,13 @@ my-rust-agent/
 │       ├── mod.rs             # Module declarations
 │       ├── query_database.rs  # Individual tool implementations
 │       └── send_notification.rs
-├── skills/                    # Skill directories (SKILL.md + optional bundled assets)
+├── .agents/skills/            # Skill directories (SKILL.md + optional bundled assets)
 │   ├── incident-response/
 │   │   └── SKILL.md
 │   └── support-handoff/
 │       └── SKILL.md
+├── .claude/
+│   └── skills -> ../.agents/skills  # Symlink so Claude Code finds the same tree
 ├── Cargo.toml                 # Rust package configuration
 ├── Taskfile.yml               # Development tasks
 ├── Dockerfile                 # Rust-optimized container
@@ -1411,11 +1431,13 @@ my-typescript-agent/
 │       ├── index.ts           # Toolbox wiring
 │       ├── query_database.ts  # Individual tool implementations (TODO placeholders)
 │       └── send_notification.ts
-├── skills/                    # Skill directories (SKILL.md + optional bundled assets)
+├── .agents/skills/            # Skill directories (SKILL.md + optional bundled assets)
 │   ├── incident-response/
 │   │   └── SKILL.md
 │   └── support-handoff/
 │       └── SKILL.md
+├── .claude/
+│   └── skills -> ../.agents/skills  # Symlink so Claude Code finds the same tree
 ├── package.json               # Node package definition + scripts
 ├── tsconfig.json              # TypeScript compiler configuration
 ├── Taskfile.yml               # Development tasks
@@ -2058,7 +2080,7 @@ Each language has its own file mapping that determines what gets generated:
 - `internal/{service}/{service}.go` → Service implementation per ADL service
 - `tools/{toolname}.go` → Individual function-call tool implementations
 - `tools/{builtin}.go` + `tools/{builtin}_test.go` → Reserved built-in tool implementations (read, bash, write, edit, fetch)
-- `skills/{skillid}/SKILL.md` → Markdown skill playbooks (loaded into system prompt at runtime)
+- `.agents/skills/{skillid}/SKILL.md` → Markdown skill playbooks (frontmatter listed in the runtime `AVAILABLE SKILLS:` block; body read on demand)
 - `go.mod` → Go module configuration
 - `Dockerfile` → Container image
 - `.dockerignore` → Docker build exclusions
@@ -2084,7 +2106,7 @@ Each language has its own file mapping that determines what gets generated:
 - `src/tools/{toolname}.rs` → Tool descriptor + handler
 - `src/tools/{builtin}.rs` → Reserved built-in tool implementations (read, bash, write, edit, fetch)
 - `src/tools/mod.rs` → Module declarations
-- `skills/{skillid}/SKILL.md` → Markdown skill playbooks
+- `.agents/skills/{skillid}/SKILL.md` → Markdown skill playbooks
 - `Cargo.toml` → Rust package configuration
 - `Dockerfile` → Container image
 - `.dockerignore` → Docker build exclusions
@@ -2113,7 +2135,7 @@ Each language has its own file mapping that determines what gets generated:
 - `src/tools/{toolname}.ts` → Individual function-call tool implementations
 - `src/tools/index.ts` → Tool module barrel export
 - `src/worker.ts` → Cloudflare Worker entrypoint (only when `spec.deployment.type: cloudflare`)
-- `skills/{skillid}/SKILL.md` → Markdown skill playbooks
+- `.agents/skills/{skillid}/SKILL.md` → Markdown skill playbooks
 - `package.json` → Node.js package configuration
 - `pnpm-workspace.yaml` → pnpm workspace configuration
 - `tsconfig.json` → TypeScript compiler configuration
