@@ -80,11 +80,50 @@ tasks:
     desc: Deploy to Kubernetes
     cmd: kubectl apply -f k8s/
 {{- else if eq .ADL.Spec.Deployment.Type "cloudrun" }}
+{{- $cr := .ADL.Spec.Deployment.CloudRun }}
+{{- $cpu := "1" }}
+{{- $memory := "512Mi" }}
+{{- $minInstances := 0 }}
+{{- $maxInstances := 10 }}
+{{- $concurrency := 1000 }}
+{{- $timeout := 3600 }}
+{{- $serviceAccount := printf "%s@${PROJECT_ID}.iam.gserviceaccount.com" .ADL.Metadata.Name }}
+{{- $executionEnvironment := "gen2" }}
+{{- $allowUnauthenticated := true }}
+{{- $image := printf "gcr.io/${PROJECT_ID}/%s:%s" .ADL.Metadata.Name .ADL.Metadata.Version }}
+{{- $useCloudBuild := false }}
+{{- $extraEnv := "" }}
+{{- if $cr }}
+{{- if $cr.Resources }}
+{{- $cpu = $cr.Resources.CPU | default $cpu }}
+{{- $memory = $cr.Resources.Memory | default $memory }}
+{{- end }}
+{{- if $cr.Scaling }}
+{{- $minInstances = $cr.Scaling.MinInstances | default $minInstances }}
+{{- $maxInstances = $cr.Scaling.MaxInstances | default $maxInstances }}
+{{- $concurrency = $cr.Scaling.Concurrency | default $concurrency }}
+{{- end }}
+{{- if $cr.Service }}
+{{- $timeout = $cr.Service.Timeout | default $timeout }}
+{{- $serviceAccount = $cr.Service.ServiceAccount | default $serviceAccount }}
+{{- $executionEnvironment = $cr.Service.ExecutionEnvironment | default $executionEnvironment }}
+{{- $allowUnauthenticated = $cr.Service.AllowUnauthenticated }}
+{{- end }}
+{{- if $cr.Image }}
+{{- $image = printf "%s/%s:%s" ($cr.Image.Registry | default "gcr.io") ($cr.Image.Repository | default (printf "${PROJECT_ID}/%s" .ADL.Metadata.Name)) ($cr.Image.Tag | default .ADL.Metadata.Version) }}
+{{- $useCloudBuild = $cr.Image.UseCloudBuild }}
+{{- end }}
+{{- range $key, $value := $cr.Environment }}
+{{- $extraEnv = printf "%s,%s=%s" $extraEnv $key $value }}
+{{- end }}
+{{- end }}
 
   deploy:
     desc: Deploy to Google Cloud Run
+{{- if not $useCloudBuild }}
     deps:
       - docker:build
+{{- end }}
     env:
       SERVICE_NAME: "{{ .ADL.Metadata.Name }}"
       PORT: "{{ .ADL.Spec.Server.Port | default 8080 }}"
@@ -98,27 +137,33 @@ tasks:
           echo "Error: REGION environment variable is required" 
           exit 1
         fi
+{{- if $useCloudBuild }}
       - |
-        echo "Pushing image to gcr.io/${PROJECT_ID}/${SERVICE_NAME}:{{ .ADL.Metadata.Version }}"
-        docker tag ${SERVICE_NAME}:{{ .ADL.Metadata.Version }} gcr.io/${PROJECT_ID}/${SERVICE_NAME}:{{ .ADL.Metadata.Version }}
-        docker push gcr.io/${PROJECT_ID}/${SERVICE_NAME}:{{ .ADL.Metadata.Version }}
+        echo "Building and pushing image using Cloud Build..."
+        gcloud builds submit --tag {{ $image }}
+{{- else }}
+      - |
+        echo "Pushing image to {{ $image }}"
+        docker tag ${SERVICE_NAME}:{{ .ADL.Metadata.Version }} {{ $image }}
+        docker push {{ $image }}
+{{- end }}
       - |
         echo "Deploying to Cloud Run..."
         gcloud run deploy ${SERVICE_NAME} \
-          --image gcr.io/${PROJECT_ID}/${SERVICE_NAME}:{{ .ADL.Metadata.Version }} \
+          --image {{ $image }} \
           --platform managed \
           --region ${REGION} \
           --port ${PORT} \
-          --allow-unauthenticated \
-          --set-env-vars "A2A_SERVER_PORT=${PORT},ENV=production{{ if .ADL.Spec.Server.Debug }},DEBUG=true{{ end }}" \
-          --cpu "{{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Resources.CPU | default "1" }}{{ else }}1{{ end }}" \
-          --memory "{{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Resources.Memory | default "512Mi" }}{{ else }}512Mi{{ end }}" \
-          --min-instances {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Scaling.MinInstances | default 0 }}{{ else }}0{{ end }} \
-          --max-instances {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Scaling.MaxInstances | default 10 }}{{ else }}10{{ end }} \
-          --concurrency {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Scaling.Concurrency | default 1000 }}{{ else }}1000{{ end }} \
-          --timeout {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Service.Timeout | default 3600 }}{{ else }}3600{{ end }} \
-          --service-account "{{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Service.ServiceAccount | default (printf "%s@${PROJECT_ID}.iam.gserviceaccount.com" .ADL.Metadata.Name) }}{{ else }}{{ .ADL.Metadata.Name }}@${PROJECT_ID}.iam.gserviceaccount.com{{ end }}" \
-          --execution-environment {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Service.ExecutionEnvironment | default "gen2" }}{{ else }}gen2{{ end }}
+          {{ if $allowUnauthenticated }}--allow-unauthenticated{{ else }}--no-allow-unauthenticated{{ end }} \
+          --set-env-vars "A2A_SERVER_PORT=${PORT},ENV=production{{ if .ADL.Spec.Server.Debug }},DEBUG=true{{ end }}{{ $extraEnv }}" \
+          --cpu "{{ $cpu }}" \
+          --memory "{{ $memory }}" \
+          --min-instances {{ $minInstances }} \
+          --max-instances {{ $maxInstances }} \
+          --concurrency {{ $concurrency }} \
+          --timeout {{ $timeout }} \
+          --service-account "{{ $serviceAccount }}" \
+          --execution-environment {{ $executionEnvironment }}
       - |
         echo "Deployment completed successfully!"
         echo "Service URL: $(gcloud run services describe ${SERVICE_NAME} --region=${REGION} --format='value(status.url)')"
@@ -140,24 +185,24 @@ tasks:
         fi
       - |
         echo "Building and pushing image using Cloud Build..."
-        gcloud builds submit --tag gcr.io/${PROJECT_ID}/${SERVICE_NAME}:{{ .ADL.Metadata.Version }}
+        gcloud builds submit --tag {{ $image }}
       - |
         echo "Deploying to Cloud Run..."
         gcloud run deploy ${SERVICE_NAME} \
-          --image gcr.io/${PROJECT_ID}/${SERVICE_NAME}:{{ .ADL.Metadata.Version }} \
+          --image {{ $image }} \
           --platform managed \
           --region ${REGION} \
           --port ${PORT} \
-          --allow-unauthenticated \
-          --set-env-vars "A2A_SERVER_PORT=${PORT},ENV=production{{ if .ADL.Spec.Server.Debug }},DEBUG=true{{ end }}" \
-          --cpu "{{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Resources.CPU | default "1" }}{{ else }}1{{ end }}" \
-          --memory "{{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Resources.Memory | default "512Mi" }}{{ else }}512Mi{{ end }}" \
-          --min-instances {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Scaling.MinInstances | default 0 }}{{ else }}0{{ end }} \
-          --max-instances {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Scaling.MaxInstances | default 10 }}{{ else }}10{{ end }} \
-          --concurrency {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Scaling.Concurrency | default 1000 }}{{ else }}1000{{ end }} \
-          --timeout {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Service.Timeout | default 3600 }}{{ else }}3600{{ end }} \
-          --service-account "{{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Service.ServiceAccount | default (printf "%s@${PROJECT_ID}.iam.gserviceaccount.com" .ADL.Metadata.Name) }}{{ else }}{{ .ADL.Metadata.Name }}@${PROJECT_ID}.iam.gserviceaccount.com{{ end }}" \
-          --execution-environment {{ if .ADL.Spec.Deployment.CloudRun }}{{ .ADL.Spec.Deployment.CloudRun.Service.ExecutionEnvironment | default "gen2" }}{{ else }}gen2{{ end }}
+          {{ if $allowUnauthenticated }}--allow-unauthenticated{{ else }}--no-allow-unauthenticated{{ end }} \
+          --set-env-vars "A2A_SERVER_PORT=${PORT},ENV=production{{ if .ADL.Spec.Server.Debug }},DEBUG=true{{ end }}{{ $extraEnv }}" \
+          --cpu "{{ $cpu }}" \
+          --memory "{{ $memory }}" \
+          --min-instances {{ $minInstances }} \
+          --max-instances {{ $maxInstances }} \
+          --concurrency {{ $concurrency }} \
+          --timeout {{ $timeout }} \
+          --service-account "{{ $serviceAccount }}" \
+          --execution-environment {{ $executionEnvironment }}
       - |
         echo "Deployment completed successfully!"
         echo "Service URL: $(gcloud run services describe ${SERVICE_NAME} --region=${REGION} --format='value(status.url)')"
