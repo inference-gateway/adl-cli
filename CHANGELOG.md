@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.64.2](https://github.com/inference-gateway/adl-cli/compare/v0.64.1...v0.64.2) (2026-09-26)
+
+### 🐛 Bug Fixes
+
+* honor cloudrun image, auth and env settings ([#442](https://github.com/inference-gateway/adl-cli/issues/442)) ([25fb094](https://github.com/inference-gateway/adl-cli/commit/25fb09405b46cbbfc8ba12c2a3e1ed1a21af5c6d))
+* **init:** honor documented flags in non-interactive mode ([#443](https://github.com/inference-gateway/adl-cli/issues/443)) ([c225858](https://github.com/inference-gateway/adl-cli/commit/c2258587841a998303147163e56c1285684b1347)), closes [#438](https://github.com/inference-gateway/adl-cli/issues/438)
+
+### 📚 Documentation
+
+* align README manifests, telemetry and hooks with code ([#440](https://github.com/inference-gateway/adl-cli/issues/440)) ([1f9216d](https://github.com/inference-gateway/adl-cli/commit/1f9216d1500b8d928dc6571baa56628a3948ec96))
+* align readme with generated k8s and ci/cd output ([#439](https://github.com/inference-gateway/adl-cli/issues/439)) ([5c019b3](https://github.com/inference-gateway/adl-cli/commit/5c019b3ad31810e7dd8ab8d00a3baf1eeb1594d6))
+* fix skills dir and built-in tool defaults ([#441](https://github.com/inference-gateway/adl-cli/issues/441)) ([675193f](https://github.com/inference-gateway/adl-cli/commit/675193fbf1572642219d58d652e558f08703371c))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump claude-code 2.1.278 -> 2.1.280 ([#432](https://github.com/inference-gateway/adl-cli/issues/432)) ([ad06706](https://github.com/inference-gateway/adl-cli/commit/ad0670629d16c7dbcba4d9f320be23d7924cccc2))
+* **deps:** bump infer CLI v0.205.3 -> v0.208.0 ([#433](https://github.com/inference-gateway/adl-cli/issues/433)) ([83be092](https://github.com/inference-gateway/adl-cli/commit/83be092c9e3e7f9073f25d58aea0785397abf95e))
+
 ## [0.64.1](https://github.com/inference-gateway/adl-cli/compare/v0.64.0...v0.64.1) (2026-09-25)
 
 ### 👷 CI
