@@ -433,10 +433,24 @@ The `--deployment` flag generates platform-specific deployment configurations:
   - Configurable resources (CPU, memory), scaling (min/max instances), and service options
   - Uses direct gcloud commands for truly serverless deployment (no Kubernetes required)
   - Automatic container building with Docker or Cloud Build integration
-- **Kubernetes Deployment**: Creates `k8s/deployment.yaml` with standard Kubernetes manifests
-  - Enterprise-ready configurations with resource limits and health checks
-  - ConfigMap and Secret integration for environment variables
-  - Service and Ingress configurations for load balancing
+- **Kubernetes Deployment**: Creates `k8s/deployment.yaml` containing a `Namespace` named `<name>-ns` and an
+  `Agent` custom resource (`apiVersion: core.inference-gateway.com/v1alpha1`)
+  - The target cluster must have the Inference Gateway Operator and its `Agent` CRD installed - the operator
+    reconciles the `Agent` resource into the underlying workload
+  - No Deployment, Service, Ingress, ConfigMap, Secret, health checks or resource limits are generated; those
+    are the operator's responsibility
+  - The container image defaults to `<name>:<version>` and can be overridden with `spec.deployment.kubernetes.image`:
+
+    ```yaml
+    spec:
+      deployment:
+        type: kubernetes
+        kubernetes:
+          image:
+            registry: ghcr.io/your-org # optional, prefixed to the repository
+            repository: weather-agent # defaults to metadata.name
+            tag: 1.2.3 # defaults to metadata.version
+    ```
 
 ## Agent Definition Language (ADL)
 
@@ -1440,7 +1454,7 @@ This creates a GitHub Actions workflow (`.github/workflows/ci.yml`) that include
 
 - **Automated Testing**: Runs all tests on every push and pull request
 - **Code Quality**: Format checking and linting
-- **Multi-Environment**: Supports main and develop branches
+- **Branch Scope**: Triggers on push and pull requests targeting `main`
 - **Caching**: Go module caching for faster builds
 - **Task Integration**: Uses the generated Taskfile for consistent build steps
 
@@ -1489,10 +1503,12 @@ gh workflow run cd.yml
 **Container Registry**: Published images are available at:
 
 ```text
+ghcr.io/your-org/your-agent:1.0.0
 ghcr.io/your-org/your-agent:latest
-ghcr.io/your-org/your-agent:v1.0.0
-ghcr.io/your-org/your-agent:1.0
 ```
+
+The version tag carries no `v` prefix (the git tag does), and `:latest` is only pushed from `main` - releases
+from `rc/*` branches publish the version tag alone.
 
 ## CloudRun Deployment
 
@@ -1589,9 +1605,14 @@ This creates:
 
 **Required GitHub Secrets:**
 
-- `GCP_SA_KEY`: Service account key JSON
+- `GCP_CREDENTIALS`: Service account credentials JSON (used by the CloudRun deploy job)
 - `GCP_PROJECT_ID`: Google Cloud project ID
 - `GCP_REGION`: Deployment region (e.g., us-central1)
+
+The same `.github/workflows/cd.yml` also contains deploy jobs for the other platforms, which require:
+
+- `KUBECONFIG`: Kubeconfig for the target cluster (Kubernetes deploy job)
+- `VERCEL_TOKEN`: Vercel API token (Vercel deploy job)
 
 ### CloudRun Benefits
 
@@ -2020,9 +2041,9 @@ Each language has its own file mapping that determines what gets generated:
 - `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` → AI assistant documentation (conditional on AI toggles)
 - `.github/ISSUE_TEMPLATE/*.md` → GitHub issue templates (conditional on SCM config)
 - `.github/dependabot.yml` → Dependabot configuration (conditional on SCM config)
-- CI workflow (`.github/workflows/ci.go.yaml`) → Conditional on SCM CI toggle
-- CD workflow (`.github/workflows/cd.yaml`) → Conditional on SCM CD toggle
-- AI agent workflows (`.github/workflows/ai-*.yaml`) → Conditional on AI orchestrator toggles
+- CI workflow (`.github/workflows/ci.yml`) → Conditional on SCM CI toggle
+- CD workflow (`.github/workflows/cd.yml`) → Conditional on SCM CD toggle
+- AI agent workflows (`.github/workflows/claude.yml`, `codex.yml`, `gemini.yml`, `infer.yml`) → Conditional on AI orchestrator toggles
 
 **Rust Projects:**
 
@@ -2046,9 +2067,9 @@ Each language has its own file mapping that determines what gets generated:
 - `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` → AI assistant documentation (conditional on AI toggles)
 - `.github/ISSUE_TEMPLATE/*.md` → GitHub issue templates (conditional on SCM config)
 - `.github/dependabot.yml` → Dependabot configuration (conditional on SCM config)
-- CI workflow (`.github/workflows/ci.rust.yaml`) → Conditional on SCM CI toggle
-- CD workflow (`.github/workflows/cd.yaml`) → Conditional on SCM CD toggle
-- AI agent workflows (`.github/workflows/ai-*.yaml`) → Conditional on AI orchestrator toggles
+- CI workflow (`.github/workflows/ci.yml`) → Conditional on SCM CI toggle
+- CD workflow (`.github/workflows/cd.yml`) → Conditional on SCM CD toggle
+- AI agent workflows (`.github/workflows/claude.yml`, `codex.yml`, `gemini.yml`, `infer.yml`) → Conditional on AI orchestrator toggles
 
 **TypeScript Projects:**
 
@@ -2078,9 +2099,9 @@ Each language has its own file mapping that determines what gets generated:
 - `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` → AI assistant documentation (conditional on AI toggles)
 - `.github/ISSUE_TEMPLATE/*.md` → GitHub issue templates (conditional on SCM config)
 - `.github/dependabot.yml` → Dependabot configuration (conditional on SCM config)
-- CI workflow (`.github/workflows/ci.typescript.yaml`) → Conditional on SCM CI toggle
-- CD workflow (`.github/workflows/cd.yaml`) → Conditional on SCM CD toggle
-- AI agent workflows (`.github/workflows/ai-*.yaml`) → Conditional on AI orchestrator toggles
+- CI workflow (`.github/workflows/ci.yml`) → Conditional on SCM CI toggle
+- CD workflow (`.github/workflows/cd.yml`) → Conditional on SCM CD toggle
+- AI agent workflows (`.github/workflows/claude.yml`, `codex.yml`, `gemini.yml`, `infer.yml`) → Conditional on AI orchestrator toggles
 
 ### Template Context
 
