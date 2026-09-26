@@ -1106,7 +1106,8 @@ spec:
     - id: export_report
       name: export_report
       description: "Export data and email report"
-      tags: [reporting]
+      tags:
+        - reporting
       inject:
         - logger
         - database
