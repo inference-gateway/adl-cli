@@ -231,7 +231,7 @@ adl init my-agent --defaults
 
 # Non-interactive with specific configuration
 adl init my-agent \
-  --name "Weather Agent" \
+  --name weather-agent \
   --description "Provides weather information" \
   --provider deepseek \
   --model deepseek-v4-flash \

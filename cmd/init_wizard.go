@@ -192,7 +192,8 @@ func collectAnswersWizard(projectName string) answers {
 		provider, providerLocked := wzString("provider", "")
 		model, modelLocked := wzString("model", "")
 		systemPrompt, promptLocked := wzString("system-prompt", "You are a helpful AI assistant.")
-		var maxTokensStr, temperatureStr string
+		maxTokensStr, maxTokensLocked := wzString("max-tokens", "")
+		temperatureStr, temperatureLocked := wzString("temperature", "")
 
 		var aiFields []huh.Field
 		if !providerLocked {
@@ -218,18 +219,20 @@ func collectAnswersWizard(projectName string) answers {
 				Value(&systemPrompt).
 				Lines(3))
 		}
-		aiFields = append(aiFields,
-			huh.NewInput().
+		if !maxTokensLocked {
+			aiFields = append(aiFields, huh.NewInput().
 				Title("Max tokens").
 				Description("Optional - leave blank to use the provider default.").
 				Value(&maxTokensStr).
-				Validate(validateOptionalInt),
-			huh.NewInput().
+				Validate(validateOptionalInt))
+		}
+		if !temperatureLocked {
+			aiFields = append(aiFields, huh.NewInput().
 				Title("Temperature").
 				Description("Optional - 0.0 to 2.0.").
 				Value(&temperatureStr).
-				Validate(validateOptionalTemperature),
-		)
+				Validate(validateOptionalTemperature))
+		}
 		runFields(aiFields)
 
 		ans.Provider = provider
@@ -319,7 +322,7 @@ func collectAnswersWizard(projectName string) answers {
 	serverFields = append(serverFields, leftConfirm().Title("Enable server authentication?").Value(&auth))
 	runFields(serverFields)
 
-	if n, err := strconv.Atoi(strings.TrimSpace(portStr)); err == nil {
+	if n, err := strconv.Atoi(strings.TrimSpace(portStr)); err == nil && n > 0 {
 		ans.Port = n
 	} else {
 		ans.Port = 8080
