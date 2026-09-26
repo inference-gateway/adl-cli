@@ -465,8 +465,11 @@ spec:
     maxTokens: 4096
     temperature: 0.7
   tools:
-    - name: get_weather
+    - id: get_weather
+      name: get_weather
       description: "Get current weather for a city"
+      tags:
+        - weather
       schema:
         type: object
         properties:
@@ -552,8 +555,11 @@ spec:
       factory: NewNotificationService
       description: Multi-channel notification service
   tools:
-    - name: query_database
+    - id: query_database
+      name: query_database
       description: "Execute database queries with validation"
+      tags:
+        - database
       inject:
         - logger
         - database
@@ -573,8 +579,11 @@ spec:
         required:
           - query
           - table
-    - name: send_notification
+    - id: send_notification
+      name: send_notification
       description: "Send multi-channel notifications"
+      tags:
+        - notifications
       inject:
         - logger
         - notifications
@@ -932,6 +941,7 @@ spec:
     - id: query_database # user tool: full entry still required
       name: query_database
       description: "..."
+      tags: [database]
       schema: { type: object, ... }
 ```
 
@@ -1011,8 +1021,10 @@ spec:
       factory: NewCacheRepository
       description: High-performance caching layer for API responses
   tools:
-    - name: create_event
+    - id: create_event
+      name: create_event
       description: "Create a new calendar event"
+      tags: [calendar]
       inject:
         - logger # Built-in, always available
         - googleCalendar # Custom service
@@ -1089,8 +1101,10 @@ spec:
       factory: NewDatabaseService
       description: PostgreSQL database service
   tools:
-    - name: export_report
+    - id: export_report
+      name: export_report
       description: "Export data and email report"
+      tags: [reporting]
       inject:
         - logger
         - database
@@ -1847,14 +1861,28 @@ Enable OpenTelemetry instrumentation for the generated agent:
 spec:
   telemetry:
     enabled: true
+    traces:
+      exporter:
+        otlp:
+          endpoint: http://localhost:4318
+          protocol: http/protobuf # grpc or http/protobuf
+    metrics:
+      exporter:
+        prometheus: # pull endpoint - Go only
+          host: 0.0.0.0
+          port: 9464
 ```
 
-The manifest field is a single on/off switch - exporter endpoints, ports, and sampling stay runtime concerns configured via environment variables in the generated `.env.example`:
+`enabled` is the master switch; the optional `traces.exporter` and `metrics.exporter` blocks pick how each signal leaves the agent. Traces accept `otlp` (`endpoint`, `protocol`); metrics accept either `otlp` (same fields) or `prometheus` (`host`, `port`). Omitting a signal's exporter disables it (`none`). Every field is a default only - each one renders into the generated `.env.example` and is overridden by the environment at runtime. Auth headers, credentials, and sampling stay runtime-only concerns.
 
-- **Go**: the ADK spans every tool call (`tool.<name>`, carrying the propagated `session.id`/`gen_ai.tool.call.id`) and the generator surfaces `A2A_TELEMETRY_ENABLED`, `A2A_TELEMETRY_METRICS_PORT`/`_HOST`, `A2A_TELEMETRY_TRACE_ENABLED`/`_ENDPOINT`/`_HEADERS` in `.env.example`.
-- **TypeScript**: wires the ADK's `createTelemetryProvider` into `src/index.ts` (no extra npm dependencies) and surfaces `TELEMETRY_ENABLED` plus the standard `OTEL_EXPORTER_OTLP_*` / `OTEL_SERVICE_*` variables in `.env.example`.
+> **Note:** Prometheus pull is Go-only - the TypeScript ADK does not support it yet, and the validator warns when a TypeScript manifest configures it.
+
+- **Go**: the ADK spans every tool call (`tool.<name>`, carrying the propagated `session.id`/`gen_ai.tool.call.id`) and the generator surfaces `A2A_TELEMETRY_ENABLED` plus `A2A_OTEL_TRACES_EXPORTER`, `A2A_OTEL_METRICS_EXPORTER`, `A2A_OTEL_EXPORTER_OTLP_ENDPOINT`/`_PROTOCOL` and `A2A_OTEL_EXPORTER_PROMETHEUS_HOST`/`_PORT` in `.env.example`. The Go ADK nests its whole config under the `A2A_` prefix, so each standard `OTEL_*` name is read as `A2A_OTEL_*`; it has no per-signal OTLP variants.
+- **TypeScript**: wires the ADK's `createTelemetryProvider` into `src/index.ts` (no extra npm dependencies) and surfaces the same `A2A_TELEMETRY_ENABLED` / `A2A_OTEL_*` names, using the per-signal `A2A_OTEL_EXPORTER_OTLP_TRACES_*` / `_METRICS_*` forms when traces and metrics push to different collectors. `A2A_OTEL_SERVICE_NAME` / `_VERSION` are emitted commented out. The generated `src/index.ts` mirrors each `A2A_OTEL_*` variable onto its bare `OTEL_*` name at startup, since the OpenTelemetry Node SDK reads the unprefixed names.
 
 > **Note:** Telemetry generation currently supports Go and TypeScript only; Rust agents ignore `spec.telemetry`.
+>
+> `.env.example` is only generated when `spec.development.sandbox.dockerCompose.enabled: true`.
 
 **Examples:**
 
@@ -1881,6 +1909,8 @@ spec:
 `enabled` is the master switch. When true (and omitted the block is off), the generator wires an `MCPClientManager` into `main.go` that connects to the servers in the background, discovers their tools, and registers two selector tools - `mcp_list_tools` and `mcp_call_tool` - into the agent's toolbox. Everything else is a runtime concern: each `mcp` field maps 1:1 to an `A2A_MCP_*` variable in the generated `.env.example` (the manifest value is the default, overridden by the environment). `A2A_MCP_SERVERS` is derived from the `http` servers' base URLs. Defaults: `endpoint=/mcp`, `refreshInterval=5m`, `dialTimeout=30s`, `callTimeout=30s`, `maxRetries=0`, `retryInterval=2s`, `retryMaxInterval=30s`.
 
 > **Note:** The ADK MCP client is generated for Go agents only and is streamable-HTTP-only; `stdio`/`sse` servers are dropped from `A2A_MCP_SERVERS` (the validator warns), and the block is ignored for TypeScript/Rust agents.
+>
+> `.env.example` is only generated when `spec.development.sandbox.dockerCompose.enabled: true`.
 
 **Example:**
 
@@ -2252,13 +2282,14 @@ Each language has sensible defaults:
 
 **Go Projects:**
 
-- `go fmt ./...` - Format all Go source files
 - `go mod tidy` - Download dependencies and clean up go.mod
+- `go fmt ./...` - Format all Go source files
 
 **Rust Projects:**
 
 - `cargo fmt` - Format all Rust source files
-- `cargo check` - Check the project for errors
+
+**TypeScript Projects:** no default hooks run.
 
 ### Custom Hooks
 
@@ -2288,7 +2319,7 @@ spec:
 - **Command Execution**: Commands run in the generated project directory
 - **Error Handling**: Failed commands show warnings but don't stop generation
 - **Sequential Execution**: Commands run in the order specified
-- **Shell Support**: Commands are executed through the system shell
+- **No Shell**: Each command is split on whitespace and executed directly - pipes, redirects, `&&`, quoting, and variable expansion do not work. Put anything that needs a shell into a script and invoke it (`./scripts/setup.sh`).
 
 ### Example Configurations
 
