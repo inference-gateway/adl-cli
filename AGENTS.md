@@ -39,3 +39,13 @@ Single test: `go test -v ./internal/generator -run TestGenerate_Go`.
 - **`examples/` is the regression suite.** When adding a feature, add/update an example and wire it into both lists (`examples:test` + `examples:generate`) in `Taskfile.yml`.
 - Skills resolution hits the network (registry/GitHub, cached under `~/.adl/skills-cache`); `--offline` skips all network access.
 - `internal/schema/validator.go::checkLegacySpecFields` rejects pre-orchestrators manifest shapes with migration hints — keep it in sync whenever the schema shape changes (JSON Schema `additionalProperties:true` would otherwise silently drop legacy fields).
+
+## Code Readability
+
+- Write self-explanatory code: clear names and small, single-purpose functions carry the intent.
+  If a block needs a comment to be understood, extract it into a well-named function or variable.
+- No inline comments inside function bodies.
+- Doc comments on functions and types are at most 5 lines: what it does and why, not how.
+- No comments above modules, packages, or files.
+- Tool directives are not comments and stay where the tool needs them (lint suppressions, build
+  tags, compiler pragmas, code generation markers).
