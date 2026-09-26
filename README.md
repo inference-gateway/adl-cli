@@ -941,7 +941,8 @@ spec:
     - id: query_database # user tool: full entry still required
       name: query_database
       description: "..."
-      tags: [database]
+      tags:
+        - database
       schema: { type: object, ... }
 ```
 
@@ -1024,7 +1025,8 @@ spec:
     - id: create_event
       name: create_event
       description: "Create a new calendar event"
-      tags: [calendar]
+      tags:
+        - calendar
       inject:
         - logger # Built-in, always available
         - googleCalendar # Custom service
