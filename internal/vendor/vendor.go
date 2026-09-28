@@ -118,7 +118,7 @@ var GoBuiltins = map[string]string{
 // them all so users can't shadow them regardless of which features they
 // activate.
 var CargoBuiltinDeps = map[string]string{
-	"inference-gateway-adk": "0.12.1",
+	"inference-gateway-adk": "0.14.0",
 	"inference-gateway-sdk": "0.28.0",
 	"tokio":                 "1",
 	"tracing":               "0.1",
@@ -158,7 +158,7 @@ var GoTelemetryDeps = map[string]string{
 // `@inference-gateway/adl-cli` is intentionally absent: it tracks the CLI
 // version at generation time rather than a static pin.
 var NpmBuiltinDeps = map[string]string{
-	"@inference-gateway/adk": "0.16.0",
+	"@inference-gateway/adk": "0.16.1",
 }
 var NpmBuiltinDevDeps = map[string]string{
 	"@types/node": "^26.6.3",
@@ -172,16 +172,16 @@ var NpmBuiltinDevDeps = map[string]string{
 // add their own `^` / `v` prefix as the target format requires.
 var Tools = map[string]string{
 	"flox-schema":   "1.15.0",
-	"golangci-lint": "2.13.2",
+	"golangci-lint": "2.14.0",
 	"go-task":       "3.53.1",
 	"rust":          "1.98.1",
 	"rust-analyzer": "2026-09-21",
 	"nodejs":        "24.20.0",
 	"pnpm":          "12.3.4",
 	"git":           "2.55.0",
-	"docker":        "29.8.0",
-	"claude-code":   "2.1.280",
-	"infer":         "0.208.2",
+	"docker":        "29.8.1",
+	"claude-code":   "2.1.283",
+	"infer":         "0.215.0",
 }
 
 // Actions pins the GitHub Actions referenced by the generated workflows
@@ -203,7 +203,7 @@ var Actions = map[string]string{
 	"google-github-actions/auth":           "v3.0.0",
 	"google-github-actions/run-gemini-cli": "v0.1.22",
 	"google-github-actions/setup-gcloud":   "v3.0.1",
-	"inference-gateway/infer-action":       "v0.51.12",
+	"inference-gateway/infer-action":       "v0.55.0",
 	"openai/codex-action":                  "v1.12",
 	"oven-sh/setup-bun":                    "v2.2.0",
 	"peter-evans/create-pull-request":      "v8.1.1",
