@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.65.0](https://github.com/inference-gateway/adl-cli/compare/v0.64.4...v0.65.0) (2026-10-02)
+
+### ✨ Features
+
+* sync ADL schema v0.28.0 and emit a v1.0.1 AgentCard ([#452](https://github.com/inference-gateway/adl-cli/issues/452)) ([8e9e09d](https://github.com/inference-gateway/adl-cli/commit/8e9e09d5f06c2b3899946a2ddee5955ae063e1ad)), closes [#451](https://github.com/inference-gateway/adl-cli/issues/451)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump infer CLI v0.218.0 -> v0.221.1 ([#450](https://github.com/inference-gateway/adl-cli/issues/450)) ([4a76441](https://github.com/inference-gateway/adl-cli/commit/4a76441459fd4f65c681dad92739c908e839dd39))
+
 ## [0.64.4](https://github.com/inference-gateway/adl-cli/compare/v0.64.3...v0.64.4) (2026-10-01)
 
 ### 🔧 Miscellaneous
