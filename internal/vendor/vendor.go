@@ -105,7 +105,7 @@ func Resolve(raws []string, builtins map[string]string, depGroup string) ([]Entr
 // tests will fail loudly if a built-in is added there without being
 // mirrored here.
 var GoBuiltins = map[string]string{
-	"github.com/inference-gateway/adk":  "v0.30.0",
+	"github.com/inference-gateway/adk":  "v0.30.1",
 	"github.com/sethvargo/go-envconfig": "v1.4.3",
 	"github.com/spf13/cobra":            "v1.10.2",
 	"go.uber.org/zap":                   "v1.28.0",
@@ -149,9 +149,9 @@ var CargoBuiltinDevDeps = map[string]string{
 // they still count as built-ins for vendor conflict checks so users can't
 // downgrade them below what the ADK needs.
 var GoTelemetryDeps = map[string]string{
-	"go.opentelemetry.io/otel":       "v1.46.0",
-	"go.opentelemetry.io/otel/sdk":   "v1.46.0",
-	"go.opentelemetry.io/otel/trace": "v1.46.0",
+	"go.opentelemetry.io/otel":       "v1.47.0",
+	"go.opentelemetry.io/otel/sdk":   "v1.47.0",
+	"go.opentelemetry.io/otel/trace": "v1.47.0",
 }
 
 // NpmBuiltinDeps / NpmBuiltinDevDeps mirror the package.json template.
@@ -161,7 +161,7 @@ var NpmBuiltinDeps = map[string]string{
 	"@inference-gateway/adk": "0.17.0",
 }
 var NpmBuiltinDevDeps = map[string]string{
-	"@types/node": "^26.6.3",
+	"@types/node": "^26.6.4",
 	"prettier":    "^3.9.9",
 	"tsx":         "^4.23.15",
 	"typescript":  "^7.0.2",
@@ -180,8 +180,8 @@ var Tools = map[string]string{
 	"pnpm":          "12.3.4",
 	"git":           "2.55.0",
 	"docker":        "29.8.1",
-	"claude-code":   "2.1.283",
-	"infer":         "0.220.0",
+	"claude-code":   "2.1.285",
+	"infer":         "0.222.2",
 }
 
 // Actions pins the GitHub Actions referenced by the generated workflows
@@ -192,18 +192,18 @@ var Actions = map[string]string{
 	"actions/create-github-app-token":      "v3.2.0",
 	"actions/setup-go":                     "v7.0.0",
 	"actions/setup-node":                   "v7.0.0",
-	"anthropics/claude-code-action":        "v1.0.238",
+	"anthropics/claude-code-action":        "v1.0.239",
 	"arduino/setup-task":                   "v3.0.0",
 	"azure/setup-kubectl":                  "v5.1.0",
 	"docker/login-action":                  "v4.6.0",
 	"docker/setup-buildx-action":           "v4.4.1",
 	"docker/setup-qemu-action":             "v4.4.0",
-	"flox/install-flox-action":             "v2.6.0",
+	"flox/install-flox-action":             "v2.7.0",
 	"golangci/golangci-lint-action":        "v9.3.0",
 	"google-github-actions/auth":           "v3.0.0",
 	"google-github-actions/run-gemini-cli": "v0.1.22",
 	"google-github-actions/setup-gcloud":   "v3.0.1",
-	"inference-gateway/infer-action":       "v0.55.3",
+	"inference-gateway/infer-action":       "v0.55.5",
 	"openai/codex-action":                  "v1.12",
 	"oven-sh/setup-bun":                    "v2.2.0",
 	"peter-evans/create-pull-request":      "v8.1.1",

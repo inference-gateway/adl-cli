@@ -317,7 +317,7 @@ func TestGenerator_AI_ClaudeWorkflowGoContent(t *testing.T) {
 	assertContains(t, body, "Install ADL skill", "Claude Code workflow body")
 	assertContains(t, body, "raw.githubusercontent.com/inference-gateway/adl/main/.agents/skills/adl/SKILL.md", "Claude Code workflow body")
 
-	assertContains(t, body, "anthropics/claude-code-action@v1.0.238", "Claude Code workflow body")
+	assertContains(t, body, "anthropics/claude-code-action@v1.0.239", "Claude Code workflow body")
 	assertContains(t, body, "claude_code_oauth_token:", "Claude Code workflow body")
 	assertContains(t, body, "use_commit_signing: true", "Claude Code workflow body")
 	assertContains(t, body, "branch_prefix: ${{ steps.prefix.outputs.value }}", "Claude Code workflow body")
@@ -402,7 +402,7 @@ func TestGenerator_AI_InferWorkflowContent(t *testing.T) {
 	body := readGenerated(t, out, ".github/workflows/infer.yml")
 
 	assertContains(t, body, "name: Infer", "Infer workflow body")
-	assertContains(t, body, "inference-gateway/infer-action@v0.55.3", "Infer workflow body")
+	assertContains(t, body, "inference-gateway/infer-action@v0.55.5", "Infer workflow body")
 	assertContains(t, body, "github-token: ${{ steps.app-token.outputs.token }}", "Infer workflow body")
 	assertContains(t, body, "actions/create-github-app-token", "Infer workflow body")
 	assertContains(t, body, "model:", "Infer workflow body")
@@ -466,11 +466,11 @@ func TestGenerator_AI_InferSandboxInstall(t *testing.T) {
 		mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
 
 		infer := readGenerated(t, out, ".github/workflows/infer.yml")
-		assertContains(t, infer, "flox/install-flox-action@v2.6.0", "Infer workflow body")
+		assertContains(t, infer, "flox/install-flox-action@v2.7.0", "Infer workflow body")
 		assertContains(t, infer, ",^flox( .*)?$", "Infer workflow bash-allow-append")
 
 		claude := readGenerated(t, out, ".github/workflows/claude.yml")
-		assertContains(t, claude, "flox/install-flox-action@v2.6.0", "Claude Code workflow body")
+		assertContains(t, claude, "flox/install-flox-action@v2.7.0", "Claude Code workflow body")
 		assertContains(t, claude, "Bash(flox:*)", "Claude Code workflow allowedTools")
 	})
 
