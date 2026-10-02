@@ -9,13 +9,13 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
-  card:
-    protocolVersion: "0.3.0"
-    preferredTransport: JSONRPC
-    url: "https://my-agent.example.com:8443"
     # Extended, authenticated card served via agent/getAuthenticatedExtendedCard.
-    supportsExtendedAgentCard: true
+    extendedAgentCard: true
+  card:
+    supportedInterfaces:
+      - url: "https://my-agent.example.com:8443"
+        protocolBinding: JSONRPC
+        protocolVersion: "1.0"
     # Statically declared schemes (apiKey / http / mutualTLS). OIDC/OAuth2 are
     # intentionally NOT declared here - the ADK derives them from runtime config
     # (A2A_AUTH_* env) when spec.server.auth.enabled is true.
@@ -30,7 +30,7 @@ spec:
         description: "JWT bearer token"
         scheme: Bearer
         bearerFormat: JWT
-    security:
+    securityRequirements:
       - apiKey: []
       - bearer: []
   agent:

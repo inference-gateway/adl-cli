@@ -17,7 +17,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
     debug: false
@@ -101,7 +100,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   agent:
     model: "gpt-3.5-turbo"
     systemPrompt: "You are a helpful assistant"
@@ -157,7 +155,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
   language:
@@ -182,7 +179,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
   language:
@@ -243,7 +239,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
   language:
@@ -270,7 +265,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
   language:
@@ -298,7 +292,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
   language:
@@ -324,7 +317,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
   language:
@@ -427,7 +419,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
     debug: false
@@ -453,7 +444,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
     debug: false
@@ -478,7 +468,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
     debug: false
@@ -504,7 +493,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
     debug: false
@@ -571,7 +559,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   config:
     tools:
       read:
@@ -615,7 +602,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   agent:
     provider: deepseek
     model: deepseek-v4-flash
@@ -646,7 +632,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   agent:
     provider: deepseek
     model: deepseek-v4-flash
@@ -679,7 +664,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   skills:
     - id: x
       bare: true
@@ -706,7 +690,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   tools:
     - id: bash
       name: MyBash
@@ -732,7 +715,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   config:
     tools:
       bash:
@@ -762,7 +744,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   tools:
     - id: nope
       name: nope
@@ -798,7 +779,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   config:
     tools:
       bash:
@@ -828,7 +808,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   config:
     tools:
       fetch:
@@ -863,7 +842,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   config:
     tools:
       fetch:
@@ -893,7 +871,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   tools:
     - id: fetch
       name: MyFetch
@@ -919,7 +896,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   skills:
     - id: incomplete
       bare: true
@@ -946,7 +922,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   tools:
     - id: ask
       name: ask
@@ -1032,7 +1007,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
   language:

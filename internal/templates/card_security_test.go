@@ -32,25 +32,26 @@ func TestCardSecuritySchemes_MapsFlatDSLToADKWrappers(t *testing.T) {
 	}
 }
 
-// TestCardSecurity_MapsRequirementsToSchemesList pins the 'security' mapping onto
-// the ADK { schemes: { <name>: { list: [scopes] } } } shape, empty scopes -> [].
-func TestCardSecurity_MapsRequirementsToSchemesList(t *testing.T) {
+// TestCardSecurityRequirements_MapsRequirementsToSchemesList pins the
+// 'securityRequirements' mapping onto the ADK
+// { schemes: { <name>: { list: [scopes] } } } shape, empty scopes -> [].
+func TestCardSecurityRequirements_MapsRequirementsToSchemesList(t *testing.T) {
 	card := &schema.Card{
-		Security: []schema.CardSecurityElem{
+		SecurityRequirements: []schema.CardSecurityRequirementsElem{
 			{"bearer": {"read", "write"}},
 			{"apiKey": nil},
 		},
 	}
 
-	got := roundTrip(t, cardSecurity(card))
+	got := roundTrip(t, cardSecurityRequirements(card))
 	want := []any{
 		map[string]any{"schemes": map[string]any{"bearer": map[string]any{"list": []any{"read", "write"}}}},
 		map[string]any{"schemes": map[string]any{"apiKey": map[string]any{"list": []any{}}}},
 	}
 	assertJSONEqual(t, want, got)
 
-	if cardSecurity(&schema.Card{}) != nil {
-		t.Fatal("expected nil when no security declared")
+	if cardSecurityRequirements(&schema.Card{}) != nil {
+		t.Fatal("expected nil when no security requirements declared")
 	}
 }
 

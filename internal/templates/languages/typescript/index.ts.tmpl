@@ -202,16 +202,16 @@ async function runWorker(signal: AbortSignal): Promise<void> {
 function loadAgentCard(config: Config): AgentCard {
   const raw = readFileSync(config.agent.cardPath, 'utf-8');
   const parsed = JSON.parse(raw) as AgentCard;
-  const url =
-    parsed.url !== undefined && parsed.url !== ''
-      ? parsed.url
-      : `http://${config.server.host}:${config.server.port}`;
+  const fallbackUrl = `http://${config.server.host}:${config.server.port}`;
+  const supportedInterfaces = parsed.supportedInterfaces.map((entry, index) =>
+    index === 0 && entry.url === '' ? { ...entry, url: fallbackUrl } : entry
+  );
   return {
     ...parsed,
     name: config.agent.name,
     description: config.agent.description,
     version: config.agent.version,
-    url,
+    supportedInterfaces,
   };
 }
 

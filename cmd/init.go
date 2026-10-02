@@ -15,6 +15,7 @@ import (
 	yaml "gopkg.in/yaml.v3"
 
 	prompt "github.com/inference-gateway/adl-cli/internal/prompt"
+	schema "github.com/inference-gateway/adl-cli/internal/schema"
 	tui "github.com/inference-gateway/adl-cli/internal/tui"
 )
 
@@ -67,7 +68,6 @@ func init() {
 	initCmd.Flags().Float64("temperature", 0.0, "Temperature (0.0-2.0)")
 	initCmd.Flags().Bool("streaming", false, "Enable streaming")
 	initCmd.Flags().Bool("notifications", false, "Enable push notifications")
-	initCmd.Flags().Bool("history", false, "Enable state transition history")
 	initCmd.Flags().Int("port", 0, "Server port")
 	initCmd.Flags().Bool("debug", false, "Enable debug mode")
 	initCmd.Flags().String("language", "", "Programming language (go/rust/typescript)")
@@ -234,6 +234,14 @@ type mcpBlock struct {
 	Servers []mcpServerBlock `yaml:"servers"`
 }
 
+// agentInterfaceBlock is one entry of spec.card.supportedInterfaces: the A2A
+// v1.0.1 endpoint the agent serves. The first entry is the preferred interface.
+type agentInterfaceBlock struct {
+	URL             string `yaml:"url"`
+	ProtocolBinding string `yaml:"protocolBinding"`
+	ProtocolVersion string `yaml:"protocolVersion"`
+}
+
 // orchestratorToggle is a single coding-agent on/off switch under
 // spec.development.ai.orchestrators.<agent>.
 type orchestratorToggle struct {
@@ -275,18 +283,15 @@ type adlData struct {
 	} `yaml:"metadata"`
 	Spec struct {
 		Capabilities *struct {
-			Streaming              bool `yaml:"streaming"`
-			PushNotifications      bool `yaml:"pushNotifications"`
-			StateTransitionHistory bool `yaml:"stateTransitionHistory"`
+			Streaming         bool `yaml:"streaming"`
+			PushNotifications bool `yaml:"pushNotifications"`
 		} `yaml:"capabilities,omitempty"`
 		Card *struct {
-			ProtocolVersion    string   `yaml:"protocolVersion,omitempty"`
-			URL                string   `yaml:"url,omitempty"`
-			PreferredTransport string   `yaml:"preferredTransport,omitempty"`
-			DefaultInputModes  []string `yaml:"defaultInputModes,omitempty"`
-			DefaultOutputModes []string `yaml:"defaultOutputModes,omitempty"`
-			DocumentationURL   string   `yaml:"documentationUrl,omitempty"`
-			IconURL            string   `yaml:"iconUrl,omitempty"`
+			SupportedInterfaces []agentInterfaceBlock `yaml:"supportedInterfaces,omitempty"`
+			DefaultInputModes   []string              `yaml:"defaultInputModes,omitempty"`
+			DefaultOutputModes  []string              `yaml:"defaultOutputModes,omitempty"`
+			DocumentationURL    string                `yaml:"documentationUrl,omitempty"`
+			IconURL             string                `yaml:"iconUrl,omitempty"`
 		} `yaml:"card,omitempty"`
 		Agent *struct {
 			Provider     string    `yaml:"provider"`
@@ -441,9 +446,8 @@ type answers struct {
 	MaxTokens    int
 	Temperature  float64
 
-	Streaming              bool
-	PushNotifications      bool
-	StateTransitionHistory bool
+	Streaming         bool
+	PushNotifications bool
 
 	ArtifactsEnabled bool
 
@@ -459,12 +463,12 @@ type answers struct {
 	Debug       bool
 	AuthEnabled bool
 
-	CardEnabled        bool
-	ProtocolVersion    string
-	PreferredTransport string
-	InputModes         []string
-	OutputModes        []string
-	CardURL            string
+	CardEnabled     bool
+	ProtocolVersion string
+	ProtocolBinding string
+	InputModes      []string
+	OutputModes     []string
+	CardURL         string
 
 	Language        string
 	GoModule        string
@@ -597,13 +601,11 @@ func buildADL(ans answers) *adlData {
 	}
 
 	adl.Spec.Capabilities = &struct {
-		Streaming              bool `yaml:"streaming"`
-		PushNotifications      bool `yaml:"pushNotifications"`
-		StateTransitionHistory bool `yaml:"stateTransitionHistory"`
+		Streaming         bool `yaml:"streaming"`
+		PushNotifications bool `yaml:"pushNotifications"`
 	}{
-		Streaming:              ans.Streaming,
-		PushNotifications:      ans.PushNotifications,
-		StateTransitionHistory: ans.StateTransitionHistory,
+		Streaming:         ans.Streaming,
+		PushNotifications: ans.PushNotifications,
 	}
 
 	if ans.ArtifactsEnabled {
@@ -667,19 +669,19 @@ func buildADL(ans answers) *adlData {
 
 	if ans.CardEnabled {
 		adl.Spec.Card = &struct {
-			ProtocolVersion    string   `yaml:"protocolVersion,omitempty"`
-			URL                string   `yaml:"url,omitempty"`
-			PreferredTransport string   `yaml:"preferredTransport,omitempty"`
-			DefaultInputModes  []string `yaml:"defaultInputModes,omitempty"`
-			DefaultOutputModes []string `yaml:"defaultOutputModes,omitempty"`
-			DocumentationURL   string   `yaml:"documentationUrl,omitempty"`
-			IconURL            string   `yaml:"iconUrl,omitempty"`
+			SupportedInterfaces []agentInterfaceBlock `yaml:"supportedInterfaces,omitempty"`
+			DefaultInputModes   []string              `yaml:"defaultInputModes,omitempty"`
+			DefaultOutputModes  []string              `yaml:"defaultOutputModes,omitempty"`
+			DocumentationURL    string                `yaml:"documentationUrl,omitempty"`
+			IconURL             string                `yaml:"iconUrl,omitempty"`
 		}{
-			ProtocolVersion:    ans.ProtocolVersion,
-			PreferredTransport: ans.PreferredTransport,
+			SupportedInterfaces: []agentInterfaceBlock{{
+				URL:             ans.CardURL,
+				ProtocolBinding: ans.ProtocolBinding,
+				ProtocolVersion: ans.ProtocolVersion,
+			}},
 			DefaultInputModes:  ans.InputModes,
 			DefaultOutputModes: ans.OutputModes,
-			URL:                ans.CardURL,
 		}
 	}
 
@@ -911,7 +913,6 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 	tui.Println(tui.Header("Capabilities"))
 	ans.Streaming = promptBoolWithConfig("streaming", useDefaults, "Enable streaming", true)
 	ans.PushNotifications = promptBoolWithConfig("notifications", useDefaults, "Enable push notifications", false)
-	ans.StateTransitionHistory = promptBoolWithConfig("history", useDefaults, "Enable state transition history", false)
 
 	tui.Println(tui.Header("Artifacts Configuration"))
 	ans.ArtifactsEnabled = conditionalPromptBool(useDefaults, "Enable artifacts support (filesystem/MinIO storage)", false)
@@ -1135,8 +1136,8 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 	tui.Println(tui.Header("Agent Card Configuration"))
 	ans.CardEnabled = conditionalPromptBool(useDefaults, "Configure agent card (protocol, transport, modes)", false)
 	if ans.CardEnabled {
-		ans.ProtocolVersion = conditionalPrompt(useDefaults, "Protocol version", "0.3.0")
-		ans.PreferredTransport = conditionalPrompt(useDefaults, "Preferred transport", "JSONRPC")
+		ans.ProtocolVersion = conditionalPrompt(useDefaults, "Protocol version", schema.DefaultProtocolVersion)
+		ans.ProtocolBinding = conditionalPrompt(useDefaults, "Protocol binding", schema.DefaultProtocolBinding)
 
 		if modes := conditionalPrompt(useDefaults, "Default input modes (comma-separated)", "text,voice"); modes != "" {
 			ans.InputModes = splitAndTrim(modes)

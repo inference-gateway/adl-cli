@@ -9,11 +9,11 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   card:
-    protocolVersion: "0.3.0"
-    preferredTransport: JSONRPC
-    url: "https://my-agent.example.com:8443"
+    supportedInterfaces:
+      - url: "https://my-agent.example.com:8443"
+        protocolBinding: JSONRPC
+        protocolVersion: "1.0"
   agent:
     provider: deepseek
     model: deepseek-v4-flash

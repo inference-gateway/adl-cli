@@ -2,9 +2,7 @@
 	"name": {{ .ADL.Metadata.Name | toJson }},
 	"version": {{ .ADL.Metadata.Version | toJson }},
 	"description": {{ .ADL.Metadata.Description | toJson }},
-	"protocolVersion": {{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.ProtocolVersion }} {{ .ADL.Spec.Card.ProtocolVersion | toJson }}{{- else }} "0.3.0"{{- end }}{{- else }} "0.3.0"{{- end }},
-	"url": {{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.URL }} {{ .ADL.Spec.Card.URL | toJson }}{{- else }} ""{{- end }}{{- else }} ""{{- end }},
-	"preferredTransport": {{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.PreferredTransport }} {{ .ADL.Spec.Card.PreferredTransport | toJson }}{{- else }} "JSONRPC"{{- end }}{{- else }} "JSONRPC"{{- end }},
+	"supportedInterfaces": {{ cardSupportedInterfaces .ADL.Spec.Card | toJson }},
 	{{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.DocumentationURL }}
 	"documentationUrl": {{ .ADL.Spec.Card.DocumentationURL | toJson }},
 	{{- end }}{{- end }}
@@ -12,27 +10,20 @@
 	"iconUrl": {{ .ADL.Spec.Card.IconURL | toJson }},
 	{{- end }}{{- end }}
 	{{- if .ADL.Spec.Card }}
-	{{- if .ADL.Spec.Card.SupportsExtendedAgentCard }}
-	"supportsExtendedAgentCard": true,
-	{{- end }}
 	{{- with cardSecuritySchemes .ADL.Spec.Card }}
 	"securitySchemes": {{ . | toJson }},
 	{{- end }}
-	{{- with cardSecurity .ADL.Spec.Card }}
-	"security": {{ . | toJson }},
+	{{- with cardSecurityRequirements .ADL.Spec.Card }}
+	"securityRequirements": {{ . | toJson }},
 	{{- end }}
 	{{- end }}
 	"defaultInputModes": {{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.DefaultInputModes }} {{ .ADL.Spec.Card.DefaultInputModes | toJson }}{{- else }} ["text"]{{- end }}{{- else }} ["text"]{{- end }},
 	"defaultOutputModes": {{- if .ADL.Spec.Card }}{{- if .ADL.Spec.Card.DefaultOutputModes }} {{ .ADL.Spec.Card.DefaultOutputModes | toJson }}{{- else }} ["text"]{{- end }}{{- else }} ["text"]{{- end }},
 	"capabilities": {
-		{{- if .ADL.Spec.Capabilities }}
 		"streaming": {{ .ADL.Spec.Capabilities.Streaming }},
-		"pushNotifications": {{ .ADL.Spec.Capabilities.PushNotifications }},
-		"stateTransitionHistory": {{ .ADL.Spec.Capabilities.StateTransitionHistory }}
-		{{- else }}
-		"streaming": false,
-		"pushNotifications": false,
-		"stateTransitionHistory": false
+		"pushNotifications": {{ .ADL.Spec.Capabilities.PushNotifications }}
+		{{- if .ADL.Spec.Capabilities.ExtendedAgentCard }},
+		"extendedAgentCard": true
 		{{- end }}
 	},
 	"skills": [

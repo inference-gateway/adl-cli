@@ -24,9 +24,8 @@ func TestGenerator_Generate(t *testing.T) {
 		},
 		Spec: schema.Spec{
 			Capabilities: schema.Capabilities{
-				Streaming:              true,
-				PushNotifications:      false,
-				StateTransitionHistory: false,
+				Streaming:         true,
+				PushNotifications: false,
 			},
 			Server: schema.Server{
 				Port:  8080,
@@ -84,9 +83,8 @@ func TestGenerator_validateADL(t *testing.T) {
 				},
 				Spec: schema.Spec{
 					Capabilities: schema.Capabilities{
-						Streaming:              true,
-						PushNotifications:      false,
-						StateTransitionHistory: false,
+						Streaming:         true,
+						PushNotifications: false,
 					},
 					Server: schema.Server{
 						Port: 8080,
@@ -113,9 +111,8 @@ func TestGenerator_validateADL(t *testing.T) {
 				},
 				Spec: schema.Spec{
 					Capabilities: schema.Capabilities{
-						Streaming:              true,
-						PushNotifications:      false,
-						StateTransitionHistory: false,
+						Streaming:         true,
+						PushNotifications: false,
 					},
 					Server: schema.Server{
 						Port: 8080,
@@ -142,9 +139,8 @@ func TestGenerator_validateADL(t *testing.T) {
 				},
 				Spec: schema.Spec{
 					Capabilities: schema.Capabilities{
-						Streaming:              true,
-						PushNotifications:      false,
-						StateTransitionHistory: false,
+						Streaming:         true,
+						PushNotifications: false,
 					},
 					Server: schema.Server{
 						Port: 0,
@@ -172,9 +168,8 @@ func TestGenerator_validateADL(t *testing.T) {
 				},
 				Spec: schema.Spec{
 					Capabilities: schema.Capabilities{
-						Streaming:              true,
-						PushNotifications:      false,
-						StateTransitionHistory: false,
+						Streaming:         true,
+						PushNotifications: false,
 					},
 					Server: schema.Server{
 						Port: 8080,
@@ -203,9 +198,8 @@ func TestGenerator_validateADL(t *testing.T) {
 				},
 				Spec: schema.Spec{
 					Capabilities: schema.Capabilities{
-						Streaming:              true,
-						PushNotifications:      false,
-						StateTransitionHistory: false,
+						Streaming:         true,
+						PushNotifications: false,
 					},
 					Server: schema.Server{
 						Port: 8080,
@@ -426,9 +420,8 @@ func TestGenerator_generateCD(t *testing.T) {
 		},
 		Spec: schema.Spec{
 			Capabilities: schema.Capabilities{
-				Streaming:              true,
-				PushNotifications:      false,
-				StateTransitionHistory: false,
+				Streaming:         true,
+				PushNotifications: false,
 			},
 			Server: schema.Server{
 				Port:  8080,
@@ -457,9 +450,8 @@ func TestGenerator_generateCD(t *testing.T) {
 		},
 		Spec: schema.Spec{
 			Capabilities: schema.Capabilities{
-				Streaming:              true,
-				PushNotifications:      false,
-				StateTransitionHistory: false,
+				Streaming:         true,
+				PushNotifications: false,
 			},
 			Server: schema.Server{
 				Port:  8080,
@@ -674,9 +666,8 @@ func TestGenerator_Dependabot(t *testing.T) {
 	makeADL := func(name string, dependabot bool, lang schema.Language, sandbox *schema.SandboxConfig) *schema.ADL {
 		spec := schema.Spec{
 			Capabilities: schema.Capabilities{
-				Streaming:              true,
-				PushNotifications:      false,
-				StateTransitionHistory: false,
+				Streaming:         true,
+				PushNotifications: false,
 			},
 			Server: schema.Server{
 				Port: 8080,
@@ -903,9 +894,8 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 		},
 		Spec: schema.Spec{
 			Capabilities: schema.Capabilities{
-				Streaming:              true,
-				PushNotifications:      false,
-				StateTransitionHistory: false,
+				Streaming:         true,
+				PushNotifications: false,
 			},
 			Server: schema.Server{
 				Port:  8080,
@@ -935,9 +925,8 @@ func TestGenerator_IssueTemplates(t *testing.T) {
 		},
 		Spec: schema.Spec{
 			Capabilities: schema.Capabilities{
-				Streaming:              true,
-				PushNotifications:      false,
-				StateTransitionHistory: false,
+				Streaming:         true,
+				PushNotifications: false,
 			},
 			Server: schema.Server{
 				Port:  8080,

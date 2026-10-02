@@ -92,9 +92,6 @@ infer agents add {{ .ADL.Metadata.Name }} {{ .ADL.Spec.Server.Scheme | default "
 {{- if .ADL.Spec.Capabilities.PushNotifications }}
 - ✅ Push notifications
 {{- end }}
-{{- if .ADL.Spec.Capabilities.StateTransitionHistory }}
-- ✅ State transition history
-{{- end }}
 {{- end }}
 {{- if and .ADL.Spec.Telemetry .ADL.Spec.Telemetry.Enabled (ne .Language "rust") }}
 - ✅ OpenTelemetry instrumentation
