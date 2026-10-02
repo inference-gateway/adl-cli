@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
-{{- if and .ADL.Spec.Card .ADL.Spec.Card.SupportsExtendedAgentCard }}
+{{- if .ADL.Spec.Capabilities.ExtendedAgentCard }}
 	"encoding/json"
 {{- end }}
 	"fmt"
@@ -22,7 +22,7 @@ import (
 	cobra "github.com/spf13/cobra"
 
 	server "github.com/inference-gateway/adk/server"
-{{- if and .ADL.Spec.Card .ADL.Spec.Card.SupportsExtendedAgentCard }}
+{{- if .ADL.Spec.Capabilities.ExtendedAgentCard }}
 	types "github.com/inference-gateway/adk/types"
 {{- end }}
 
@@ -156,7 +156,7 @@ func taskWorkers() int {
 	return n
 }
 
-{{- if and .ADL.Spec.Card .ADL.Spec.Card.SupportsExtendedAgentCard }}
+{{- if .ADL.Spec.Capabilities.ExtendedAgentCard }}
 // loadAgentCard reads a .well-known agent-card JSON file into a typed AgentCard.
 // It is used to seed the authenticated extended card (A2A spec section 7) from
 // the same static card the public endpoint serves; enrich the returned card with
@@ -401,11 +401,11 @@ func runStart(ctx context.Context) error {
 	}
 {{- end }}
 
-{{- if and .ADL.Spec.Card .ADL.Spec.Card.SupportsExtendedAgentCard }}
+{{- if .ADL.Spec.Capabilities.ExtendedAgentCard }}
 
-	// spec.card.supportsExtendedAgentCard: serve a richer, authenticated card via
+	// spec.capabilities.extendedAgentCard: serve a richer, authenticated card via
 	// agent/getAuthenticatedExtendedCard (A2A spec section 7). It is seeded from the
-	// public card and forces the public card to advertise supportsExtendedAgentCard.
+	// public card and forces the public card to advertise extendedAgentCard.
 	extendedCard, err := loadAgentCard(".well-known/agent-card.json")
 	if err != nil {
 		return fmt.Errorf("failed to load extended agent card: %w", err)
@@ -413,8 +413,9 @@ func runStart(ctx context.Context) error {
 	extendedCard.Name = AgentName
 	extendedCard.Version = Version
 	extendedCard.Description = AgentDescription
-	agentURL := cfg.A2A.AgentURL
-	extendedCard.URL = &agentURL
+	if len(extendedCard.SupportedInterfaces) > 0 {
+		extendedCard.SupportedInterfaces[0].URL = cfg.A2A.AgentURL
+	}
 {{- end }}
 
 	a2aServer, err := server.NewA2AServerBuilder(cfg.A2A, l).
@@ -423,9 +424,13 @@ func runStart(ctx context.Context) error {
 			"name":        AgentName,
 			"version":     Version,
 			"description": AgentDescription,
-			"url":         cfg.A2A.AgentURL,
+			"supportedInterfaces": []map[string]any{
+{{- range $index, $interface := cardSupportedInterfaces .ADL.Spec.Card }}
+				{"url": {{ if eq $index 0 }}cfg.A2A.AgentURL{{ else }}{{ index $interface "url" | toJson }}{{ end }}, "protocolBinding": {{ index $interface "protocolBinding" | toJson }}, "protocolVersion": {{ index $interface "protocolVersion" | toJson }}},
+{{- end }}
+			},
 		}).
-{{- if and .ADL.Spec.Card .ADL.Spec.Card.SupportsExtendedAgentCard }}
+{{- if .ADL.Spec.Capabilities.ExtendedAgentCard }}
 		WithExtendedAgentCard(*extendedCard).
 {{- end }}
 {{- if and .ADL.Spec.Artifacts .ADL.Spec.Artifacts.Enabled }}
@@ -443,7 +448,7 @@ func runStart(ctx context.Context) error {
 	// AgentCard (A2A spec section 7) so clients can discover how to authenticate.
 	// The issuer is per-environment runtime config (A2A_AUTH_ISSUER_URL), so it is
 	// derived here at startup rather than baked into the static card.
-	if cfg.A2A.AuthConfig.Enable {
+	if cfg.A2A.AuthConfig.Enabled {
 		if card := a2aServer.GetAgentCard(); card != nil {
 			schemes, security := server.OIDCSecuritySchemes(cfg.A2A.AuthConfig)
 			if card.SecuritySchemes == nil {
@@ -453,7 +458,7 @@ func runStart(ctx context.Context) error {
 					card.SecuritySchemes[name] = scheme
 				}
 			}
-			card.Security = append(card.Security, security...)
+			card.SecurityRequirements = append(card.SecurityRequirements, security...)
 			a2aServer.SetAgentCard(*card)
 			l.Info("advertised OIDC security scheme on agent card")
 		}

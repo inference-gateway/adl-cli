@@ -739,7 +739,6 @@ func TestInitAITuningAndServerFlags(t *testing.T) {
 		"temperature":   "0.5",
 		"streaming":     "false",
 		"notifications": "true",
-		"history":       "true",
 		"port":          "9000",
 		"debug":         "true",
 	}
@@ -751,7 +750,7 @@ func TestInitAITuningAndServerFlags(t *testing.T) {
 	defer func() {
 		for _, reset := range [][2]string{
 			{"type", ""}, {"system-prompt", ""}, {"max-tokens", "0"}, {"temperature", "0"},
-			{"streaming", "false"}, {"notifications", "false"}, {"history", "false"},
+			{"streaming", "false"}, {"notifications", "false"},
 			{"port", "0"}, {"debug", "false"},
 		} {
 			_ = cmd.Flags().Set(reset[0], reset[1])
@@ -792,9 +791,6 @@ func TestInitAITuningAndServerFlags(t *testing.T) {
 	}
 	if !adl.Spec.Capabilities.PushNotifications {
 		t.Errorf("expected pushNotifications true from --notifications")
-	}
-	if !adl.Spec.Capabilities.StateTransitionHistory {
-		t.Errorf("expected stateTransitionHistory true from --history")
 	}
 	if adl.Spec.Server.Port != 9000 {
 		t.Errorf("expected port 9000 from --port, got: %d", adl.Spec.Server.Port)

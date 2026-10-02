@@ -95,6 +95,7 @@ func (v *Validator) ValidateFile(filePath string) ([]string, error) {
 
 	warnings = append(warnings, v.validateTelemetry(&adl)...)
 	warnings = append(warnings, v.validateMCP(&adl)...)
+	warnings = append(warnings, MigrateDeprecatedCardFields(data, &adl)...)
 
 	return warnings, nil
 }
@@ -174,7 +175,8 @@ func (v *Validator) validateTelemetry(adl *ADL) []string {
 //
 // JSON Schema's default additionalProperties:true would otherwise silently
 // drop these unknown fields, so we surface them as errors before they
-// confuse the user.
+// confuse the user. The removed spec.card fields are handled differently -
+// MigrateDeprecatedCardFields translates them and warns instead of rejecting.
 func checkLegacySpecFields(yamlData any) error {
 	root, ok := yamlData.(map[string]any)
 	if !ok {

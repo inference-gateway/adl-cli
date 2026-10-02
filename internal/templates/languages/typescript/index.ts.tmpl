@@ -202,16 +202,16 @@ async function runWorker(signal: AbortSignal): Promise<void> {
 function loadAgentCard(config: Config): AgentCard {
   const raw = readFileSync(config.agent.cardPath, 'utf-8');
   const parsed = JSON.parse(raw) as AgentCard;
-  const url =
-    parsed.url !== undefined && parsed.url !== ''
-      ? parsed.url
-      : `http://${config.server.host}:${config.server.port}`;
+  const fallbackUrl = `http://${config.server.host}:${config.server.port}`;
+  const supportedInterfaces = parsed.supportedInterfaces.map((entry, index) =>
+    index === 0 && entry.url === '' ? { ...entry, url: fallbackUrl } : entry
+  );
   return {
     ...parsed,
     name: config.agent.name,
     description: config.agent.description,
     version: config.agent.version,
-    url,
+    supportedInterfaces,
   };
 }
 
@@ -364,9 +364,9 @@ function adaptLLMClient(client: OpenAICompatibleLLMClient): LLMClient {
 function toWireMessage(message: ChatMessage): LLMMessage {
   switch (message.role) {
     case 'system':
-      return { role: MessageRole.system, content: message.content };
+      return { role: MessageRole.System, content: message.content };
     case 'user':
-      return { role: MessageRole.user, content: message.content };
+      return { role: MessageRole.User, content: message.content };
     case 'assistant': {
       const toolCalls = message.toolCalls?.map((tc) => ({
         id: tc.id,
@@ -374,7 +374,7 @@ function toWireMessage(message: ChatMessage): LLMMessage {
         function: { name: tc.name, arguments: tc.arguments },
       }));
       return {
-        role: MessageRole.assistant,
+        role: MessageRole.Assistant,
         content: message.content ?? '',
         ...(toolCalls !== undefined && toolCalls.length > 0
           ? { tool_calls: toolCalls }
@@ -383,7 +383,7 @@ function toWireMessage(message: ChatMessage): LLMMessage {
     }
     case 'tool':
       return {
-        role: MessageRole.tool,
+        role: MessageRole.Tool,
         content: message.content,
         tool_call_id: message.toolCallId,
       };

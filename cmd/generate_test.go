@@ -21,7 +21,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
     debug: false
@@ -78,7 +77,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   agent:
     provider: deepseek
     model: deepseek-v4-flash
@@ -196,7 +194,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
     debug: false
@@ -250,7 +247,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
     debug: false
@@ -343,7 +339,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
     debug: false
@@ -456,7 +451,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
     debug: false
@@ -511,7 +505,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
     debug: false
@@ -568,7 +561,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
     debug: false
@@ -630,7 +622,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
     debug: false
@@ -747,7 +738,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8080
     debug: false
@@ -852,7 +842,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   server:
     port: 8443
     debug: false

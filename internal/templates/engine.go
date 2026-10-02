@@ -374,7 +374,8 @@ func customFuncMap() template.FuncMap {
 	funcMap["telemetryEnvVars"] = telemetryEnvVars
 	funcMap["mcpEnvVars"] = mcpEnvVars
 	funcMap["cardSecuritySchemes"] = cardSecuritySchemes
-	funcMap["cardSecurity"] = cardSecurity
+	funcMap["cardSecurityRequirements"] = cardSecurityRequirements
+	funcMap["cardSupportedInterfaces"] = cardSupportedInterfaces
 	funcMap["pin"] = vendor.Pin
 	return funcMap
 }
@@ -410,7 +411,8 @@ func customFuncMapWithAcronyms(acronyms map[string]string) template.FuncMap {
 	funcMap["telemetryEnvVars"] = telemetryEnvVars
 	funcMap["mcpEnvVars"] = mcpEnvVars
 	funcMap["cardSecuritySchemes"] = cardSecuritySchemes
-	funcMap["cardSecurity"] = cardSecurity
+	funcMap["cardSecurityRequirements"] = cardSecurityRequirements
+	funcMap["cardSupportedInterfaces"] = cardSupportedInterfaces
 	funcMap["pin"] = vendor.Pin
 	return funcMap
 }

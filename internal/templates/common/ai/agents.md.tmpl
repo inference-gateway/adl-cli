@@ -22,11 +22,6 @@ This agent is built using the Agent Definition Language (ADL) and provides A2A c
 {{- else }}
 - **Push Notifications**: ❌ Server-sent events not supported
 {{- end }}
-{{- if .ADL.Spec.Capabilities.StateTransitionHistory }}
-- **State History**: ✅ Tracks agent state transitions over time
-{{- else }}
-- **State History**: ❌ State transition history not tracked
-{{- end }}
 {{- else }}
 - **Streaming**: ❌ Real-time response streaming not supported
 - **Push Notifications**: ❌ Server-sent events not supported

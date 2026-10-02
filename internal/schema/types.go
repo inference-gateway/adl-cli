@@ -46,6 +46,24 @@ type Agent struct {
 	Temperature float64 `json:"temperature,omitempty,omitzero" yaml:"temperature,omitempty" mapstructure:"temperature,omitempty"`
 }
 
+// A single protocol endpoint of the agent (A2A v1.0.1 'AgentInterface'). Declared
+// as an entry of 'spec.card.supportedInterfaces' - one per protocol binding the
+// agent serves; the first entry is the preferred one.
+type AgentInterface struct {
+	// The protocol binding served at this URL (A2A v1.0.1
+	// 'AgentInterface.protocolBinding'). An open string to allow other bindings; the
+	// core ones are 'JSONRPC', 'GRPC' and 'HTTP+JSON'.
+	ProtocolBinding string `json:"protocolBinding" yaml:"protocolBinding" mapstructure:"protocolBinding"`
+
+	// The A2A protocol version this interface exposes, e.g. '1.0' (A2A v1.0.1
+	// 'AgentInterface.protocolVersion').
+	ProtocolVersion string `json:"protocolVersion" yaml:"protocolVersion" mapstructure:"protocolVersion"`
+
+	// The URL where this interface is available; must be a valid absolute URL in
+	// production (A2A v1.0.1 'AgentInterface.url').
+	URL string `json:"url" yaml:"url" mapstructure:"url"`
+}
+
 type AgentProvider string
 
 const AgentProviderAnthropic AgentProvider = "anthropic"
@@ -111,12 +129,17 @@ type BashToolConfig struct {
 }
 
 type Capabilities struct {
+	// Whether the agent serves a richer, authenticated AgentCard via the A2A
+	// 'GetExtendedAgentCard' method (GET /extendedAgentCard; A2A spec section 7) once
+	// the caller is authenticated (A2A v1.0.1 'AgentCapabilities.extendedAgentCard').
+	// When true, the generated ADK wires up that endpoint; misconfigured or
+	// unsupported calls follow the A2A error contract (-32007
+	// ExtendedAgentCardNotConfiguredError / -32004 UnsupportedOperationError).
+	// Optional; defaults to false when omitted.
+	ExtendedAgentCard bool `json:"extendedAgentCard,omitempty,omitzero" yaml:"extendedAgentCard,omitempty" mapstructure:"extendedAgentCard,omitempty"`
+
 	// PushNotifications corresponds to the JSON schema field "pushNotifications".
 	PushNotifications bool `json:"pushNotifications" yaml:"pushNotifications" mapstructure:"pushNotifications"`
-
-	// StateTransitionHistory corresponds to the JSON schema field
-	// "stateTransitionHistory".
-	StateTransitionHistory bool `json:"stateTransitionHistory" yaml:"stateTransitionHistory" mapstructure:"stateTransitionHistory"`
 
 	// Streaming corresponds to the JSON schema field "streaming".
 	Streaming bool `json:"streaming" yaml:"streaming" mapstructure:"streaming"`
@@ -135,53 +158,40 @@ type Card struct {
 	// IconURL corresponds to the JSON schema field "iconUrl".
 	IconURL string `json:"iconUrl,omitempty,omitzero" yaml:"iconUrl,omitempty" mapstructure:"iconUrl,omitempty"`
 
-	// PreferredTransport corresponds to the JSON schema field "preferredTransport".
-	PreferredTransport string `json:"preferredTransport,omitempty,omitzero" yaml:"preferredTransport,omitempty" mapstructure:"preferredTransport,omitempty"`
-
-	// ProtocolVersion corresponds to the JSON schema field "protocolVersion".
-	ProtocolVersion string `json:"protocolVersion,omitempty,omitzero" yaml:"protocolVersion,omitempty" mapstructure:"protocolVersion,omitempty"`
-
-	// Security requirements advertised on the AgentCard (A2A spec section 7). Each
-	// entry is a map from a scheme name declared in 'securitySchemes' to a list of
-	// required scopes (empty for schemes without scopes); multiple keys in one entry
-	// are ANDed, and separate array entries are ORed - the same semantics as the
-	// OpenAPI/A2A 'security' field. This flat DSL form is what authors write;
-	// consumers (e.g. adl-cli) map it onto the ADK's AgentCard 'security' shape ({
-	// schemes: { <name>: { list: [scopes] } } }).
-	Security []CardSecurityElem `json:"security,omitempty,omitzero" yaml:"security,omitempty" mapstructure:"security,omitempty"`
+	// Security requirements for contacting the agent (A2A v1.0.1
+	// 'AgentCard.securityRequirements'). Each entry is a map from a scheme name
+	// declared in 'securitySchemes' to a list of required scopes (empty for schemes
+	// without scopes); multiple keys in one entry are ANDed, and separate array
+	// entries are ORed - the same semantics as the OpenAPI/A2A 'security' field.
+	SecurityRequirements []CardSecurityRequirementsElem `json:"securityRequirements,omitempty,omitzero" yaml:"securityRequirements,omitempty" mapstructure:"securityRequirements,omitempty"`
 
 	// Statically declared A2A/OpenAPI security schemes advertised on the AgentCard
 	// (A2A spec section 7), keyed by an arbitrary scheme name referenced from
-	// 'security'. Use this only for schemes that cannot be derived from runtime
-	// config - 'apiKey', 'http', and 'mutualTLS'. OIDC/OAuth2 schemes are
+	// 'securityRequirements'. Use this only for schemes that cannot be derived from
+	// runtime config - 'apiKey', 'http', and 'mutualTLS'. OIDC/OAuth2 schemes are
 	// deliberately excluded here: they are runtime concerns (AUTH_ISSUER_URL /
 	// AUTH_CLIENT_ID / AUTH_CLIENT_SECRET env) and the ADK derives their declaration
 	// at startup, so baking an issuer into the manifest would be wrong per
 	// environment.
 	SecuritySchemes CardSecuritySchemes `json:"securitySchemes,omitempty,omitzero" yaml:"securitySchemes,omitempty" mapstructure:"securitySchemes,omitempty"`
 
-	// Whether the deployed agent serves a richer, authenticated AgentCard via the A2A
-	// 'GetExtendedAgentCard' method (GET /extendedAgentCard; A2A spec section 7).
-	// When true, the generated ADK wires up that endpoint; clients that authenticate
-	// receive an extended card, and misconfigured/unsupported calls follow the A2A
-	// error contract (-32007 ExtendedAgentCardNotConfiguredError when the extended
-	// card is declared but not configured / -32004 UnsupportedOperationError when the
-	// agent does not support it). Optional; defaults to false when omitted.
-	SupportsExtendedAgentCard bool `json:"supportsExtendedAgentCard,omitempty,omitzero" yaml:"supportsExtendedAgentCard,omitempty" mapstructure:"supportsExtendedAgentCard,omitempty"`
-
-	// URL corresponds to the JSON schema field "url".
-	URL string `json:"url,omitempty,omitzero" yaml:"url,omitempty" mapstructure:"url,omitempty"`
+	// Ordered list of protocol endpoints the agent exposes (A2A v1.0.1
+	// 'AgentCard.supportedInterfaces'). The first entry is the preferred interface.
+	// Required on the v1.0.1 wire format; optional here so that manifests can omit it
+	// and let the consumer derive it from 'spec.server'.
+	SupportedInterfaces []AgentInterface `json:"supportedInterfaces,omitempty,omitzero" yaml:"supportedInterfaces,omitempty" mapstructure:"supportedInterfaces,omitempty"`
 }
 
-type CardSecurityElem map[string][]string
+type CardSecurityRequirementsElem map[string][]string
 
 // Statically declared A2A/OpenAPI security schemes advertised on the AgentCard
 // (A2A spec section 7), keyed by an arbitrary scheme name referenced from
-// 'security'. Use this only for schemes that cannot be derived from runtime config
-// - 'apiKey', 'http', and 'mutualTLS'. OIDC/OAuth2 schemes are deliberately
-// excluded here: they are runtime concerns (AUTH_ISSUER_URL / AUTH_CLIENT_ID /
-// AUTH_CLIENT_SECRET env) and the ADK derives their declaration at startup, so
-// baking an issuer into the manifest would be wrong per environment.
+// 'securityRequirements'. Use this only for schemes that cannot be derived from
+// runtime config - 'apiKey', 'http', and 'mutualTLS'. OIDC/OAuth2 schemes are
+// deliberately excluded here: they are runtime concerns (AUTH_ISSUER_URL /
+// AUTH_CLIENT_ID / AUTH_CLIENT_SECRET env) and the ADK derives their declaration
+// at startup, so baking an issuer into the manifest would be wrong per
+// environment.
 type CardSecuritySchemes map[string]SecurityScheme
 
 // Provision Anthropic's Claude Code coding agent inside the sandbox.
@@ -777,7 +787,10 @@ type ScalingConfig struct {
 // key, 'in' -> 'location'). The 'type' selects the variant: 'apiKey' (key passed
 // in a header, query param, or cookie), 'http' (HTTP auth such as Basic or
 // Bearer), or 'mutualTLS' (client-certificate auth). OIDC/OAuth2 are intentionally
-// not modelled here because the ADK derives them from runtime config.
+// not modelled here because the ADK derives them from runtime config - this
+// includes every OAuth flow the A2A v1.0.1 SecurityScheme knows
+// (authorizationCode, implicit, password, clientCredentials) plus the newer
+// 'deviceCode' flow (DeviceCodeOAuthFlow).
 type SecurityScheme struct {
 	// For 'http' with a 'Bearer' scheme: a hint identifying the bearer token format
 	// (e.g. 'JWT'). Informational only.

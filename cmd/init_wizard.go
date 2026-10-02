@@ -13,6 +13,7 @@ import (
 	lipgloss "charm.land/lipgloss/v2"
 	viper "github.com/spf13/viper"
 
+	schema "github.com/inference-gateway/adl-cli/internal/schema"
 	tui "github.com/inference-gateway/adl-cli/internal/tui"
 )
 
@@ -253,7 +254,6 @@ func collectAnswersWizard(projectName string) answers {
 	// ---- capabilities + artifacts ----
 	streaming, _ := wzBool("streaming", true)
 	push, _ := wzBool("notifications", false)
-	history, _ := wzBool("history", false)
 	caps := []string{}
 	if streaming {
 		caps = append(caps, "streaming")
@@ -261,18 +261,14 @@ func collectAnswersWizard(projectName string) answers {
 	if push {
 		caps = append(caps, "pushNotifications")
 	}
-	if history {
-		caps = append(caps, "stateTransitionHistory")
-	}
 	runFields([]huh.Field{
 		huh.NewMultiSelect[string]().
 			Title("Capabilities").
 			Description("Space to toggle, enter to confirm.").
-			Height(multiSelectHeight(3)).
+			Height(multiSelectHeight(2)).
 			Options(
 				huh.NewOption("Streaming responses", "streaming").Selected(streaming),
 				huh.NewOption("Push notifications", "pushNotifications").Selected(push),
-				huh.NewOption("State transition history", "stateTransitionHistory").Selected(history),
 			).
 			Value(&caps),
 	})
@@ -285,7 +281,6 @@ func collectAnswersWizard(projectName string) answers {
 	})
 	ans.Streaming = slices.Contains(caps, "streaming")
 	ans.PushNotifications = slices.Contains(caps, "pushNotifications")
-	ans.StateTransitionHistory = slices.Contains(caps, "stateTransitionHistory")
 	ans.ArtifactsEnabled = artifacts
 
 	// ---- services / tools / skills ----
@@ -375,8 +370,8 @@ func collectAnswersWizard(projectName string) answers {
 
 func collectCard(ans *answers) {
 	var enabled bool
-	protocol := "0.3.0"
-	transport := "JSONRPC"
+	protocol := schema.DefaultProtocolVersion
+	binding := schema.DefaultProtocolBinding
 	inputModes := []string{"text", "voice"}
 	outputModes := []string{"text", "audio"}
 	scheme := ans.Scheme
@@ -389,12 +384,12 @@ func collectCard(ans *answers) {
 		huh.NewGroup(
 			leftConfirm().
 				Title("Configure the agent card?").
-				Description("Protocol version, transport, and input/output modes.").
+				Description("Protocol version, binding, and input/output modes.").
 				Value(&enabled),
 		),
 		huh.NewGroup(
 			huh.NewInput().Title("Protocol version").Value(&protocol),
-			huh.NewInput().Title("Preferred transport").Value(&transport),
+			huh.NewInput().Title("Protocol binding").Value(&binding),
 			huh.NewMultiSelect[string]().
 				Title("Default input modes").
 				Height(multiSelectHeight(3)).
@@ -425,7 +420,7 @@ func collectCard(ans *answers) {
 		return
 	}
 	ans.ProtocolVersion = protocol
-	ans.PreferredTransport = transport
+	ans.ProtocolBinding = binding
 	ans.InputModes = inputModes
 	ans.OutputModes = outputModes
 	ans.CardURL = cardURL

@@ -184,6 +184,9 @@ func (g *Generator) parseADL(adlFile string) (*schema.ADL, error) {
 	if err := yaml.Unmarshal(data, &adl); err != nil {
 		return nil, err
 	}
+	for _, w := range schema.MigrateDeprecatedCardFields(data, &adl) {
+		fmt.Fprintf(os.Stderr, "⚠️  %s\n", w)
+	}
 
 	return &adl, nil
 }
@@ -1141,6 +1144,24 @@ func (g *Generator) generateGitHubActionsWorkflow(adl *schema.ADL, outputDir str
 	return nil
 }
 
+// goPostGenerationCommands builds the default Go post-generation commands.
+// Tool devdeps name a package path (e.g. golang.org/x/tools/cmd/stringer),
+// not a module, so go.mod cannot pin them itself; the first `go get pkg@ver`
+// resolves the owning module at the pinned version, then tidy normalises the
+// rest of the graph and writes go.sum.
+func goPostGenerationCommands(adl *schema.ADL) []string {
+	view, err := vendor.ResolveADL(adl)
+	if err != nil || len(view.GoTools) == 0 {
+		return []string{"go mod tidy", "go fmt ./..."}
+	}
+
+	args := make([]string, 0, len(view.GoTools))
+	for _, tool := range view.GoTools {
+		args = append(args, tool.Name+"@"+tool.Version)
+	}
+	return []string{"go get " + strings.Join(args, " "), "go mod tidy", "go fmt ./..."}
+}
+
 // runPostGenerationSteps runs language-specific post-generation steps
 func (g *Generator) runPostGenerationSteps(adl *schema.ADL, outputDir, language string) error {
 	var commands []string
@@ -1151,7 +1172,7 @@ func (g *Generator) runPostGenerationSteps(adl *schema.ADL, outputDir, language 
 	} else {
 		switch language {
 		case "go":
-			commands = []string{"go mod tidy", "go fmt ./..."}
+			commands = goPostGenerationCommands(adl)
 			fmt.Println("🔧 Running default Go post-generation commands...")
 		case "rust":
 			commands = []string{"cargo fmt"}

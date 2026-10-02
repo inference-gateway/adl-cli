@@ -8,7 +8,7 @@ import schema "github.com/inference-gateway/adl-cli/internal/schema"
 // nested under a per-variant key ('type' selects the wrapper, 'in' becomes
 // 'location'). Returns nil when none are declared so the template omits the
 // field. OIDC/OAuth2 are intentionally not modelled here - the ADK derives them
-// from runtime config (see cardSecurity and main.go's OIDC wiring).
+// from runtime config (see cardSecurityRequirements and main.go's OIDC wiring).
 func cardSecuritySchemes(card *schema.Card) map[string]any {
 	if card == nil || len(card.SecuritySchemes) == 0 {
 		return nil
@@ -44,16 +44,16 @@ func wrapSecurityScheme(s schema.SecurityScheme) map[string]any {
 	return map[string]any{}
 }
 
-// cardSecurity maps the manifest's flat security requirements
-// (spec.card.security) onto the ADK AgentCard 'security' shape:
-// [{ schemes: { <name>: { list: [scopes] } } }]. Returns nil when none are
-// declared.
-func cardSecurity(card *schema.Card) []any {
-	if card == nil || len(card.Security) == 0 {
+// cardSecurityRequirements maps the manifest's flat security requirements
+// (spec.card.securityRequirements) onto the ADK AgentCard
+// 'securityRequirements' shape: [{ schemes: { <name>: { list: [scopes] } } }].
+// Returns nil when none are declared.
+func cardSecurityRequirements(card *schema.Card) []any {
+	if card == nil || len(card.SecurityRequirements) == 0 {
 		return nil
 	}
-	out := make([]any, 0, len(card.Security))
-	for _, req := range card.Security {
+	out := make([]any, 0, len(card.SecurityRequirements))
+	for _, req := range card.SecurityRequirements {
 		schemes := make(map[string]any, len(req))
 		for name, scopes := range req {
 			if scopes == nil {

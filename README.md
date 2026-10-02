@@ -471,7 +471,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: false
-    stateTransitionHistory: false
   agent:
     provider: "" # Choose: openai, anthropic, google, groq, mistral, deepseek, cohere, cloudflare, moonshot, ollama, ollama_cloud, nvidia, minimax
     model: "" # Specify default model name for chosen provider
@@ -539,7 +538,6 @@ spec:
   capabilities:
     streaming: true
     pushNotifications: true
-    stateTransitionHistory: true
   agent:
     provider: deepseek
     model: deepseek-v4-flash

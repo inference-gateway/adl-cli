@@ -31,11 +31,13 @@ func TestAgentCardTemplate_EscapesQuotesInDescriptions(t *testing.T) {
 	adl := minimalGoADL()
 	adl.Metadata.Description = `An agent that handles "PromQL" and "sum by" queries.`
 	adl.Spec.Card = &schema.Card{
-		ProtocolVersion:    "0.3.0",
-		URL:                "https://example.com/agent",
-		PreferredTransport: "JSONRPC",
-		DocumentationURL:   "https://example.com/docs",
-		IconURL:            "https://example.com/icon.png",
+		SupportedInterfaces: []schema.AgentInterface{{
+			URL:             "https://example.com/agent",
+			ProtocolBinding: "JSONRPC",
+			ProtocolVersion: "1.0",
+		}},
+		DocumentationURL: "https://example.com/docs",
+		IconURL:          "https://example.com/icon.png",
 	}
 
 	promqlDesc := `Generate Prometheus query expressions. Triggers on phrases like "PromQL", "Prometheus query", and "sum by".`
@@ -98,6 +100,101 @@ func TestAgentCardTemplate_EscapesQuotesInDescriptions(t *testing.T) {
 	}
 	if card.Skills[0].Version != "1.0.0" {
 		t.Errorf("promql skill version not preserved\nwant: %q\ngot:  %q", "1.0.0", card.Skills[0].Version)
+	}
+}
+
+// TestAgentCardTemplate_EmitsV101Shape pins the emitted card on the A2A v1.0.1
+// AgentCard: supportedInterfaces (first entry preferred), securityRequirements,
+// and the extended-card flag on capabilities instead of the card.
+func TestAgentCardTemplate_EmitsV101Shape(t *testing.T) {
+	r, err := NewRegistry("go")
+	if err != nil {
+		t.Fatalf("NewRegistry: %v", err)
+	}
+	tmpl, err := r.GetTemplate("config/agent.json")
+	if err != nil {
+		t.Fatalf("GetTemplate(config/agent.json): %v", err)
+	}
+
+	adl := minimalGoADL()
+	adl.Spec.Capabilities.ExtendedAgentCard = true
+	adl.Spec.Card = &schema.Card{
+		SupportedInterfaces: []schema.AgentInterface{
+			{URL: "https://agent.example.com", ProtocolBinding: "JSONRPC", ProtocolVersion: "1.0"},
+			{URL: "https://grpc.agent.example.com", ProtocolBinding: "GRPC", ProtocolVersion: "1.0"},
+		},
+		SecurityRequirements: []schema.CardSecurityRequirementsElem{{"bearer": {"read"}}},
+	}
+
+	rendered, err := NewWithRegistry("config/agent.json", r).Execute(tmpl, Context{ADL: adl, Language: "go"})
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+
+	var card struct {
+		SupportedInterfaces []struct {
+			URL             string `json:"url"`
+			ProtocolBinding string `json:"protocolBinding"`
+			ProtocolVersion string `json:"protocolVersion"`
+		} `json:"supportedInterfaces"`
+		SecurityRequirements []map[string]any `json:"securityRequirements"`
+		Capabilities         map[string]any   `json:"capabilities"`
+	}
+	if err := json.Unmarshal([]byte(rendered), &card); err != nil {
+		t.Fatalf("rendered agent-card.json is not valid JSON: %v\n--- rendered ---\n%s", err, rendered)
+	}
+
+	if len(card.SupportedInterfaces) != 2 {
+		t.Fatalf("expected both declared interfaces, got %+v", card.SupportedInterfaces)
+	}
+	if card.SupportedInterfaces[0].URL != "https://agent.example.com" || card.SupportedInterfaces[0].ProtocolBinding != "JSONRPC" {
+		t.Errorf("preferred interface not emitted first: %+v", card.SupportedInterfaces[0])
+	}
+	if len(card.SecurityRequirements) != 1 {
+		t.Errorf("expected securityRequirements to be emitted, got %+v", card.SecurityRequirements)
+	}
+	if card.Capabilities["extendedAgentCard"] != true {
+		t.Errorf("expected capabilities.extendedAgentCard true, got %+v", card.Capabilities)
+	}
+	if _, found := card.Capabilities["stateTransitionHistory"]; found {
+		t.Errorf("stateTransitionHistory must not be emitted, got %+v", card.Capabilities)
+	}
+	if strings.Contains(rendered, "preferredTransport") {
+		t.Errorf("card must not emit the removed preferredTransport field\n--- rendered ---\n%s", rendered)
+	}
+}
+
+// TestAgentCardTemplate_DefaultsSupportedInterfaces covers a manifest with no card
+// block: the v1.0.1 card requires an interface, so one JSONRPC entry is derived.
+func TestAgentCardTemplate_DefaultsSupportedInterfaces(t *testing.T) {
+	r, err := NewRegistry("go")
+	if err != nil {
+		t.Fatalf("NewRegistry: %v", err)
+	}
+	tmpl, err := r.GetTemplate("config/agent.json")
+	if err != nil {
+		t.Fatalf("GetTemplate(config/agent.json): %v", err)
+	}
+
+	rendered, err := NewWithRegistry("config/agent.json", r).Execute(tmpl, Context{ADL: minimalGoADL(), Language: "go"})
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+
+	var card struct {
+		SupportedInterfaces []map[string]string `json:"supportedInterfaces"`
+	}
+	if err := json.Unmarshal([]byte(rendered), &card); err != nil {
+		t.Fatalf("rendered agent-card.json is not valid JSON: %v\n--- rendered ---\n%s", err, rendered)
+	}
+	if len(card.SupportedInterfaces) != 1 {
+		t.Fatalf("expected one derived interface, got %+v", card.SupportedInterfaces)
+	}
+	want := map[string]string{"url": "", "protocolBinding": "JSONRPC", "protocolVersion": "1.0"}
+	for key, value := range want {
+		if card.SupportedInterfaces[0][key] != value {
+			t.Errorf("derived interface %s = %q, want %q", key, card.SupportedInterfaces[0][key], value)
+		}
 	}
 }
 

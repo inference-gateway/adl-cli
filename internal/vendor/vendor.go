@@ -105,7 +105,7 @@ func Resolve(raws []string, builtins map[string]string, depGroup string) ([]Entr
 // tests will fail loudly if a built-in is added there without being
 // mirrored here.
 var GoBuiltins = map[string]string{
-	"github.com/inference-gateway/adk":  "v0.29.0",
+	"github.com/inference-gateway/adk":  "v0.30.0",
 	"github.com/sethvargo/go-envconfig": "v1.4.3",
 	"github.com/spf13/cobra":            "v1.10.2",
 	"go.uber.org/zap":                   "v1.28.0",
@@ -118,7 +118,7 @@ var GoBuiltins = map[string]string{
 // them all so users can't shadow them regardless of which features they
 // activate.
 var CargoBuiltinDeps = map[string]string{
-	"inference-gateway-adk": "0.14.0",
+	"inference-gateway-adk": "0.15.0",
 	"inference-gateway-sdk": "0.28.0",
 	"tokio":                 "1",
 	"tracing":               "0.1",
@@ -158,7 +158,7 @@ var GoTelemetryDeps = map[string]string{
 // `@inference-gateway/adl-cli` is intentionally absent: it tracks the CLI
 // version at generation time rather than a static pin.
 var NpmBuiltinDeps = map[string]string{
-	"@inference-gateway/adk": "0.16.2",
+	"@inference-gateway/adk": "0.17.0",
 }
 var NpmBuiltinDevDeps = map[string]string{
 	"@types/node": "^26.6.3",
@@ -265,12 +265,12 @@ type View struct {
 	GoBuiltinEntries []Entry
 
 	// GoTools holds Go executable dev tools (`vendor.devdeps`). Each
-	// entry is rendered both as a `// indirect` line in `require` (so
-	// the module is downloadable) and as a bare package path inside the
+	// entry is rendered as a bare package path inside the
 	// `tool ( ... )` block introduced in Go 1.24. Users supply the full
 	// tool package path (e.g. `golang.org/x/tools/cmd/stringer`); a
-	// post-generation `go mod tidy` normalises the require entry to the
-	// owning module root.
+	// post-generation `go get pkg@version` records the owning module
+	// root in `require` (a package path is not a module path, so tidy
+	// alone cannot resolve it).
 	GoTools []Entry
 
 	// CargoDeps / CargoDevDeps map to the matching Cargo.toml sections.
