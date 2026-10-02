@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"cmp"
 	"fmt"
 
 	yaml "gopkg.in/yaml.v3"
@@ -76,8 +77,8 @@ func migrateSupportedInterfaces(legacy legacyCard, adl *ADL) []string {
 
 	ensureCard(adl).SupportedInterfaces = []AgentInterface{{
 		URL:             legacy.URL,
-		ProtocolBinding: firstNonEmpty(legacy.PreferredTransport, DefaultProtocolBinding),
-		ProtocolVersion: firstNonEmpty(legacy.ProtocolVersion, DefaultProtocolVersion),
+		ProtocolBinding: cmp.Or(legacy.PreferredTransport, DefaultProtocolBinding),
+		ProtocolVersion: cmp.Or(legacy.ProtocolVersion, DefaultProtocolVersion),
 	}}
 	return warnings
 }
@@ -120,11 +121,4 @@ func ensureCard(adl *ADL) *Card {
 		adl.Spec.Card = &Card{}
 	}
 	return adl.Spec.Card
-}
-
-func firstNonEmpty(value, fallback string) string {
-	if value != "" {
-		return value
-	}
-	return fallback
 }

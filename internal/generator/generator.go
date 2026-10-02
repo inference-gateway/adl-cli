@@ -184,7 +184,9 @@ func (g *Generator) parseADL(adlFile string) (*schema.ADL, error) {
 	if err := yaml.Unmarshal(data, &adl); err != nil {
 		return nil, err
 	}
-	schema.MigrateDeprecatedCardFields(data, &adl)
+	for _, w := range schema.MigrateDeprecatedCardFields(data, &adl) {
+		fmt.Fprintf(os.Stderr, "⚠️  %s\n", w)
+	}
 
 	return &adl, nil
 }
