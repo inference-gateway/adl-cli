@@ -364,9 +364,9 @@ function adaptLLMClient(client: OpenAICompatibleLLMClient): LLMClient {
 function toWireMessage(message: ChatMessage): LLMMessage {
   switch (message.role) {
     case 'system':
-      return { role: MessageRole.system, content: message.content };
+      return { role: MessageRole.System, content: message.content };
     case 'user':
-      return { role: MessageRole.user, content: message.content };
+      return { role: MessageRole.User, content: message.content };
     case 'assistant': {
       const toolCalls = message.toolCalls?.map((tc) => ({
         id: tc.id,
@@ -374,7 +374,7 @@ function toWireMessage(message: ChatMessage): LLMMessage {
         function: { name: tc.name, arguments: tc.arguments },
       }));
       return {
-        role: MessageRole.assistant,
+        role: MessageRole.Assistant,
         content: message.content ?? '',
         ...(toolCalls !== undefined && toolCalls.length > 0
           ? { tool_calls: toolCalls }
@@ -383,7 +383,7 @@ function toWireMessage(message: ChatMessage): LLMMessage {
     }
     case 'tool':
       return {
-        role: MessageRole.tool,
+        role: MessageRole.Tool,
         content: message.content,
         tool_call_id: message.toolCallId,
       };

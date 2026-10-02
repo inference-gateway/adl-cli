@@ -9,9 +9,6 @@ require (
 {{- range .Vendor.GoRequires }}
 	{{ .Name }} {{ .Version }}
 {{- end }}
-{{- range .Vendor.GoTools }}
-	{{ .Name }} {{ .Version }} // indirect
-{{- end }}
 )
 {{ if .Vendor.GoTools }}
 tool (

@@ -265,12 +265,12 @@ type View struct {
 	GoBuiltinEntries []Entry
 
 	// GoTools holds Go executable dev tools (`vendor.devdeps`). Each
-	// entry is rendered both as a `// indirect` line in `require` (so
-	// the module is downloadable) and as a bare package path inside the
+	// entry is rendered as a bare package path inside the
 	// `tool ( ... )` block introduced in Go 1.24. Users supply the full
 	// tool package path (e.g. `golang.org/x/tools/cmd/stringer`); a
-	// post-generation `go mod tidy` normalises the require entry to the
-	// owning module root.
+	// post-generation `go get pkg@version` records the owning module
+	// root in `require` (a package path is not a module path, so tidy
+	// alone cannot resolve it).
 	GoTools []Entry
 
 	// CargoDeps / CargoDevDeps map to the matching Cargo.toml sections.

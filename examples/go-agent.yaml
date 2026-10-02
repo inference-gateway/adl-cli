@@ -213,8 +213,8 @@ spec:
       vendor:
         deps:
           - github.com/stretchr/testify@v1.10.0
-        devdeps:
-          - golang.org/x/tools/cmd/stringer@v0.20.0
+        devdeps:                                                 
+          - golang.org/x/tools/cmd/stringer@v0.49.0             
   scm:
     provider: github
     url: "https://github.com/inference-gateway/adl-cli"

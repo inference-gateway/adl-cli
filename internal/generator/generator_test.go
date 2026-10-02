@@ -1080,7 +1080,7 @@ func TestGenerator_VendorWiring(t *testing.T) {
 		}
 	})
 
-	t.Run("go: deps land in require sorted+deduped; devdeps populate require // indirect and tool block", func(t *testing.T) {
+	t.Run("go: deps land in require sorted+deduped; devdeps go to the tool block", func(t *testing.T) {
 		got := render(t, "go", "go.mod", makeGo(&schema.VendorConfig{
 			Deps:    []string{"github.com/google/uuid@v1.6.0", "github.com/google/uuid@v1.5.0"},
 			Devdeps: []string{"golang.org/x/tools/cmd/stringer@v0.20.0"},
@@ -1091,8 +1091,10 @@ func TestGenerator_VendorWiring(t *testing.T) {
 		if strings.Contains(got, "v1.5.0") {
 			t.Fatalf("expected duplicate uuid v1.5.0 to be deduped (first-wins), got:\n%s", got)
 		}
-		if !strings.Contains(got, "golang.org/x/tools/cmd/stringer v0.20.0 // indirect") {
-			t.Fatalf("expected stringer in require as // indirect, got:\n%s", got)
+		// The tool package path is not a module path, so it must not render
+		// into require; post-generation `go get pkg@ver` records the module.
+		if strings.Contains(got, "stringer v0.20.0 // indirect") {
+			t.Fatalf("tool package path must not render as a require entry, got:\n%s", got)
 		}
 		toolIdx := strings.Index(got, "tool (")
 		if toolIdx == -1 {
@@ -1111,8 +1113,8 @@ func TestGenerator_VendorWiring(t *testing.T) {
 		got := render(t, "go", "go.mod", makeGo(&schema.VendorConfig{
 			Devdeps: []string{"github.com/golang/mock/mockgen@v1.6.0"},
 		}))
-		if !strings.Contains(got, "github.com/golang/mock/mockgen v1.6.0 // indirect") {
-			t.Fatalf("expected mockgen as // indirect require, got:\n%s", got)
+		if strings.Contains(got, "mockgen v1.6.0 // indirect") {
+			t.Fatalf("tool package path must not render as a require entry, got:\n%s", got)
 		}
 		if !strings.Contains(got, "tool (") {
 			t.Fatalf("expected tool directive when only devdeps set, got:\n%s", got)

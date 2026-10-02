@@ -189,7 +189,7 @@ is rendered by `adl init --defaults` precisely so it's discoverable:
 |-------|---------|---------------|---------------|
 {{- if eq .Language "go" }}
 | `spec.language.go.vendor.deps` | Runtime Go modules | `github.com/stretchr/testify@v1.10.0` | `go.mod` `require` block |
-| `spec.language.go.vendor.devdeps` | Executable dev tools (Go 1.24 `tool` directive) | `golang.org/x/tools/cmd/stringer@v0.20.0` | `go.mod` `tool` directive |
+| `spec.language.go.vendor.devdeps` | Executable dev tools (Go 1.24 `tool` directive) | `golang.org/x/tools/cmd/stringer@v0.49.0` | `go.mod` `tool` directive |
 {{- else if eq .Language "rust" }}
 | `spec.language.rust.vendor.deps` | Runtime crates | `tokio@1.36.0` | `Cargo.toml` `[dependencies]` |
 | `spec.language.rust.vendor.devdeps` | Test / dev-only crates | `mockall@0.12.0` | `Cargo.toml` `[dev-dependencies]` |

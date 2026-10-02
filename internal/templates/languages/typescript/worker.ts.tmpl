@@ -19,10 +19,11 @@
  * intentionally left out of the initial cloudflare deployment block - add the
  * binding to wrangler.toml and wire it here when you need it.
  *
- * One-time setup (not installed by the scaffold):
+ * One-time setup for real Workers wiring (not installed by the scaffold):
  *   pnpm add -D wrangler @cloudflare/workers-types
  * then add "@cloudflare/workers-types" to compilerOptions.types in
- * tsconfig.json so the Workers globals below type-check.
+ * tsconfig.json so Workers globals (ExecutionContext, DurableObjects,...)
+ * type-check in your handler.
  *
  * Local dev:   pnpm wrangler dev
  * Deploy:      pnpm wrangler deploy
@@ -38,11 +39,7 @@ export interface Env {
 }
 
 export default {
-  async fetch(
-    request: Request,
-    env: Env,
-    _ctx: ExecutionContext
-  ): Promise<Response> {
+  async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
     if (request.method === 'GET' && url.pathname === '/health') {
