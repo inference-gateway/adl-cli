@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.65.4](https://github.com/inference-gateway/adl-cli/compare/v0.65.3...v0.65.4) (2026-10-03)
+
+### ♻️ Improvements
+
+* **rust:** let the adk resolve the agent card url ([#461](https://github.com/inference-gateway/adl-cli/issues/461)) ([f5e438a](https://github.com/inference-gateway/adl-cli/commit/f5e438af584d561ab6ab568b5f1d09c3bf8f0582))
+
+### 🐛 Bug Fixes
+
+* serve and advertise the a2a json-rpc endpoint at /a2a in every language ([#457](https://github.com/inference-gateway/adl-cli/issues/457)) ([71e2c82](https://github.com/inference-gateway/adl-cli/commit/71e2c82544937be94b86dcebb64c1b81fbcae85e))
+* **typescript:** register every a2a method the agent card advertises ([#458](https://github.com/inference-gateway/adl-cli/issues/458)) ([7149295](https://github.com/inference-gateway/adl-cli/commit/7149295086055e9c083b52f9e924e821c278e51d))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump template pins to latest ([#460](https://github.com/inference-gateway/adl-cli/issues/460)) ([503a054](https://github.com/inference-gateway/adl-cli/commit/503a054a285f38cbbd9d576b0c98821cbc561c4a))
+
 ## [0.65.3](https://github.com/inference-gateway/adl-cli/compare/v0.65.2...v0.65.3) (2026-10-03)
 
 ### 🔧 Miscellaneous
