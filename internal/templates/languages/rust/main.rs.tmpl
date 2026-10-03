@@ -1,4 +1,4 @@
-use inference_gateway_adk::{A2AServerBuilder, {{ if .ADL.Spec.Agent }}AgentBuilder, {{ end }}Config};
+use inference_gateway_adk::{A2AServerBuilder, {{ if .ADL.Spec.Agent }}AgentBuilder, {{ end }}AgentCardOverrides, Config};
 {{- if .ADL.Spec.Agent }}
 use serde_json::Value;
 {{- end }}
@@ -261,12 +261,19 @@ async fn run_start() -> Result<(), Box<dyn std::error::Error>> {
 {{- end }}
 
     let port = config.server_config.port;
+    let agent_url = std::env::var("A2A_AGENT_URL")
+        .ok()
+        .filter(|url| !url.is_empty())
+        .unwrap_or_else(|| {{ with index (index (cardSupportedInterfaces .ADL.Spec.Card) 0) "url" }}{{ . | toJson }}.to_string(){{ else }}format!("{{ .ADL.Spec.Server.Scheme | default "http" }}://localhost:{port}/a2a"){{ end }});
     let server = A2AServerBuilder::new()
         .with_config(config)
 {{- if .ADL.Spec.Agent }}
         .with_agent(agent)
 {{- end }}
-        .with_agent_card_from_file(".well-known/agent-card.json", None)
+        .with_agent_card_from_file(
+            ".well-known/agent-card.json",
+            Some(AgentCardOverrides::new().with_url(agent_url)),
+        )
         .with_default_task_handlers()
         .build()
         .await?;

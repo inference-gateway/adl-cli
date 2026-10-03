@@ -52,7 +52,7 @@ export default {
     // once at module scope (reading config from `env`) and dispatch this
     // request to them, returning their Response - covering at least:
     //   GET  /.well-known/agent-card.json
-    //   POST /                              (A2A JSON-RPC)
+    //   POST /a2a                           (A2A JSON-RPC)
     return new Response(
       'Not Implemented: wire the A2A handler in src/worker.ts',
       { status: 501 }
