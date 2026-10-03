@@ -234,7 +234,6 @@ func runStart(ctx context.Context) error {
 	}
 
 	l.Info("starting " + AgentName + " agent", zap.String("version", Version), zap.Bool("debug", cfg.A2A.Debug))
-	l.Debug("loaded configuration", zap.Any("config", cfg))
 
 	resolvedSkillsDir := skillsDir
 	if v := os.Getenv("A2A_SKILLS_DIR"); v != "" {
