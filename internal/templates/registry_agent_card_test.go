@@ -321,3 +321,77 @@ func TestRustMainTemplate_EscapesQuotesInDescription(t *testing.T) {
 		t.Errorf("main.rs still contains raw (unescaped) quotes inside the about literal\n--- rendered ---\n%s", rendered)
 	}
 }
+
+// TestMainTemplates_DefaultCardURLToJSONRPCEndpoint: the card's preferred
+// interface URL is where clients send JSON-RPC (the TCK posts to it verbatim).
+// A2A_AGENT_URL wins, then the manifest's interface URL, then the agent's own
+// /a2a endpoint, so the card never advertises an empty URL.
+func TestMainTemplates_DefaultCardURLToJSONRPCEndpoint(t *testing.T) {
+	declared := &schema.Card{SupportedInterfaces: []schema.AgentInterface{
+		{URL: "https://agent.example.com/a2a", ProtocolBinding: "JSONRPC", ProtocolVersion: "1.0"},
+	}}
+
+	tests := []struct {
+		name     string
+		language string
+		tmplKey  string
+		card     *schema.Card
+		want     string
+		alsoWant string
+	}{
+		{
+			name:     "go derives the url from the server",
+			language: "go",
+			tmplKey:  "main.go",
+			want:     `cfg.A2A.AgentURL = cmp.Or(cfg.A2A.AgentURL, "", "http://localhost:"+cfg.A2A.ServerConfig.Port+"/a2a")`,
+		},
+		{
+			name:     "go prefers the manifest url",
+			language: "go",
+			tmplKey:  "main.go",
+			card:     declared,
+			want:     `cfg.A2A.AgentURL = cmp.Or(cfg.A2A.AgentURL, "https://agent.example.com/a2a", "http://localhost:"+cfg.A2A.ServerConfig.Port+"/a2a")`,
+		},
+		{
+			name:     "rust derives the url from the server",
+			language: "rust",
+			tmplKey:  "main.rs",
+			want:     `.unwrap_or_else(|| format!("http://localhost:{port}/a2a"));`,
+			alsoWant: "Some(AgentCardOverrides::new().with_url(agent_url))",
+		},
+		{
+			name:     "rust prefers the manifest url",
+			language: "rust",
+			tmplKey:  "main.rs",
+			card:     declared,
+			want:     `.unwrap_or_else(|| "https://agent.example.com/a2a".to_string());`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r, err := NewRegistry(tt.language)
+			if err != nil {
+				t.Fatalf("NewRegistry: %v", err)
+			}
+			tmpl, err := r.GetTemplate(tt.tmplKey)
+			if err != nil {
+				t.Fatalf("GetTemplate(%s): %v", tt.tmplKey, err)
+			}
+
+			adl := minimalGoADL()
+			adl.Spec.Language.Rust = &schema.RustConfig{PackageName: "rust-agent", Version: "1.94.1", Edition: "2024"}
+			adl.Spec.Card = tt.card
+
+			rendered, err := NewWithRegistry(tt.tmplKey, r).Execute(tmpl, Context{ADL: adl, Language: tt.language})
+			if err != nil {
+				t.Fatalf("Execute: %v", err)
+			}
+			for _, want := range []string{tt.want, tt.alsoWant} {
+				if !strings.Contains(rendered, want) {
+					t.Errorf("%s missing card url default\nwant substring: %s\n--- rendered ---\n%s", tt.tmplKey, want, rendered)
+				}
+			}
+		})
+	}
+}

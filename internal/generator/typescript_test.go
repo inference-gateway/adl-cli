@@ -304,7 +304,8 @@ func TestGenerator_TypeScriptIndex(t *testing.T) {
 	mustContain := []string{
 		"const JSON_RPC_PATH = '/a2a';",
 		"createA2AServer({ card, jsonRpcPath: JSON_RPC_PATH })",
-		"const fallbackUrl = `http://${config.server.host}:${config.server.port}${JSON_RPC_PATH}`;",
+		"const fallbackUrl = `http://localhost:${config.server.port}${JSON_RPC_PATH}`;",
+		"url: config.agent.url || entry.url || fallbackUrl",
 		"createMessageSendHandler({ storage })",
 		"createTaskGetHandler({ storage })",
 		"createTaskListHandler({ storage })",
@@ -403,6 +404,7 @@ func TestGenerator_TypeScriptConfig(t *testing.T) {
 			`envString('A2A_AGENT_NAME', "ts-agent")`,
 			`envString('A2A_AGENT_VERSION', "2.1.0")`,
 			`envString('A2A_AGENT_SYSTEM_PROMPT', "You are a test bot.")`,
+			`envString('A2A_AGENT_URL', '')`,
 			`envString('A2A_AGENT_CARD_PATH', '.well-known/agent-card.json')`,
 			`envString('A2A_SKILLS_DIR', '.agents/skills')`,
 			`envString('A2A_AGENT_CLIENT_PROVIDER', "openai")`,

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 {{- if .ADL.Spec.Capabilities.ExtendedAgentCard }}
 	"encoding/json"
@@ -219,6 +220,7 @@ func runStart(ctx context.Context) error {
 	// empty strings, and so any other consumer of cfg.A2A sees the real values.
 	cfg.A2A.AgentName = AgentName
 	cfg.A2A.AgentVersion = Version
+	cfg.A2A.AgentURL = cmp.Or(cfg.A2A.AgentURL, {{ index (index (cardSupportedInterfaces .ADL.Spec.Card) 0) "url" | toJson }}, "{{ .ADL.Spec.Server.Scheme | default "http" }}://localhost:"+cfg.A2A.ServerConfig.Port+"/a2a")
 {{- if and .ADL.Spec.Telemetry .ADL.Spec.Telemetry.Enabled }}
 	// The OpenTelemetry SDK settings are read as A2A_OTEL_* through the ADK's
 	// A2A_-prefixed config (cfg.A2A.OTelConfig), so the single Process call above
