@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.65.3](https://github.com/inference-gateway/adl-cli/compare/v0.65.2...v0.65.3) (2026-10-03)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump the adks to the a2a v1.0.1 releases ([#456](https://github.com/inference-gateway/adl-cli/issues/456)) ([6b479cf](https://github.com/inference-gateway/adl-cli/commit/6b479cf436f94ec370d011e6b33eda06e9489f25))
+
 ## [0.65.2](https://github.com/inference-gateway/adl-cli/compare/v0.65.1...v0.65.2) (2026-10-03)
 
 ### 🔧 Miscellaneous
