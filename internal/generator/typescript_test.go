@@ -302,7 +302,9 @@ func TestGenerator_TypeScriptIndex(t *testing.T) {
 
 	// A2A server wiring and the three JSON-RPC handlers the issue requires.
 	mustContain := []string{
-		"createA2AServer({ card })",
+		"const JSON_RPC_PATH = '/a2a';",
+		"createA2AServer({ card, jsonRpcPath: JSON_RPC_PATH })",
+		"const fallbackUrl = `http://${config.server.host}:${config.server.port}${JSON_RPC_PATH}`;",
 		"createMessageSendHandler({ storage })",
 		"createTaskGetHandler({ storage })",
 		"createTaskListHandler({ storage })",

@@ -45,6 +45,7 @@ import { buildToolBox } from './tools/index.js';
 // All runtime configuration - ADK options under the A2A_ prefix plus any
 // custom spec.config sections - is loaded once here. See ./config.ts for the
 // (hand-rolled) loader and the rationale behind it.
+const JSON_RPC_PATH = '/a2a';
 const config = loadConfig();
 const { host, port } = config.server;
 
@@ -121,9 +122,9 @@ telemetry.start();
 if (telemetry.isEnabled()) {
   logger.info('OpenTelemetry enabled', { serviceName: card.name });
 }
-const server = createA2AServer({ card, telemetry });
+const server = createA2AServer({ card, telemetry, jsonRpcPath: JSON_RPC_PATH });
 {{- else }}
-const server = createA2AServer({ card });
+const server = createA2AServer({ card, jsonRpcPath: JSON_RPC_PATH });
 {{- end }}
 
 server.registerMethod(MESSAGE_SEND_METHOD, createMessageSendHandler({ storage }));
@@ -145,7 +146,7 @@ logger.info(`${config.agent.name} listening on http://${host}:${port}`, {
 });
 logger.info(`agent card: http://${host}:${port}/.well-known/agent-card.json`);
 logger.info(`health:     http://${host}:${port}/health`);
-logger.info(`rpc:        POST http://${host}:${port}/`);
+logger.info(`rpc:        POST http://${host}:${port}${JSON_RPC_PATH}`);
 
 const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
   logger.info(`received ${signal}, shutting down...`);
@@ -202,7 +203,7 @@ async function runWorker(signal: AbortSignal): Promise<void> {
 function loadAgentCard(config: Config): AgentCard {
   const raw = readFileSync(config.agent.cardPath, 'utf-8');
   const parsed = JSON.parse(raw) as AgentCard;
-  const fallbackUrl = `http://${config.server.host}:${config.server.port}`;
+  const fallbackUrl = `http://${config.server.host}:${config.server.port}${JSON_RPC_PATH}`;
   const supportedInterfaces = parsed.supportedInterfaces.map((entry, index) =>
     index === 0 && entry.url === '' ? { ...entry, url: fallbackUrl } : entry
   );
