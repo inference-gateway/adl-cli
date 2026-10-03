@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.66.0](https://github.com/inference-gateway/adl-cli/compare/v0.65.4...v0.66.0) (2026-10-03)
+
+### ✨ Features
+
+* **ai:** allow docker, k3d, kubectl and ctlptl in the claude and infer workflows ([#462](https://github.com/inference-gateway/adl-cli/issues/462)) ([c99cfd6](https://github.com/inference-gateway/adl-cli/commit/c99cfd6e980f2207e9656eaaa7fdf89a84f35cd4))
+
 ## [0.65.4](https://github.com/inference-gateway/adl-cli/compare/v0.65.3...v0.65.4) (2026-10-03)
 
 ### ♻️ Improvements
