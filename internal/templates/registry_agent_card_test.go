@@ -344,7 +344,7 @@ func TestMainTemplates_DefaultCardURLToJSONRPCEndpoint(t *testing.T) {
 			name:     "go derives the url from the server",
 			language: "go",
 			tmplKey:  "main.go",
-			want:     `cfg.A2A.AgentURL = cmp.Or(cfg.A2A.AgentURL, "", "http://localhost:"+cfg.A2A.ServerConfig.Port+"/a2a")`,
+			want:     `cfg.A2A.AgentURL = cmp.Or(cfg.A2A.AgentURL, "http://localhost:"+cfg.A2A.ServerConfig.Port+"/a2a")`,
 		},
 		{
 			name:     "go prefers the manifest url",
