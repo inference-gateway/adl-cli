@@ -181,6 +181,7 @@ var Tools = map[string]string{
 	"git":           "2.55.0",
 	"docker":        "29.8.1",
 	"k3d":           "5.9.0",
+	"ctlptl":        "0.9.6",
 	"claude-code":   "2.1.285",
 	"infer":         "0.223.0",
 }

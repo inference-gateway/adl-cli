@@ -129,6 +129,11 @@ jobs:
           curl -fsSL https://raw.githubusercontent.com/k3d-io/k3d/v{{ pin "tool" "k3d" }}/install.sh | TAG=v{{ pin "tool" "k3d" }} bash
           k3d version
 
+      - name: Install ctlptl
+        run: |
+          curl -fsSL https://github.com/tilt-dev/ctlptl/releases/download/v{{ pin "tool" "ctlptl" }}/ctlptl.{{ pin "tool" "ctlptl" }}.linux.x86_64.tar.gz | sudo tar -xz -C /usr/local/bin ctlptl
+          ctlptl version
+
       - name: Install ADL CLI
         env:
           VERSION: v{{ .Metadata.CLIVersion }}
@@ -188,7 +193,7 @@ jobs:
           claude_args: |
             --effort ${{`{{ inputs.effort || 'medium' }}`}}
             --model ${{`{{ inputs.model || 'claude-opus-5-5' }}`}}
-            --allowedTools "Bash(task:*),Bash(gh:*),Bash(git:*),Bash(adl:*),Bash(docker:*),Bash(k3d:*),Bash(kubectl:*){{- if and .ADL.Spec.Development .ADL.Spec.Development.Sandbox .ADL.Spec.Development.Sandbox.Flox .ADL.Spec.Development.Sandbox.Flox.Enabled }},Bash(flox:*){{- end }}{{- if eq .Language "go" }},Bash(go:*){{- else if eq .Language "rust" }},Bash(cargo:*){{- else if eq .Language "typescript" }},Bash(npm:*),Bash(node:*){{- end }}"
+            --allowedTools "Bash(task:*),Bash(gh:*),Bash(git:*),Bash(adl:*),Bash(docker:*),Bash(k3d:*),Bash(kubectl:*),Bash(ctlptl:*){{- if and .ADL.Spec.Development .ADL.Spec.Development.Sandbox .ADL.Spec.Development.Sandbox.Flox .ADL.Spec.Development.Sandbox.Flox.Enabled }},Bash(flox:*){{- end }}{{- if eq .Language "go" }},Bash(go:*){{- else if eq .Language "rust" }},Bash(cargo:*){{- else if eq .Language "typescript" }},Bash(npm:*),Bash(node:*){{- end }}"
             --append-system-prompt "After pushing commits to a new branch (issue-triggered runs), open the pull request yourself with 'gh pr create' against main, titled with a conventional commit prefix and linking the triggering issue via 'Closes #<number>' in the body. GH_TOKEN is already set for gh. Do not just post a link to a PR creation page. When working on an existing pull request branch, do not create a new pull request."
           prompt: ${{`{{ steps.set-prompt.outputs.value }}`}}
           track_progress: ${{`{{ github.event_name != 'workflow_dispatch' }}`}}
