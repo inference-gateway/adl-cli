@@ -325,7 +325,8 @@ func TestRustMainTemplate_EscapesQuotesInDescription(t *testing.T) {
 // TestMainTemplates_DefaultCardURLToJSONRPCEndpoint: the card's preferred
 // interface URL is where clients send JSON-RPC (the TCK posts to it verbatim).
 // A2A_AGENT_URL wins, then the manifest's interface URL, then the agent's own
-// /a2a endpoint, so the card never advertises an empty URL.
+// /a2a endpoint, so the card never advertises an empty URL. Go resolves this in
+// the generated main; Rust leaves it to the ADK, which applies the same order.
 func TestMainTemplates_DefaultCardURLToJSONRPCEndpoint(t *testing.T) {
 	declared := &schema.Card{SupportedInterfaces: []schema.AgentInterface{
 		{URL: "https://agent.example.com/a2a", ProtocolBinding: "JSONRPC", ProtocolVersion: "1.0"},
@@ -337,7 +338,7 @@ func TestMainTemplates_DefaultCardURLToJSONRPCEndpoint(t *testing.T) {
 		tmplKey  string
 		card     *schema.Card
 		want     string
-		alsoWant string
+		notWant  string
 	}{
 		{
 			name:     "go derives the url from the server",
@@ -353,18 +354,12 @@ func TestMainTemplates_DefaultCardURLToJSONRPCEndpoint(t *testing.T) {
 			want:     `cfg.A2A.AgentURL = cmp.Or(cfg.A2A.AgentURL, "https://agent.example.com/a2a", "http://localhost:"+cfg.A2A.ServerConfig.Port+"/a2a")`,
 		},
 		{
-			name:     "rust derives the url from the server",
-			language: "rust",
-			tmplKey:  "main.rs",
-			want:     `.unwrap_or_else(|| format!("http://localhost:{port}/a2a"));`,
-			alsoWant: "Some(AgentCardOverrides::new().with_url(agent_url))",
-		},
-		{
-			name:     "rust prefers the manifest url",
+			name:     "rust delegates the url to the adk",
 			language: "rust",
 			tmplKey:  "main.rs",
 			card:     declared,
-			want:     `.unwrap_or_else(|| "https://agent.example.com/a2a".to_string());`,
+			want:     `.with_agent_card_from_file(".well-known/agent-card.json", None)`,
+			notWant:  "A2A_AGENT_URL",
 		},
 	}
 
@@ -387,10 +382,11 @@ func TestMainTemplates_DefaultCardURLToJSONRPCEndpoint(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Execute: %v", err)
 			}
-			for _, want := range []string{tt.want, tt.alsoWant} {
-				if !strings.Contains(rendered, want) {
-					t.Errorf("%s missing card url default\nwant substring: %s\n--- rendered ---\n%s", tt.tmplKey, want, rendered)
-				}
+			if !strings.Contains(rendered, tt.want) {
+				t.Errorf("%s missing card url default\nwant substring: %s\n--- rendered ---\n%s", tt.tmplKey, tt.want, rendered)
+			}
+			if tt.notWant != "" && strings.Contains(rendered, tt.notWant) {
+				t.Errorf("%s still resolves the card url itself\nunwanted substring: %s\n--- rendered ---\n%s", tt.tmplKey, tt.notWant, rendered)
 			}
 		})
 	}
