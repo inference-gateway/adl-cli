@@ -199,8 +199,9 @@ func TestGenerator_TypeScriptPnpmWorkspace(t *testing.T) {
 		if !reflect.DeepEqual(ws.AllowBuilds, wantAllowBuilds) {
 			t.Fatalf("expected allowBuilds %v, got %v\n%s", wantAllowBuilds, ws.AllowBuilds, got)
 		}
-		if len(ws.MinimumReleaseAgeExclude) != 1 || ws.MinimumReleaseAgeExclude[0] != "@inference-gateway/adl-cli@9.9.9" {
-			t.Fatalf("expected minimumReleaseAgeExclude [@inference-gateway/adl-cli@9.9.9], got %v\n%s", ws.MinimumReleaseAgeExclude, got)
+		wantExclude := []string{"@inference-gateway/adk@" + vendor.NpmBuiltinDeps["@inference-gateway/adk"], "@inference-gateway/adl-cli@9.9.9"}
+		if !reflect.DeepEqual(ws.MinimumReleaseAgeExclude, wantExclude) {
+			t.Fatalf("expected minimumReleaseAgeExclude %v, got %v\n%s", wantExclude, ws.MinimumReleaseAgeExclude, got)
 		}
 	})
 
@@ -234,8 +235,9 @@ func TestGenerator_TypeScriptPnpmWorkspace(t *testing.T) {
 		if !reflect.DeepEqual(ws.AllowBuilds, wantAllowBuilds) {
 			t.Fatalf("expected allowBuilds %v, got %v\n%s", wantAllowBuilds, ws.AllowBuilds, wsBytes)
 		}
-		if len(ws.MinimumReleaseAgeExclude) != 1 || ws.MinimumReleaseAgeExclude[0] != "@inference-gateway/adl-cli@1.2.3" {
-			t.Fatalf("expected minimumReleaseAgeExclude [@inference-gateway/adl-cli@1.2.3], got %v\n%s", ws.MinimumReleaseAgeExclude, wsBytes)
+		wantExclude := []string{"@inference-gateway/adk@" + vendor.NpmBuiltinDeps["@inference-gateway/adk"], "@inference-gateway/adl-cli@1.2.3"}
+		if !reflect.DeepEqual(ws.MinimumReleaseAgeExclude, wantExclude) {
+			t.Fatalf("expected minimumReleaseAgeExclude %v, got %v\n%s", wantExclude, ws.MinimumReleaseAgeExclude, wsBytes)
 		}
 
 		pkgBytes, err := os.ReadFile(filepath.Join(outDir, "package.json"))

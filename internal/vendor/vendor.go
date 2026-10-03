@@ -105,7 +105,7 @@ func Resolve(raws []string, builtins map[string]string, depGroup string) ([]Entr
 // tests will fail loudly if a built-in is added there without being
 // mirrored here.
 var GoBuiltins = map[string]string{
-	"github.com/inference-gateway/adk":  "v0.31.0",
+	"github.com/inference-gateway/adk":  "v0.31.1",
 	"github.com/sethvargo/go-envconfig": "v1.4.3",
 	"github.com/spf13/cobra":            "v1.10.2",
 	"go.uber.org/zap":                   "v1.28.0",
@@ -158,7 +158,7 @@ var GoTelemetryDeps = map[string]string{
 // `@inference-gateway/adl-cli` is intentionally absent: it tracks the CLI
 // version at generation time rather than a static pin.
 var NpmBuiltinDeps = map[string]string{
-	"@inference-gateway/adk": "0.18.0",
+	"@inference-gateway/adk": "0.18.1",
 }
 var NpmBuiltinDevDeps = map[string]string{
 	"@types/node": "^26.6.4",
