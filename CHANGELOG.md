@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.66.1](https://github.com/inference-gateway/adl-cli/compare/v0.66.0...v0.66.1) (2026-10-03)
+
+### 🐛 Bug Fixes
+
+* **templates:** stop logging the full config in generated go agents ([#464](https://github.com/inference-gateway/adl-cli/issues/464)) ([29716d1](https://github.com/inference-gateway/adl-cli/commit/29716d1a9c5a23e3d2d8afa550c86a53ca27abf0)), closes [#463](https://github.com/inference-gateway/adl-cli/issues/463)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump the adks to the url credentials releases ([#465](https://github.com/inference-gateway/adl-cli/issues/465)) ([c577e08](https://github.com/inference-gateway/adl-cli/commit/c577e08b93ccf91e1d9f050b03003cf2b385efb5))
+
 ## [0.66.0](https://github.com/inference-gateway/adl-cli/compare/v0.65.4...v0.66.0) (2026-10-03)
 
 ### ✨ Features
