@@ -1,11 +1,14 @@
 # pnpm 11.5+ reads settings from this file, not the `pnpm` field in package.json.
 # Pre-approve dependencies that run install/build scripts; without this pnpm
 # skips them and the native `adl` binary (adl-cli postinstall) is never fetched.
+# The pinned ADK and CLI releases are exempt from minimumReleaseAge so an agent
+# generated right after a release still installs.
 allowBuilds:
   '@inference-gateway/adl-cli': false
   esbuild: false
   protobufjs: false
 minimumReleaseAgeExclude:
+  - '@inference-gateway/adk@{{ pin "npm" "@inference-gateway/adk" }}'
   {{- if and .Metadata.CLIVersion (ne .Metadata.CLIVersion "dev") }}
   - '@inference-gateway/adl-cli@{{ .Metadata.CLIVersion }}'
   {{- end }}
