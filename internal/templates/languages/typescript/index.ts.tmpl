@@ -6,23 +6,56 @@ import {
   AgentBuilder,
   ChatCompletionToolType,
   DefaultBackgroundTaskHandler,
+{{- if .ADL.Spec.Capabilities.Streaming }}
+  DefaultStreamingTaskHandler,
+{{- end }}
 {{- if not $hasUserTools }}
   DefaultToolBox,
 {{- end }}
   InMemoryTaskStorage,
   MESSAGE_SEND_METHOD,
+{{- if .ADL.Spec.Capabilities.Streaming }}
+  MESSAGE_STREAM_METHOD,
+{{- end }}
   MessageRole,
   OpenAICompatibleLLMClient,
+  TASK_CANCEL_METHOD,
   TASK_GET_METHOD,
   TASK_LIST_METHOD,
+{{- if .ADL.Spec.Capabilities.PushNotifications }}
+  TASK_PUSH_NOTIFICATION_CONFIG_DELETE_METHOD,
+  TASK_PUSH_NOTIFICATION_CONFIG_GET_METHOD,
+  TASK_PUSH_NOTIFICATION_CONFIG_LIST_METHOD,
+  TASK_PUSH_NOTIFICATION_CONFIG_SET_METHOD,
+{{- end }}
+{{- if .ADL.Spec.Capabilities.Streaming }}
+  TASK_RESUBSCRIBE_METHOD,
+{{- end }}
   TASK_STATE,
+  TaskCancellationRegistry,
+{{- if .ADL.Spec.Capabilities.Streaming }}
+  TaskEventBusRegistry,
+{{- end }}
   createA2AServer,
 {{- if and .ADL.Spec.Telemetry .ADL.Spec.Telemetry.Enabled }}
   createTelemetryProvider,
 {{- end }}
   createMessageSendHandler,
+{{- if .ADL.Spec.Capabilities.Streaming }}
+  createMessageStreamHandler,
+{{- end }}
+  createTaskCancelHandler,
   createTaskGetHandler,
   createTaskListHandler,
+{{- if .ADL.Spec.Capabilities.PushNotifications }}
+  createTaskPushNotificationConfigDeleteHandler,
+  createTaskPushNotificationConfigGetHandler,
+  createTaskPushNotificationConfigListHandler,
+  createTaskPushNotificationConfigSetHandler,
+{{- end }}
+{{- if .ADL.Spec.Capabilities.Streaming }}
+  createTaskResubscribeHandler,
+{{- end }}
   isTerminal,
   transitionTask,
   type AgentCard,
@@ -83,14 +116,19 @@ const toolBox = buildToolBox(logger, config);
 const toolBox = new DefaultToolBox();
 {{- end }}
 
-const handler = new DefaultBackgroundTaskHandler({
+const taskHandlerOptions = {
   llmClient: adaptLLMClient(agent.getLLMClient()),
   toolBox,
   systemPrompt: agent.getSystemPrompt(),
   maxIterations: agent.getMaxIterations(),
   maxConversationHistory: agent.getMaxConversationHistory(),
-});
+};
+const handler = new DefaultBackgroundTaskHandler(taskHandlerOptions);
 handler.setEnableUsageMetadata(true);
+{{- if .ADL.Spec.Capabilities.Streaming }}
+const streamingHandler = new DefaultStreamingTaskHandler(taskHandlerOptions);
+streamingHandler.setEnableUsageMetadata(true);
+{{- end }}
 
 const storage = new InMemoryTaskStorage();
 {{- if and .ADL.Spec.Telemetry .ADL.Spec.Telemetry.Enabled }}
@@ -130,6 +168,48 @@ const server = createA2AServer({ card, jsonRpcPath: JSON_RPC_PATH });
 server.registerMethod(MESSAGE_SEND_METHOD, createMessageSendHandler({ storage }));
 server.registerMethod(TASK_GET_METHOD, createTaskGetHandler({ storage }));
 server.registerMethod(TASK_LIST_METHOD, createTaskListHandler({ storage }));
+
+const cancellations = new TaskCancellationRegistry();
+server.registerMethod(
+  TASK_CANCEL_METHOD,
+  createTaskCancelHandler({ storage, registry: cancellations })
+);
+{{- if .ADL.Spec.Capabilities.Streaming }}
+
+const eventBuses = new TaskEventBusRegistry();
+server.registerStreamingMethod(
+  MESSAGE_STREAM_METHOD,
+  createMessageStreamHandler({
+    storage,
+    executor: streamingHandler.asHandler(),
+    cancellationRegistry: cancellations,
+    eventBusRegistry: eventBuses,
+  })
+);
+server.registerStreamingMethod(
+  TASK_RESUBSCRIBE_METHOD,
+  createTaskResubscribeHandler({ storage, eventBusRegistry: eventBuses })
+);
+{{- end }}
+{{- if .ADL.Spec.Capabilities.PushNotifications }}
+
+server.registerMethod(
+  TASK_PUSH_NOTIFICATION_CONFIG_SET_METHOD,
+  createTaskPushNotificationConfigSetHandler({ storage })
+);
+server.registerMethod(
+  TASK_PUSH_NOTIFICATION_CONFIG_GET_METHOD,
+  createTaskPushNotificationConfigGetHandler({ storage })
+);
+server.registerMethod(
+  TASK_PUSH_NOTIFICATION_CONFIG_LIST_METHOD,
+  createTaskPushNotificationConfigListHandler({ storage })
+);
+server.registerMethod(
+  TASK_PUSH_NOTIFICATION_CONFIG_DELETE_METHOD,
+  createTaskPushNotificationConfigDeleteHandler({ storage })
+);
+{{- end }}
 
 const abort = new AbortController();
 const worker = runWorker(abort.signal).catch((err) => {

@@ -360,6 +360,57 @@ func TestGenerator_TypeScriptIndex(t *testing.T) {
 	}
 }
 
+// TestGenerator_TypeScriptIndexRegistersAdvertisedMethods: the agent serves
+// every A2A method its card advertises. CancelTask is always on; streaming and
+// SubscribeToTask follow spec.capabilities.streaming, and the push-config
+// methods follow spec.capabilities.pushNotifications.
+func TestGenerator_TypeScriptIndexRegistersAdvertisedMethods(t *testing.T) {
+	streamingRegistrations := []string{
+		"server.registerStreamingMethod(\n  MESSAGE_STREAM_METHOD,",
+		"server.registerStreamingMethod(\n  TASK_RESUBSCRIBE_METHOD,",
+	}
+	pushRegistrations := []string{
+		"server.registerMethod(\n  TASK_PUSH_NOTIFICATION_CONFIG_SET_METHOD,",
+		"server.registerMethod(\n  TASK_PUSH_NOTIFICATION_CONFIG_GET_METHOD,",
+		"server.registerMethod(\n  TASK_PUSH_NOTIFICATION_CONFIG_LIST_METHOD,",
+		"server.registerMethod(\n  TASK_PUSH_NOTIFICATION_CONFIG_DELETE_METHOD,",
+	}
+
+	tests := []struct {
+		name          string
+		streaming     bool
+		push          bool
+		wantStreaming bool
+		wantPush      bool
+	}{
+		{name: "streaming and push off", streaming: false, push: false},
+		{name: "streaming on", streaming: true, wantStreaming: true},
+		{name: "push on", push: true, wantPush: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			adl := makeTypeScriptADL(nil, "You are a test bot.")
+			adl.Spec.Capabilities = schema.Capabilities{Streaming: tt.streaming, PushNotifications: tt.push}
+			got := renderTS(t, "index.ts", adl)
+
+			if !strings.Contains(got, "server.registerMethod(\n  TASK_CANCEL_METHOD,\n  createTaskCancelHandler({ storage, registry: cancellations })\n);") {
+				t.Fatalf("index.ts must always register CancelTask\n%s", got)
+			}
+			for _, want := range streamingRegistrations {
+				if strings.Contains(got, want) != tt.wantStreaming {
+					t.Fatalf("index.ts registration %q present = %v, want %v\n%s", want, !tt.wantStreaming, tt.wantStreaming, got)
+				}
+			}
+			for _, want := range pushRegistrations {
+				if strings.Contains(got, want) != tt.wantPush {
+					t.Fatalf("index.ts registration %q present = %v, want %v\n%s", want, !tt.wantPush, tt.wantPush, got)
+				}
+			}
+		})
+	}
+}
+
 // makeTSConfigADL builds a TypeScript ADL with a fully specified agent
 // (provider/model/systemPrompt) plus the given custom spec.config sections, for
 // exercising the generated config module.
