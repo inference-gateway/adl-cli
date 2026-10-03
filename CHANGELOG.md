@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.66.2](https://github.com/inference-gateway/adl-cli/compare/v0.66.1...v0.66.2) (2026-10-03)
+
+### 🐛 Bug Fixes
+
+* **templates:** drop the go 1.24 mention from the generated readme ([#466](https://github.com/inference-gateway/adl-cli/issues/466)) ([e86885d](https://github.com/inference-gateway/adl-cli/commit/e86885dc9083e67a51dbb0aa297f2d5a9b95169e))
+
 ## [0.66.1](https://github.com/inference-gateway/adl-cli/compare/v0.66.0...v0.66.1) (2026-10-03)
 
 ### 🐛 Bug Fixes
