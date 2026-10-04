@@ -1981,7 +1981,7 @@ When `issue_templates: true` is set, the following templates are generated in `.
 **Issue Template Features:**
 
 - **Structured Sections** - Consistent formatting for better issue triage and tracking
-- **Title Prefixes** - Frontmatter prefills titles with `[BUG] `, `[FEATURE] ` and `[TASK] Refactor `
+- **Title Prefixes** - Frontmatter prefills titles with `[BUG]`, `[FEATURE]` and `[TASK] Refactor` (each followed by a trailing space)
 - **GitHub Integration** - Frontmatter sets labels (`bug`, `enhancement`, `refactor`) and issue types (`bug`, `feature`, `task`); `assignees` is left empty for you to fill in
 
 ## Dependabot Configuration
