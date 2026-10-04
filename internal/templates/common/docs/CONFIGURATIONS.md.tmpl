@@ -76,6 +76,7 @@ derived from `agent.yaml`; the env vars below override them at runtime.
 {{- else }}
 | **Authentication** | `A2A_AUTH_ENABLED` | Enable OIDC authentication | `false` |
 {{- end }}
+| **Authentication** | `A2A_AUTH_TOKEN` | Static bearer token that protects `/a2a`, mutually exclusive with `A2A_AUTH_ENABLED` | - |
 {{- if and .ADL.Spec.Telemetry .ADL.Spec.Telemetry.Enabled }}
 {{- if or (eq .Language "go") (eq .Language "typescript") }}
 | **Telemetry** | `A2A_TELEMETRY_ENABLED` | Enable OpenTelemetry instrumentation | `true` |

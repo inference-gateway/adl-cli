@@ -232,3 +232,46 @@ func TestDockerfileRust_InvokesStart(t *testing.T) {
 		t.Errorf("Rust Dockerfile CMD does not invoke the start subcommand:\n%s", rendered)
 	}
 }
+
+// TestGoMainTemplate_AdvertisesRuntimeAuthScheme verifies the generated server
+// declares its security scheme from runtime config for both auth modes, whether
+// or not the manifest sets spec.server.auth.enabled.
+func TestGoMainTemplate_AdvertisesRuntimeAuthScheme(t *testing.T) {
+	tests := []struct {
+		name string
+		auth *schema.AuthConfig
+	}{
+		{"manifest without spec.server.auth", nil},
+		{"manifest with spec.server.auth.enabled", &schema.AuthConfig{Enabled: true}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r, err := NewRegistry("go")
+			if err != nil {
+				t.Fatalf("NewRegistry: %v", err)
+			}
+			tmpl, err := r.GetTemplate("main.go")
+			if err != nil {
+				t.Fatalf("GetTemplate(main.go): %v", err)
+			}
+			adl := minimalGoADL()
+			adl.Spec.Server.Auth = tt.auth
+
+			rendered, err := NewWithRegistry("main.go", r).Execute(tmpl, Context{ADL: adl, Language: "go"})
+			if err != nil {
+				t.Fatalf("Execute: %v", err)
+			}
+
+			for _, want := range []string{
+				"advertiseAuthScheme(a2aServer, cfg.A2A.AuthConfig)",
+				"server.BearerTokenSecuritySchemes()",
+				"server.OIDCSecuritySchemes(auth)",
+				`auth.Token == ""`,
+			} {
+				if !strings.Contains(rendered, want) {
+					t.Errorf("generated main.go missing %q", want)
+				}
+			}
+		})
+	}
+}
