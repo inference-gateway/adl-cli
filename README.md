@@ -1974,17 +1974,15 @@ spec:
 
 When `issue_templates: true` is set, the following templates are generated in `.github/ISSUE_TEMPLATE/`:
 
-- **`bug_report.md`** - Structured bug reporting with severity levels, reproduction steps, and environment details
-- **`feature_request.md`** - Feature proposals with use case descriptions and acceptance criteria
-- **`refactor_request.md`** - Code improvement requests with motivation and impact analysis
+- **`bug_report.md`** - Summary, Steps to Reproduce, Expected Behavior and Actual Behavior
+- **`feature_request.md`** - Summary plus an Acceptance Criteria checklist
+- **`refactor_request.md`** - Summary plus an Acceptance Criteria checklist
 
 **Issue Template Features:**
 
-- **Agent Context** - Templates include agent name and version from your ADL metadata
 - **Structured Sections** - Consistent formatting for better issue triage and tracking
-- **GitHub Integration** - Automatic labels and assignees configured in frontmatter
-- **Severity Levels** - Priority classification for bug reports (critical, high, medium, low)
-- **Environment Info** - Sections for capturing logs, system details, and configurations
+- **Title Prefixes** - Frontmatter prefills titles with `[BUG] `, `[FEATURE] ` and `[TASK] Refactor `
+- **GitHub Integration** - Frontmatter sets labels (`bug`, `enhancement`, `refactor`) and issue types (`bug`, `feature`, `task`); `assignees` is left empty for you to fill in
 
 ## Dependabot Configuration
 
