@@ -470,7 +470,7 @@ func collectLanguage(ans *answers) {
 		ans.TSPackageName = pkg
 	default:
 		module, moduleLocked := wzString("go-module", getDefaultGoModule(ans.Name))
-		ver, verLocked := wzString("go-version", "1.26.7")
+		ver, verLocked := wzString("go-version", "1.26.8")
 		var fields []huh.Field
 		if !moduleLocked {
 			fields = append(fields, huh.NewInput().

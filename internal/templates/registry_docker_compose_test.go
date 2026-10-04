@@ -35,7 +35,7 @@ func TestRegistry_DockerCompose_AllLanguages(t *testing.T) {
 						Capabilities: schema.Capabilities{Streaming: true},
 						Server:       schema.Server{Port: 8080},
 						Language: schema.Language{
-							Go: &schema.GoConfig{Module: "example.com/agent", Version: "1.26.7"},
+							Go: &schema.GoConfig{Module: "example.com/agent", Version: "1.26.8"},
 						},
 					},
 				}
@@ -112,7 +112,7 @@ func TestDockerComposeTemplate_ContainsRequiredServices(t *testing.T) {
 							SystemPrompt: "hello",
 						},
 						Language: schema.Language{
-							Go: &schema.GoConfig{Module: "example.com/agent", Version: "1.26.7"},
+							Go: &schema.GoConfig{Module: "example.com/agent", Version: "1.26.8"},
 						},
 					},
 				}
@@ -221,7 +221,7 @@ func TestDockerComposeTemplate_ArtifactsWiring(t *testing.T) {
 						SystemPrompt: "hello",
 					},
 					Language: schema.Language{
-						Go: &schema.GoConfig{Module: "example.com/agent", Version: "1.26.7"},
+						Go: &schema.GoConfig{Module: "example.com/agent", Version: "1.26.8"},
 					},
 				},
 			}
@@ -324,7 +324,7 @@ func TestDockerComposeTemplate_EnvironmentValuesAreStrings(t *testing.T) {
 						},
 						Artifacts: &schema.ArtifactsConfig{Enabled: true},
 						Language: schema.Language{
-							Go: &schema.GoConfig{Module: "example.com/agent", Version: "1.26.7"},
+							Go: &schema.GoConfig{Module: "example.com/agent", Version: "1.26.8"},
 						},
 					},
 				}
