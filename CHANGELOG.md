@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.67.0](https://github.com/inference-gateway/adl-cli/compare/v0.66.4...v0.67.0) (2026-10-04)
+
+### ✨ Features
+
+* **go:** declare the runtime security scheme on the agent card ([#483](https://github.com/inference-gateway/adl-cli/issues/483)) ([c068fc3](https://github.com/inference-gateway/adl-cli/commit/c068fc37a4b4241a04067eb3dfcd30167718accf)), closes [#482](https://github.com/inference-gateway/adl-cli/issues/482)
+
 ## [0.66.4](https://github.com/inference-gateway/adl-cli/compare/v0.66.3...v0.66.4) (2026-10-04)
 
 ### ♻️ Improvements
