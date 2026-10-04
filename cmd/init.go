@@ -1166,7 +1166,7 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 		ans.TSPackageName = promptWithConfig("typescript-name", useDefaults, "TypeScript package name", ans.Name)
 	default:
 		ans.GoModule = promptWithConfig("go-module", useDefaults, "Go module", getDefaultGoModule(ans.Name))
-		ans.GoVersion = promptWithConfig("go-version", useDefaults, "Go version", "1.26.7")
+		ans.GoVersion = promptWithConfig("go-version", useDefaults, "Go version", "1.26.8")
 	}
 
 	tui.Println(tui.Header("Sandbox Configuration"))

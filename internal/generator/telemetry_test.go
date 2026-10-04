@@ -28,7 +28,7 @@ func telemetryADL(enabled bool) *schema.ADL {
 			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/telemetry-agent",
-					Version: "1.26.7",
+					Version: "1.26.8",
 				},
 			},
 			Tools: []schema.Tool{{ID: "read"}},

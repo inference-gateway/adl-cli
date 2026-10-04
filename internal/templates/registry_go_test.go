@@ -22,7 +22,7 @@ func minimalGoADL() *schema.ADL {
 			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/go-agent",
-					Version: "1.26.7",
+					Version: "1.26.8",
 				},
 			},
 		},

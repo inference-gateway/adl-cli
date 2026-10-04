@@ -27,7 +27,7 @@ spec:
   language:
     go:
       module: github.com/test/agent
-      version: "1.26.7"
+      version: "1.26.8"
 `
 	adlPath := filepath.Join(tempDir, "agent.yaml")
 	if err := os.WriteFile(adlPath, []byte(adlContent), 0644); err != nil {
@@ -112,7 +112,7 @@ spec:
   language:
     go:
       module: github.com/test/standalone
-      version: "1.26.7"
+      version: "1.26.8"
 `
 
 	adlPath := filepath.Join(tempDir, "agent.yaml")
@@ -200,7 +200,7 @@ spec:
   language:
     go:
       module: github.com/test/no-skills
-      version: "1.26.7"
+      version: "1.26.8"
 `
 
 	adlPath := filepath.Join(tempDir, "agent.yaml")
@@ -253,7 +253,7 @@ spec:
   language:
     go:
       module: github.com/test/cd-agent
-      version: "1.26.7"
+      version: "1.26.8"
   scm:
     provider: github
     url: https://github.com/test/cd-agent
@@ -345,7 +345,7 @@ spec:
   language:
     go:
       module: github.com/test/ai-agent
-      version: "1.26.7"
+      version: "1.26.8"
   development:
     sandbox:
       flox:
@@ -457,7 +457,7 @@ spec:
   language:
     go:
       module: github.com/test/legacy-ai
-      version: "1.26.7"
+      version: "1.26.8"
   development:
     ai:
       enabled: true
@@ -511,7 +511,7 @@ spec:
   language:
     go:
       module: github.com/test/manifest-ci
-      version: "1.26.7"
+      version: "1.26.8"
   scm:
     provider: github
     url: https://github.com/test/manifest-ci
@@ -567,7 +567,7 @@ spec:
   language:
     go:
       module: github.com/test/manifest-cd
-      version: "1.26.7"
+      version: "1.26.8"
   scm:
     provider: github
     url: https://github.com/test/manifest-cd
@@ -628,7 +628,7 @@ spec:
   language:
     go:
       module: github.com/test/cli-overrides
-      version: "1.26.7"
+      version: "1.26.8"
   scm:
     provider: github
     url: https://github.com/test/cli-overrides
@@ -744,7 +744,7 @@ spec:
   language:
     go:
       module: github.com/test/sandbox-docs
-      version: "1.26.7"
+      version: "1.26.8"
   development:
     ai:
       orchestrators:
@@ -852,7 +852,7 @@ spec:
   language:
     go:
       module: github.com/test/compose-agent
-      version: "1.26.7"
+      version: "1.26.8"
   development:
     sandbox:
       dockerCompose:

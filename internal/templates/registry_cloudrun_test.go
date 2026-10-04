@@ -24,7 +24,7 @@ func cloudRunADL() *schema.ADL {
 			Language: schema.Language{
 				Go: &schema.GoConfig{
 					Module:  "github.com/example/cloudrun-agent",
-					Version: "1.26.7",
+					Version: "1.26.8",
 				},
 			},
 			Deployment: &schema.DeploymentConfig{

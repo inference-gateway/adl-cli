@@ -65,7 +65,7 @@ spec:
   language:
     go:
       module: "github.com/inference-gateway/adl-cli/test-output/go-agent-ai"
-      version: "1.26.7"
+      version: "1.26.8"
   scm:
     provider: github
     url: "https://github.com/inference-gateway/adl-cli"
