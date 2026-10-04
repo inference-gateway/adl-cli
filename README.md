@@ -187,15 +187,17 @@ adl init my-weather-agent
 adl generate --file agent.yaml --output ./test-my-agent
 ```
 
+The wizard defaults to `typescript` and adds no tools unless you answer yes to "Add tools to your agent". The Go example below assumes you picked `go` (for example with `--language go`) and added a `get_weather` tool.
+
 ### 2. Implement Your Business Logic
 
-The generated project includes TODO placeholders for your implementations:
+The generated project includes TODO placeholders for your implementations - here `tools/get_weather.go`:
 
 ```go
-// TODO: Implement weather API logic
-func GetWeatherTool(ctx context.Context, args map[string]any) (string, error) {
+// GetWeatherHandler handles the get_weather tool execution
+func (t *GetWeatherTool) GetWeatherHandler(ctx context.Context, args map[string]any) (string, error) {
+    // TODO: Implement get_weather logic
     city := args["city"].(string)
-    // TODO: Replace with actual weather API call
     return fmt.Sprintf(`{"city": "%s", "temp": "22°C"}`, city), nil
 }
 ```
@@ -203,7 +205,7 @@ func GetWeatherTool(ctx context.Context, args map[string]any) (string, error) {
 ### 3. Build and Run
 
 ```bash
-cd test-weather-agent
+cd test-my-agent
 task build
 task run
 ```
@@ -264,7 +266,6 @@ The init command supports extensive configuration options:
 
 - `--streaming` - Enable streaming responses
 - `--notifications` - Enable push notifications
-- `--history` - Enable state transition history
 
 **Server Configuration:**
 
