@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.66.3](https://github.com/inference-gateway/adl-cli/compare/v0.66.2...v0.66.3) (2026-10-04)
+
+### 🐛 Bug Fixes
+
+* **templates:** document a2a_server_port, the port every adk reads ([#467](https://github.com/inference-gateway/adl-cli/issues/467)) ([f5cfa66](https://github.com/inference-gateway/adl-cli/commit/f5cfa666074337807a03d57c0cb2b08a84d3a15f))
+
 ## [0.66.2](https://github.com/inference-gateway/adl-cli/compare/v0.66.1...v0.66.2) (2026-10-03)
 
 ### 🐛 Bug Fixes
