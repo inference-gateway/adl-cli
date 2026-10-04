@@ -42,8 +42,8 @@ detect_platform() {
     local arch=""
     
     case "$(uname -s)" in
-        Linux*)     os="Linux";;
-        Darwin*)    os="Darwin";;
+        Linux*)     os="linux";;
+        Darwin*)    os="darwin";;
         *)          
             print_error "Unsupported operating system: $(uname -s)"
             exit 1
@@ -97,7 +97,7 @@ install_binary() {
     local temp_archive="${temp_dir}/${archive_name}"
     
     if command -v curl >/dev/null 2>&1; then
-        if ! curl -L -o "$temp_archive" "$download_url"; then
+        if ! curl -fL -o "$temp_archive" "$download_url"; then
             print_error "Failed to download archive from ${download_url}"
             rm -rf "$temp_dir"
             exit 1
@@ -125,12 +125,8 @@ install_binary() {
     fi
     
     local extracted_binary=""
-    if [[ "$platform" == *"Windows"* ]]; then
-        extracted_binary=$(find "$temp_dir" -name "${BINARY_NAME}.exe" -type f | head -n1)
-    else
-        extracted_binary=$(find "$temp_dir" -name "${BINARY_NAME}" -type f | head -n1)
-    fi
-    
+    extracted_binary=$(find "$temp_dir" -name "${BINARY_NAME}" -type f | head -n1)
+
     if [ -z "$extracted_binary" ] || [ ! -f "$extracted_binary" ]; then
         print_error "Binary not found in extracted archive"
         rm -rf "$temp_dir"
