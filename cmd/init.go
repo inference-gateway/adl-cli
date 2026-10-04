@@ -917,7 +917,7 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 	tui.Println(tui.Header("Artifacts Configuration"))
 	ans.ArtifactsEnabled = conditionalPromptBool(useDefaults, "Enable artifacts support (filesystem/MinIO storage)", false)
 	if ans.ArtifactsEnabled {
-		tui.Println(tui.Note("Artifacts storage can be configured via A2A_ARTIFACT_* environment variables"))
+		tui.Println(tui.Note("Artifacts storage can be configured via A2A_ARTIFACTS_* environment variables"))
 	}
 
 	tui.Println(tui.Header("Dependencies"))
