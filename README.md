@@ -1109,7 +1109,7 @@ type CacheConfig struct {
 
 ### Config Subsection Injection
 
-In addition to injecting entire configuration objects, you can inject specific config subsections directly into skills using dotted notation. This provides type-safe access to focused configuration scopes.
+In addition to injecting entire configuration objects, you can inject specific config subsections directly into tools (`spec.tools[].inject`) using dotted notation. This provides type-safe access to focused configuration scopes.
 
 **Example ADL Configuration:**
 
@@ -1199,11 +1199,11 @@ toolBox.AddTool(exportReportTool)
 
 **Benefits of Config Subsection Injection:**
 
-- **Scoped Access**: Skills only receive the configuration they need, following principle of least privilege
+- **Scoped Access**: Tools only receive the configuration they need, following principle of least privilege
 - **Type Safety**: Compile-time validation ensures config fields exist
-- **Clear Dependencies**: Explicit declaration of which config sections each skill requires
+- **Clear Dependencies**: Explicit declaration of which config sections each tool requires
 - **Easier Testing**: Mock specific config subsections without full config object
-- **Better Separation**: Skills don't have access to unrelated configuration
+- **Better Separation**: Tools don't have access to unrelated configuration
 - **Auto-Validation**: ADL CLI validates that injected config sections exist in `spec.config`
 
 **Injection Patterns:**
@@ -1225,7 +1225,7 @@ The service injection system generates:
 2. **Type-Safe Configuration**: Structured config with environment variable mapping
 3. **Service Interfaces**: Custom service packages with interface definitions
 4. **Factory Functions**: Constructor functions that receive logger and configuration
-5. **Automatic Registration**: Services are automatically wired into skills
+5. **Automatic Registration**: Services are automatically wired into tools
 6. **File Protection**: Generated service files are automatically added to `.adl-ignore`
 
 ### Generated Structure
@@ -1278,9 +1278,9 @@ func NewCalendarService(logger *zap.Logger, cfg *config.Config) (CalendarService
 }
 ```
 
-### Skill Integration
+### Tool Integration
 
-Skills automatically receive injected services as constructor parameters:
+Tools automatically receive injected services as constructor parameters:
 
 **Example `tools/create_event.go`:**
 
@@ -2296,15 +2296,17 @@ spec:
 
 ### Generated Code Examples
 
+Tool identifiers are generated as `<Name>Tool` (see `internal/templates/languages/go/tool.go.tmpl`). `xml` is already a default acronym, so only words outside the defaults change between the two cases below.
+
 **Without custom acronyms:**
 
-- `get_n8n_docs` → `GetN8nDocsSkill`
-- `process_xml_data` → `ProcessXmlDataSkill`
+- `get_n8n_docs` → `GetN8nDocsTool`
+- `publish_mqtt_event` → `PublishMqttEventTool`
 
-**With custom acronyms:**
+**With custom acronyms (`["n8n", "mqtt"]`):**
 
-- `get_n8n_docs` → `GetN8NDocsSkill`
-- `process_xml_data` → `ProcessXMLDataSkill`
+- `get_n8n_docs` → `GetN8NDocsTool`
+- `publish_mqtt_event` → `PublishMQTTEventTool`
 
 ### Default Acronyms
 
@@ -2313,6 +2315,7 @@ The following acronyms are recognized by default:
 - **Common**: id, api, url, uri, json, xml, sql, html, css, js, ui, uuid
 - **Network**: http, https, tcp, udp, ip, dns, tls, ssl
 - **Tech**: cpu, gpu, ram, io, os, db
+- **Units**: mb, gb, kb
 
 Your custom acronyms extend these defaults and take precedence over them.
 
