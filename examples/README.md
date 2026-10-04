@@ -28,6 +28,12 @@ validates each manifest and `task examples:generate` scaffolds each one into
 - `go-agent-documentation.yaml` - Go agent that ships hand-authored documentation
   pages (`spec.documentation.pages`); the generator seeds stub `docs/*.md` files
   for the maintainers to fill in
+- `go-agent-auth.yaml` - Go agent advertising A2A card-driven authentication
+  (API key and JWT bearer security schemes)
+- `go-agent-authz.yaml` - Go agent with the authorization decision hook scaffold
+  (`internal/authz/authz.go`)
+- `go-agent-mcp.yaml` - Go agent wired to MCP servers via the ADK's built-in MCP
+  client (`mcp_list_tools` / `mcp_call_tool`)
 
 ### Rust
 
@@ -83,7 +89,8 @@ adl generate --file examples/typescript-agent.yaml --output ./test-typescript-ag
 ```
 
 Deployment targets are selected by the manifest's `spec.deployment.type`; the
-matching `--deployment` flag is optional and simply asserts the expected target:
+`--deployment` flag overrides that field, so passing a different value generates
+for that target instead:
 
 ```bash
 # Cloud Run

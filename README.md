@@ -63,7 +63,7 @@ The ADL CLI helps you build enterprise-ready A2A agents quickly by generating co
 - 🔧 **CI/CD Generation** - Automatic GitHub Actions workflows with semantic-release CD pipelines
 - 🏗️ **Sandbox Environments** - Flox and DevContainer support for isolated development
 - 🎣 **Post-Generation Hooks** - Customize build, format, and test commands after generation
-- 🤖 **Multi-Provider AI** - OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama, Ollama Cloud, and Nvidia support
+- 🤖 **Multi-Provider AI** - OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama, Ollama Cloud, Nvidia, and MiniMax support
 - 📁 **Artifacts Support** - Integrated filesystem and MinIO object storage for artifact management
 - 📡 **OpenTelemetry Instrumentation** - Opt-in tracing and metrics via `spec.telemetry.enabled` (Go and TypeScript)
 - 🔌 **MCP Client** - Connect to MCP servers via `spec.agent.mcp` for `mcp_list_tools` / `mcp_call_tool` (Go)
@@ -516,7 +516,7 @@ The complete ADL schema includes:
 - **capabilities**: Streaming, notifications, state history
 - **config**: Structured configuration sections with environment variable mapping
 - **services**: Service services with interfaces, factories, and type definitions
-- **agent**: AI provider configuration (OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama, Ollama Cloud, Nvidia)
+- **agent**: AI provider configuration (OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama, Ollama Cloud, Nvidia, MiniMax)
 - **tools**: Function-call definitions with JSON schemas, validation, and service injection support
 - **skills**: Markdown playbooks (id + optional `bare`, version, source) pulled from the skills registry, fetched as a full directory from a GitHub repo (shorthand or URL), or scaffolded locally into `.agents/skills/<id>/`; advertised on the agent card, and summarised at runtime in an `AVAILABLE SKILLS:` block appended to the system prompt (frontmatter only - the model reads each `SKILL.md` body on demand)
 - **server**: HTTP server configuration with authentication support
@@ -1879,7 +1879,7 @@ When `github_app: true` is set, the generated CD pipeline will use GitHub App au
 
 ### AI Provider Support
 
-The ADL CLI supports multiple AI providers including OpenAI, Anthropic, Google AI, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama (for local LLMs), Ollama Cloud, and Nvidia. Each provider requires appropriate API keys to be configured as environment variables. See the ADL examples above for configuration details.
+The ADL CLI supports multiple AI providers including OpenAI, Anthropic, Google AI, Groq, Mistral, DeepSeek, Cohere, Cloudflare, Moonshot, Ollama (for local LLMs), Ollama Cloud, Nvidia, and MiniMax. Each provider requires appropriate API keys to be configured as environment variables. See the ADL examples above for configuration details.
 
 ## Artifacts Support
 
@@ -1891,7 +1891,7 @@ spec:
     enabled: true
 ```
 
-Configure storage via environment variables (see generated README for A2A*ARTIFACT*\* variables). Supports both filesystem and MinIO/S3 storage backends.
+Configure storage via environment variables (see the generated `CONFIGURATIONS.md` for the `A2A_ARTIFACTS_*` variables, such as `A2A_ARTIFACTS_ENABLED` and `A2A_ARTIFACTS_STORAGE_PROVIDER`). Supports both filesystem and MinIO/S3 storage backends.
 
 **Examples:**
 
@@ -2047,7 +2047,7 @@ adl generate --file examples/cloudrun-agent.yaml --output ./cloudrun-enterprise 
 - `cloudrun-agent.yaml` - Cloud Run deployment with Google Container Registry
 - `cloudrun-ghcr-agent.yaml` - Cloud Run deployment with GitHub Container Registry
 
-See [`examples/README.md`](examples/README.md) for the full catalog of all 18 example manifests.
+See [`examples/README.md`](examples/README.md) for the full catalog of all 22 example manifests.
 
 ## Template System & Architecture
 
@@ -2194,7 +2194,7 @@ You can control which additional files are generated or updated by editing the `
 # .adl-ignore
 # Skip Docker-related files if you have custom containerization
 Dockerfile
-docker-compose.yml
+docker-compose.yaml
 
 # Skip Kubernetes manifests if you use different deployment tools
 k8s/
@@ -2217,7 +2217,7 @@ Taskfile.yml
 
 ### Common Use Cases
 
-- **Custom Deployment**: Skip `Dockerfile`, `k8s/`, `docker-compose.yml`
+- **Custom Deployment**: Skip `Dockerfile`, `k8s/`, `docker-compose.yaml`
 - **Custom Build**: Skip `Taskfile.yml`, `Makefile`
 - **Custom Auth**: Skip `auth.go`, `middleware.go`
 - **Custom Documentation**: Skip `README.md`

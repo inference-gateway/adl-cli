@@ -276,7 +276,7 @@ func collectAnswersWizard(projectName string) answers {
 	runFields([]huh.Field{
 		leftConfirm().
 			Title("Enable artifacts support?").
-			Description("Filesystem / MinIO storage, configured via A2A_ARTIFACT_* env vars.").
+			Description("Filesystem / MinIO storage, configured via A2A_ARTIFACTS_* env vars.").
 			Value(&artifacts),
 	})
 	ans.Streaming = slices.Contains(caps, "streaming")
