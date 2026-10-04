@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.66.4](https://github.com/inference-gateway/adl-cli/compare/v0.66.3...v0.66.4) (2026-10-04)
+
+### ♻️ Improvements
+
+* bump go toolchain to 1.26.8 ([#480](https://github.com/inference-gateway/adl-cli/issues/480)) ([fb9473f](https://github.com/inference-gateway/adl-cli/commit/fb9473f36f25007fdd04df24b6b7f57b9eb51863))
+
+### 🐛 Bug Fixes
+
+* use lowercase os in install.sh archive name ([#476](https://github.com/inference-gateway/adl-cli/issues/476)) ([b0a7ab0](https://github.com/inference-gateway/adl-cli/commit/b0a7ab0422541d49af60b8df1ef74a435f5cf362))
+
+### 📚 Documentation
+
+* **agents:** add code readability guidelines ([#473](https://github.com/inference-gateway/adl-cli/issues/473)) ([f6ef7a8](https://github.com/inference-gateway/adl-cli/commit/f6ef7a833d83f36b36e4659801cc90a9fb2cc01a))
+* align readme quick start with the cli ([#477](https://github.com/inference-gateway/adl-cli/issues/477)) ([26422a0](https://github.com/inference-gateway/adl-cli/commit/26422a0a0c0a4d6ef8fa668486fb9b421c8ea947))
+* fix stale adl-ignore, artifacts vars and examples ([#479](https://github.com/inference-gateway/adl-cli/issues/479)) ([4a5d845](https://github.com/inference-gateway/adl-cli/commit/4a5d8450119f3873ba16c99e75276e21299f8b49))
+* **readme:** call generated code tools, not skills ([#478](https://github.com/inference-gateway/adl-cli/issues/478)) ([4373543](https://github.com/inference-gateway/adl-cli/commit/4373543558fbf5afcbca66e76a9d985e6c467176))
+* **readme:** match issue template section to templates ([#475](https://github.com/inference-gateway/adl-cli/issues/475)) ([b4f6392](https://github.com/inference-gateway/adl-cli/commit/b4f6392aecbc1352ac77f884a2ea916e9716f0c0))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump the go adk to the usage extension release ([#481](https://github.com/inference-gateway/adl-cli/issues/481)) ([ca5f637](https://github.com/inference-gateway/adl-cli/commit/ca5f637596a92164351151b449d91503b0e3802e)), references [inference-gateway/cli#1526](https://github.com/inference-gateway/cli/issues/1526)
+
 ## [0.66.3](https://github.com/inference-gateway/adl-cli/compare/v0.66.2...v0.66.3) (2026-10-04)
 
 ### 🐛 Bug Fixes
