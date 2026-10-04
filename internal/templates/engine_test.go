@@ -492,6 +492,29 @@ func TestREADMETemplate_LinksToConfigurations(t *testing.T) {
 	}
 }
 
+// TestCONFIGURATIONSTemplate_ServerPortEnvVar pins the port row to
+// A2A_SERVER_PORT, the variable every ADK reads; A2A_PORT was documented but
+// read by none of them, so setting it silently left the agent on its default.
+func TestCONFIGURATIONSTemplate_ServerPortEnvVar(t *testing.T) {
+	registry, err := NewRegistry("go")
+	if err != nil {
+		t.Fatalf("NewRegistry: %v", err)
+	}
+	engine := NewWithRegistry("minimal", registry)
+
+	out, err := engine.ExecuteTemplate("docs/CONFIGURATIONS.md", Context{ADL: minimalGoADL(), Language: "go"})
+	if err != nil {
+		t.Fatalf("ExecuteTemplate(CONFIGURATIONS.md): %v", err)
+	}
+
+	if !strings.Contains(out, "| **Server** | `A2A_SERVER_PORT` |") {
+		t.Error("CONFIGURATIONS.md missing the A2A_SERVER_PORT row")
+	}
+	if strings.Contains(out, "`A2A_PORT`") {
+		t.Error("CONFIGURATIONS.md still documents A2A_PORT, which no ADK reads")
+	}
+}
+
 // TestCONFIGURATIONSTemplate_TelemetryEnvVars guards the regression from
 // inference-gateway/mock-agent#64: once telemetry moved from spec.config.telemetry
 // (which the "Custom Configuration" loop documented) to top-level spec.telemetry,
