@@ -135,7 +135,7 @@ When implementing tests:
 - **Generated Files**: Never manually edit files with "DO NOT EDIT" headers
 - **Configuration Changes**: Always modify `agent.yaml` and regenerate
 - **ADL Version**: Ensure ADL CLI {{ .Metadata.CLIVersion }} or compatible version for regeneration
-- **Port Configuration**: Default {{ .ADL.Spec.Server.Port | default "8080" }}, configurable via `A2A_PORT` or `A2A_SERVER_PORT`
+- **Port Configuration**: Default {{ .ADL.Spec.Server.Port | default "8080" }}, configurable via `A2A_SERVER_PORT`
 
 ## Debugging Tips
 
