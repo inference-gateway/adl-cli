@@ -118,7 +118,7 @@ var GoBuiltins = map[string]string{
 // them all so users can't shadow them regardless of which features they
 // activate.
 var CargoBuiltinDeps = map[string]string{
-	"inference-gateway-adk": "0.17.1",
+	"inference-gateway-adk": "0.18.0",
 	"inference-gateway-sdk": "0.28.0",
 	"tokio":                 "1",
 	"tracing":               "0.1",
@@ -158,7 +158,7 @@ var GoTelemetryDeps = map[string]string{
 // `@inference-gateway/adl-cli` is intentionally absent: it tracks the CLI
 // version at generation time rather than a static pin.
 var NpmBuiltinDeps = map[string]string{
-	"@inference-gateway/adk": "0.19.2",
+	"@inference-gateway/adk": "0.20.0",
 }
 var NpmBuiltinDevDeps = map[string]string{
 	"@types/node": "^26.6.4",
@@ -175,15 +175,15 @@ var Tools = map[string]string{
 	"golangci-lint": "2.14.0",
 	"go-task":       "3.53.1",
 	"rust":          "1.98.1",
-	"rust-analyzer": "2026-09-21",
+	"rust-analyzer": "2026-09-28",
 	"nodejs":        "24.21.0",
-	"pnpm":          "12.3.4",
+	"pnpm":          "12.9.0",
 	"git":           "2.55.0",
 	"docker":        "29.8.1",
 	"k3d":           "5.9.0",
 	"ctlptl":        "0.9.6",
-	"claude-code":   "2.1.285",
-	"infer":         "0.223.0",
+	"claude-code":   "2.1.287",
+	"infer":         "0.225.0",
 }
 
 // Actions pins the GitHub Actions referenced by the generated workflows
@@ -194,7 +194,7 @@ var Actions = map[string]string{
 	"actions/create-github-app-token":      "v3.2.0",
 	"actions/setup-go":                     "v7.0.0",
 	"actions/setup-node":                   "v7.0.0",
-	"anthropics/claude-code-action":        "v1.0.240",
+	"anthropics/claude-code-action":        "v1.0.241",
 	"arduino/setup-task":                   "v3.0.0",
 	"azure/setup-kubectl":                  "v5.1.0",
 	"docker/login-action":                  "v4.6.0",
