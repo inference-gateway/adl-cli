@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.67.2](https://github.com/inference-gateway/adl-cli/compare/v0.67.1...v0.67.2) (2026-10-05)
+
+### 🐛 Bug Fixes
+
+* **go:** start the doc comments after the optional loadAgentCard on their own line ([#485](https://github.com/inference-gateway/adl-cli/issues/485)) ([e03f35f](https://github.com/inference-gateway/adl-cli/commit/e03f35f90943dec19d63f32103a048110fabdb86))
+
 ## [0.67.1](https://github.com/inference-gateway/adl-cli/compare/v0.67.0...v0.67.1) (2026-10-05)
 
 ### 🔧 Miscellaneous
