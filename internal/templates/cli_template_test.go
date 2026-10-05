@@ -275,3 +275,42 @@ func TestGoMainTemplate_AdvertisesRuntimeAuthScheme(t *testing.T) {
 		})
 	}
 }
+
+// TestGoMainTemplate_DocCommentsStartOnTheirOwnLine verifies the optional
+// loadAgentCard block leaves a blank line before the next doc comment, so gofmt
+// never glues it onto the closing brace of the function above.
+func TestGoMainTemplate_DocCommentsStartOnTheirOwnLine(t *testing.T) {
+	tests := []struct {
+		name              string
+		extendedAgentCard bool
+	}{
+		{"without the extended agent card", false},
+		{"with the extended agent card", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r, err := NewRegistry("go")
+			if err != nil {
+				t.Fatalf("NewRegistry: %v", err)
+			}
+			tmpl, err := r.GetTemplate("main.go")
+			if err != nil {
+				t.Fatalf("GetTemplate(main.go): %v", err)
+			}
+			adl := minimalGoADL()
+			adl.Spec.Capabilities.ExtendedAgentCard = tt.extendedAgentCard
+
+			rendered, err := NewWithRegistry("main.go", r).Execute(tmpl, Context{ADL: adl, Language: "go"})
+			if err != nil {
+				t.Fatalf("Execute: %v", err)
+			}
+
+			if !strings.Contains(rendered, "}\n\n// newRootCmd builds") {
+				t.Error("newRootCmd doc comment does not start on its own line after a blank line")
+			}
+			if tt.extendedAgentCard && !strings.Contains(rendered, "}\n\n// loadAgentCard reads") {
+				t.Error("loadAgentCard doc comment does not start on its own line after a blank line")
+			}
+		})
+	}
+}

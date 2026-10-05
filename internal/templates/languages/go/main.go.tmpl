@@ -187,7 +187,7 @@ func advertiseAuthScheme(a2aServer server.A2AServer, auth serverConfig.AuthConfi
 	return true
 }
 
-{{- if .ADL.Spec.Capabilities.ExtendedAgentCard }}
+{{ if .ADL.Spec.Capabilities.ExtendedAgentCard -}}
 // loadAgentCard reads a .well-known agent-card JSON file into a typed AgentCard.
 // It is used to seed the authenticated extended card (A2A spec section 7) from
 // the same static card the public endpoint serves; enrich the returned card with
