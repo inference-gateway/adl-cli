@@ -105,7 +105,7 @@ func Resolve(raws []string, builtins map[string]string, depGroup string) ([]Entr
 // tests will fail loudly if a built-in is added there without being
 // mirrored here.
 var GoBuiltins = map[string]string{
-	"github.com/inference-gateway/adk":  "v0.33.0",
+	"github.com/inference-gateway/adk":  "v0.34.0",
 	"github.com/sethvargo/go-envconfig": "v1.4.3",
 	"github.com/spf13/cobra":            "v1.10.2",
 	"go.uber.org/zap":                   "v1.28.0",
@@ -182,8 +182,8 @@ var Tools = map[string]string{
 	"docker":        "29.8.1",
 	"k3d":           "5.9.0",
 	"ctlptl":        "0.9.6",
-	"claude-code":   "2.1.287",
-	"infer":         "0.225.0",
+	"claude-code":   "2.1.289",
+	"infer":         "0.227.0",
 }
 
 // Actions pins the GitHub Actions referenced by the generated workflows
@@ -193,10 +193,10 @@ var Actions = map[string]string{
 	"actions/checkout":                     "v7.0.1",
 	"actions/create-github-app-token":      "v3.2.0",
 	"actions/setup-go":                     "v7.0.0",
-	"actions/setup-node":                   "v7.0.0",
-	"anthropics/claude-code-action":        "v1.0.241",
+	"actions/setup-node":                   "v7.1.0",
+	"anthropics/claude-code-action":        "v1.0.245",
 	"arduino/setup-task":                   "v3.0.0",
-	"azure/setup-kubectl":                  "v5.1.0",
+	"azure/setup-kubectl":                  "v5.2.0",
 	"docker/login-action":                  "v4.6.0",
 	"docker/setup-buildx-action":           "v4.4.1",
 	"docker/setup-qemu-action":             "v4.4.0",
@@ -206,7 +206,7 @@ var Actions = map[string]string{
 	"google-github-actions/run-gemini-cli": "v0.1.22",
 	"google-github-actions/setup-gcloud":   "v3.0.1",
 	"inference-gateway/infer-action":       "v0.55.5",
-	"openai/codex-action":                  "v1.12",
+	"openai/codex-action":                  "v1.13",
 	"oven-sh/setup-bun":                    "v2.2.0",
 	"peter-evans/create-pull-request":      "v8.1.1",
 }
@@ -221,8 +221,8 @@ var Release = map[string]string{
 	"@semantic-release/exec":                     "7.1.0",
 	"@semantic-release/git":                      "11.0.1",
 	"@semantic-release/github":                   "12.0.10",
-	"conventional-changelog-conventionalcommits": "10.4.0",
-	"conventional-changelog-writer":              "^9.2.1",
+	"conventional-changelog-conventionalcommits": "10.4.1",
+	"conventional-changelog-writer":              "^9.3.0",
 }
 
 // Pin returns the pinned version for `name` in `group`. It is exposed to
