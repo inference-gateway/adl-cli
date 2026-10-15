@@ -307,7 +307,7 @@ func TestGenerator_AI_ClaudeWorkflowGoContent(t *testing.T) {
 	assertNotContains(t, body, "Set up Rust", "Claude Code workflow body (go)")
 	assertNotContains(t, body, "actions-rs/toolchain", "Claude Code workflow body (go)")
 
-	assertContains(t, body, "actions/create-github-app-token@v3.2.0", "Claude Code workflow body")
+	assertContains(t, body, "actions/create-github-app-token@v3.3.0", "Claude Code workflow body")
 	assertContains(t, body, "token: ${{ steps.app-token.outputs.token }}", "Claude Code workflow checkout token")
 	if strings.Index(body, "Generate GitHub App token") > strings.Index(body, "Checkout repository") {
 		t.Errorf("Claude Code workflow: 'Generate GitHub App token' must come before 'Checkout repository'")
@@ -317,7 +317,7 @@ func TestGenerator_AI_ClaudeWorkflowGoContent(t *testing.T) {
 	assertContains(t, body, "Install ADL skill", "Claude Code workflow body")
 	assertContains(t, body, "raw.githubusercontent.com/inference-gateway/adl/main/.agents/skills/adl/SKILL.md", "Claude Code workflow body")
 
-	assertContains(t, body, "anthropics/claude-code-action@v1.0.248", "Claude Code workflow body")
+	assertContains(t, body, "anthropics/claude-code-action@v1.0.250", "Claude Code workflow body")
 	assertContains(t, body, "claude_code_oauth_token:", "Claude Code workflow body")
 	assertContains(t, body, "use_commit_signing: true", "Claude Code workflow body")
 	assertContains(t, body, "branch_prefix: ${{ steps.prefix.outputs.value }}", "Claude Code workflow body")
@@ -406,7 +406,7 @@ func TestGenerator_AI_InferWorkflowContent(t *testing.T) {
 	body := readGenerated(t, out, ".github/workflows/infer.yml")
 
 	assertContains(t, body, "name: Infer", "Infer workflow body")
-	assertContains(t, body, "inference-gateway/infer-action@v0.55.6", "Infer workflow body")
+	assertContains(t, body, "inference-gateway/infer-action@v0.56.1", "Infer workflow body")
 	assertContains(t, body, "github-token: ${{ steps.app-token.outputs.token }}", "Infer workflow body")
 	assertContains(t, body, "actions/create-github-app-token", "Infer workflow body")
 	assertContains(t, body, ",^docker( .*)?$,^k3d( .*)?$,^kubectl( .*)?$,^ctlptl( .*)?$", "Infer workflow bash-allow-append")
