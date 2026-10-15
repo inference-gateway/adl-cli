@@ -213,6 +213,9 @@ func TestGenerator_AI_AllAgentsEnabled(t *testing.T) {
 	assertFile(t, out, "GEMINI.md", false)
 	assertFile(t, out, ".gemini/settings.json", true)
 
+	gitattributes := readGenerated(t, out, ".gitattributes")
+	assertContains(t, gitattributes, ".gemini/settings.json linguist-generated=true", "linguist tag for gemini settings")
+
 	assertFile(t, out, ".github/workflows/claude.yml", true)
 	assertFile(t, out, ".github/workflows/codex.yml", true)
 	assertFile(t, out, ".github/workflows/gemini.yml", true)
