@@ -72,29 +72,16 @@ func TestAIAgentToggles_Any(t *testing.T) {
 	if (AIAgentToggles{}).Any() {
 		t.Fatal("empty toggles should report Any()=false")
 	}
-	if !(AIAgentToggles{OpenCode: true}).Any() {
-		t.Fatal("opencode toggle should report Any()=true")
-	}
-}
-
-func TestAIAgentToggles_AnyAgentsMD(t *testing.T) {
-	tests := map[string]struct {
-		toggles AIAgentToggles
-		want    bool
-	}{
-		"gemini alone is not enough": {AIAgentToggles{Gemini: true}, false},
-		"claudecode flips it on":     {AIAgentToggles{ClaudeCode: true}, true},
-		"codex flips it on":          {AIAgentToggles{Codex: true}, true},
-		"opencode flips it on":       {AIAgentToggles{OpenCode: true}, true},
-		"infer flips it on":          {AIAgentToggles{Infer: true}, true},
-	}
-
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			if got := tc.toggles.AnyAgentsMD(); got != tc.want {
-				t.Fatalf("AnyAgentsMD() = %v, want %v", got, tc.want)
-			}
-		})
+	for name, toggles := range map[string]AIAgentToggles{
+		"claudecode": {ClaudeCode: true},
+		"codex":      {Codex: true},
+		"gemini":     {Gemini: true},
+		"opencode":   {OpenCode: true},
+		"infer":      {Infer: true},
+	} {
+		if !toggles.Any() {
+			t.Fatalf("%s toggle should report Any()=true", name)
+		}
 	}
 }
 

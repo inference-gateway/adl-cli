@@ -357,21 +357,20 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 	return files
 }
 
-// addAIFiles maps per-agent AI assistant documentation onto the
-// generated project layout. Each agent's toggle in
-// spec.development.ai.orchestrators is consulted independently:
-//
-//   - GEMINI.md  ← gemini.enabled
-//   - AGENTS.md  ← any of claudecode / codex / opencode / infer (single shared file)
-//
-// AGENTS.md is emitted once even when more than one agent is enabled.
+// addAIFiles maps AI assistant documentation onto the generated project
+// layout. Every orchestrator reads the shared AGENTS.md, so it is emitted
+// once when any toggle in spec.development.ai.orchestrators is enabled.
+// Gemini CLI defaults to GEMINI.md, so it also gets a settings file that
+// points its context file name at AGENTS.md.
 func (r *Registry) addAIFiles(files map[string]string) {
-	t := r.aiToggles
-	if t.Gemini {
-		files["GEMINI.md"] = "ai/gemini.md"
+	if !r.aiToggles.Any() {
+		return
 	}
-	if t.AnyAgentsMD() {
-		files["AGENTS.md"] = "ai/agents.md"
+
+	files["AGENTS.md"] = "ai/agents.md"
+
+	if r.aiToggles.Gemini {
+		files[".gemini/settings.json"] = "ai/gemini-settings.json"
 	}
 }
 

@@ -80,7 +80,7 @@ func init() {
 	initCmd.Flags().Bool("flox", false, "Enable Flox environment")
 	initCmd.Flags().Bool("devcontainer", false, "Enable DevContainer environment")
 	initCmd.Flags().Bool("docker-compose", false, "Enable Docker Compose environment")
-	initCmd.Flags().Bool("ai", false, "Enable AI assistant docs (AGENTS.md/GEMINI.md) and claude-code in sandboxes")
+	initCmd.Flags().Bool("ai", false, "Enable AI assistant docs (AGENTS.md) and claude-code in sandboxes")
 	initCmd.Flags().Bool("ci", false, "Enable CI workflow generation")
 	initCmd.Flags().Bool("cd", false, "Enable CD pipeline generation")
 	initCmd.Flags().String("deployment", "", "Deployment type (kubernetes, defaults to empty for no deployment)")
