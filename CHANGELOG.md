@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.68.1](https://github.com/inference-gateway/adl-cli/compare/v0.68.0...v0.68.1) (2026-10-15)
+
+### ♻️ Improvements
+
+* **templates:** generate AGENTS.md for claude code instead of CLAUDE.md ([#495](https://github.com/inference-gateway/adl-cli/issues/495)) ([1755c57](https://github.com/inference-gateway/adl-cli/commit/1755c57ffb50b80f53bb7cc08bbe157ebbe4c086))
+
+### 🔧 Miscellaneous
+
+* sync ADL schema to v0.29.1 ([#496](https://github.com/inference-gateway/adl-cli/issues/496)) ([78fb5bd](https://github.com/inference-gateway/adl-cli/commit/78fb5bdbf8c22462c2dab9f359b24aba0f8947c4))
+
 ## [0.68.0](https://github.com/inference-gateway/adl-cli/compare/v0.67.4...v0.68.0) (2026-10-15)
 
 ### ✨ Features
