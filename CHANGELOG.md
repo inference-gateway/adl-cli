@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.68.0](https://github.com/inference-gateway/adl-cli/compare/v0.67.4...v0.68.0) (2026-10-15)
+
+### ✨ Features
+
+* **templates:** install orchestrator plugins in the claude and infer workflows ([#493](https://github.com/inference-gateway/adl-cli/issues/493)) ([b6139e9](https://github.com/inference-gateway/adl-cli/commit/b6139e91bac037c9cd47c5305a81bf5d2420b0ac))
+
+### 🔧 Miscellaneous
+
+* sync ADL schema to v0.29.0 ([#494](https://github.com/inference-gateway/adl-cli/issues/494)) ([55a1ef8](https://github.com/inference-gateway/adl-cli/commit/55a1ef8ea25f84192716210635d99b0d5bf83b25))
+
 ## [0.67.4](https://github.com/inference-gateway/adl-cli/compare/v0.67.3...v0.67.4) (2026-10-15)
 
 ### 🔧 Miscellaneous
