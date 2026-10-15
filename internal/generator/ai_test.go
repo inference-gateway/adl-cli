@@ -512,3 +512,49 @@ func TestGenerator_AI_InferSandboxInstall(t *testing.T) {
 		assertNotContains(t, dc, "install.sh", "devcontainer postCreateCommand")
 	})
 }
+
+func TestGenerator_AI_WorkflowPlugins(t *testing.T) {
+	tmp := t.TempDir()
+	manifest := writeManifest(t, tmp, `  development:
+    ai:
+      orchestrators:
+        claudecode:
+          enabled: true
+          pluginMarketplaces:
+            - https://github.com/DietrichGebert/ponytail.git
+          plugins:
+            - ponytail@ponytail
+        infer:
+          enabled: true
+          plugins:
+            - DietrichGebert/ponytail@v4.8.4
+`)
+	out := filepath.Join(tmp, "out")
+
+	mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
+
+	claude := readGenerated(t, out, ".github/workflows/claude.yml")
+	assertContains(t, claude, "plugin_marketplaces: |\n            https://github.com/DietrichGebert/ponytail.git\n", "Claude Code workflow plugins")
+	assertContains(t, claude, "plugins: |\n            ponytail@ponytail\n", "Claude Code workflow plugins")
+
+	infer := readGenerated(t, out, ".github/workflows/infer.yml")
+	assertContains(t, infer, "plugins: |\n            DietrichGebert/ponytail@v4.8.4\n", "infer workflow plugins")
+}
+
+func TestGenerator_AI_WorkflowsWithoutPlugins(t *testing.T) {
+	tmp := t.TempDir()
+	manifest := writeManifest(t, tmp, `  development:
+    ai:
+      orchestrators:
+        claudecode:
+          enabled: true
+        infer:
+          enabled: true
+`)
+	out := filepath.Join(tmp, "out")
+
+	mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
+
+	assertNotContains(t, readGenerated(t, out, ".github/workflows/claude.yml"), "plugin", "Claude Code workflow without plugins")
+	assertNotContains(t, readGenerated(t, out, ".github/workflows/infer.yml"), "plugins:", "infer workflow without plugins")
+}

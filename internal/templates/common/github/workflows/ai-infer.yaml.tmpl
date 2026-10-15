@@ -216,6 +216,12 @@ jobs:
           mirror-agent-logs: ${{`{{ inputs.debug || vars.INFER_DEBUG == 'true' }}`}}
           skills: |
             adl
+{{- with .ADL.Spec.Development.AI.Orchestrators.Infer.Plugins }}
+          plugins: |
+{{- range . }}
+            {{ . }}
+{{- end }}
+{{- end }}
           bash-allow-append: >-
             ^adl( .*)?$,^task( .*)?$,^docker( .*)?$,^k3d( .*)?$,^kubectl( .*)?$,^ctlptl( .*)?${{- if and .ADL.Spec.Development .ADL.Spec.Development.Sandbox .ADL.Spec.Development.Sandbox.Flox .ADL.Spec.Development.Sandbox.Flox.Enabled }},^flox( .*)?${{- end }}{{- if eq .Language "go" }},^go( .*)?${{- else if eq .Language "rust" }},^cargo( .*)?$,^rustup( .*)?$,^rustc( .*)?${{- else if eq .Language "typescript" }},^bun( .*)?$,^node( .*)?$,^npm( .*)?$,^npx( .*)?${{- end }}
           anthropic-api-key: ${{`{{ secrets.ANTHROPIC_API_KEY }}`}}

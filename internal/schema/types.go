@@ -206,6 +206,16 @@ type ClaudeCodeConfig struct {
 
 	// Enabled corresponds to the JSON schema field "enabled".
 	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
+
+	// Git URLs of Claude Code plugin marketplaces the generated workflow registers
+	// before installing plugins (e.g.
+	// 'https://github.com/DietrichGebert/ponytail.git').
+	PluginMarketplaces []string `json:"pluginMarketplaces,omitempty,omitzero" yaml:"pluginMarketplaces,omitempty" mapstructure:"pluginMarketplaces,omitempty"`
+
+	// Claude Code plugins the generated workflow installs before the agent runs, as
+	// '<plugin>@<marketplace>' (e.g. 'ponytail@ponytail'). Third-party marketplaces
+	// must also be listed in pluginMarketplaces.
+	Plugins []string `json:"plugins,omitempty,omitzero" yaml:"plugins,omitempty" mapstructure:"plugins,omitempty"`
 }
 
 type CloudRunConfig struct {
@@ -465,6 +475,11 @@ type InferConfig struct {
 
 	// Enabled corresponds to the JSON schema field "enabled".
 	Enabled bool `json:"enabled" yaml:"enabled" mapstructure:"enabled"`
+
+	// Infer plugins the generated workflow installs before the agent runs, passed to
+	// 'infer plugins install'. Entries are 'owner/repo', 'owner/repo@ref', or a
+	// GitHub URL (e.g. 'DietrichGebert/ponytail@v4.8.4').
+	Plugins []string `json:"plugins,omitempty,omitzero" yaml:"plugins,omitempty" mapstructure:"plugins,omitempty"`
 }
 
 type KubernetesConfig struct {
