@@ -195,6 +195,18 @@ jobs:
           use_commit_signing: true
           base_branch: main
           branch_prefix: ${{`{{ steps.prefix.outputs.value }}`}}
+{{- with .ADL.Spec.Development.AI.Orchestrators.Claudecode.PluginMarketplaces }}
+          plugin_marketplaces: |
+{{- range . }}
+            {{ . }}
+{{- end }}
+{{- end }}
+{{- with .ADL.Spec.Development.AI.Orchestrators.Claudecode.Plugins }}
+          plugins: |
+{{- range . }}
+            {{ . }}
+{{- end }}
+{{- end }}
           claude_args: |
             --effort ${{`{{ inputs.effort || 'medium' }}`}}
             --model ${{`{{ inputs.model || 'claude-opus-5-5' }}`}}
