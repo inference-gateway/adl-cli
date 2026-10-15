@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.67.4](https://github.com/inference-gateway/adl-cli/compare/v0.67.3...v0.67.4) (2026-10-15)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump golang.org/x/term ([#490](https://github.com/inference-gateway/adl-cli/issues/490)) ([0001629](https://github.com/inference-gateway/adl-cli/commit/00016292811875715b9cd23871ed7ef2fcbd2d76))
+* **deps:** bump template pins to latest ([#489](https://github.com/inference-gateway/adl-cli/issues/489)) ([4e2baaa](https://github.com/inference-gateway/adl-cli/commit/4e2baaaf192dca90e4c5455155d2ac7764421e97))
+* **deps:** bump template pins to latest ([#492](https://github.com/inference-gateway/adl-cli/issues/492)) ([31be78d](https://github.com/inference-gateway/adl-cli/commit/31be78de126bb410d6b224065473957de96f0761))
+* **deps:** bump the github-actions group with 3 updates ([#491](https://github.com/inference-gateway/adl-cli/issues/491)) ([00e4691](https://github.com/inference-gateway/adl-cli/commit/00e4691b21f712663a75a2446e9d0978082973fc))
+
 ## [0.67.3](https://github.com/inference-gateway/adl-cli/compare/v0.67.2...v0.67.3) (2026-10-08)
 
 ### 🔧 Miscellaneous
