@@ -19,8 +19,8 @@ type ADL struct {
 }
 
 // Configures AI-assistant integration for the agent project: generation of
-// AI-assistant documentation (CLAUDE.md, AGENTS.md) and provisioning of
-// coding-agent orchestrators inside sandbox environments.
+// AGENTS.md, the shared instructions file every supported orchestrator reads, and
+// provisioning of coding-agent orchestrators inside sandbox environments.
 type AIConfig struct {
 	// Orchestrators corresponds to the JSON schema field "orchestrators".
 	Orchestrators *OrchestratorsConfig `json:"orchestrators,omitempty,omitzero" yaml:"orchestrators,omitempty" mapstructure:"orchestrators,omitempty"`
@@ -320,8 +320,8 @@ type DevContainerConfig struct {
 }
 
 // Local development experience for the agent: sandboxed dev environments (flox,
-// devcontainer, dockerCompose), AI-assistant integration (CLAUDE.md/AGENTS.md
-// generation, claude-code provisioning), and extra sandbox-level dependencies
+// devcontainer, dockerCompose), AI-assistant integration (shared AGENTS.md
+// generation, coding-agent provisioning), and extra sandbox-level dependencies
 // (deps) for tools that don't belong to any single language's package manager
 // (e.g. deno, kubectl, terraform).
 type DevelopmentConfig struct {
