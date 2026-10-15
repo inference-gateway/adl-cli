@@ -66,7 +66,6 @@ func TestGenerator_AI_NoTogglesNoFiles(t *testing.T) {
 
 	mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
 
-	assertFile(t, out, "CLAUDE.md", false)
 	assertFile(t, out, "AGENTS.md", false)
 	assertFile(t, out, "GEMINI.md", false)
 	assertFile(t, out, ".github/workflows/claude.yml", false)
@@ -87,10 +86,10 @@ func TestGenerator_AI_ClaudeCodeOnly(t *testing.T) {
 
 	mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
 
-	assertFile(t, out, "CLAUDE.md", true)
+	assertFile(t, out, "AGENTS.md", true)
 	assertFile(t, out, ".github/workflows/claude.yml", true)
 
-	assertFile(t, out, "AGENTS.md", false)
+	assertFile(t, out, "CLAUDE.md", false)
 	assertFile(t, out, "GEMINI.md", false)
 	assertFile(t, out, ".github/workflows/codex.yml", false)
 	assertFile(t, out, ".github/workflows/gemini.yml", false)
@@ -111,7 +110,6 @@ func TestGenerator_AI_GeminiOnly(t *testing.T) {
 	assertFile(t, out, "GEMINI.md", true)
 	assertFile(t, out, ".github/workflows/gemini.yml", true)
 
-	assertFile(t, out, "CLAUDE.md", false)
 	assertFile(t, out, "AGENTS.md", false)
 	assertFile(t, out, ".github/workflows/claude.yml", false)
 	assertFile(t, out, ".github/workflows/codex.yml", false)
@@ -179,7 +177,6 @@ func TestGenerator_AI_AgentsMDSharedAcrossCodexOpencodeInfer(t *testing.T) {
 			mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
 
 			assertFile(t, out, "AGENTS.md", true)
-			assertFile(t, out, "CLAUDE.md", false)
 			assertFile(t, out, "GEMINI.md", false)
 			assertFile(t, out, ".github/workflows/codex.yml", tt.wantCodexWorkflow)
 			assertFile(t, out, ".github/workflows/infer.yml", tt.wantInferWorkflow)
@@ -209,9 +206,8 @@ func TestGenerator_AI_AllAgentsEnabled(t *testing.T) {
 
 	mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
 
-	assertFile(t, out, "CLAUDE.md", true)
-	assertFile(t, out, "GEMINI.md", true)
 	assertFile(t, out, "AGENTS.md", true)
+	assertFile(t, out, "GEMINI.md", true)
 
 	assertFile(t, out, ".github/workflows/claude.yml", true)
 	assertFile(t, out, ".github/workflows/codex.yml", true)
@@ -233,7 +229,7 @@ func TestGenerator_AI_NoWorkflowsWhenSCMNotGithub(t *testing.T) {
 
 	mustGenerate(t, manifest, out, Config{Overwrite: true, Version: "test"})
 
-	assertFile(t, out, "CLAUDE.md", true)
+	assertFile(t, out, "AGENTS.md", true)
 	assertFile(t, out, ".github/workflows/claude.yml", false)
 }
 

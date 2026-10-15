@@ -361,17 +361,12 @@ func (r *Registry) getTypeScriptFiles(adl *schema.ADL) map[string]string {
 // generated project layout. Each agent's toggle in
 // spec.development.ai.orchestrators is consulted independently:
 //
-//   - CLAUDE.md  ← claudecode.enabled
 //   - GEMINI.md  ← gemini.enabled
-//   - AGENTS.md  ← any of codex / opencode / infer (single shared file)
+//   - AGENTS.md  ← any of claudecode / codex / opencode / infer (single shared file)
 //
-// AGENTS.md is shared by the three "AGENTS.md"-flavoured agents and
-// is emitted once even when more than one of them is enabled.
+// AGENTS.md is emitted once even when more than one agent is enabled.
 func (r *Registry) addAIFiles(files map[string]string) {
 	t := r.aiToggles
-	if t.ClaudeCode {
-		files["CLAUDE.md"] = "ai/claude.md"
-	}
 	if t.Gemini {
 		files["GEMINI.md"] = "ai/gemini.md"
 	}

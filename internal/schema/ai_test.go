@@ -82,12 +82,11 @@ func TestAIAgentToggles_AnyAgentsMD(t *testing.T) {
 		toggles AIAgentToggles
 		want    bool
 	}{
-		"claudecode alone is not enough":       {AIAgentToggles{ClaudeCode: true}, false},
-		"gemini alone is not enough":           {AIAgentToggles{Gemini: true}, false},
-		"codex flips it on":                    {AIAgentToggles{Codex: true}, true},
-		"opencode flips it on":                 {AIAgentToggles{OpenCode: true}, true},
-		"infer flips it on":                    {AIAgentToggles{Infer: true}, true},
-		"claudecode + infer combo flips it on": {AIAgentToggles{ClaudeCode: true, Infer: true}, true},
+		"gemini alone is not enough": {AIAgentToggles{Gemini: true}, false},
+		"claudecode flips it on":     {AIAgentToggles{ClaudeCode: true}, true},
+		"codex flips it on":          {AIAgentToggles{Codex: true}, true},
+		"opencode flips it on":       {AIAgentToggles{OpenCode: true}, true},
+		"infer flips it on":          {AIAgentToggles{Infer: true}, true},
 	}
 
 	for name, tc := range tests {

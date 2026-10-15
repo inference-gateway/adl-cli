@@ -353,7 +353,7 @@ adl generate --file agent.yaml --output ./test-my-agent --deployment cloudrun --
 >
 > - see the matrix below.
 >   `adl init` writes all toggles as `false` by default - they're opt-in. Generated files
->   (`CLAUDE.md`, `GEMINI.md`, `AGENTS.md`, `.github/workflows/ci.yml`,
+>   (`GEMINI.md`, `AGENTS.md`, `.github/workflows/ci.yml`,
 >   `.github/workflows/cd.yml`, `.github/workflows/claude.yml`,
 >   `.github/workflows/codex.yml`, `.github/workflows/gemini.yml`,
 >   `.github/workflows/infer.yml`,
@@ -391,7 +391,7 @@ spec:
     ai:
       orchestrators:
         claudecode:
-          enabled: true # generates CLAUDE.md + .github/workflows/claude.yml
+          enabled: true # generates AGENTS.md + .github/workflows/claude.yml
         codex:
           enabled: false # would generate AGENTS.md + .github/workflows/codex.yml
         gemini:
@@ -406,17 +406,17 @@ spec:
 
 | Agent toggle | Docs file the agent reads | GitHub Actions workflow generated?                                                |
 | ------------ | ------------------------- | --------------------------------------------------------------------------------- |
-| `claudecode` | `CLAUDE.md`               | yes (`.github/workflows/claude.yml`, uses `anthropics/claude-code-action`)        |
+| `claudecode` | `AGENTS.md` (shared)      | yes (`.github/workflows/claude.yml`, uses `anthropics/claude-code-action`)        |
 | `codex`      | `AGENTS.md` (shared)      | yes (`.github/workflows/codex.yml`, uses `openai/codex-action`)                   |
 | `gemini`     | `GEMINI.md`               | yes (`.github/workflows/gemini.yml`, uses `google-github-actions/run-gemini-cli`) |
 | `opencode`   | `AGENTS.md` (shared)      | no upstream action yet - docs only                                                |
 | `infer`      | `AGENTS.md` (shared)      | yes (`.github/workflows/infer.yml`, uses `inference-gateway/infer-action`)         |
 
 - `AGENTS.md` is generated **once** and is shared by every enabled agent that
-  reads from it (`codex`, `opencode`, `infer`); the file's contents are
+  reads from it (`claudecode`, `codex`, `opencode`, `infer`); the file's contents are
   agent-agnostic.
-- `CLAUDE.md` and `GEMINI.md` are agent-specific and only appear when the
-  matching toggle is on.
+- `GEMINI.md` is agent-specific and only appears when the
+  `gemini` toggle is on. `CLAUDE.md` is no longer generated - Claude Code reads `AGENTS.md`.
 - If no toggles are enabled, no AI docs or workflows are emitted.
 - Pre-v0.8.0 manifests using `spec.development.ai.enabled: true`, and the
   flat per-agent shape `spec.development.ai.<agent>` (pre-orchestrators), are no
@@ -1379,7 +1379,7 @@ my-go-agent/
 ├── .gitignore                 # Standard Git ignore patterns
 ├── .gitattributes             # Git attributes configuration
 ├── .editorconfig              # Editor configuration
-├── CLAUDE.md                  # AI assistant instructions (spec.development.ai.orchestrators.claudecode.enabled: true)
+├── AGENTS.md                  # AI assistant instructions (claudecode, codex, opencode or infer enabled)
 └── README.md                  # Project documentation with setup instructions
 ```
 
@@ -1412,7 +1412,7 @@ my-rust-agent/
 ├── .releaserc.yaml            # Semantic-release configuration (with --cd flag)
 ├── k8s/
 │   └── deployment.yaml        # Kubernetes deployment (with --deployment kubernetes)
-├── CLAUDE.md                  # AI assistant instructions (spec.development.ai.orchestrators.claudecode.enabled: true)
+├── AGENTS.md                  # AI assistant instructions (claudecode, codex, opencode or infer enabled)
 └── README.md                  # Documentation
 ```
 
@@ -1450,7 +1450,7 @@ my-typescript-agent/
 ├── .releaserc.yaml            # Semantic-release configuration (with --cd flag)
 ├── k8s/
 │   └── deployment.yaml        # Kubernetes deployment (with --deployment kubernetes)
-├── CLAUDE.md                  # AI assistant instructions (spec.development.ai.orchestrators.claudecode.enabled: true)
+├── AGENTS.md                  # AI assistant instructions (claudecode, codex, opencode or infer enabled)
 └── README.md                  # Documentation
 ```
 
@@ -1475,9 +1475,8 @@ All projects include these essential files regardless of language:
   - **DevContainer**: `.devcontainer/devcontainer.json` when `sandbox.devcontainer.enabled: true`
 - **AI Assistant Instructions** - Per-agent toggles under `spec.development.ai.orchestrators`
   (see [Per-agent AI assistants](#per-agent-ai-assistants)):
-  - **CLAUDE.md** when `spec.development.ai.orchestrators.claudecode.enabled: true`
   - **GEMINI.md** when `spec.development.ai.orchestrators.gemini.enabled: true`
-  - **AGENTS.md** (shared) when any of `codex`, `opencode`, or `infer` is enabled
+  - **AGENTS.md** (shared) when any of `claudecode`, `codex`, `opencode`, or `infer` is enabled
 
 ### CI Integration
 
@@ -2090,7 +2089,7 @@ Each language has its own file mapping that determines what gets generated:
 - `docker-compose.yaml`, `.env.example` → Docker Compose sandbox (conditional on sandbox config)
 - `.flox/` → Flox reproducible environment (conditional)
 - `.devcontainer/` → Devcontainer configuration (conditional)
-- `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` → AI assistant documentation (conditional on AI toggles)
+- `GEMINI.md`, `AGENTS.md` → AI assistant documentation (conditional on AI toggles)
 - `.github/ISSUE_TEMPLATE/*.md` → GitHub issue templates (conditional on SCM config)
 - `.github/dependabot.yml` → Dependabot configuration (conditional on SCM config)
 - CI workflow (`.github/workflows/ci.yml`) → Conditional on SCM CI toggle
@@ -2116,7 +2115,7 @@ Each language has its own file mapping that determines what gets generated:
 - `docker-compose.yaml`, `.env.example` → Docker Compose sandbox (conditional on sandbox config)
 - `.flox/` → Flox reproducible environment (conditional)
 - `.devcontainer/` → Devcontainer configuration (conditional)
-- `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` → AI assistant documentation (conditional on AI toggles)
+- `GEMINI.md`, `AGENTS.md` → AI assistant documentation (conditional on AI toggles)
 - `.github/ISSUE_TEMPLATE/*.md` → GitHub issue templates (conditional on SCM config)
 - `.github/dependabot.yml` → Dependabot configuration (conditional on SCM config)
 - CI workflow (`.github/workflows/ci.yml`) → Conditional on SCM CI toggle
@@ -2148,7 +2147,7 @@ Each language has its own file mapping that determines what gets generated:
 - `docker-compose.yaml`, `.env.example` → Docker Compose sandbox (conditional on sandbox config)
 - `.flox/` → Flox reproducible environment (conditional)
 - `.devcontainer/` → Devcontainer configuration (conditional)
-- `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` → AI assistant documentation (conditional on AI toggles)
+- `GEMINI.md`, `AGENTS.md` → AI assistant documentation (conditional on AI toggles)
 - `.github/ISSUE_TEMPLATE/*.md` → GitHub issue templates (conditional on SCM config)
 - `.github/dependabot.yml` → Dependabot configuration (conditional on SCM config)
 - CI workflow (`.github/workflows/ci.yml`) → Conditional on SCM CI toggle

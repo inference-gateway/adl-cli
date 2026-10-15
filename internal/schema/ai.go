@@ -19,10 +19,10 @@ func (t AIAgentToggles) Any() bool {
 }
 
 // AnyAgentsMD reports whether AGENTS.md should be generated. AGENTS.md
-// is shared by codex, opencode, and infer - generate it once if any of
-// those three are enabled.
+// is shared by claudecode, codex, opencode, and infer - generate it once
+// if any of them are enabled. Claude Code reads AGENTS.md natively.
 func (t AIAgentToggles) AnyAgentsMD() bool {
-	return t.Codex || t.OpenCode || t.Infer
+	return t.ClaudeCode || t.Codex || t.OpenCode || t.Infer
 }
 
 // ResolveAIAgentToggles inspects spec.development.ai.orchestrators and

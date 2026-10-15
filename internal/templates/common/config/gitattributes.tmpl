@@ -45,20 +45,13 @@ docker-compose.yaml linguist-generated=true
 .github/dependabot.yml linguist-generated=true
 {{- end }}
 
-{{- if .AIToggles.ClaudeCode }}
-
-# AI assistant documentation (generated)
-CLAUDE.md linguist-generated=true
-{{- end }}
 {{- if .AIToggles.Gemini }}
-{{- if not .AIToggles.ClaudeCode }}
 
 # AI assistant documentation (generated)
-{{- end }}
 GEMINI.md linguist-generated=true
 {{- end }}
 {{- if .AIToggles.AnyAgentsMD }}
-{{- if not (or .AIToggles.ClaudeCode .AIToggles.Gemini) }}
+{{- if not .AIToggles.Gemini }}
 
 # AI assistant documentation (generated)
 {{- end }}
