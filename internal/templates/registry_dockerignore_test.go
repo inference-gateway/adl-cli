@@ -75,6 +75,11 @@ func TestDockerignoreTemplate_ContainsExpectedExclusions(t *testing.T) {
 			t.Errorf("dockerignore missing %q\n---\n%s", line, out)
 		}
 	}
+	for _, retired := range []string{"CLAUDE.md", "GEMINI.md"} {
+		if strings.Contains(out, retired) {
+			t.Errorf("dockerignore lists %q, which is no longer generated\n---\n%s", retired, out)
+		}
+	}
 }
 
 // TestRegistry_EnvExample_GatedOnDockerCompose confirms the .env.example

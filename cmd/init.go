@@ -80,7 +80,7 @@ func init() {
 	initCmd.Flags().Bool("flox", false, "Enable Flox environment")
 	initCmd.Flags().Bool("devcontainer", false, "Enable DevContainer environment")
 	initCmd.Flags().Bool("docker-compose", false, "Enable Docker Compose environment")
-	initCmd.Flags().Bool("ai", false, "Enable AI assistant docs (CLAUDE.md/AGENTS.md) and claude-code in sandboxes")
+	initCmd.Flags().Bool("ai", false, "Enable AI assistant docs (AGENTS.md) and claude-code in sandboxes")
 	initCmd.Flags().Bool("ci", false, "Enable CI workflow generation")
 	initCmd.Flags().Bool("cd", false, "Enable CD pipeline generation")
 	initCmd.Flags().String("deployment", "", "Deployment type (kubernetes, defaults to empty for no deployment)")
@@ -1218,7 +1218,7 @@ func collectAnswersNonInteractive(projectName string, useDefaults bool) answers 
 	}
 
 	tui.Println(tui.Header("AI Assistant Documentation"))
-	ans.Claudecode = promptBoolWithConfig("ai", useDefaults, "Enable Claude Code (CLAUDE.md + claude-code in sandboxes)", false)
+	ans.Claudecode = promptBoolWithConfig("ai", useDefaults, "Enable Claude Code (AGENTS.md + claude-code in sandboxes)", false)
 	ans.ClaudecodeAppIDSecret = "CLAUDE_APP_ID"
 	ans.ClaudecodeAppPrivateKeySecret = "CLAUDE_APP_PRIVATE_KEY"
 	if ans.Claudecode {

@@ -45,23 +45,9 @@ docker-compose.yaml linguist-generated=true
 .github/dependabot.yml linguist-generated=true
 {{- end }}
 
-{{- if .AIToggles.ClaudeCode }}
+{{- if .AIToggles.Any }}
 
 # AI assistant documentation (generated)
-CLAUDE.md linguist-generated=true
-{{- end }}
-{{- if .AIToggles.Gemini }}
-{{- if not .AIToggles.ClaudeCode }}
-
-# AI assistant documentation (generated)
-{{- end }}
-GEMINI.md linguist-generated=true
-{{- end }}
-{{- if .AIToggles.AnyAgentsMD }}
-{{- if not (or .AIToggles.ClaudeCode .AIToggles.Gemini) }}
-
-# AI assistant documentation (generated)
-{{- end }}
 AGENTS.md linguist-generated=true
 {{- end }}
 {{- if .AIToggles.ClaudeCode }}
@@ -71,6 +57,7 @@ AGENTS.md linguist-generated=true
 .github/workflows/codex.yml linguist-generated=true
 {{- end }}
 {{- if .AIToggles.Gemini }}
+.gemini/settings.json linguist-generated=true
 .github/workflows/gemini.yml linguist-generated=true
 {{- end }}
 {{- if .AIToggles.Infer }}

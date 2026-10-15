@@ -13,16 +13,11 @@ type AIAgentToggles struct {
 	Infer      bool
 }
 
-// Any reports whether at least one agent toggle is enabled.
+// Any reports whether at least one agent toggle is enabled. Every
+// orchestrator reads the shared AGENTS.md, so this also decides whether
+// AGENTS.md is generated.
 func (t AIAgentToggles) Any() bool {
 	return t.ClaudeCode || t.Codex || t.Gemini || t.OpenCode || t.Infer
-}
-
-// AnyAgentsMD reports whether AGENTS.md should be generated. AGENTS.md
-// is shared by codex, opencode, and infer - generate it once if any of
-// those three are enabled.
-func (t AIAgentToggles) AnyAgentsMD() bool {
-	return t.Codex || t.OpenCode || t.Infer
 }
 
 // ResolveAIAgentToggles inspects spec.development.ai.orchestrators and

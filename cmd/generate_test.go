@@ -378,20 +378,20 @@ spec:
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	claudeMdPath := filepath.Join(outputPath, "CLAUDE.md")
-	if _, err := os.Stat(claudeMdPath); os.IsNotExist(err) {
-		t.Errorf("expected CLAUDE.md to be generated when spec.development.ai.orchestrators.claudecode.enabled is true")
+	agentsMdPath := filepath.Join(outputPath, "AGENTS.md")
+	if _, err := os.Stat(agentsMdPath); os.IsNotExist(err) {
+		t.Errorf("expected AGENTS.md to be generated when spec.development.ai.orchestrators.claudecode.enabled is true")
 	}
 
-	claudeMdContent, err := os.ReadFile(claudeMdPath)
+	agentsMdContent, err := os.ReadFile(agentsMdPath)
 	if err != nil {
-		t.Fatalf("failed to read CLAUDE.md: %v", err)
+		t.Fatalf("failed to read AGENTS.md: %v", err)
 	}
-	if !containsString(string(claudeMdContent), "test-ai-agent") {
-		t.Errorf("expected CLAUDE.md to contain agent name")
+	if !containsString(string(agentsMdContent), "test-ai-agent") {
+		t.Errorf("expected AGENTS.md to contain agent name")
 	}
-	if !containsString(string(claudeMdContent), "Test AI agent with sandbox environments") {
-		t.Errorf("expected CLAUDE.md to contain agent description")
+	if !containsString(string(agentsMdContent), "Test AI agent with sandbox environments") {
+		t.Errorf("expected AGENTS.md to contain agent description")
 	}
 
 	devcontainerPath := filepath.Join(outputPath, ".devcontainer/devcontainer.json")
@@ -426,9 +426,6 @@ spec:
 		t.Fatalf("failed to read .gitattributes: %v", err)
 	}
 	gitattributesContent := string(gitattributesBytes)
-	if !containsString(gitattributesContent, "CLAUDE.md linguist-generated=true") {
-		t.Errorf("expected .gitattributes to mark CLAUDE.md as linguist-generated, got:\n%s", gitattributesContent)
-	}
 	if !containsString(gitattributesContent, "AGENTS.md linguist-generated=true") {
 		t.Errorf("expected .gitattributes to mark AGENTS.md as linguist-generated, got:\n%s", gitattributesContent)
 	}
@@ -679,8 +676,8 @@ func containsString(content, substr string) bool {
 	return false
 }
 
-// TestGenerateAIDocsRespectSandboxEnabledFlags verifies that AGENTS.md and
-// CLAUDE.md only mention sandbox environments that are actually enabled. This
+// TestGenerateAIDocsRespectSandboxEnabledFlags verifies that AGENTS.md
+// only mentions sandbox environments that are actually enabled. This
 // guards against the regression in issue #129 where `init` populates all three
 // sandbox pointers (flox/devcontainer/dockerCompose), causing the templates to
 // document every environment regardless of its `enabled` flag.
@@ -779,7 +776,7 @@ spec:
 				t.Fatalf("unexpected error: %v", err)
 			}
 
-			for _, doc := range []string{"AGENTS.md", "CLAUDE.md"} {
+			for _, doc := range []string{"AGENTS.md"} {
 				path := filepath.Join(outputPath, doc)
 				bytes, err := os.ReadFile(path)
 				if err != nil {
