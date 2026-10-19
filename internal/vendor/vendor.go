@@ -175,7 +175,7 @@ var Tools = map[string]string{
 	"golangci-lint": "2.14.0",
 	"go-task":       "3.53.1",
 	"rust":          "1.98.1",
-	"rust-analyzer": "2026-10-05",
+	"rust-analyzer": "2026-10-12",
 	"nodejs":        "24.21.0",
 	"pnpm":          "12.9.0",
 	"git":           "2.55.0",
@@ -183,7 +183,7 @@ var Tools = map[string]string{
 	"k3d":           "5.9.0",
 	"ctlptl":        "0.9.6",
 	"claude-code":   "2.1.296",
-	"infer":         "0.229.0",
+	"infer":         "0.230.3",
 }
 
 // Actions pins the GitHub Actions referenced by the generated workflows
@@ -194,7 +194,7 @@ var Actions = map[string]string{
 	"actions/create-github-app-token":      "v3.3.0",
 	"actions/setup-go":                     "v7.0.0",
 	"actions/setup-node":                   "v7.1.0",
-	"anthropics/claude-code-action":        "v1.0.250",
+	"anthropics/claude-code-action":        "v1.0.253",
 	"arduino/setup-task":                   "v3.0.0",
 	"azure/setup-kubectl":                  "v5.2.0",
 	"docker/login-action":                  "v4.6.0",
@@ -205,7 +205,7 @@ var Actions = map[string]string{
 	"google-github-actions/auth":           "v3.0.0",
 	"google-github-actions/run-gemini-cli": "v0.1.22",
 	"google-github-actions/setup-gcloud":   "v3.0.1",
-	"inference-gateway/infer-action":       "v0.56.1",
+	"inference-gateway/infer-action":       "v0.56.2",
 	"openai/codex-action":                  "v1.13",
 	"oven-sh/setup-bun":                    "v2.2.0",
 	"peter-evans/create-pull-request":      "v8.1.1",
