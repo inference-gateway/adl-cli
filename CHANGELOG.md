@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.68.2](https://github.com/inference-gateway/adl-cli/compare/v0.68.1...v0.68.2) (2026-10-26)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump claude-code 2.1.289 -> 2.1.296 ([#498](https://github.com/inference-gateway/adl-cli/issues/498)) ([c20cd59](https://github.com/inference-gateway/adl-cli/commit/c20cd59f7390d27f974c05671631cacaa5c2909c))
+* **deps:** bump infer CLI v0.226.0 -> v0.231.1 ([#499](https://github.com/inference-gateway/adl-cli/issues/499)) ([3dff04a](https://github.com/inference-gateway/adl-cli/commit/3dff04a3b86800e0f8a9c2a08b17f1da911de1ef))
+* **deps:** bump template pins to latest ([#497](https://github.com/inference-gateway/adl-cli/issues/497)) ([9bfe030](https://github.com/inference-gateway/adl-cli/commit/9bfe030de5d44c6b1f0b08f3e6b04d9137577994))
+* **deps:** bump template pins to latest ([#500](https://github.com/inference-gateway/adl-cli/issues/500)) ([aa525d3](https://github.com/inference-gateway/adl-cli/commit/aa525d3673be7c2a0289ec7b3f7fbd22f9ed47d2))
+
 ## [0.68.1](https://github.com/inference-gateway/adl-cli/compare/v0.68.0...v0.68.1) (2026-10-15)
 
 ### ♻️ Improvements
