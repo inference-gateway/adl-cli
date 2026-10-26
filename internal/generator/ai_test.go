@@ -320,7 +320,7 @@ func TestGenerator_AI_ClaudeWorkflowGoContent(t *testing.T) {
 	assertContains(t, body, "Install ADL skill", "Claude Code workflow body")
 	assertContains(t, body, "raw.githubusercontent.com/inference-gateway/adl/main/.agents/skills/adl/SKILL.md", "Claude Code workflow body")
 
-	assertContains(t, body, "anthropics/claude-code-action@v1.0.253", "Claude Code workflow body")
+	assertContains(t, body, "anthropics/claude-code-action@v1.0.262", "Claude Code workflow body")
 	assertContains(t, body, "claude_code_oauth_token:", "Claude Code workflow body")
 	assertContains(t, body, "use_commit_signing: true", "Claude Code workflow body")
 	assertContains(t, body, "branch_prefix: ${{ steps.prefix.outputs.value }}", "Claude Code workflow body")
@@ -409,7 +409,7 @@ func TestGenerator_AI_InferWorkflowContent(t *testing.T) {
 	body := readGenerated(t, out, ".github/workflows/infer.yml")
 
 	assertContains(t, body, "name: Infer", "Infer workflow body")
-	assertContains(t, body, "inference-gateway/infer-action@v0.56.2", "Infer workflow body")
+	assertContains(t, body, "inference-gateway/infer-action@v0.58.3", "Infer workflow body")
 	assertContains(t, body, "github-token: ${{ steps.app-token.outputs.token }}", "Infer workflow body")
 	assertContains(t, body, "actions/create-github-app-token", "Infer workflow body")
 	assertContains(t, body, ",^docker( .*)?$,^k3d( .*)?$,^kubectl( .*)?$,^ctlptl( .*)?$", "Infer workflow bash-allow-append")
