@@ -89,7 +89,7 @@ plugins:
           name: adl_darwin_arm64.tar.gz
         - path: dist/checksums.txt
           name: checksums.txt
-      releasedLabels: ["released"]
+      releasedLabels: ["<%= nextRelease.channel === 'rc' ? 'rc' : 'released' %>"]
       releaseNameTemplate: "🚀 Version ${nextRelease.version}"
       releaseBodyTemplate: |
         ## What's Changed
