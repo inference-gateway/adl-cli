@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.68.4](https://github.com/inference-gateway/adl-cli/compare/v0.68.3...v0.68.4) (2026-10-31)
+
+### 👷 CI
+
+* **release:** label issues and PRs shipped in an rc with rc ([#503](https://github.com/inference-gateway/adl-cli/issues/503)) ([d75db98](https://github.com/inference-gateway/adl-cli/commit/d75db986ada612030533c71a687a254975812d1a))
+
 ## [0.68.3](https://github.com/inference-gateway/adl-cli/compare/v0.68.2...v0.68.3) (2026-10-30)
 
 ### 🔧 Miscellaneous
