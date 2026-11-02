@@ -119,7 +119,7 @@ var GoBuiltins = map[string]string{
 // activate.
 var CargoBuiltinDeps = map[string]string{
 	"inference-gateway-adk": "0.18.0",
-	"inference-gateway-sdk": "0.30.1",
+	"inference-gateway-sdk": "0.30.2",
 	"tokio":                 "1",
 	"tracing":               "0.1",
 	"tracing-subscriber":    "0.3",
@@ -175,15 +175,15 @@ var Tools = map[string]string{
 	"golangci-lint": "2.15.0",
 	"go-task":       "3.53.1",
 	"rust":          "1.99.0",
-	"rust-analyzer": "2026-10-19",
+	"rust-analyzer": "2026-10-26",
 	"nodejs":        "24.21.0",
 	"pnpm":          "12.9.0",
 	"git":           "2.56.0",
-	"docker":        "29.9.1",
+	"docker":        "29.9.2",
 	"k3d":           "5.9.0",
 	"ctlptl":        "0.9.6",
-	"claude-code":   "2.1.311",
-	"infer":         "0.238.0",
+	"claude-code":   "2.1.312",
+	"infer":         "0.240.0",
 }
 
 // Actions pins the GitHub Actions referenced by the generated workflows
@@ -194,7 +194,7 @@ var Actions = map[string]string{
 	"actions/create-github-app-token":      "v3.3.0",
 	"actions/setup-go":                     "v7.0.0",
 	"actions/setup-node":                   "v7.1.0",
-	"anthropics/claude-code-action":        "v1.0.265",
+	"anthropics/claude-code-action":        "v1.0.266",
 	"arduino/setup-task":                   "v3.0.0",
 	"azure/setup-kubectl":                  "v5.2.0",
 	"docker/login-action":                  "v4.7.0",
