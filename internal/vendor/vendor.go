@@ -118,8 +118,8 @@ var GoBuiltins = map[string]string{
 // them all so users can't shadow them regardless of which features they
 // activate.
 var CargoBuiltinDeps = map[string]string{
-	"inference-gateway-adk": "0.18.0",
-	"inference-gateway-sdk": "0.30.2",
+	"inference-gateway-adk": "0.18.1",
+	"inference-gateway-sdk": "0.32.0",
 	"tokio":                 "1",
 	"tracing":               "0.1",
 	"tracing-subscriber":    "0.3",
@@ -158,7 +158,7 @@ var GoTelemetryDeps = map[string]string{
 // `@inference-gateway/adl-cli` is intentionally absent: it tracks the CLI
 // version at generation time rather than a static pin.
 var NpmBuiltinDeps = map[string]string{
-	"@inference-gateway/adk": "0.20.0",
+	"@inference-gateway/adk": "0.21.0",
 }
 var NpmBuiltinDevDeps = map[string]string{
 	"@types/node": "^26.6.6",
@@ -182,8 +182,8 @@ var Tools = map[string]string{
 	"docker":        "29.9.2",
 	"k3d":           "5.9.0",
 	"ctlptl":        "0.9.6",
-	"claude-code":   "2.1.312",
-	"infer":         "0.240.0",
+	"claude-code":   "2.1.317",
+	"infer":         "0.245.0",
 }
 
 // Actions pins the GitHub Actions referenced by the generated workflows
@@ -194,10 +194,10 @@ var Actions = map[string]string{
 	"actions/create-github-app-token":      "v3.3.0",
 	"actions/setup-go":                     "v7.0.0",
 	"actions/setup-node":                   "v7.1.0",
-	"anthropics/claude-code-action":        "v1.0.266",
+	"anthropics/claude-code-action":        "v1.0.268",
 	"arduino/setup-task":                   "v3.0.0",
 	"azure/setup-kubectl":                  "v5.2.0",
-	"docker/login-action":                  "v4.7.0",
+	"docker/login-action":                  "v4.8.0",
 	"docker/setup-buildx-action":           "v4.4.1",
 	"docker/setup-qemu-action":             "v4.4.0",
 	"flox/install-flox-action":             "v2.7.0",
@@ -205,7 +205,7 @@ var Actions = map[string]string{
 	"google-github-actions/auth":           "v3.0.0",
 	"google-github-actions/run-gemini-cli": "v0.1.22",
 	"google-github-actions/setup-gcloud":   "v3.0.1",
-	"inference-gateway/infer-action":       "v0.59.2",
+	"inference-gateway/infer-action":       "v0.59.4",
 	"openai/codex-action":                  "v1.13",
 	"oven-sh/setup-bun":                    "v2.2.0",
 	"peter-evans/create-pull-request":      "v8.1.1",
