@@ -20,7 +20,7 @@
 
         version = "0.68.5";
 
-        adl = pkgs.buildGoModule (finalAttrs: {
+        adl = pkgs.buildGo127Module (finalAttrs: {
           __structuredAttrs = true;
 
           pname = "adl";
@@ -121,7 +121,7 @@
 
         devShells.default = pkgs.mkShell {
           packages = [
-            pkgs.go
+            pkgs.go_1_27
             pkgs.go-task
             pkgs.golangci-lint
             pkgs.gopls

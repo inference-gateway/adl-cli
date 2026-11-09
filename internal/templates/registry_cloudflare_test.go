@@ -93,7 +93,7 @@ func TestRegistry_CloudflareFiles_GoOmitsWorker(t *testing.T) {
 	}
 
 	adl := cloudflareTSADL()
-	adl.Spec.Language = schema.Language{Go: &schema.GoConfig{Module: "example.com/agent", Version: "1.26.8"}}
+	adl.Spec.Language = schema.Language{Go: &schema.GoConfig{Module: "example.com/agent", Version: "1.27.3"}}
 
 	files := r.GetFiles(adl)
 	if _, ok := files["wrangler.toml"]; ok {
