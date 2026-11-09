@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.68.6](https://github.com/inference-gateway/adl-cli/compare/v0.68.5...v0.68.6) (2026-11-09)
+
+### ♻️ Improvements
+
+* bump go toolchain to 1.27.3 ([#506](https://github.com/inference-gateway/adl-cli/issues/506)) ([80861d1](https://github.com/inference-gateway/adl-cli/commit/80861d173e8ab29dd4db0919fe62720dcc21c852))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump template pins to latest ([#507](https://github.com/inference-gateway/adl-cli/issues/507)) ([7a8a2a1](https://github.com/inference-gateway/adl-cli/commit/7a8a2a176b616ef3f588dc7a857e93893261e6e2))
+
 ## [0.68.5](https://github.com/inference-gateway/adl-cli/compare/v0.68.4...v0.68.5) (2026-11-05)
 
 ### 🔧 Miscellaneous
