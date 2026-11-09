@@ -105,7 +105,7 @@ func Resolve(raws []string, builtins map[string]string, depGroup string) ([]Entr
 // tests will fail loudly if a built-in is added there without being
 // mirrored here.
 var GoBuiltins = map[string]string{
-	"github.com/inference-gateway/adk":  "v0.34.0",
+	"github.com/inference-gateway/adk":  "v0.34.1",
 	"github.com/sethvargo/go-envconfig": "v1.4.3",
 	"github.com/spf13/cobra":            "v1.10.2",
 	"go.uber.org/zap":                   "v1.28.0",
@@ -174,16 +174,16 @@ var Tools = map[string]string{
 	"flox-schema":   "1.15.0",
 	"golangci-lint": "2.15.0",
 	"go-task":       "3.53.1",
-	"rust":          "1.99.0",
-	"rust-analyzer": "2026-10-26",
-	"nodejs":        "24.21.0",
+	"rust":          "1.99.1",
+	"rust-analyzer": "2026-11-02",
+	"nodejs":        "24.22.2",
 	"pnpm":          "12.9.0",
 	"git":           "2.56.0",
 	"docker":        "29.9.2",
 	"k3d":           "5.9.0",
 	"ctlptl":        "0.9.6",
-	"claude-code":   "2.1.317",
-	"infer":         "0.245.0",
+	"claude-code":   "2.1.318",
+	"infer":         "0.250.0",
 }
 
 // Actions pins the GitHub Actions referenced by the generated workflows
@@ -194,7 +194,7 @@ var Actions = map[string]string{
 	"actions/create-github-app-token":      "v3.3.0",
 	"actions/setup-go":                     "v7.0.0",
 	"actions/setup-node":                   "v7.1.0",
-	"anthropics/claude-code-action":        "v1.0.268",
+	"anthropics/claude-code-action":        "v1.0.269",
 	"arduino/setup-task":                   "v3.0.0",
 	"azure/setup-kubectl":                  "v5.2.0",
 	"docker/login-action":                  "v4.8.0",
@@ -205,10 +205,10 @@ var Actions = map[string]string{
 	"google-github-actions/auth":           "v3.0.0",
 	"google-github-actions/run-gemini-cli": "v0.1.22",
 	"google-github-actions/setup-gcloud":   "v3.0.1",
-	"inference-gateway/infer-action":       "v0.59.4",
+	"inference-gateway/infer-action":       "v0.59.5",
 	"openai/codex-action":                  "v1.13",
 	"oven-sh/setup-bun":                    "v2.2.0",
-	"peter-evans/create-pull-request":      "v8.1.1",
+	"peter-evans/create-pull-request":      "v8.1.2",
 }
 
 // Release pins the semantic-release npm packages the generated CD
