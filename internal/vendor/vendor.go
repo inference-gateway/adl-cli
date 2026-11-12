@@ -105,7 +105,7 @@ func Resolve(raws []string, builtins map[string]string, depGroup string) ([]Entr
 // tests will fail loudly if a built-in is added there without being
 // mirrored here.
 var GoBuiltins = map[string]string{
-	"github.com/inference-gateway/adk":  "v0.34.1",
+	"github.com/inference-gateway/adk":  "v0.34.2",
 	"github.com/sethvargo/go-envconfig": "v1.4.3",
 	"github.com/spf13/cobra":            "v1.10.2",
 	"go.uber.org/zap":                   "v1.28.0",
@@ -118,8 +118,8 @@ var GoBuiltins = map[string]string{
 // them all so users can't shadow them regardless of which features they
 // activate.
 var CargoBuiltinDeps = map[string]string{
-	"inference-gateway-adk": "0.18.1",
-	"inference-gateway-sdk": "0.32.0",
+	"inference-gateway-adk": "0.18.2",
+	"inference-gateway-sdk": "0.32.1",
 	"tokio":                 "1",
 	"tracing":               "0.1",
 	"tracing-subscriber":    "0.3",
@@ -158,11 +158,11 @@ var GoTelemetryDeps = map[string]string{
 // `@inference-gateway/adl-cli` is intentionally absent: it tracks the CLI
 // version at generation time rather than a static pin.
 var NpmBuiltinDeps = map[string]string{
-	"@inference-gateway/adk": "0.21.0",
+	"@inference-gateway/adk": "0.21.1",
 }
 var NpmBuiltinDevDeps = map[string]string{
 	"@types/node": "^26.6.6",
-	"prettier":    "^3.9.10",
+	"prettier":    "^3.10.1",
 	"tsx":         "^4.23.15",
 	"typescript":  "^7.0.2",
 }
@@ -183,7 +183,7 @@ var Tools = map[string]string{
 	"k3d":           "5.9.0",
 	"ctlptl":        "0.9.6",
 	"claude-code":   "2.1.318",
-	"infer":         "0.250.0",
+	"infer":         "0.259.0",
 }
 
 // Actions pins the GitHub Actions referenced by the generated workflows
@@ -194,7 +194,7 @@ var Actions = map[string]string{
 	"actions/create-github-app-token":      "v3.3.0",
 	"actions/setup-go":                     "v7.0.0",
 	"actions/setup-node":                   "v7.1.0",
-	"anthropics/claude-code-action":        "v1.0.269",
+	"anthropics/claude-code-action":        "v1.0.274",
 	"arduino/setup-task":                   "v3.0.0",
 	"azure/setup-kubectl":                  "v5.2.0",
 	"docker/login-action":                  "v4.8.0",
@@ -205,10 +205,10 @@ var Actions = map[string]string{
 	"google-github-actions/auth":           "v3.0.0",
 	"google-github-actions/run-gemini-cli": "v0.1.22",
 	"google-github-actions/setup-gcloud":   "v3.0.1",
-	"inference-gateway/infer-action":       "v0.59.5",
+	"inference-gateway/infer-action":       "v0.59.7",
 	"openai/codex-action":                  "v1.13",
 	"oven-sh/setup-bun":                    "v2.2.0",
-	"peter-evans/create-pull-request":      "v8.1.2",
+	"peter-evans/create-pull-request":      "v8.1.3",
 }
 
 // Release pins the semantic-release npm packages the generated CD
@@ -220,7 +220,7 @@ var Release = map[string]string{
 	"@semantic-release/changelog":                "7.0.0",
 	"@semantic-release/exec":                     "7.1.0",
 	"@semantic-release/git":                      "11.0.1",
-	"@semantic-release/github":                   "12.0.10",
+	"@semantic-release/github":                   "12.0.11",
 	"conventional-changelog-conventionalcommits": "10.4.1",
 	"conventional-changelog-writer":              "^9.3.0",
 }
