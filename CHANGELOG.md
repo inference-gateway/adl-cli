@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.68.8](https://github.com/inference-gateway/adl-cli/compare/v0.68.7...v0.68.8) (2026-11-15)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump flox dependencies to latest ([#511](https://github.com/inference-gateway/adl-cli/issues/511)) ([ec2208d](https://github.com/inference-gateway/adl-cli/commit/ec2208d508a351d6e608193834bd15785a1596dd))
+* **deps:** bump template pins to latest ([#512](https://github.com/inference-gateway/adl-cli/issues/512)) ([4342201](https://github.com/inference-gateway/adl-cli/commit/4342201bb3951f49b7b19a5e06c7b98867d65d6b))
+
 ## [0.68.7](https://github.com/inference-gateway/adl-cli/compare/v0.68.6...v0.68.7) (2026-11-12)
 
 ### 🔧 Miscellaneous
