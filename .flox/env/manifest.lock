@@ -4,7 +4,7 @@
     "schema-version": "1.19.0",
     "install": {
       "adl": {
-        "flake": "github:inference-gateway/adl-cli/v0.61.4"
+        "flake": "github:inference-gateway/adl-cli/v0.68.8"
       },
       "claude-code": {
         "pkg-path": "claude-code",
@@ -33,7 +33,7 @@
         "version": "^2.20.0"
       },
       "infer": {
-        "flake": "github:inference-gateway/cli/v0.231.1"
+        "flake": "github:inference-gateway/cli/v0.261.0"
       },
       "markdownlint-cli": {
         "pkg-path": "markdownlint-cli",
@@ -776,12 +776,12 @@
     },
     {
       "install_id": "adl",
-      "locked-url": "github:inference-gateway/adl-cli/e42f60b44f93ee941ea5ee1270bbf7b39a831f12?narHash=sha256-ajJnsVkJ06lUDt3JajEyNLcVMk4YCT1YkRAdZu9dESw%3D",
+      "locked-url": "github:inference-gateway/adl-cli/2bda1014dcbac4922a9d0f6ab1cf1d46e82e878d?narHash=sha256-e/W4ptPZFF1PyY/n8fSpFfCrBl3Qer2LKHCr3FX%2BMj8%3D",
       "flake-description": "ADL CLI - Generate enterprise-ready A2A agents from YAML",
       "locked-flake-attr-path": "packages.aarch64-darwin.default",
-      "derivation": "/nix/store/y9ri9z0ky4q7qxbb9pggbk5xpng3krg7-adl-0.61.4.drv",
+      "derivation": "/nix/store/kqg7mglvz9wgj5hdd3y1bi9prcjbiimx-adl-0.68.8.drv",
       "outputs": {
-        "out": "/nix/store/97isw0qp29fbzb3qrnp8n8sykyf7vqb4-adl-0.61.4"
+        "out": "/nix/store/rmw88dxgq8qikxjkk5z100483521gam4-adl-0.68.8"
       },
       "output-names": [
         "out"
@@ -792,9 +792,9 @@
       "requested-outputs-to-install": [],
       "package-system": "aarch64-darwin",
       "system": "aarch64-darwin",
-      "name": "adl-0.61.4",
+      "name": "adl-0.68.8",
       "pname": "adl",
-      "version": "0.61.4",
+      "version": "0.68.8",
       "description": "Generate enterprise-ready A2A agents from YAML Agent Definition Language files",
       "licenses": [
         "MIT"
@@ -805,12 +805,12 @@
     },
     {
       "install_id": "adl",
-      "locked-url": "github:inference-gateway/adl-cli/e42f60b44f93ee941ea5ee1270bbf7b39a831f12?narHash=sha256-ajJnsVkJ06lUDt3JajEyNLcVMk4YCT1YkRAdZu9dESw%3D",
+      "locked-url": "github:inference-gateway/adl-cli/2bda1014dcbac4922a9d0f6ab1cf1d46e82e878d?narHash=sha256-e/W4ptPZFF1PyY/n8fSpFfCrBl3Qer2LKHCr3FX%2BMj8%3D",
       "flake-description": "ADL CLI - Generate enterprise-ready A2A agents from YAML",
       "locked-flake-attr-path": "packages.aarch64-linux.default",
-      "derivation": "/nix/store/b2va2vvpc4kffdhqqky6kngq12bfqgb1-adl-0.61.4.drv",
+      "derivation": "/nix/store/ps4ynn41fmlmnw5midckck7pimx4rarn-adl-0.68.8.drv",
       "outputs": {
-        "out": "/nix/store/7ndv8nc37dwzjawa5nbmb4v603w1ajnd-adl-0.61.4"
+        "out": "/nix/store/v21y99x8lwawpkrrbcck577px3b8g1a1-adl-0.68.8"
       },
       "output-names": [
         "out"
@@ -821,9 +821,9 @@
       "requested-outputs-to-install": [],
       "package-system": "aarch64-linux",
       "system": "aarch64-linux",
-      "name": "adl-0.61.4",
+      "name": "adl-0.68.8",
       "pname": "adl",
-      "version": "0.61.4",
+      "version": "0.68.8",
       "description": "Generate enterprise-ready A2A agents from YAML Agent Definition Language files",
       "licenses": [
         "MIT"
@@ -834,12 +834,12 @@
     },
     {
       "install_id": "adl",
-      "locked-url": "github:inference-gateway/adl-cli/e42f60b44f93ee941ea5ee1270bbf7b39a831f12?narHash=sha256-ajJnsVkJ06lUDt3JajEyNLcVMk4YCT1YkRAdZu9dESw%3D",
+      "locked-url": "github:inference-gateway/adl-cli/2bda1014dcbac4922a9d0f6ab1cf1d46e82e878d?narHash=sha256-e/W4ptPZFF1PyY/n8fSpFfCrBl3Qer2LKHCr3FX%2BMj8%3D",
       "flake-description": "ADL CLI - Generate enterprise-ready A2A agents from YAML",
       "locked-flake-attr-path": "packages.x86_64-linux.default",
-      "derivation": "/nix/store/1bc2941ahfckq30pm672g257a7c3kvih-adl-0.61.4.drv",
+      "derivation": "/nix/store/d4bsxh0a47qiz5zi2gdg6l7kcm017r9d-adl-0.68.8.drv",
       "outputs": {
-        "out": "/nix/store/h6ksq4qfgyf7a0am0w4si1bdkk9r3hkx-adl-0.61.4"
+        "out": "/nix/store/v6828nc39bzpv862pigs1qxi12qhwl38-adl-0.68.8"
       },
       "output-names": [
         "out"
@@ -850,9 +850,9 @@
       "requested-outputs-to-install": [],
       "package-system": "x86_64-linux",
       "system": "x86_64-linux",
-      "name": "adl-0.61.4",
+      "name": "adl-0.68.8",
       "pname": "adl",
-      "version": "0.61.4",
+      "version": "0.68.8",
       "description": "Generate enterprise-ready A2A agents from YAML Agent Definition Language files",
       "licenses": [
         "MIT"
@@ -863,12 +863,12 @@
     },
     {
       "install_id": "infer",
-      "locked-url": "github:inference-gateway/cli/6ed069757fb4bc99e5fbdbc81ccd1dbd9c407810?narHash=sha256-AZ%2BESOUqtzfS35XRR3wtoenuCS8AXFcsTVWuNWPlPKs%3D",
+      "locked-url": "github:inference-gateway/cli/cd353ec71dc7e014fc7b54513035c5b29df82fc3?narHash=sha256-Dqpa/JLhARXLxNatlgH2tDz6m91enM6312p16/GqrM0%3D",
       "flake-description": "Inference Gateway CLI - infer",
       "locked-flake-attr-path": "packages.aarch64-darwin.default",
-      "derivation": "/nix/store/62q1br0rqwh5q36gxrfr2z1lpn55g6bw-infer-0.231.1.drv",
+      "derivation": "/nix/store/a4p48lbpc97yr1wjd9n1r4qp1r298cv4-infer-0.261.0.drv",
       "outputs": {
-        "out": "/nix/store/vmlwac5d62xi0qs3kij874ia88ymir6v-infer-0.231.1"
+        "out": "/nix/store/9vq3hab0p1yyan42pi3hxnb2ildgfm9d-infer-0.261.0"
       },
       "output-names": [
         "out"
@@ -879,9 +879,9 @@
       "requested-outputs-to-install": [],
       "package-system": "aarch64-darwin",
       "system": "aarch64-darwin",
-      "name": "infer-0.231.1",
+      "name": "infer-0.261.0",
       "pname": "infer",
-      "version": "0.231.1",
+      "version": "0.261.0",
       "description": "Command-line interface for the Inference Gateway - AI model interaction manager",
       "licenses": [
         "MIT"
@@ -892,12 +892,12 @@
     },
     {
       "install_id": "infer",
-      "locked-url": "github:inference-gateway/cli/6ed069757fb4bc99e5fbdbc81ccd1dbd9c407810?narHash=sha256-AZ%2BESOUqtzfS35XRR3wtoenuCS8AXFcsTVWuNWPlPKs%3D",
+      "locked-url": "github:inference-gateway/cli/cd353ec71dc7e014fc7b54513035c5b29df82fc3?narHash=sha256-Dqpa/JLhARXLxNatlgH2tDz6m91enM6312p16/GqrM0%3D",
       "flake-description": "Inference Gateway CLI - infer",
       "locked-flake-attr-path": "packages.aarch64-linux.default",
-      "derivation": "/nix/store/a1mjjixnv1jkpyjlpyn1bqzvffdykc5v-infer-0.231.1.drv",
+      "derivation": "/nix/store/s8m7098gc99nw0ibcbs9qr1jiprmla2d-infer-0.261.0.drv",
       "outputs": {
-        "out": "/nix/store/qsjrcn61si2i86k168668bw861gb3c3d-infer-0.231.1"
+        "out": "/nix/store/cdvi1pqyh7xn6finra6r3pb1v7nlv7x3-infer-0.261.0"
       },
       "output-names": [
         "out"
@@ -908,9 +908,9 @@
       "requested-outputs-to-install": [],
       "package-system": "aarch64-linux",
       "system": "aarch64-linux",
-      "name": "infer-0.231.1",
+      "name": "infer-0.261.0",
       "pname": "infer",
-      "version": "0.231.1",
+      "version": "0.261.0",
       "description": "Command-line interface for the Inference Gateway - AI model interaction manager",
       "licenses": [
         "MIT"
@@ -921,12 +921,12 @@
     },
     {
       "install_id": "infer",
-      "locked-url": "github:inference-gateway/cli/6ed069757fb4bc99e5fbdbc81ccd1dbd9c407810?narHash=sha256-AZ%2BESOUqtzfS35XRR3wtoenuCS8AXFcsTVWuNWPlPKs%3D",
+      "locked-url": "github:inference-gateway/cli/cd353ec71dc7e014fc7b54513035c5b29df82fc3?narHash=sha256-Dqpa/JLhARXLxNatlgH2tDz6m91enM6312p16/GqrM0%3D",
       "flake-description": "Inference Gateway CLI - infer",
       "locked-flake-attr-path": "packages.x86_64-linux.default",
-      "derivation": "/nix/store/pfqfaz9wld6q5rh8vhv9m30mgr07p5y4-infer-0.231.1.drv",
+      "derivation": "/nix/store/5dldn70n006xzilgfb6cj62mkgis5j3b-infer-0.261.0.drv",
       "outputs": {
-        "out": "/nix/store/pw17p56akgixkj0vgbzsph5lzgapx86r-infer-0.231.1"
+        "out": "/nix/store/2348vdfv9g68n1y2aq53s2cvy3x6s70h-infer-0.261.0"
       },
       "output-names": [
         "out"
@@ -937,9 +937,9 @@
       "requested-outputs-to-install": [],
       "package-system": "x86_64-linux",
       "system": "x86_64-linux",
-      "name": "infer-0.231.1",
+      "name": "infer-0.261.0",
       "pname": "infer",
-      "version": "0.231.1",
+      "version": "0.261.0",
       "description": "Command-line interface for the Inference Gateway - AI model interaction manager",
       "licenses": [
         "MIT"
