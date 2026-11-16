@@ -179,11 +179,11 @@ var Tools = map[string]string{
 	"nodejs":        "24.22.2",
 	"pnpm":          "12.9.0",
 	"git":           "2.56.0",
-	"docker":        "29.9.2",
+	"docker":        "29.9.3",
 	"k3d":           "5.9.0",
 	"ctlptl":        "0.9.6",
-	"claude-code":   "2.1.321",
-	"infer":         "0.261.0",
+	"claude-code":   "2.1.322",
+	"infer":         "0.262.0",
 }
 
 // Actions pins the GitHub Actions referenced by the generated workflows
@@ -214,7 +214,7 @@ var Actions = map[string]string{
 // Release pins the semantic-release npm packages the generated CD
 // workflow installs into a throwaway package.json.
 var Release = map[string]string{
-	"semantic-release":                           "25.0.9",
+	"semantic-release":                           "26.0.1",
 	"@semantic-release/commit-analyzer":          "13.0.1",
 	"@semantic-release/release-notes-generator":  "14.1.1",
 	"@semantic-release/changelog":                "7.0.0",
