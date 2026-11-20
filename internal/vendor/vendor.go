@@ -119,7 +119,7 @@ var GoBuiltins = map[string]string{
 // activate.
 var CargoBuiltinDeps = map[string]string{
 	"inference-gateway-adk": "0.18.2",
-	"inference-gateway-sdk": "0.33.0",
+	"inference-gateway-sdk": "0.34.0",
 	"tokio":                 "1",
 	"tracing":               "0.1",
 	"tracing-subscriber":    "0.3",
@@ -175,15 +175,15 @@ var Tools = map[string]string{
 	"golangci-lint": "2.15.0",
 	"go-task":       "3.53.1",
 	"rust":          "1.99.1",
-	"rust-analyzer": "2026-11-02",
+	"rust-analyzer": "2026-11-09",
 	"nodejs":        "24.22.2",
 	"pnpm":          "12.9.0",
 	"git":           "2.56.0",
 	"docker":        "29.9.3",
 	"k3d":           "5.9.0",
 	"ctlptl":        "0.9.6",
-	"claude-code":   "2.1.322",
-	"infer":         "0.262.0",
+	"claude-code":   "2.1.325",
+	"infer":         "0.265.1",
 }
 
 // Actions pins the GitHub Actions referenced by the generated workflows
@@ -191,10 +191,10 @@ var Tools = map[string]string{
 var Actions = map[string]string{
 	"actions/cache":                        "v6.1.0",
 	"actions/checkout":                     "v7.0.1",
-	"actions/create-github-app-token":      "v3.3.0",
-	"actions/setup-go":                     "v7.0.0",
+	"actions/create-github-app-token":      "v3.4.0",
+	"actions/setup-go":                     "v7.1.0",
 	"actions/setup-node":                   "v7.1.0",
-	"anthropics/claude-code-action":        "v1.0.276",
+	"anthropics/claude-code-action":        "v1.0.284",
 	"arduino/setup-task":                   "v3.0.0",
 	"azure/setup-kubectl":                  "v5.2.0",
 	"docker/login-action":                  "v4.8.0",
@@ -205,8 +205,8 @@ var Actions = map[string]string{
 	"google-github-actions/auth":           "v3.0.0",
 	"google-github-actions/run-gemini-cli": "v0.1.22",
 	"google-github-actions/setup-gcloud":   "v3.0.1",
-	"inference-gateway/infer-action":       "v0.59.8",
-	"openai/codex-action":                  "v1.13",
+	"inference-gateway/infer-action":       "v0.59.11",
+	"openai/codex-action":                  "v1.14",
 	"oven-sh/setup-bun":                    "v2.2.0",
 	"peter-evans/create-pull-request":      "v8.1.3",
 }
