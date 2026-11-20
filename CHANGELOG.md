@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.68.9](https://github.com/inference-gateway/adl-cli/compare/v0.68.8...v0.68.9) (2026-11-20)
+
+### 👷 CI
+
+* align Dependabot schedule and grouping ([#514](https://github.com/inference-gateway/adl-cli/issues/514)) ([95f79fc](https://github.com/inference-gateway/adl-cli/commit/95f79fc225521b9cb85213cbb194995939e39883))
+* set up orchestrators from repos.yaml ([#518](https://github.com/inference-gateway/adl-cli/issues/518)) ([fb45686](https://github.com/inference-gateway/adl-cli/commit/fb456863f99614df11ca998878ff42133d57aa86))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump flox dependencies to latest ([#513](https://github.com/inference-gateway/adl-cli/issues/513)) ([0b2760e](https://github.com/inference-gateway/adl-cli/commit/0b2760e9c09f3b5e401a77b5b6dff0fca84d0bc2))
+* **deps:** bump peter-evans/create-pull-request ([#516](https://github.com/inference-gateway/adl-cli/issues/516)) ([29a41f8](https://github.com/inference-gateway/adl-cli/commit/29a41f8c861c96a822d54a3e9898fef5bd0a7876))
+* **deps:** bump template pins to latest ([#517](https://github.com/inference-gateway/adl-cli/issues/517)) ([b081936](https://github.com/inference-gateway/adl-cli/commit/b0819364af26f81ab850a8aa4a9b918e637c753e))
+* **deps:** bump template pins to latest ([#519](https://github.com/inference-gateway/adl-cli/issues/519)) ([1a88c2f](https://github.com/inference-gateway/adl-cli/commit/1a88c2fb5ed119e22f3fbed8a7d6ceff01aa46f0))
+* **deps:** bump the gomod group with 2 updates ([#515](https://github.com/inference-gateway/adl-cli/issues/515)) ([82b1583](https://github.com/inference-gateway/adl-cli/commit/82b158380db691e23db48d996f1ba0ad5ed057c1))
+
 ## [0.68.8](https://github.com/inference-gateway/adl-cli/compare/v0.68.7...v0.68.8) (2026-11-15)
 
 ### 🔧 Miscellaneous
