@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.68.10](https://github.com/inference-gateway/adl-cli/compare/v0.68.9...v0.68.10) (2026-11-27)
+
+### 📚 Documentation
+
+* refresh AGENTS.md to match current architecture ([#520](https://github.com/inference-gateway/adl-cli/issues/520)) ([e344750](https://github.com/inference-gateway/adl-cli/commit/e34475023f2b03957d21d4dcb82f20699e92c8e8))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump charm.land/lipgloss/v2 ([#522](https://github.com/inference-gateway/adl-cli/issues/522)) ([9c0d69c](https://github.com/inference-gateway/adl-cli/commit/9c0d69ca09c1c1cbeabf8fb1eb31c667ca227f44))
+* **deps:** bump template pins to latest ([#523](https://github.com/inference-gateway/adl-cli/issues/523)) ([cc526cb](https://github.com/inference-gateway/adl-cli/commit/cc526cbf49c540843c9a1e8bc388dc5076d1a12c))
+* **deps:** bump template pins to latest ([#524](https://github.com/inference-gateway/adl-cli/issues/524)) ([15e360e](https://github.com/inference-gateway/adl-cli/commit/15e360e990c37fe0cda3014c8ce63e3f1834512d))
+* **deps:** bump the github-actions group with 2 updates ([#521](https://github.com/inference-gateway/adl-cli/issues/521)) ([954ac1c](https://github.com/inference-gateway/adl-cli/commit/954ac1c5906067f8134da4ea6140288b321ee777))
+
 ## [0.68.9](https://github.com/inference-gateway/adl-cli/compare/v0.68.8...v0.68.9) (2026-11-20)
 
 ### 👷 CI
